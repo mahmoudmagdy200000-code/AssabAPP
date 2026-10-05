@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .info {
+            margin-bottom: 20px;
+        }
+
+        .info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info td {
+            padding: 5px;
+        }
+
+        .info td:first-child {
+            font-weight: bold;
+            width: 150px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .amount-positive {
+            color: #28a745;
+        }
+
+        .amount-negative {
+            color: #dc3545;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Personal Custody Balance - Transaction History</h1>
+    </div>
+
+    <div class="info">
+        <table>
+            <tr>
+                <td>Branch Manager:</td>
+                <td>Ahmed Al-Saud</td>
+            </tr>
+            <tr>
+                <td>View Type:</td>
+                <td>Detailed</td>
+            </tr>
+            <tr>
+                <td>Total Transactions:</td>
+                <td>2</td>
+            </tr>
+                                        <tr>
+                    <td>Transaction Type:</td>
+                    <td>Total Sales</td>
+                </tr>
+                        <tr>
+                <td>Generated At:</td>
+                <td>2026-02-01 17:32:54</td>
+            </tr>
+        </table>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Transaction Type</th>
+                <th>Cashier/Brand Owner</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+                            <tr>
+                    <td>2026-01-29 02:06:02</td>
+                    <td>Total Sales</td>
+                    <td>
+                                                    Mohamed Hassan
+                                            </td>
+                    <td
+                        class="amount-positive">
+                        +11772.33
+                    </td>
+                </tr>
+                            <tr>
+                    <td>2026-01-27 11:03:02</td>
+                    <td>Total Sales</td>
+                    <td>
+                                                    Fatima Mohamed
+                                            </td>
+                    <td
+                        class="amount-positive">
+                        +11764.29
+                    </td>
+                </tr>
+                    </tbody>
+    </table>
+
+    <div class="footer">
+        <p>This report was generated on 2026-02-01 17:32:54</p>
+        <p>© 2026 - All rights reserved</p>
+    </div>
+</body>
+
+</html>

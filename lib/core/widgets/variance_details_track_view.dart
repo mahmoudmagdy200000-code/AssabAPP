@@ -1,0 +1,419 @@
+import 'package:assab/core/constants/app_assets.dart';
+import 'package:assab/core/extensions/build_context_extensions.dart';
+import 'package:assab/core/extensions/number_extensions.dart';
+import 'package:assab/core/styles/app_styles.dart';
+import 'package:assab/core/widgets/app_padding_widget.dart';
+import 'package:assab/core/widgets/custom_divider.dart';
+import 'package:assab/features/supplier_requests/presentation/widgets/supplier_item_preview_widget.dart';
+import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/app_svg.dart';
+import '../../shared/models/order_track_response.dart';
+
+class VarianceDetailsTrackView extends StatelessWidget {
+  final OrderTrackResponseVarianceLoggedStage stage;
+
+  const VarianceDetailsTrackView({super.key, required this.stage});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPaddingWidget(
+      top: 0,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.tr.varianceDetails,
+                    style: AppStyles.s20W600.copyWith(
+                      color: context.customColor.text3,
+                    ),
+                  ),
+                  12.verticalSpace,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(color: context.customColor.border),
+                    ),
+                    padding: EdgeInsets.all(16.r),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                AppSvg(
+                                  assetName: AppAssets.warning,
+                                  width: 20.r,
+                                  colorFilter: ColorFilter.mode(
+                                    context.customColor.error,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                                10.horizontalSpace,
+                                Text(
+                                  context.tr.varianceSummary,
+                                  style: AppStyles.s14W600.copyWith(
+                                    color: context.customColor.text1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            10.verticalSpace,
+                            ListView.builder(
+                              itemCount: stage.variances.length,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(
+                                  context,
+                                  stage.variances[index],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  10.verticalSpace,
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     color: context.customColor.text2,
+                  //     borderRadius: BorderRadius.circular(20.r),
+                  //   ),
+                  //   padding: EdgeInsets.all(16.r),
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Text(
+                  //         context.tr.financialSummary,
+                  //         style: AppStyles.s16W600.copyWith(
+                  //           color: context.customColor.text1,
+                  //         ),
+                  //       ),
+                  //       10.verticalSpace,
+                  //       Column(
+                  //         crossAxisAlignment: CrossAxisAlignment.start,
+                  //         children: [
+                  //           Container(
+                  //             decoration: BoxDecoration(
+                  //               color: context.customColor.reversedTextColor,
+                  //               borderRadius: BorderRadius.circular(20.r),
+                  //             ),
+                  //             padding: EdgeInsets.symmetric(
+                  //               horizontal: 16.r,
+                  //               vertical: 12.r,
+                  //             ),
+                  //             child: Column(
+                  //               children: [
+                  //                 _buildRowWidget(
+                  //                   context: context,
+                  //                   title: context.tr.supplier,
+                  //                   value: stage
+                  //                       .receiptDetails
+                  //                       .financialSummary
+                  //                       .supplierName,
+                  //                 ),
+                  //                 10.verticalSpace,
+                  //                 _buildRowWidget(
+                  //                   context: context,
+                  //                   title: context.tr.order,
+                  //                   value: stage
+                  //                       .receiptDetails
+                  //                       .financialSummary
+                  //                       .invoiceNumber,
+                  //                 ),
+                  //                 10.verticalSpace,
+                  //                 _buildRowWidget(
+                  //                   context: context,
+                  //                   title: context.tr.value,
+                  //                   value: stage
+                  //                       .receiptDetails
+                  //                       .financialSummary
+                  //                       .totalAmount
+                  //                       .toStringAsFixed(2),
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //           10.verticalSpace,
+                  //           Container(
+                  //             decoration: BoxDecoration(
+                  //               color: context.customColor.reversedTextColor,
+                  //               borderRadius: BorderRadius.circular(20.r),
+                  //             ),
+                  //             padding: EdgeInsets.symmetric(
+                  //               horizontal: 16.r,
+                  //               vertical: 12.r,
+                  //             ),
+                  //             child: Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Text(
+                  //                   context.tr.financialDetails,
+                  //                   style: AppStyles.s14W500.copyWith(
+                  //                     color: context.customColor.text1,
+                  //                   ),
+                  //                 ),
+                  //                 10.verticalSpace,
+                  //                 _buildRowWidget(
+                  //                   context: context,
+                  //                   title: context.tr.amountBeforeTax,
+                  //                   value: stage
+                  //                       .receiptDetails
+                  //                       .financialSummary
+                  //                       .amountBeforeTax
+                  //                       .toStringAsFixed(2),
+                  //                 ),
+                  //                 10.verticalSpace,
+                  //                 _buildRowWidget(
+                  //                   context: context,
+                  //                   title: context.tr.vat15Percent,
+                  //                   value:
+                  //                       (stage
+                  //                                   .receiptDetails
+                  //                                   .financialSummary
+                  //                                   .totalAmount -
+                  //                               stage
+                  //                                   .receiptDetails
+                  //                                   .financialSummary
+                  //                                   .amountBeforeTax)
+                  //                           .toStringAsFixed(2),
+                  //                 ),
+                  //                 10.verticalSpace,
+                  //                 _buildRowWidget(
+                  //                   context: context,
+                  //                   title: context.tr.totalAmount,
+                  //                   value: stage
+                  //                       .receiptDetails
+                  //                       .financialSummary
+                  //                       .totalAmount
+                  //                       .toStringAsFixed(2),
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemCard(
+    BuildContext context,
+    OrderTrackResponseVarianceItem item,
+  ) {
+    final unitText = item.unit;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: context.customColor.border),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 12.r, horizontal: 16.r),
+      margin: EdgeInsets.only(bottom: 10.r),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SupplierItemPreviewWidget(
+            itemName: item.itemName,
+            itemImageUrl: item.itemLogo,
+          ),
+          5.verticalSpace,
+          const CustomDivider(),
+          5.verticalSpace,
+          _buildRowWidget(
+            context: context,
+            title: context.tr.qtyOrdered,
+            value: '${item.quantityOrdered} $unitText',
+          ),
+          10.verticalSpace,
+          _buildRowWidget(
+            context: context,
+            title: context.tr.qtyReceived,
+            value: '${item.quantityReceived} $unitText',
+          ),
+          10.verticalSpace,
+          Container(
+            decoration: BoxDecoration(
+              color: context.customColor.reversedTextColor,
+              borderRadius: BorderRadius.circular(15.r),
+              border: Border.all(color: context.customColor.border),
+            ),
+            padding: EdgeInsets.all(16.r),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppSvg(
+                  assetName: AppAssets.warning,
+                  width: 20.r,
+                  colorFilter: ColorFilter.mode(
+                    context.customColor.error,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                15.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.tr.varianceDetected_v,
+                        style: AppStyles.s14W600.copyWith(
+                          color: context.customColor.text1,
+                        ),
+                      ),
+                      Text(
+                        context.tr
+                            .itemDeliveredIsQuantityUnitLowerThanRequestedAndConfirmedQty(
+                              (item.quantityOrdered - item.quantityReceived)
+                                  .toString(),
+                              unitText,
+                            ),
+                        style: AppStyles.s14W400.copyWith(
+                          color: context.customColor.text3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          10.verticalSpace,
+          _buildRowWidget(
+            context: context,
+            title: context.tr.quality,
+            value: item.quality.getString(context),
+          ),
+          10.verticalSpace,
+          _buildRowWidget(
+            context: context,
+            title: context.tr.temperature,
+            value: '${item.temperature}°C',
+          ),
+          10.verticalSpace,
+          // _buildRowWidget(
+          //   context: context,
+          //   title: context.tr.expirationDate,
+          //   value:
+          //       DateFormatter.formatDateMDY(
+          //         DateTime.tryParse(item.expirationDate),
+          //       ) ??
+          //       item.expirationDate,
+          // ),
+          // if (item.itemImage != null) ...[
+          //   12.verticalSpace,
+          //   AppNetworkImage(
+          //     image: item.itemImage?.url ?? '',
+          //     borderRadius: BorderRadius.circular(20.r),
+          //   ),
+          // ],
+          // if (item.additionalNote != null &&
+          //     item.additionalNote!.isNotEmpty) ...[
+          //   8.verticalSpace,
+          //   _buildAdditionalNoteWidget(context, item.additionalNote),
+          // ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRowWidget({
+    required BuildContext context,
+    required String title,
+    String? value,
+    Widget? customValue,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppStyles.s13W400.copyWith(color: context.customColor.text3),
+        ),
+        5.horizontalSpace,
+        Expanded(
+          child:
+              customValue ??
+              Text(
+                value ?? '',
+                textAlign: TextAlign.end,
+                style: AppStyles.s13W500.copyWith(
+                  color: context.customColor.text1,
+                ),
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAdditionalNoteWidget(BuildContext context, String? note) {
+    if (note == null || note.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        10.verticalSpace,
+        Text(
+          context.tr.additionalNote,
+          style: AppStyles.s14W600.copyWith(color: context.customColor.text3),
+        ),
+        4.verticalSpace,
+        Text(
+          note,
+          style: AppStyles.s14W400.copyWith(color: context.customColor.text1),
+        ),
+        10.verticalSpace,
+      ],
+    );
+  }
+
+  Widget _buildOptionalNoteWidget(BuildContext context, {String? note}) {
+    if (note == null || note.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        10.verticalSpace,
+        Text(
+          context.tr.additionalNote,
+          style: AppStyles.s14W600.copyWith(color: context.customColor.text1),
+        ),
+        8.verticalSpace,
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: context.customColor.reversedTextColor,
+            borderRadius: BorderRadius.circular(15.r),
+          ),
+          padding: EdgeInsets.symmetric(vertical: 12.r, horizontal: 16.r),
+          child: Text(
+            note,
+            style: AppStyles.s13W400.copyWith(color: context.customColor.text3),
+          ),
+        ),
+      ],
+    );
+  }
+}

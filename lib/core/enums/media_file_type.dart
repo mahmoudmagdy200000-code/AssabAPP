@@ -1,0 +1,1 @@
+enum MediaFileType { image, pdf }

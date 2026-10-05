@@ -1,0 +1,1 @@
+enum BrandOwnerInventoryActionType { approve, reject }

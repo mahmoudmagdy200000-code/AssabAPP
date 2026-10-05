@@ -1,0 +1,1 @@
+enum EndShiftOption { withHandover, withoutHandover }

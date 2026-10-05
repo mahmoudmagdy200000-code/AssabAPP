@@ -1,0 +1,169 @@
+import 'package:assab/core/extensions/build_context_extensions.dart';
+import 'package:assab/core/extensions/number_extensions.dart';
+import 'package:assab/core/routing/app_route_name.dart';
+import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/styles/app_styles.dart';
+import 'package:assab/core/utils/date_formatter.dart';
+import 'package:assab/core/widgets/app_failure_widget.dart';
+import 'package:assab/core/widgets/custom_divider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/widgets/app_loading_widget.dart';
+import '../../data/models/fixed_assets_handovers_requests_response.dart';
+import '../cubit/fixed_assets_get_requests/fixed_assets_get_requests_cubit.dart';
+import '../widgets/fixed_assets_view_details_request_button.dart';
+
+class FixedAssetsRequestsHandoverView extends StatefulWidget {
+  const FixedAssetsRequestsHandoverView({super.key});
+
+  @override
+  State<FixedAssetsRequestsHandoverView> createState() =>
+      _FixedAssetsRequestsHandoverViewState();
+}
+
+class _FixedAssetsRequestsHandoverViewState
+    extends State<FixedAssetsRequestsHandoverView> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getHandoverRequests();
+
+    _scrollController = ScrollController();
+    _setupScrollControllerListener();
+  }
+
+  void _setupScrollControllerListener() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent -
+                  _scrollController.position.pixels <=
+              300.h &&
+          context
+              .read<FixedAssetsGetRequestsCubit>()
+              .handoverRequestsPaginator
+              .hasMore) {
+        _getHandoverRequests(loadMore: true);
+      }
+    });
+  }
+
+  void _getHandoverRequests({bool loadMore = false}) {
+    context.read<FixedAssetsGetRequestsCubit>().fetchHandoverRequests(
+      loadMore: loadMore,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<
+      FixedAssetsGetRequestsCubit,
+      FixedAssetsGetRequestsState
+    >(
+      buildWhen: (previous, current) =>
+          current is FixedAssetsGetHandoverRequestsLoading ||
+          current is FixedAssetsGetHandoverRequestsSuccess ||
+          current is FixedAssetsGetHandoverRequestsFailure,
+      builder: (context, state) {
+        final requests = <FixedAssetsHandoverRequestsItem>[];
+
+        if (state is FixedAssetsGetHandoverRequestsLoading) {
+          return const AppLoadingWidget();
+        } else if (state is FixedAssetsGetHandoverRequestsFailure) {
+          return AppFailureWidget(
+            failure: state.failure,
+            onRetry: () => _getHandoverRequests(),
+          );
+        } else if (state is FixedAssetsGetHandoverRequestsSuccess) {
+          requests.addAll(state.response);
+        }
+
+        if (requests.isEmpty) {
+          return Center(
+            child: Text(
+              context.tr.noRequestsYet,
+              style: AppStyles.s14W500.copyWith(
+                color: context.customColor.text3,
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: context.customColor.text2,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          padding: EdgeInsets.all(8.r),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              _getHandoverRequests();
+            },
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: requests.length,
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final request = requests[index];
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: context.customColor.reversedTextColor,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  padding: EdgeInsets.all(8.r),
+                  margin: EdgeInsets.only(
+                    bottom: index == requests.length - 1 ? 0 : 10.r,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              context.tr.handoverRequest,
+                              style: AppStyles.s13W600.copyWith(
+                                color: context.customColor.text1,
+                              ),
+                            ),
+                          ),
+                          10.horizontalSpace,
+                          request.status.buildRequestStatusWidget(context),
+                        ],
+                      ),
+                      5.verticalSpace,
+                      Text(
+                        DateFormatter.formatDateMDY(
+                              DateTime.tryParse(request.createdAt),
+                            ) ??
+                            '-',
+                        style: AppStyles.s12W500.copyWith(
+                          color: context.customColor.text3,
+                        ),
+                      ),
+                      10.verticalSpace,
+                      const CustomDivider(),
+                      10.verticalSpace,
+                      FixedAssetsViewDetailsRequestButton(
+                        onPressed: () {
+                          NavigationService.I.pushNamed(
+                            AppRouteName.fixedAssetsHandoverDetailsScreen,
+                            arguments: request.id,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

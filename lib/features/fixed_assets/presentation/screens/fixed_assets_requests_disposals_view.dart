@@ -1,0 +1,189 @@
+import 'package:assab/core/extensions/build_context_extensions.dart';
+import 'package:assab/core/extensions/number_extensions.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/routing/app_route_name.dart';
+import '../../../../core/services/navigation/navigation_service.dart';
+import '../../../../core/styles/app_styles.dart';
+import '../../../../core/widgets/app_failure_widget.dart';
+import '../../../../core/widgets/app_loading_widget.dart';
+import '../../../../core/widgets/custom_divider.dart';
+import '../../data/models/fixed_assets_disposals_requests_response.dart';
+import '../cubit/fixed_assets_get_requests/fixed_assets_get_requests_cubit.dart';
+import '../widgets/fixed_assets_view_details_request_button.dart';
+
+class FixedAssetsRequestsDisposalsView extends StatefulWidget {
+  const FixedAssetsRequestsDisposalsView({super.key});
+
+  @override
+  State<FixedAssetsRequestsDisposalsView> createState() =>
+      _FixedAssetsRequestsDisposalsViewState();
+}
+
+class _FixedAssetsRequestsDisposalsViewState
+    extends State<FixedAssetsRequestsDisposalsView> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getDisposalsRequests();
+
+    _scrollController = ScrollController();
+    _setupScrollControllerListener();
+  }
+
+  void _setupScrollControllerListener() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent -
+                  _scrollController.position.pixels <=
+              300.h &&
+          context
+              .read<FixedAssetsGetRequestsCubit>()
+              .disposalsRequestsPaginator
+              .hasMore) {
+        _getDisposalsRequests(loadMore: true);
+      }
+    });
+  }
+
+  void _getDisposalsRequests({bool loadMore = false}) {
+    context.read<FixedAssetsGetRequestsCubit>().fetchDisposalsRequests(
+      loadMore: loadMore,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<
+      FixedAssetsGetRequestsCubit,
+      FixedAssetsGetRequestsState
+    >(
+      buildWhen: (previous, current) =>
+          current is FixedAssetsGetDisposalsRequestsLoading ||
+          current is FixedAssetsGetDisposalsRequestsSuccess ||
+          current is FixedAssetsGetDisposalsRequestsFailure,
+      builder: (context, state) {
+        final requests = <FixedAssetsDisposalsRequestsItem>[];
+
+        if (state is FixedAssetsGetDisposalsRequestsLoading) {
+          return const AppLoadingWidget();
+        } else if (state is FixedAssetsGetDisposalsRequestsFailure) {
+          return AppFailureWidget(
+            failure: state.failure,
+            onRetry: _getDisposalsRequests,
+          );
+        } else if (state is FixedAssetsGetDisposalsRequestsSuccess) {
+          requests.addAll(state.response);
+        }
+
+        if (requests.isEmpty) {
+          return Center(
+            child: Text(
+              context.tr.noRequestsYet,
+              style: AppStyles.s14W500.copyWith(
+                color: context.customColor.text3,
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: context.customColor.text2,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          padding: EdgeInsets.all(8.r),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              _getDisposalsRequests();
+            },
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: requests.length,
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final request = requests[index];
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: context.customColor.reversedTextColor,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  padding: EdgeInsets.all(8.r),
+                  margin: EdgeInsets.only(
+                    bottom: index == requests.length - 1 ? 0 : 10.r,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${request.assetName} ${context.tr.disposal}',
+                              style: AppStyles.s13W600.copyWith(
+                                color: context.customColor.text1,
+                              ),
+                            ),
+                          ),
+                          10.horizontalSpace,
+                          request.status.buildStatusWidget(context),
+                        ],
+                      ),
+                      5.verticalSpace,
+                      Text(
+                        context.tr.youSubmittedThisRequest,
+                        style: AppStyles.s12W500.copyWith(
+                          color: context.customColor.text3,
+                        ),
+                      ),
+                      5.verticalSpace,
+                      Text(
+                        '(${request.dateAndTime})',
+                        style: AppStyles.s10W500.copyWith(
+                          color: context.customColor.text3,
+                        ),
+                      ),
+                      5.verticalSpace,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.circle,
+                            size: 10.r,
+                            color: context.customColor.error,
+                          ),
+                          10.horizontalSpace,
+                          Text(
+                            context.tr.damaged,
+                            style: AppStyles.s12W400.copyWith(
+                              color: context.customColor.text4,
+                            ),
+                          ),
+                        ],
+                      ),
+                      10.verticalSpace,
+                      const CustomDivider(),
+                      10.verticalSpace,
+                      FixedAssetsViewDetailsRequestButton(
+                        onPressed: () {
+                          NavigationService.I.pushNamed(
+                            AppRouteName.fixedAssetsDisposalsDetailsScreen,
+                            arguments: request.id,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

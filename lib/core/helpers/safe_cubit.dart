@@ -1,0 +1,29 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../errors/api_failure.dart';
+import '../utils/api_result.dart';
+import '../utils/app_logger.dart';
+
+abstract class SafeCubit<State> extends Cubit<State> {
+  SafeCubit(super.initialState);
+
+  void handle<T>(
+    ApiResult<T> result, {
+    required void Function(T data) success,
+    required void Function(ApiFailure failure) failure,
+    bool resetOnCancel = true,
+  }) {
+    if (isClosed || result.isCancelled) return;
+
+    result.when(success: success, failure: failure);
+  }
+
+  @override
+  void emit(State state) {
+    if (!isClosed) {
+      super.emit(state);
+    } else {
+      AppLogger.log('Emit ignored — cubit is closed.');
+    }
+  }
+}

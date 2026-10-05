@@ -1,0 +1,151 @@
+{
+  "@@locale": "ar",
+  "details": "التفاصيل",
+  "timelines": "الجداول الزمنية",
+  "timelinesContentHere": "محتوى الجداول الزمنية هنا",
+  "modificationDetails": "تفاصيل التعديل",
+  "viewDetailsTimelinesAndStatuses": "عرض التفاصيل والجداول الزمنية والحالات.",
+  "pendingReview": "قيد المراجعة",
+  "modificationSubmitted": "تم تقديم التعديل",
+  "yourAssetStatusUpdateHasBeenSent": "تم إرسال تحديث حالة الأصل الخاص بك إلى الإدارة للموافقة عليه.",
+  "assetDetails": "تفاصيل الأصل",
+  "location": "الموقع",
+  "valueText": "القيمة",
+  "age": "العمر",
+  "custody": "العهدة",
+  "maintenance": "صيانة",
+  "newStatus": "الحالة الجديدة",
+  "needsAttention": "يحتاج انتباه",
+  "reasonForChange": "سبب التغيير",
+  "documentationPhotos": "صور التوثيق",
+  "requiredActions": "الإجراءات المطلوبة",
+  "doneActions": "تم:",
+  "nextActions": "التالي:",
+  "needTechnician": "بحاجة لفني",
+  "halt": "إيقاف",
+  "replace": "استبدال",
+  "approvalRequestOwner": "طلب الموافقة: المالك",
+  "eGMinorIssues": "مشاكل طفيفة، يتطلب التفتيش.",
+  "eGStrangeNoises": "أصوات غريبة، انخفاض الأداء",
+  "send": "إرسال",
+  "initialAudit": "التدقيق المبدئي",
+  "addZonesAndCountAssetsAsNewBranch": "أضف المناطق وقم بعد الأصول كفرع جديد",
+  "zoneSetup": "إعداد المناطق",
+  "youCurrentlyHaveNZonesAdded": "لديك حاليا {count} مناطق مضافة",
+  "kitchen": "المطبخ",
+  "dining": "الطعام",
+  "store": "المخزن",
+  "assetsCount": "{count} أصول",
+  "addNewZone": "إضافة منطقة جديدة",
+  "countAssets": "عد الأصول",
+  "clickOnAddButtonToGetStarted": "انقر على زر \"إضافة\" للبدء",
+  "totalNumberOfAsset": "إجمالي عدد الأصول",
+  "newPhoto": "صورة جديدة",
+  "fromFiles": "من الملفات",
+  "addAssetNumber": "إضافة أصل #{number}",
+  "countProgress": "تقدم العد:",
+  "recorded": "تم التسجيل",
+  "excellent": "ممتاز",
+  "problem": "مشكلة",
+  "saveAndAdd": "حفظ وإضافة",
+  "completeAndSend": "إكمال وإرسال",
+  "fixedAssetsReceiveAssetsTitle": "استلام الأصول",
+  "fixedAssetsReceiveAssetsSubtitle": "راجع الأصول الثابتة المستلمة وتفاصيل حالتها.",
+  "fixedAssetsReceiveAssetsAssignedZone": "المنطقة المخصصة",
+  "fixedAssetsReceiveAssetsAssetType": "نوع الأصل",
+  "fixedAssetsReceiveAssetsNewId": "المعرف الجديد",
+  "fixedAssetsReceiveAssetsEmptyTitle": "لا توجد أصول مستلمة",
+  "fixedAssetsReceiveAssetsEmptyDesc": "لم يتم العثور على أصول مستلمة. حاول تحديث الفلاتر أو أعد المحاولة لاحقًا.",
+  "juneExpenseReportTitle": "تقرير مصروفات يونيو",
+  "trackEverySpendInOnePlace": "تتبع كل المصروفات في مكان واحد",
+  "exportLabel": "تصدير",
+  "quickFilter": "سريع",
+  "standardFilter": "قياسي",
+  "customFilter": "مخصص",
+  "monthlyFilter": "شهري",
+  "weeklyFilter": "أسبوعي",
+  "dailyFilter": "يومي",
+  "yearlyFilter": "سنوي",
+  "branchName": "اسم الفرع",
+  "branchA": "الفرع أ",
+  "branchB": "الفرع ب",
+  "quickExpenseForBranch": "مصروفات سريعة لفرع {branchName}",
+  "@quickExpenseForBranch": {
+    "description": "عنوان المصروفات السريعة مع اسم الفرع",
+    "placeholders": {
+      "branchName": {
+        "type": "String",
+        "example": "اسم الفرع"
+      }
+    }
+  },
+  "juneRangeLabel": "1 - 30 يونيو 2025",
+  "totalQuickExpenseRequests": "إجمالي طلبات المصروفات السريعة",
+  "totalQuickExpenseCount": "{count} =",
+  "@totalQuickExpenseCount": {
+    "description": "عدد المصروفات السريعة",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "32"
+      }
+    }
+  },
+  "lowerThanLastMonthPercent": "-8%",
+  "lowerThanLastMonthLabel": "أقل من الشهر الماضي.",
+  "paymentMethodTitle": "طريقة الدفع",
+  "cashVsBankTransfers": "نقدا مقابل التحويلات البنكية",
+  "recordsCount": "{count} سجل",
+  "@recordsCount": {
+    "description": "عدد السجلات",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "32"
+      }
+    }
+  },
+  "topSuppliersTitle": "أفضل 5 موردين",
+  "supplierName1": "اسم المورد (1)",
+  "supplierName2": "اسم المورد (2)",
+  "supplierName3": "اسم المورد (3)",
+  "supplierName4": "اسم المورد (4)",
+  "supplierName5": "اسم المورد (5)",
+  "expenseRequestRatioTitle": "نسبة طلبات المصروفات",
+  "taxVsNonTaxInvoiceRatio": "نسبة الفواتير الضريبية مقابل غير الضريبية",
+  "requestsCount": "{count} طلب",
+  "@requestsCount": {
+    "description": "عدد الطلبات",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "32"
+      }
+    }
+  },
+  "taxRequests": "طلبات ضريبية",
+  "nonTaxRequests": "طلبات غير ضريبية",
+  "branchComparisonReportsTitle": "تقارير مقارنة الفروع.",
+  "branchFullName": "الفرع الاسم الكامل",
+  "cashTransferAndOwnerPaymentLog": "سجل تحويل النقد ومدفوعات المالك.",
+  "cashTransferCount": "{count}",
+  "@cashTransferCount": {
+    "description": "عدد تحويلات النقد",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "48"
+      }
+    }
+  },
+  "bankTransferLabel": "تحويل بنكي",
+  "cashHandoverLabel": "تسليم نقدي",
+  "bankTransfers": "تحويلات بنكية",
+  "cashHandovers": "تسليمات نقدية",
+  "expenseLogDateTime": "11 يونيو - 1:24 ص",
+  "fromBranchName": "من اسم الفرع",
+  "quickExpensesReportTitle": "تقرير المصروفات السريعة",
+  "totalCashIn": "إجمالي النقد الداخل",
+  "totalCashOut": "إجمالي النقد الخارج",
+  "storeBranchName": "اسم فرع المتجر"
+}

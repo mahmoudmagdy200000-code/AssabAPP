@@ -1,0 +1,44 @@
+default_platform(:android)
+
+platform :android do
+  desc "Increment versionCode based on latest Firebase release"
+  lane :increment_version do
+    latest_release = firebase_app_distribution_get_latest_release(
+      app: "1:745175055141:android:42f22bd2971b74216af8cc",
+      service_credentials_file: "D:/Flutter Project/assab/firebase-service-account.json"
+    )
+
+
+    version_code = latest_release ? latest_release[:buildVersion].to_i + 1 : 1
+
+    # read pubspec.yaml
+    pubspec = File.read("D:/Flutter Project/assab/pubspec.yaml")
+    match = pubspec.match(/version:\s*(\d+\.\d+\.\d+)\+(\d+)/)
+    if match
+      version_name = match[1]
+      new_version = "#{version_name}+#{version_code}"
+      puts "Updating version to #{new_version}"
+      new_pubspec = pubspec.gsub(/version:\s*(\d+\.\d+\.\d+)\+(\d+)/, "version: #{new_version}")
+      File.write("D:/Flutter Project/assab/pubspec.yaml", new_pubspec)
+    else
+      UI.user_error!("Couldn't find version line in pubspec.yaml")
+    end
+  end
+
+
+  desc "Lane For Distributing ASSAB Build"
+  lane :assab do
+    increment_version
+    sh "flutter clean"
+    sh "flutter build apk --release --flavor production --target lib/main_production.dart --no-tree-shake-icons"
+    release = firebase_app_distribution(
+      app: "1:745175055141:android:42f22bd2971b74216af8cc",
+      service_credentials_file: "D:/Flutter Project/assab/firebase-service-account.json",
+      android_artifact_type: "APK",
+      apk_path: "../build/app/outputs/flutter-apk/app-production-release.apk",
+      testers: "mohammedrefhaat@gmail.com,saifgharib28@gmail.com,mohamedali.coder@gmail.com,omarahmeddev89@gmail.com",
+      release_notes: "Assab Build - #{Time.now.strftime("%Y-%m-%d %H:%M")}",
+      upload_timeout: 600
+    )
+  end
+end
