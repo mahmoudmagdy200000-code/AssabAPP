@@ -140,10 +140,12 @@ void main() {
           'success': true,
           'data': {
             'cash_reconciliation': {
+              'counted_cash': 550.0,
               'expected_cash': 600.0,
-              'actual_cash': 550.0,
-              'variance': -50.0,
+              'cash_variance': -50.0,
               'cash_variance_type': 'shortage',
+              'pending_incoming_cash': 0.0,
+              'confirmed_opening_cash': 0.0,
             },
             'shortage_to_allocate': 50.0,
             'allocation_required': true,
@@ -159,6 +161,8 @@ void main() {
       expect(success.allocationRequired, isTrue);
       expect(success.shortageToAllocate, equals(50.0));
       expect(success.cashVarianceType, equals('shortage'));
+      expect(success.previewData['cash_reconciliation']['counted_cash'], equals(550.0));
+      expect(success.previewData['cash_reconciliation']['cash_variance'], equals(-50.0));
       expect(cubit.previewStale, isFalse);
 
       // Attempting endShift without allocations fails
@@ -206,10 +210,12 @@ void main() {
           'success': true,
           'data': {
             'cash_reconciliation': {
+              'counted_cash': 520.0,
               'expected_cash': 500.0,
-              'actual_cash': 520.0,
-              'variance': 20.0,
+              'cash_variance': 20.0,
               'cash_variance_type': 'surplus',
+              'pending_incoming_cash': 0.0,
+              'confirmed_opening_cash': 0.0,
             },
             'shortage_to_allocate': 0.0,
             'allocation_required': false,
@@ -225,6 +231,8 @@ void main() {
       expect(surplusState.allocationRequired, isFalse);
       expect(surplusState.shortageToAllocate, equals(0.0));
       expect(surplusState.cashVarianceType, equals('surplus'));
+      expect(surplusState.previewData['cash_reconciliation']['counted_cash'], equals(520.0));
+      expect(surplusState.previewData['cash_reconciliation']['cash_variance'], equals(20.0));
 
       // 2. Balanced scenario
       repository.onPreview = ({
@@ -238,10 +246,12 @@ void main() {
           'success': true,
           'data': {
             'cash_reconciliation': {
+              'counted_cash': 500.0,
               'expected_cash': 500.0,
-              'actual_cash': 500.0,
-              'variance': 0.0,
+              'cash_variance': 0.0,
               'cash_variance_type': 'balanced',
+              'pending_incoming_cash': 0.0,
+              'confirmed_opening_cash': 0.0,
             },
             'shortage_to_allocate': 0.0,
             'allocation_required': false,
@@ -256,6 +266,8 @@ void main() {
       expect(balancedState.allocationRequired, isFalse);
       expect(balancedState.shortageToAllocate, equals(0.0));
       expect(balancedState.cashVarianceType, equals('balanced'));
+      expect(balancedState.previewData['cash_reconciliation']['counted_cash'], equals(500.0));
+      expect(balancedState.previewData['cash_reconciliation']['cash_variance'], equals(0.0));
 
       // If allocations are mistakenly provided for balanced/surplus, submission fails closed
       cubit.updateShortageAllocations([
@@ -287,10 +299,12 @@ void main() {
           'success': true,
           'data': {
             'cash_reconciliation': {
+              'counted_cash': 0.0,
               'expected_cash': 300.0,
-              'actual_cash': 0.0,
-              'variance': -300.0,
+              'cash_variance': -300.0,
               'cash_variance_type': 'shortage',
+              'pending_incoming_cash': 0.0,
+              'confirmed_opening_cash': 0.0,
             },
             'shortage_to_allocate': 300.0,
             'allocation_required': true,
@@ -305,6 +319,8 @@ void main() {
       final zeroState = cubit.state as EndShiftPreviewSuccess;
       expect(zeroState.shortageToAllocate, equals(300.0));
       expect(zeroState.allocationRequired, isTrue);
+      expect(zeroState.previewData['cash_reconciliation']['counted_cash'], equals(0.0));
+      expect(zeroState.previewData['cash_reconciliation']['cash_variance'], equals(-300.0));
     });
   });
 }
