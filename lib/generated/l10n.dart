@@ -24821,6 +24821,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Physical Counted Cash`
+  String get physicalCountedCash {
+    return Intl.message(
+      'Physical Counted Cash',
+      name: 'physicalCountedCash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter actual cash in drawer`
+  String get physicalCountedCashHint {
+    return Intl.message(
+      'Enter actual cash in drawer',
+      name: 'physicalCountedCashHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Physical counted cash is required`
+  String get physicalCountedCashRequired {
+    return Intl.message(
+      'Physical counted cash is required',
+      name: 'physicalCountedCashRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shortage Allocation Required`
+  String get shortageAllocationTitle {
+    return Intl.message(
+      'Shortage Allocation Required',
+      name: 'shortageAllocationTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You must allocate the shortage amount across the responsible parties before closing the shift.`
+  String get shortageAllocationDesc {
+    return Intl.message(
+      'You must allocate the shortage amount across the responsible parties before closing the shift.',
+      name: 'shortageAllocationDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shortage to Allocate:`
+  String get shortageToAllocate {
+    return Intl.message(
+      'Shortage to Allocate:',
+      name: 'shortageToAllocate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining to Allocate:`
+  String get remainingToAllocate {
+    return Intl.message(
+      'Remaining to Allocate:',
+      name: 'remainingToAllocate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining amount must be 0.00 SAR`
+  String get allocationIncomplete {
+    return Intl.message(
+      'Remaining amount must be 0.00 SAR',
+      name: 'allocationIncomplete',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -3389,5 +3389,13 @@
   "testItemData": "Test Item Data",
   "testCompleted": "Test Completed.",
   "savedTestsCount": "Saved Tests ({count})",
-  "savedTestResult": "Saved Test Result"
+  "savedTestResult": "Saved Test Result",
+  "physicalCountedCash": "Physical Counted Cash",
+  "physicalCountedCashHint": "Enter actual cash in drawer",
+  "physicalCountedCashRequired": "Physical counted cash is required",
+  "shortageAllocationTitle": "Shortage Allocation Required",
+  "shortageAllocationDesc": "You must allocate the shortage amount across the responsible parties before closing the shift.",
+  "shortageToAllocate": "Shortage to Allocate:",
+  "remainingToAllocate": "Remaining to Allocate:",
+  "allocationIncomplete": "Remaining amount must be 0.00 SAR"
 }

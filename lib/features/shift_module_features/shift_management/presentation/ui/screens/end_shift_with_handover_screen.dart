@@ -29,6 +29,7 @@ import '../../../domain/entity/cashier_entity.dart';
 import '../../logic/choose_employee/choose_employee_cubit.dart';
 import '../../logic/choose_variance_reason/choose_variance_reason_cubit.dart';
 import '../../logic/shifts/handover/handover_cubit.dart';
+import '../widgets/end_shift_widgets/cash_shortage_allocation_widget.dart';
 import '../widgets/end_shift_widgets/end_shift_request_widget.dart';
 import '../widgets/end_shift_widgets/hand_over_widget.dart';
 import '../widgets/reassign_widgets/reassign_shift_top_section.dart';
@@ -55,6 +56,7 @@ class _EndShiftWithHandoverScreenState
   late final TextEditingController _totalHandoverController;
   late final TextEditingController _madaSController;
   late final TextEditingController _cashController;
+  late final TextEditingController _countedCashController;
   late final TextEditingController _handoverAmountController;
   late final TextEditingController _handoverNoteController;
 
@@ -65,6 +67,7 @@ class _EndShiftWithHandoverScreenState
     _totalHandoverController = TextEditingController();
     _madaSController = TextEditingController();
     _cashController = TextEditingController();
+    _countedCashController = TextEditingController();
     _handoverAmountController = TextEditingController();
     _handoverNoteController = TextEditingController();
   }
@@ -75,6 +78,7 @@ class _EndShiftWithHandoverScreenState
     _totalHandoverController.dispose();
     _madaSController.dispose();
     _cashController.dispose();
+    _countedCashController.dispose();
     _handoverAmountController.dispose();
     _handoverNoteController.dispose();
     super.dispose();
@@ -161,6 +165,7 @@ class _EndShiftWithHandoverScreenState
                                     _totalHandoverController,
                                 madaController: _madaSController,
                                 cashController: _cashController,
+                                countedCashController: _countedCashController,
                                 viewUpload: true,
                               ),
                             ),
@@ -199,10 +204,52 @@ class _EndShiftWithHandoverScreenState
 
                             BlocBuilder<EndShiftCubit, EndShiftState>(
                               builder: (context, state) {
-                                return state.varianceStrategy?.buildUI(
-                                      context,
-                                    ) ??
-                                    const EndShiftWithHandoverSummaryWidget();
+                                final cubit = context.read<EndShiftCubit>();
+                                final preview = cubit.previewData;
+                                double shortage = 0;
+                                bool allocationRequired = false;
+                                if (preview != null) {
+                                  final pMap = (preview['data']
+                                          is Map<String, dynamic>)
+                                      ? preview['data'] as Map<String, dynamic>
+                                      : preview;
+                                  shortage =
+                                      (pMap['shortage_to_allocate'] as num?)
+                                              ?.toDouble() ??
+                                          0.0;
+                                  allocationRequired =
+                                      pMap['allocation_required'] == true;
+                                }
+
+                                return Column(
+                                  children: [
+                                    Expanded(
+                                      child: state.varianceStrategy?.buildUI(
+                                            context,
+                                          ) ??
+                                          const EndShiftWithHandoverSummaryWidget(),
+                                    ),
+                                    if (allocationRequired && shortage > 0) ...[
+                                      10.verticalSpace,
+                                      CashShortageAllocationWidget(
+                                        shortageAmount: shortage,
+                                        initialAllocations:
+                                            cubit.shortageAllocations,
+                                        onAllocationsChanged: (allocs) {
+                                          cubit.updateShortageAllocations(allocs);
+                                          setState(() {});
+                                        },
+                                        initialReason: cubit.allocationReason,
+                                        onReasonChanged: (reason) {
+                                          cubit.updateShortageAllocations(
+                                            cubit.shortageAllocations,
+                                            reason,
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ],
+                                );
                               },
                             ),
                           ];
@@ -298,8 +345,35 @@ class _EndShiftWithHandoverScreenState
                                     final bool totalSales =
                                         state.fieldsValidity['totalSales'] ??
                                         false;
+                                    final bool countedCash =
+                                        state.fieldsValidity['countedCash'] ??
+                                        false;
 
-                                    return totalSales;
+                                    return totalSales && countedCash;
+                                  }
+
+                                  final cubit = context.read<EndShiftCubit>();
+                                  final preview = cubit.previewData;
+                                  if (preview != null && pagingState.isLastStep) {
+                                    final pMap = (preview['data']
+                                            is Map<String, dynamic>)
+                                        ? preview['data'] as Map<String, dynamic>
+                                        : preview;
+                                    final allocationRequired =
+                                        pMap['allocation_required'] == true;
+                                    final shortage =
+                                        (pMap['shortage_to_allocate'] as num?)
+                                                ?.toDouble() ??
+                                            0.0;
+                                    if (allocationRequired && shortage > 0) {
+                                      final allocated = cubit
+                                          .shortageAllocations
+                                          .fold<double>(
+                                              0.0, (sum, a) => sum + a.amount);
+                                      if ((allocated - shortage).abs() > 0.01) {
+                                        return false;
+                                      }
+                                    }
                                   }
 
                                   if (pagingState.totalSteps == 3) {
@@ -471,7 +545,13 @@ class _EndShiftWithHandoverScreenState
                                               }
                                             : () {
                                                 if (currentIndex == 0) {
-                                                  //
+                                                  final counted = double.tryParse(
+                                                    _countedCashController.text.trim(),
+                                                  );
+                                                  context
+                                                      .read<EndShiftCubit>()
+                                                      .setCountedCash(counted);
+
                                                   context
                                                       .read<EndShiftCubit>()
                                                       .endShiftTotalSalesValuesUpdated(
@@ -499,6 +579,11 @@ class _EndShiftWithHandoverScreenState
                                                             >()
                                                             .addedAggregators,
                                                       );
+
+                                                  // Fetch server preview calculation
+                                                  context
+                                                      .read<EndShiftCubit>()
+                                                      .fetchCashReconciliationPreview();
 
                                                   final isVarianceDetected =
                                                       context

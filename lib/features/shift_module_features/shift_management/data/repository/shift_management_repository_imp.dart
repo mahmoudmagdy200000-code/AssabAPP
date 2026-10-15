@@ -42,8 +42,11 @@ import '../model/shift/handover_approve_body_request.dart';
 import '../model/shift/reassign_shift/reassign_shift_request_model.dart';
 import '../model/shift/shift_response_model.dart';
 
+import '../../domain/repository/shift_management_repository.dart';
+import '../model/shift/end_shift_aggregator_model.dart';
+
 @LazySingleton()
-class ShiftManagementRepositoryImp with RepositoryMixin {
+class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManagementRepository {
   final ShiftManagementRemoteDataSource _remoteDataSource;
 
   ShiftManagementRepositoryImp(this._remoteDataSource);
@@ -510,6 +513,45 @@ class ShiftManagementRepositoryImp with RepositoryMixin {
         cashierId: cashierId,
       );
       return result.data.cashier.toEntity();
+    });
+  }
+
+  @override
+  FutureApiResult<Map<String, dynamic>> previewCashReconciliation({
+    required String shiftId,
+    required double totalSales,
+    required double countedCash,
+    double? cardPayments,
+    List<EndShiftAggregatorModel>? aggregators,
+  }) async {
+    return execute(() async {
+      final body = <String, dynamic>{
+        'total_sales': totalSales.toStringAsFixed(2),
+        'counted_cash': countedCash.toStringAsFixed(2),
+        if (cardPayments != null)
+          'card_payments': cardPayments.toStringAsFixed(2),
+        if (aggregators != null && aggregators.isNotEmpty)
+          'aggregators': aggregators
+              .map(
+                (a) => {
+                  'aggregator_id': a.aggregatorId,
+                  'amount': a.amount.toStringAsFixed(2),
+                },
+              )
+              .toList(),
+      };
+
+      final response = await _remoteDataSource.previewCashReconciliation(
+        shiftId: shiftId,
+        body: body,
+      );
+
+      if (response is Map<String, dynamic>) {
+        return response;
+      } else if (response is Map) {
+        return Map<String, dynamic>.from(response);
+      }
+      return <String, dynamic>{};
     });
   }
 }

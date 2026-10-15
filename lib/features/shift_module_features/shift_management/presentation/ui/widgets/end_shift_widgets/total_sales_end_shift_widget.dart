@@ -33,6 +33,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
   final TextEditingController totalHandoverController;
   final TextEditingController madaController;
   final TextEditingController cashController;
+  final TextEditingController countedCashController;
 
   final bool viewUpload;
   const SalesBreakDownEndShiftWidget({
@@ -41,6 +42,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
     required this.totalHandoverController,
     required this.madaController,
     required this.cashController,
+    required this.countedCashController,
     required this.viewUpload,
   });
 
@@ -245,6 +247,75 @@ class _SalesBreakDownEndShiftWidget
                             ],
                           ),
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                10.verticalSpace,
+                const CustomDivider(),
+                10.verticalSpace,
+
+                Text(
+                  'النقد الفعلي المعدود (جرد الصندوق)',
+                  style: AppStyles.s15W500,
+                ),
+                2.verticalSpace,
+                Text(
+                  'أدخل المبلغ الفعلي الموجود في الدرج بشكل مستقل عن المبيعات',
+                  style: AppStyles.s13W500.copyWith(
+                    color: context.customColor.text3,
+                  ),
+                ),
+                10.verticalSpace,
+
+                ContainerCustomTextField(
+                  label: 'النقد الفعلي المعدود',
+                  isLabelRequired: true,
+                  pngAssetName: AppAssets.cashPng,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          controller: widget.countedCashController,
+                          hintText: '0.00',
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          maxLength: 30,
+                          onChanged: (value) {
+                            final trimmed = value.trim();
+                            if (trimmed.isEmpty) {
+                              context.read<EndShiftCubit>().setCountedCash(null);
+                              context
+                                  .read<ValidationCubit>()
+                                  .validateField('countedCash', false);
+                            } else {
+                              final parsed = double.tryParse(trimmed);
+                              if (parsed != null && parsed >= 0) {
+                                context
+                                    .read<EndShiftCubit>()
+                                    .setCountedCash(parsed);
+                                context
+                                    .read<ValidationCubit>()
+                                    .validateField('countedCash', true);
+                              } else {
+                                context
+                                    .read<EndShiftCubit>()
+                                    .setCountedCash(null);
+                                context
+                                    .read<ValidationCubit>()
+                                    .validateField('countedCash', false);
+                              }
+                            }
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                      AppSvg(
+                        assetName: AppAssets.saudiRiyal,
+                        width: 20.w,
+                        height: 20.h,
                       ),
                     ],
                   ),

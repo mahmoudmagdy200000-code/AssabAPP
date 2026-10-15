@@ -147,5 +147,13 @@
   "quickExpensesReportTitle": "تقرير المصروفات السريعة",
   "totalCashIn": "إجمالي النقد الداخل",
   "totalCashOut": "إجمالي النقد الخارج",
-  "storeBranchName": "اسم فرع المتجر"
+  "storeBranchName": "اسم فرع المتجر",
+  "physicalCountedCash": "النقد الفعلي المحسوب",
+  "physicalCountedCashHint": "أدخل النقد الفعلي في الدرج",
+  "physicalCountedCashRequired": "النقد الفعلي المحسوب مطلوب",
+  "shortageAllocationTitle": "توزيع العجز مطلوب",
+  "shortageAllocationDesc": "يجب توزيع مبلغ العجز على الأطراف المسؤولة قبل إغلاق الوردية.",
+  "shortageToAllocate": "العجز المطلوب توزيعه:",
+  "remainingToAllocate": "المتبقي للتوزيع:",
+  "allocationIncomplete": "يجب أن يكون المبلغ المتبقي 0.00 ر.س"
 }

@@ -1,10 +1,72 @@
 class ApiEndpoint {
   ApiEndpoint._();
 
-  static const String baseUrl =
-      'https://ivory-snail-183262.hostingersite.com/api/v1/';
-  static const String pusherAuth =
-      'https://ivory-snail-183262.hostingersite.com/broadcasting/auth';
+  static const String _envBaseUrl =
+      String.fromEnvironment('API_BASE_URL', defaultValue: '');
+
+  static const bool isDemoBuild =
+      bool.fromEnvironment('DEMO_MODE', defaultValue: true);
+
+  /// Normalizes and validates the API base URL according to strict demo requirements.
+  /// Enforces scheme, normalizes path to end with '/api/v1/', prevents empty configurations (fails closed),
+  /// and forbids Hostinger production hosts during demo testing.
+  static String normalizeBaseUrl(String url, {bool? demo}) {
+    final isDemo = demo ?? isDemoBuild;
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) {
+      throw StateError(
+        'Missing required build-time API base URL. Configure with --dart-define=API_BASE_URL=<url>',
+      );
+    }
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null ||
+        !uri.hasScheme ||
+        (uri.scheme != 'https' && uri.scheme != 'http')) {
+      throw FormatException('Invalid API base URL: must have http or https scheme ($trimmed)');
+    }
+
+    if (isDemo && (uri.host.contains('hostingersite.com') || trimmed.contains('ivory-snail-183262'))) {
+      throw StateError('Hostinger production host is strictly forbidden in demo build: $trimmed');
+    }
+
+    var path = uri.path;
+    if (path.isEmpty || path == '/') {
+      path = '/api/v1/';
+    } else {
+      if (!path.endsWith('/')) {
+        path = '$path/';
+      }
+      if (!path.endsWith('/api/v1/')) {
+        if (path.endsWith('/api/')) {
+          path = '${path}v1/';
+        } else {
+          path = '${path}api/v1/';
+        }
+      }
+    }
+    // Clean any accidental duplicate slashes in the path
+    path = path.replaceAll(RegExp(r'/+'), '/');
+
+    return uri.replace(path: path).toString();
+  }
+
+  /// Derives the Pusher broadcasting auth endpoint on the same host and scheme as the given API URL.
+  static String derivePusherAuthUrl(String apiUrl) {
+    final uri = Uri.parse(apiUrl);
+    return uri.replace(path: '/broadcasting/auth').toString();
+  }
+
+  /// Compile-time constant for Retrofit source definitions.
+  static const String baseUrl = _envBaseUrl;
+
+  /// Validated base URL for runtime client initialization.
+  static String get validatedBaseUrl => normalizeBaseUrl(_envBaseUrl);
+
+  /// Pusher auth URL evaluated on the same host as the active API base URL.
+  static String get pusherAuth =>
+      _envBaseUrl.isNotEmpty ? derivePusherAuthUrl(validatedBaseUrl) : '';
+
   static const String branchManager = 'branch-manager/';
   static const String auth = 'auth';
   static const String branchManagerFirstLogin =

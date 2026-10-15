@@ -134,6 +134,12 @@ abstract class ShiftManagementRemoteDataSource {
     @Body() required FormData data,
   });
 
+  @POST('${ApiEndpoint.branchManagerShifts}/{shift}/cash-reconciliation/preview')
+  Future<dynamic> previewCashReconciliation({
+    @Path('shift') required String shiftId,
+    @Body() required Map<String, dynamic> body,
+  });
+
   @GET('${ApiEndpoint.branchWorkDayMgmt}/current')
   Future<CurrentShiftResponse> getCurrentShift();
 

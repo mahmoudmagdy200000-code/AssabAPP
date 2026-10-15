@@ -44,6 +44,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "أضف المناطق وقم بعد الأصول كفرع جديد",
     ),
     "age": MessageLookupByLibrary.simpleMessage("العمر"),
+    "allocationIncomplete": MessageLookupByLibrary.simpleMessage(
+      "يجب أن يكون المبلغ المتبقي 0.00 ر.س",
+    ),
     "approvalRequestOwner": MessageLookupByLibrary.simpleMessage(
       "طلب الموافقة: المالك",
     ),
@@ -146,6 +149,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "nonTaxRequests": MessageLookupByLibrary.simpleMessage("طلبات غير ضريبية"),
     "paymentMethodTitle": MessageLookupByLibrary.simpleMessage("طريقة الدفع"),
     "pendingReview": MessageLookupByLibrary.simpleMessage("قيد المراجعة"),
+    "physicalCountedCash": MessageLookupByLibrary.simpleMessage(
+      "النقد الفعلي المحسوب",
+    ),
+    "physicalCountedCashHint": MessageLookupByLibrary.simpleMessage(
+      "أدخل النقد الفعلي في الدرج",
+    ),
+    "physicalCountedCashRequired": MessageLookupByLibrary.simpleMessage(
+      "النقد الفعلي المحسوب مطلوب",
+    ),
     "problem": MessageLookupByLibrary.simpleMessage("مشكلة"),
     "quickExpenseForBranch": m3,
     "quickExpensesReportTitle": MessageLookupByLibrary.simpleMessage(
@@ -155,6 +167,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "reasonForChange": MessageLookupByLibrary.simpleMessage("سبب التغيير"),
     "recorded": MessageLookupByLibrary.simpleMessage("تم التسجيل"),
     "recordsCount": m4,
+    "remainingToAllocate": MessageLookupByLibrary.simpleMessage(
+      "المتبقي للتوزيع:",
+    ),
     "replace": MessageLookupByLibrary.simpleMessage("استبدال"),
     "requestsCount": m5,
     "requiredActions": MessageLookupByLibrary.simpleMessage(
@@ -162,6 +177,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "saveAndAdd": MessageLookupByLibrary.simpleMessage("حفظ وإضافة"),
     "send": MessageLookupByLibrary.simpleMessage("إرسال"),
+    "shortageAllocationDesc": MessageLookupByLibrary.simpleMessage(
+      "يجب توزيع مبلغ العجز على الأطراف المسؤولة قبل إغلاق الوردية.",
+    ),
+    "shortageAllocationTitle": MessageLookupByLibrary.simpleMessage(
+      "توزيع العجز مطلوب",
+    ),
+    "shortageToAllocate": MessageLookupByLibrary.simpleMessage(
+      "العجز المطلوب توزيعه:",
+    ),
     "standardFilter": MessageLookupByLibrary.simpleMessage("قياسي"),
     "store": MessageLookupByLibrary.simpleMessage("المخزن"),
     "storeBranchName": MessageLookupByLibrary.simpleMessage("اسم فرع المتجر"),

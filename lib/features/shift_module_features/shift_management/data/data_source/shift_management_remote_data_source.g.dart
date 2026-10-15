@@ -12,13 +12,7 @@ part of 'shift_management_remote_data_source.dart';
 
 class _ShiftManagementRemoteDataSource
     implements ShiftManagementRemoteDataSource {
-  _ShiftManagementRemoteDataSource(
-    this._dio, {
-    this.baseUrl,
-    this.errorLogger,
-  }) {
-    baseUrl ??= 'https://ivory-snail-183262.hostingersite.com/api/v1/';
-  }
+  _ShiftManagementRemoteDataSource(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 
@@ -127,7 +121,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'https://ivory-snail-183262.hostingersite.com/api/v1/aggregators',
+            'aggregators',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -523,6 +517,31 @@ class _ShiftManagementRemoteDataSource
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     await _dio.fetch<void>(_options);
+  }
+
+  @override
+  Future<Map<String, dynamic>> previewCashReconciliation({
+    required String shiftId,
+    required Map<String, dynamic> body,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body);
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'branch-manager/shifts/${shiftId}/cash-reconciliation/preview',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
   }
 
   @override

@@ -597,6 +597,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "allShifts": MessageLookupByLibrary.simpleMessage("All Shifts"),
     "allSuppliers": MessageLookupByLibrary.simpleMessage("All Suppliers"),
+    "allocationIncomplete": MessageLookupByLibrary.simpleMessage(
+      "Remaining amount must be 0.00 SAR",
+    ),
     "alternativeOptions": MessageLookupByLibrary.simpleMessage(
       "Alternative Options",
     ),
@@ -3671,6 +3674,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Photos or notes are added where needed",
     ),
     "photosTaken": MessageLookupByLibrary.simpleMessage("Photos taken"),
+    "physicalCountedCash": MessageLookupByLibrary.simpleMessage(
+      "Physical Counted Cash",
+    ),
+    "physicalCountedCashHint": MessageLookupByLibrary.simpleMessage(
+      "Enter actual cash in drawer",
+    ),
+    "physicalCountedCashRequired": MessageLookupByLibrary.simpleMessage(
+      "Physical counted cash is required",
+    ),
     "pickTheDateToAutoSendThisOrderEveryMonth":
         MessageLookupByLibrary.simpleMessage(
           "Pick the date to auto-send this order every month.",
@@ -4196,6 +4208,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingBalanceAutoCalculated": MessageLookupByLibrary.simpleMessage(
       "Remaining Balance (Auto-calculated)",
+    ),
+    "remainingToAllocate": MessageLookupByLibrary.simpleMessage(
+      "Remaining to Allocate:",
     ),
     "reminder": MessageLookupByLibrary.simpleMessage("Reminder"),
     "remove": MessageLookupByLibrary.simpleMessage("Remove"),
@@ -4831,9 +4846,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Short text message quick alert",
     ),
     "shortage": MessageLookupByLibrary.simpleMessage("Shortage"),
+    "shortageAllocationDesc": MessageLookupByLibrary.simpleMessage(
+      "You must allocate the shortage amount across the responsible parties before closing the shift.",
+    ),
+    "shortageAllocationTitle": MessageLookupByLibrary.simpleMessage(
+      "Shortage Allocation Required",
+    ),
     "shortageAmount": MessageLookupByLibrary.simpleMessage("Shortage Amount:"),
     "shortageStockDeficit": MessageLookupByLibrary.simpleMessage(
       "Shortage (stock deficit)",
+    ),
+    "shortageToAllocate": MessageLookupByLibrary.simpleMessage(
+      "Shortage to Allocate:",
     ),
     "showAllPhotos": m112,
     "showBranchesWithAtLeast80OfRequestedItems":

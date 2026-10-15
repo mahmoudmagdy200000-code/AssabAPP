@@ -4,6 +4,8 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/end_shift_aggregator_entity.dart';
 import 'package:dio/dio.dart';
 
+import 'cash_shortage_allocation.dart';
+
 class EndShiftRequestWithHandOver {
   final double totalSales;
   final double cashCollected;
@@ -17,6 +19,9 @@ class EndShiftRequestWithHandOver {
   final Variance variance;
   final bool isThereVariance;
   final bool isManager;
+  final double? countedCash;
+  final List<CashShortageAllocation>? shortageAllocations;
+  final String? allocationReason;
 
   EndShiftRequestWithHandOver({
     required this.totalSales,
@@ -30,6 +35,9 @@ class EndShiftRequestWithHandOver {
     required this.variance,
     required this.isThereVariance,
     required this.isManager,
+    this.countedCash,
+    this.shortageAllocations,
+    this.allocationReason,
   });
 
   Future<FormData> toFormData() async {
@@ -52,7 +60,7 @@ class EndShiftRequestWithHandOver {
     addIfNotNullAndNotZero('cash_collected', cashCollected);
     addIfNotNullAndNotZero('card_payments', cardPayments);
     isManager
-        ? addIfNotNull('to_branch_manager', nextCashierId)
+        ? addIfNotNull('branch_manager_id', nextCashierId)
         : addIfNotNull('next_cashier_id', nextCashierId);
     isManager
         ? addIfNotNull('handover_to_type', 'branch_manager')
@@ -101,6 +109,27 @@ class EndShiftRequestWithHandOver {
         }
       }
     }
+
+    if (countedCash != null) {
+      formMap['counted_cash'] = countedCash!.toStringAsFixed(2);
+    }
+
+    if (shortageAllocations != null && shortageAllocations!.isNotEmpty) {
+      for (int i = 0; i < shortageAllocations!.length; i++) {
+        final alloc = shortageAllocations![i];
+        formMap['shortage_allocations[$i][responsible_type]'] =
+            alloc.responsibleType;
+        formMap['shortage_allocations[$i][responsible_id]'] =
+            alloc.responsibleId;
+        formMap['shortage_allocations[$i][amount]'] =
+            alloc.amount.toStringAsFixed(2);
+      }
+    }
+
+    if (allocationReason != null && allocationReason!.isNotEmpty) {
+      formMap['allocation_reason'] = allocationReason;
+    }
+
     return FormData.fromMap(formMap);
   }
 }
