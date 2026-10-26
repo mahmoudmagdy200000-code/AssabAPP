@@ -9,8 +9,9 @@ class DioClient {
   DioClient._();
 
   static Dio create({String? customBaseUrl}) {
-    final effectiveBaseUrl = customBaseUrl ??
-        (ApiEndpoint.baseUrl.isNotEmpty ? ApiEndpoint.validatedBaseUrl : '');
+    final effectiveBaseUrl = customBaseUrl == null
+        ? ApiEndpoint.validatedBaseUrl
+        : ApiEndpoint.normalizeBaseUrl(customBaseUrl);
 
     final dio = Dio(
       BaseOptions(

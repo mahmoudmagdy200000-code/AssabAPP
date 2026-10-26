@@ -5,8 +5,15 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    id("com.google.gms.google-services") apply false
+    id("com.google.firebase.crashlytics") apply false
+}
+
+// A clean demo checkout has no Firebase configuration and starts no Firebase SDK.
+val isShiftDemo = gradle.startParameter.taskNames.any { it.contains("Demo", ignoreCase = true) }
+if (!isShiftDemo) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 val keyPropertiesFile = rootProject.file("key.properties")
@@ -68,6 +75,11 @@ android {
 
     flavorDimensions += listOf("env")
     productFlavors {
+        create("demo") {
+            dimension = "env"
+            applicationIdSuffix = ".shiftdemo"
+            resValue("string", "app_name", "Assab Shift Demo")
+        }
         create("development") {
             dimension = "env"
             applicationIdSuffix = ".dev"

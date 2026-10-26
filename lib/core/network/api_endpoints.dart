@@ -1,11 +1,15 @@
 class ApiEndpoint {
   ApiEndpoint._();
 
-  static const String _envBaseUrl =
-      String.fromEnvironment('API_BASE_URL', defaultValue: '');
+  static const String _envBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: '',
+  );
 
-  static const bool isDemoBuild =
-      bool.fromEnvironment('DEMO_MODE', defaultValue: true);
+  static const bool isDemoBuild = bool.fromEnvironment(
+    'DEMO_MODE',
+    defaultValue: false,
+  );
 
   /// Normalizes and validates the API base URL according to strict demo requirements.
   /// Enforces scheme, normalizes path to end with '/api/v1/', prevents empty configurations (fails closed),
@@ -22,12 +26,22 @@ class ApiEndpoint {
     final uri = Uri.tryParse(trimmed);
     if (uri == null ||
         !uri.hasScheme ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasQuery ||
+        uri.hasFragment ||
         (uri.scheme != 'https' && uri.scheme != 'http')) {
-      throw FormatException('Invalid API base URL: must have http or https scheme ($trimmed)');
+      throw FormatException(
+        'Invalid API base URL: must have http or https scheme ($trimmed)',
+      );
     }
 
-    if (isDemo && (uri.host.contains('hostingersite.com') || trimmed.contains('ivory-snail-183262'))) {
-      throw StateError('Hostinger production host is strictly forbidden in demo build: $trimmed');
+    if (isDemo &&
+        (uri.host.contains('hostingersite.com') ||
+            trimmed.contains('ivory-snail-183262'))) {
+      throw StateError(
+        'Hostinger production host is strictly forbidden in demo build: $trimmed',
+      );
     }
 
     var path = uri.path;
@@ -118,6 +132,8 @@ class ApiEndpoint {
       '$branchManagerExpenses/custody-balance';
   static const String branchManagerCashiers = '${branchManager}cashiers';
 
+  // Retain the legacy public name used by existing Retrofit declarations.
+  // ignore: constant_identifier_names
   static const String Aggregators = '${baseUrl}aggregators';
 
   // =================== Branch Manager Settings & Aggregators ===================
