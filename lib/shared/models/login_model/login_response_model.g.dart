@@ -16,21 +16,24 @@ Map<String, dynamic> _$LoginResponseModelToJson(LoginResponseModel instance) =>
 
 LoginData _$LoginDataFromJson(Map<String, dynamic> json) => LoginData(
   user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
-  token: json['token'] as String,
+  token: (json['token'] ?? '').toString(),
+  requiresPasswordReset: json['requires_password_reset'] as bool?,
 );
 
 Map<String, dynamic> _$LoginDataToJson(LoginData instance) => <String, dynamic>{
   'user': instance.user,
   'token': instance.token,
+  if (instance.requiresPasswordReset != null)
+    'requires_password_reset': instance.requiresPasswordReset,
 };
 
 UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
-  id: json['id'] as String,
-  name: json['name'] as String,
-  email: json['email'] as String,
-  phone: json['phone'] as String?,
-  image: json['image'] as String?,
-  createdAt: json['created_at'] as String,
+  id: (json['id'] ?? '').toString(),
+  name: (json['name'] ?? '').toString(),
+  email: (json['email'] ?? '').toString(),
+  phone: json['phone']?.toString(),
+  image: json['image']?.toString(),
+  createdAt: (json['created_at'] ?? '').toString(),
 );
 
 Map<String, dynamic> _$UserResponseToJson(UserResponse instance) =>

@@ -9,7 +9,13 @@ class ItemTestRemoteDataSourceImpl implements ItemTestDataSource {
   final Dio _dio;
   final String baseUrl;
 
-  ItemTestRemoteDataSourceImpl(this._dio, {this.baseUrl = ApiEndpoint.baseUrl});
+  ItemTestRemoteDataSourceImpl(
+    this._dio, {
+    String? baseUrl,
+  }) : baseUrl =
+           (baseUrl == null || baseUrl.trim().isEmpty)
+               ? ''
+               : ApiEndpoint.normalizeBaseUrl(baseUrl);
 
   @override
   Future<ItemTestResultModel> submitTest({

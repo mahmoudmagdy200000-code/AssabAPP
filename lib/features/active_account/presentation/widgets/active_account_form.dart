@@ -1,7 +1,11 @@
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
+import 'package:assab/core/helpers/shared_preferences_helper.dart';
 import 'package:assab/core/routing/app_route_name.dart';
+import 'package:assab/core/services/auth_service.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/services/token_storage_service.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/utils/app_bottom_sheet.dart';
 import 'package:assab/core/utils/app_dialog.dart';
@@ -57,16 +61,49 @@ class _ActiveAccountFormState extends State<ActiveAccountForm> {
   }
 
   void _activeAccount() {
-    UserTypeService.selectedUserTypeStrategy!.activeAccount(
+    if (UserTypeService.selectedUserTypeStrategy == null) {
+      UserTypeService.restoreSavedUserType();
+    }
+    final strategy = UserTypeService.selectedUserTypeStrategy;
+    if (strategy == null) return;
+
+    strategy.activeAccount(
       context,
       FirstLoginRequestModel(
-        email: _emailController.text,
+        email: _emailController.text.trim(),
         password: _passwordController.text,
       ),
     );
   }
 
-  void _activeAccountSuccess(LoginResponseModel firstLoginResponseModel) async {
+  Future<void> _activeAccountSuccess(
+    LoginResponseModel firstLoginResponseModel,
+  ) async {
+    final loginData = firstLoginResponseModel.data;
+    await getIt<TokenStorageService>().saveAccessToken(loginData.token);
+
+    if (UserTypeService.selectedUserTypeStrategy == null) {
+      UserTypeService.restoreSavedUserType();
+    }
+    final strategy = UserTypeService.selectedUserTypeStrategy;
+
+    // When backend FirstLoginPolicy is OFF, first-login completes activation
+    // immediately and returns `requires_password_reset: false` with a full
+    // session token (must NOT route to reset-password-first-login).
+    if (loginData.requiresPasswordReset == false && strategy != null) {
+      await Future.wait([
+        getIt<SharedPreferencesHelper>().storeString(
+          'u_name',
+          loginData.user.name,
+        ),
+        getIt<SharedPreferencesHelper>().storeString('u_id', loginData.user.id),
+        UserTypeService.saveSelectedUserType(strategy.userType),
+      ]);
+      AuthService.markLoggedIn();
+      strategy.goToMainScreen();
+      return;
+    }
+
     NavigationService.I.pushNamed(
       AppRouteName.resetPasswordActiveAccountScreen,
     );
@@ -103,9 +140,13 @@ class _ActiveAccountFormState extends State<ActiveAccountForm> {
                       controller: _emailController,
                       label: context.tr.registeredEmail,
                       hint: context.tr.hintEmail,
-                      error: context.read<ActiveAccountFormCubit>().state.emailError,
-                      onChanged: (value) =>
-                          context.read<ActiveAccountFormCubit>().updateEmail(value),
+                      error: context
+                          .read<ActiveAccountFormCubit>()
+                          .state
+                          .emailError,
+                      onChanged: (value) => context
+                          .read<ActiveAccountFormCubit>()
+                          .updateEmail(value),
                     ),
                     16.verticalSpace,
                     AppTextFormField(
@@ -113,14 +154,22 @@ class _ActiveAccountFormState extends State<ActiveAccountForm> {
                       label: context.tr.defaultPassword,
                       hint: context.tr.defaultPassword,
                       textFormType: TextFormType.password,
-                      error: context.read<ActiveAccountFormCubit>().state.passwordError,
-                      onChanged: (value) =>
-                          context.read<ActiveAccountFormCubit>().updatePassword(value),
+                      error: context
+                          .read<ActiveAccountFormCubit>()
+                          .state
+                          .passwordError,
+                      onChanged: (value) => context
+                          .read<ActiveAccountFormCubit>()
+                          .updatePassword(value),
                     ),
                     20.verticalSpace,
                     const CustomDivider(),
                     20.verticalSpace,
-                    BlocSelector<ActiveAccountFormCubit, ActiveAccountFormState, bool>(
+                    BlocSelector<
+                      ActiveAccountFormCubit,
+                      ActiveAccountFormState,
+                      bool
+                    >(
                       selector: (state) => state.isFormValid,
                       builder: (context, isFormValid) {
                         return BlocConsumer<

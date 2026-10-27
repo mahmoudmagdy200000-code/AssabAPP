@@ -7,29 +7,35 @@ class LoginFormCubit extends SafeCubit<LoginFormState> {
   LoginFormCubit() : super(const LoginFormState());
 
   void updateIdentifier(String value) {
-    final isValid = AppRegExp.emailValidator(value) || AppRegExp.phoneValidator(value);
-    final error = value.isEmpty
+    final trimmed = value.trim();
+    final isValid =
+        AppRegExp.emailValidator(trimmed) || AppRegExp.phoneValidator(trimmed);
+    final error = trimmed.isEmpty
         ? null
         : (isValid ? null : 'Invalid email or phone');
 
-    emit(state.copyWith(
-      identifier: value,
-      isIdentifierValid: isValid,
-      identifierError: () => error,
-    ));
+    emit(
+      state.copyWith(
+        identifier: trimmed,
+        isIdentifierValid: isValid,
+        identifierError: () => error,
+      ),
+    );
   }
 
   void updatePassword(String value) {
-    final isValid = AppRegExp.passwordValidator(value);
-    final error = value.isEmpty
-        ? null
-        : (isValid ? null : 'Password not valid');
+    // Login authenticates an existing backend account; do not block valid
+    // server-side credentials with password-creation complexity rules.
+    final isValid = value.isNotEmpty;
+    final error = value.isEmpty ? null : null;
 
-    emit(state.copyWith(
-      password: value,
-      isPasswordValid: isValid,
-      passwordError: () => error,
-    ));
+    emit(
+      state.copyWith(
+        password: value,
+        isPasswordValid: isValid,
+        passwordError: () => error,
+      ),
+    );
   }
 
   void toggleSaveLoginDetails(bool value) {
@@ -45,10 +51,9 @@ class LoginFormCubit extends SafeCubit<LoginFormState> {
   }
 
   void initWithIdentifier(String identifier) {
-    final isValid = AppRegExp.emailValidator(identifier) || AppRegExp.phoneValidator(identifier);
-    emit(state.copyWith(
-      identifier: identifier,
-      isIdentifierValid: isValid,
-    ));
+    final trimmed = identifier.trim();
+    final isValid =
+        AppRegExp.emailValidator(trimmed) || AppRegExp.phoneValidator(trimmed);
+    emit(state.copyWith(identifier: trimmed, isIdentifierValid: isValid));
   }
 }

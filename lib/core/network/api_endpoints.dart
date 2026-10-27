@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class ApiEndpoint {
   ApiEndpoint._();
 
@@ -11,11 +13,21 @@ class ApiEndpoint {
     defaultValue: false,
   );
 
-  /// Normalizes and validates the API base URL according to strict demo requirements.
+  static const bool rejectLegacyProdHosts = bool.fromEnvironment(
+    'REJECT_LEGACY_PROD_HOSTS',
+    defaultValue: true,
+  );
+
+  /// Normalizes and validates the API base URL according to strict staging/demo requirements.
   /// Enforces scheme, normalizes path to end with '/api/v1/', prevents empty configurations (fails closed),
-  /// and forbids Hostinger production hosts during demo testing.
-  static String normalizeBaseUrl(String url, {bool? demo}) {
+  /// and forbids legacy Hostinger production hosts.
+  static String normalizeBaseUrl(
+    String url, {
+    bool? demo,
+    bool? forbidLegacyProd,
+  }) {
     final isDemo = demo ?? isDemoBuild;
+    final rejectLegacy = forbidLegacyProd ?? rejectLegacyProdHosts;
     final trimmed = url.trim();
     if (trimmed.isEmpty) {
       throw StateError(
@@ -36,11 +48,11 @@ class ApiEndpoint {
       );
     }
 
-    if (isDemo &&
+    if ((isDemo || rejectLegacy) &&
         (uri.host.contains('hostingersite.com') ||
             trimmed.contains('ivory-snail-183262'))) {
       throw StateError(
-        'Hostinger production host is strictly forbidden in demo build: $trimmed',
+        'Legacy Hostinger production host is strictly forbidden: $trimmed',
       );
     }
 
@@ -75,11 +87,15 @@ class ApiEndpoint {
   static const String baseUrl = _envBaseUrl;
 
   /// Validated base URL for runtime client initialization.
-  static String get validatedBaseUrl => normalizeBaseUrl(_envBaseUrl);
+  @visibleForTesting
+  static String? debugTestBaseUrl;
+
+  static String get validatedBaseUrl =>
+      normalizeBaseUrl(debugTestBaseUrl ?? _envBaseUrl);
 
   /// Pusher auth URL evaluated on the same host as the active API base URL.
   static String get pusherAuth =>
-      _envBaseUrl.isNotEmpty ? derivePusherAuthUrl(validatedBaseUrl) : '';
+      (debugTestBaseUrl ?? _envBaseUrl).isNotEmpty ? derivePusherAuthUrl(validatedBaseUrl) : '';
 
   static const String branchManager = 'branch-manager/';
   static const String auth = 'auth';
@@ -134,7 +150,7 @@ class ApiEndpoint {
 
   // Retain the legacy public name used by existing Retrofit declarations.
   // ignore: constant_identifier_names
-  static const String Aggregators = '${baseUrl}aggregators';
+  static const String Aggregators = 'aggregators';
 
   // =================== Branch Manager Settings & Aggregators ===================
   static const String branchManagerSettings = '${branchManager}settings';
@@ -204,18 +220,21 @@ class ApiEndpoint {
   static const String cashier = 'cashier/';
 
   static const String cashierLogin = '$cashier$auth/login';
+  static const String cashierFirstLogin = '$cashier$auth/first-login';
   static const String cashierActivate = '$cashier$auth/activate';
+  static const String cashierResetPasswordFirstLogin =
+      '$cashier$auth/reset-password-first-login';
   static const String cashierVerifyOtp = '$cashier$auth/verify-otp';
   static const String cashierResetPassword = '$cashier$auth/reset-password';
   static const String cashierForgotPassword = '$cashier$auth/forgot-password';
-  static const String cashierMe = '$cashier$auth/me';
-  static const String cashierLogout = '$cashier$auth/logout';
-  static const String cashierShifts = '$cashier/shifts';
-  static const String cashierMyInfo = '$cashier/my-info';
-  static const String cashierBranchInfo = '$cashier/branch-info';
+  static const String cashierMe = '${cashier}profile';
+  static const String cashierLogout = '${cashier}logout';
+  static const String cashierShifts = '${cashier}shifts';
+  static const String cashierMyInfo = '${cashier}my-info';
+  static const String cashierBranchInfo = '${cashier}branch-info';
 
   // =================== BranchManager Workday Endpoints ===================
-  static const String branchWorkDayMgmt = '$branchManager/workday';
+  static const String branchWorkDayMgmt = '${branchManager}workday';
 
   /// =================== Purchase Endpoints ===================
   static const String purchase = 'purchase/';
@@ -330,6 +349,7 @@ class ApiEndpoint {
   static const String brandOwnerResetPasswordFirstLogin =
       '${brandOwnerAuth}reset-password-first-login';
   static const String brandOwnerLogout = '${brandOwnerAuth}logout';
+  static const String brandOwnerMe = '${brandOwnerAuth}me';
 
   // =================== Brand Owner Endpoints ===================
   static const String brandOwnerPaymentForm = '${brandOwner}payment-form';
@@ -372,6 +392,8 @@ class ApiEndpoint {
   static const String supplierVerifyOtp =
       '${supplierAuth}password/reset/verify-otp';
   static const String supplierResetPassword = '${supplierAuth}password/reset';
+  static const String supplierLogout = '${supplierAuth}logout';
+  static const String supplierMe = '${supplierAuth}me';
   static const String supplierOrders = '${suppliers}orders';
   static const String supplierPartialConfirmItem =
       '${suppliers}pending-orders/{id}/partial-approve';
@@ -440,8 +462,8 @@ class ApiEndpoint {
       '$recurringOrders/next-scheduling';
   static const String recurringOrdersPaused = '$recurringOrders/paused';
 
-  // =================== Inventory Endpoints ===================
-  static const String cashierMyShifts = '$cashier/my-shifts';
+  // =================== Cashier Shifts Endpoints ===================
+  static const String cashierMyShifts = '${cashier}my-shifts';
   static const String cashierMyPendingShifts = '$cashierMyShifts/pending';
   static const String cashierMyCompletedShifts = '$cashierMyShifts/completed';
   static const String cashierMyReassignedShifts = '$cashierMyShifts/reassigned';

@@ -9,9 +9,13 @@ plugins {
     id("com.google.firebase.crashlytics") apply false
 }
 
-// A clean demo checkout has no Firebase configuration and starts no Firebase SDK.
+// Only apply Google Services / Crashlytics when a real Firebase configuration file exists
+// and we are not building the standalone Shift Demo flavor.
 val isShiftDemo = gradle.startParameter.taskNames.any { it.contains("Demo", ignoreCase = true) }
-if (!isShiftDemo) {
+val hasGoogleServicesConfig = file("google-services.json").exists() ||
+    file("src/development/google-services.json").exists() ||
+    file("src/production/google-services.json").exists()
+if (!isShiftDemo && hasGoogleServicesConfig) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
 }

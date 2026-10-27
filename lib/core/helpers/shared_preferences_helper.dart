@@ -94,6 +94,13 @@ class SharedPreferencesHelper {
 
   double? getDouble(String key) => _safePrefs.getDouble(key);
 
+  Future<bool> remove(String key) async {
+    return await _safeWrite(
+      () => _safePrefs.remove(key),
+      'Failed to remove key $key',
+    );
+  }
+
   // ---------------- Clear ----------------
   Future<bool> clearAllData() async {
     return await _safeWrite(() => _safePrefs.clear(), 'Failed to clear data');

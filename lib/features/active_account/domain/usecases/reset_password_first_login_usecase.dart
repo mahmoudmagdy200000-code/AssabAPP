@@ -38,4 +38,14 @@ class ResetPasswordFirstLoginUseCase {
       passwordConfirmation: passwordConfirmation,
     );
   }
+
+  FutureApiResult<void> cashier({
+    required String password,
+    required String passwordConfirmation,
+  }) {
+    return _repository.cashierResetPasswordFirstLogin(
+      password: password,
+      passwordConfirmation: passwordConfirmation,
+    );
+  }
 }

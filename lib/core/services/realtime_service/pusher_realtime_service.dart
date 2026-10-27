@@ -22,6 +22,9 @@ const _kReconnectDelay = Duration(seconds: 3);
 /// Set to 0 for unlimited reconnect attempts.
 const _kMaxReconnectAttempts = 5;
 
+const _kCompileTimePusherKey = String.fromEnvironment('PUSHER_APP_KEY');
+const _kCompileTimePusherCluster = String.fromEnvironment('PUSHER_CLUSTER');
+
 // ---------------------------------------------------------------------------
 // Internal channel holder
 // ---------------------------------------------------------------------------
@@ -114,7 +117,10 @@ class PusherRealtimeService implements RealtimeService {
       AppLogger.log('Already connected — skipping.', tag: _kTag);
       return;
     }
-    await _initPusher();
+    final ready = await _initPusher();
+    if (!ready) {
+      return;
+    }
     await _connectPusher();
   }
 
@@ -124,7 +130,9 @@ class PusherRealtimeService implements RealtimeService {
     AppLogger.log('Disconnecting.', tag: _kTag);
     try {
       await _closeAllChannels();
-      await _pusher.disconnect();
+      if (_initialized) {
+        await _pusher.disconnect();
+      }
       _connected = false;
       _initialized = false;
       _reconnectAttempts = 0;
@@ -156,6 +164,14 @@ class PusherRealtimeService implements RealtimeService {
     final entry = _ChannelEntry<T>(mapper: mapper);
     _channels[channel] = entry;
 
+    if (!_initialized) {
+      AppLogger.log(
+        'Pusher not initialized — returning idle stream for "$channel".',
+        tag: _kTag,
+      );
+      return entry.stream;
+    }
+
     _pusher.subscribe(
       channelName: channel,
       onEvent: (dynamic raw) {
@@ -185,7 +201,9 @@ class PusherRealtimeService implements RealtimeService {
       return;
     }
     try {
-      await _pusher.unsubscribe(channelName: channel);
+      if (_initialized) {
+        await _pusher.unsubscribe(channelName: channel);
+      }
       await _channels[channel]!.close();
       _channels.remove(channel);
       AppLogger.log('Unsubscribed from "$channel".', tag: _kTag);
@@ -197,11 +215,20 @@ class PusherRealtimeService implements RealtimeService {
   // ── Initialisation ─────────────────────────────────────────────────────────
 
   /// Configures and initializes the Pusher SDK. Runs once per session.
-  Future<void> _initPusher() async {
-    if (_initialized) return;
+  /// Returns false when Pusher credentials are not configured in this build.
+  Future<bool> _initPusher() async {
+    if (_initialized) return true;
 
-    final apiKey = _requireEnv('PUSHER_APP_KEY');
-    final cluster = _requireEnv('PUSHER_CLUSTER');
+    final apiKey = _optionalEnv('PUSHER_APP_KEY', _kCompileTimePusherKey);
+    final cluster = _optionalEnv('PUSHER_CLUSTER', _kCompileTimePusherCluster);
+
+    if (apiKey == null || cluster == null) {
+      AppLogger.log(
+        'Pusher credentials not configured — realtime disabled for this session.',
+        tag: _kTag,
+      );
+      return false;
+    }
 
     await _pusher.init(
       apiKey: apiKey,
@@ -221,6 +248,7 @@ class PusherRealtimeService implements RealtimeService {
       'Pusher initialized (auth endpoint: ${ApiEndpoint.pusherAuth}).',
       tag: _kTag,
     );
+    return true;
   }
 
   // ── Private-channel authorization ─────────────────────────────────────────
@@ -458,17 +486,16 @@ class PusherRealtimeService implements RealtimeService {
 
   // ── Utilities ──────────────────────────────────────────────────────────────
 
-  /// Returns the value of [key] from the .env file.
-  /// Throws [StateError] if the variable is missing or empty.
-  String _requireEnv(String key) {
-    final value = dotenv.env[key];
-    if (value == null || value.isEmpty) {
-      throw StateError(
-        'Missing required environment variable "$key". '
-        'Ensure it is defined in your .env file.',
-      );
+  /// Reads an optional Pusher configuration key from `.env` or `--dart-define`.
+  String? _optionalEnv(String key, String compileTimeFallback) {
+    if (dotenv.isInitialized) {
+      final value = dotenv.env[key]?.trim();
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
     }
-    return value;
+    final fallback = compileTimeFallback.trim();
+    return fallback.isEmpty ? null : fallback;
   }
 
   /// Returns true for Pusher system events that carry no application payload.

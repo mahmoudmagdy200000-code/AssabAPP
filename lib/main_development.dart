@@ -7,12 +7,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/helpers/app_bloc_observer.dart';
 import 'core/init/init_app.dart';
 
+const bool _enableDevicePreview = bool.fromEnvironment(
+  'ENABLE_DEVICE_PREVIEW',
+  defaultValue: false,
+);
+
 void main() async {
   Bloc.observer = AppBlocObserver();
 
   await initializeApp();
 
   runApp(
-    DevicePreview(enabled: kDebugMode, builder: (context) => const AssabApp()),
+    DevicePreview(
+      enabled: kDebugMode && _enableDevicePreview,
+      builder: (context) => const AssabApp(),
+    ),
   );
 }

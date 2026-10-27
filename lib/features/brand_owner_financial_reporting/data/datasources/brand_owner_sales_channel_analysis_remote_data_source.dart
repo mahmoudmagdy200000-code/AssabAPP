@@ -12,8 +12,11 @@ class BrandOwnerSalesChannelAnalysisRemoteDataSourceImpl
 
   BrandOwnerSalesChannelAnalysisRemoteDataSourceImpl(
     this._dio, {
-    this.baseUrl = ApiEndpoint.baseUrl,
-  });
+    String? baseUrl,
+  }) : baseUrl =
+           (baseUrl == null || baseUrl.trim().isEmpty)
+               ? ''
+               : ApiEndpoint.normalizeBaseUrl(baseUrl);
 
   @override
   Future<SalesChannelAnalysisModel> getSalesChannelAnalysis({

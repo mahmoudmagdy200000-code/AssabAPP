@@ -16,9 +16,7 @@ class _CashierMyShiftsRemoteDataSource
     this._dio, {
     this.baseUrl,
     this.errorLogger,
-  }) {
-    baseUrl ??= 'https://ivory-snail-183262.hostingersite.com/api/v1/';
-  }
+  });
 
   final Dio _dio;
 
@@ -39,7 +37,7 @@ class _CashierMyShiftsRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'cashier//my-shifts/pending',
+            'cashier/my-shifts/pending',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -69,7 +67,7 @@ class _CashierMyShiftsRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'cashier//my-shifts/completed',
+            'cashier/my-shifts/completed',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -99,7 +97,7 @@ class _CashierMyShiftsRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'cashier//my-shifts/reassigned',
+            'cashier/my-shifts/reassigned',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -127,7 +125,7 @@ class _CashierMyShiftsRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'cashier//my-shifts/in-progress',
+            'cashier/my-shifts/in-progress',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -156,7 +154,7 @@ class _CashierMyShiftsRemoteDataSource
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'cashier//shifts/${shiftId}/reassign/accept',
+            'cashier/shifts/${shiftId}/reassign/accept',
             queryParameters: queryParameters,
             data: _data,
           )

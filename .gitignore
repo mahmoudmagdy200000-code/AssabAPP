@@ -59,3 +59,6 @@ firebase-service-account.json
 
 # FVM Version Cache
 .fvm/
+# Binaries
+*.apk
+*.bundle

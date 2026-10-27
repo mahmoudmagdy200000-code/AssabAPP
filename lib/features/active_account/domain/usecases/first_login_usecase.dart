@@ -30,4 +30,11 @@ class FirstLoginUseCase {
   }) {
     return _repository.brandOwnerFirstLogin(email: email, password: password);
   }
+
+  FutureApiResult<LoginResponseModel> cashier({
+    required String email,
+    required String password,
+  }) {
+    return _repository.cashierFirstLogin(email: email, password: password);
+  }
 }

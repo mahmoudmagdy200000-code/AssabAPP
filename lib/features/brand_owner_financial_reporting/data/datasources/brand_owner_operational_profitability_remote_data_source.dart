@@ -12,8 +12,11 @@ class BrandOwnerOperationalProfitabilityRemoteDataSourceImpl
 
   BrandOwnerOperationalProfitabilityRemoteDataSourceImpl(
     this._dio, {
-    this.baseUrl = ApiEndpoint.baseUrl,
-  });
+    String? baseUrl,
+  }) : baseUrl =
+           (baseUrl == null || baseUrl.trim().isEmpty)
+               ? ''
+               : ApiEndpoint.normalizeBaseUrl(baseUrl);
 
   @override
   Future<OperationalProfitabilityModel> getOperationalProfitability() async {

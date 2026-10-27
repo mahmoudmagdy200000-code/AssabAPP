@@ -41,4 +41,14 @@ abstract class ActiveAccountRemoteDataSource {
   Future<void> brandOwnerResetPasswordFirstLogin(
     @Body() ResetPasswordActivationAccountRequestModel request,
   );
+
+  @POST(ApiEndpoint.cashierFirstLogin)
+  Future<LoginResponseModel> cashierFirstLogin(
+    @Body() FirstLoginRequestModel request,
+  );
+
+  @POST(ApiEndpoint.cashierResetPasswordFirstLogin)
+  Future<void> cashierResetPasswordFirstLogin(
+    @Body() ResetPasswordActivationAccountRequestModel request,
+  );
 }

@@ -10,10 +10,15 @@ class ActiveAccountCubit extends SafeCubit<ActiveAccountState> {
   final FirstLoginUseCase _firstLoginUseCase;
   final ResetPasswordFirstLoginUseCase _resetPasswordFirstLoginUseCase;
 
-  ActiveAccountCubit(this._firstLoginUseCase, this._resetPasswordFirstLoginUseCase)
-    : super(const ActiveAccountInit());
+  ActiveAccountCubit(
+    this._firstLoginUseCase,
+    this._resetPasswordFirstLoginUseCase,
+  ) : super(const ActiveAccountInit());
 
-  void firstLogin({required String email, required String password}) async {
+  Future<void> firstLogin({
+    required String email,
+    required String password,
+  }) async {
     emit(const ActiveAccountLoading());
     final result = await _firstLoginUseCase(email: email, password: password);
 
@@ -25,7 +30,7 @@ class ActiveAccountCubit extends SafeCubit<ActiveAccountState> {
     );
   }
 
-  void resetPasswordFirstLogin({
+  Future<void> resetPasswordFirstLogin({
     required String password,
     required String passwordConfirmation,
   }) async {
@@ -42,9 +47,15 @@ class ActiveAccountCubit extends SafeCubit<ActiveAccountState> {
     );
   }
 
-  void supplierFirstLogin({required String email, required String password}) async {
+  Future<void> supplierFirstLogin({
+    required String email,
+    required String password,
+  }) async {
     emit(const ActiveAccountLoading());
-    final result = await _firstLoginUseCase.supplier(email: email, password: password);
+    final result = await _firstLoginUseCase.supplier(
+      email: email,
+      password: password,
+    );
 
     handle(
       result,
@@ -54,7 +65,7 @@ class ActiveAccountCubit extends SafeCubit<ActiveAccountState> {
     );
   }
 
-  void supplierResetPasswordFirstLogin({
+  Future<void> supplierResetPasswordFirstLogin({
     required String password,
     required String passwordConfirmation,
   }) async {
@@ -71,9 +82,15 @@ class ActiveAccountCubit extends SafeCubit<ActiveAccountState> {
     );
   }
 
-  void brandOwnerFirstLogin({required String email, required String password}) async {
+  Future<void> brandOwnerFirstLogin({
+    required String email,
+    required String password,
+  }) async {
     emit(const ActiveAccountLoading());
-    final result = await _firstLoginUseCase.brandOwner(email: email, password: password);
+    final result = await _firstLoginUseCase.brandOwner(
+      email: email,
+      password: password,
+    );
 
     handle(
       result,
@@ -83,7 +100,7 @@ class ActiveAccountCubit extends SafeCubit<ActiveAccountState> {
     );
   }
 
-  void brandOwnerResetPasswordFirstLogin({
+  Future<void> brandOwnerResetPasswordFirstLogin({
     required String password,
     required String passwordConfirmation,
   }) async {
@@ -100,14 +117,38 @@ class ActiveAccountCubit extends SafeCubit<ActiveAccountState> {
     );
   }
 
-  void cashierFirstLogin({required String email, required String password}) async {
-    // Cashier first login not yet implemented
+  Future<void> cashierFirstLogin({
+    required String email,
+    required String password,
+  }) async {
+    emit(const ActiveAccountLoading());
+    final result = await _firstLoginUseCase.cashier(
+      email: email,
+      password: password,
+    );
+
+    handle(
+      result,
+      failure: (failure) => emit(ActiveAccountFailure(failure: failure)),
+      success: (firstLoginResponseModel) =>
+          emit(ActiveAccountSuccess(firstLoginResponseModel)),
+    );
   }
 
-  void cashierResetPasswordFirstLogin({
+  Future<void> cashierResetPasswordFirstLogin({
     required String password,
     required String passwordConfirmation,
   }) async {
-    // Cashier reset password not yet implemented
+    emit(const ActiveAccountLoading());
+    final result = await _resetPasswordFirstLoginUseCase.cashier(
+      password: password,
+      passwordConfirmation: passwordConfirmation,
+    );
+
+    handle(
+      result,
+      failure: (failure) => emit(ActiveAccountFailure(failure: failure)),
+      success: (success) => emit(const ResetPasswordActiveAccountSuccess()),
+    );
   }
 }

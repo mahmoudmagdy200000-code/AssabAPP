@@ -19,7 +19,7 @@ class AuthInterceptor extends Interceptor {
     try {
       final token = await getIt.get<TokenStorageService>().getAccessToken();
 
-      if (token != null) {
+      if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
       }
 
@@ -40,24 +40,28 @@ class AuthInterceptor extends Interceptor {
 
   @override
   Future<void> onError(
-    DioException error,
+    DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    if (!_isUnauthorized(error)) {
-      return handler.next(error);
+    if (!_isUnauthorized(err)) {
+      return handler.next(err);
     }
 
     if (_isUnauthorizedHandled) {
-      return handler.next(error);
+      return handler.next(err);
     }
     _isUnauthorizedHandled = true;
 
-    await _handleUnauthorized(error, handler);
+    await _handleUnauthorized(err, handler);
   }
 
   bool _isUnauthorized(DioException error) {
+    if (error.requestOptions.extra['skipAuthInterceptor'] == true) {
+      return false;
+    }
     if (error.response?.statusCode != 401) return false;
-    if (error.requestOptions.uri.toString().contains('/auth')) return false;
+    final path = error.requestOptions.uri.path;
+    if (path.contains('/auth') || path.endsWith('/logout')) return false;
     return true;
   }
 
@@ -66,7 +70,7 @@ class AuthInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     try {
-      await AuthService.logout();
+      await AuthService.logout(revokeRemote: false);
     } catch (e) {
       AppLogger.log('AuthInterceptor: AuthService.logout() threw: $e');
     }

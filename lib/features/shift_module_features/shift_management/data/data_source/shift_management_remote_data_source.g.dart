@@ -554,7 +554,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager//workday/current',
+            'branch-manager/workday/current',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -581,7 +581,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager//workday/start',
+            'branch-manager/workday/start',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -605,7 +605,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager//workday/end',
+            'branch-manager/workday/end',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -635,7 +635,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'PUT', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager//workday/daily-close',
+            'branch-manager/workday/daily-close',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -737,7 +737,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager//workday/daily-close',
+            'branch-manager/workday/daily-close',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -850,7 +850,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager//workday/handoffs/cashier/${handoverId}',
+            'branch-manager/workday/handoffs/cashier/${handoverId}',
             queryParameters: queryParameters,
             data: _data,
           )

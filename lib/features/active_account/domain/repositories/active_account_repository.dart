@@ -31,4 +31,14 @@ abstract class ActiveAccountRepository {
     required String password,
     required String passwordConfirmation,
   });
+
+  FutureApiResult<LoginResponseModel> cashierFirstLogin({
+    required String email,
+    required String password,
+  });
+
+  FutureApiResult<void> cashierResetPasswordFirstLogin({
+    required String password,
+    required String passwordConfirmation,
+  });
 }

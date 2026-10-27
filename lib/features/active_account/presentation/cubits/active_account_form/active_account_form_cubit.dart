@@ -7,29 +7,29 @@ class ActiveAccountFormCubit extends SafeCubit<ActiveAccountFormState> {
   ActiveAccountFormCubit() : super(const ActiveAccountFormState());
 
   void updateEmail(String email) {
-    final isValid = AppRegExp.emailValidator(email);
+    final trimmed = email.trim();
+    final isValid = AppRegExp.emailValidator(trimmed);
     emit(
       state.copyWith(
-        email: email,
-        emailError: email.isNotEmpty ? (isValid ? null : '') : null,
-        isFormValid: _isFormValid(email: email, password: state.password),
+        email: trimmed,
+        emailError: trimmed.isNotEmpty ? (isValid ? null : '') : null,
+        isFormValid: _isFormValid(email: trimmed, password: state.password),
       ),
     );
   }
 
   void updatePassword(String password) {
-    final isValid = AppRegExp.passwordValidator(password);
+    // Default issued passwords may be arbitrary tokens/passphrases.
     emit(
       state.copyWith(
         password: password,
-        passwordError: password.isNotEmpty ? (isValid ? null : '') : null,
+        passwordError: null,
         isFormValid: _isFormValid(email: state.email, password: password),
       ),
     );
   }
 
   bool _isFormValid({required String email, required String password}) {
-    return AppRegExp.emailValidator(email) &&
-        AppRegExp.passwordValidator(password);
+    return AppRegExp.emailValidator(email) && password.isNotEmpty;
   }
 }

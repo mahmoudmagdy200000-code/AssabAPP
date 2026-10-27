@@ -305,6 +305,10 @@ class AppRouter {
     final userType = UserTypeService.getSavedUserType();
 
     if (AuthService.isLoggedInVal && userType != null) {
+      UserTypeService.setUserType(
+        strategy: UserTypeService.strategyFor(userType),
+        userType: userType,
+      );
       switch (userType) {
         case UserType.branchManager:
           return _branchManagerMainScreenRoute(settings);

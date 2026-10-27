@@ -5,12 +5,11 @@ import '../../di/dependency_injection.dart';
 class ErrorLocaleResolver {
   ErrorLocaleResolver._();
 
-  static LocaleCubit get _cubit => getIt<LocaleCubit>();
-
   static String resolve(ErrorMessageKey key) {
-    final languageCode = _cubit.state.languageCode;
-    return ErrorMessages.resolve(key, languageCode);
+    return ErrorMessages.resolve(key, currentLanguage);
   }
 
-  static String get currentLanguage => _cubit.state.languageCode;
+  static String get currentLanguage => getIt.isRegistered<LocaleCubit>()
+      ? getIt<LocaleCubit>().state.languageCode
+      : 'en';
 }

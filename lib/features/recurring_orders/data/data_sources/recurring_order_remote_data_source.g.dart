@@ -12,9 +12,7 @@ part of 'recurring_order_remote_data_source.dart';
 
 class _RecurringOrderRemoteDataSource
     implements RecurringOrderRemoteDataSource {
-  _RecurringOrderRemoteDataSource(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://ivory-snail-183262.hostingersite.com/api/v1/';
-  }
+  _RecurringOrderRemoteDataSource(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 

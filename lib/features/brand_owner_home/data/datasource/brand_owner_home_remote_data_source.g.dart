@@ -12,9 +12,7 @@ part of 'brand_owner_home_remote_data_source.dart';
 
 class _BrandOwnerHomeRemoteDataSource
     implements BrandOwnerHomeRemoteDataSource {
-  _BrandOwnerHomeRemoteDataSource(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://ivory-snail-183262.hostingersite.com/api/v1/';
-  }
+  _BrandOwnerHomeRemoteDataSource(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 

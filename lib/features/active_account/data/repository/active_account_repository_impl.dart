@@ -84,4 +84,27 @@ class ActiveAccountRepositoryImpl
       ),
     );
   });
+
+  @override
+  FutureApiResult<LoginResponseModel> cashierFirstLogin({
+    required String email,
+    required String password,
+  }) => execute(() async {
+    return _activeAccountRemoteDataSource.cashierFirstLogin(
+      FirstLoginRequestModel(email: email, password: password),
+    );
+  });
+
+  @override
+  FutureApiResult<void> cashierResetPasswordFirstLogin({
+    required String password,
+    required String passwordConfirmation,
+  }) => execute(() async {
+    return _activeAccountRemoteDataSource.cashierResetPasswordFirstLogin(
+      ResetPasswordActivationAccountRequestModel(
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      ),
+    );
+  });
 }

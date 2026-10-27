@@ -55,6 +55,8 @@ import '../../features/supplier_returns/data/data_sources/supplier_returns_remot
 
 @module
 abstract class AppModule {
+  Dio? _dioInstance;
+
   @lazySingleton
   Logger get logger => Logger();
 
@@ -76,7 +78,7 @@ abstract class AppModule {
   CancelRequestService get cancelRequestService => CancelRequestService();
 
   @lazySingleton
-  Dio get dio => DioClient.create();
+  Dio get dio => _dioInstance ??= DioClient.create();
 
   @lazySingleton
   ActiveAccountRemoteDataSource get activeAccountRemoteDataSource =>

@@ -18,8 +18,14 @@ class LoginResponseModel {
 class LoginData {
   final UserResponse user;
   final String token;
+  @JsonKey(name: 'requires_password_reset')
+  final bool? requiresPasswordReset;
 
-  LoginData({required this.user, required this.token});
+  LoginData({
+    required this.user,
+    required this.token,
+    this.requiresPasswordReset,
+  });
 
   factory LoginData.fromJson(Map<String, dynamic> json) =>
       _$LoginDataFromJson(json);

@@ -16,9 +16,7 @@ class _SupplierReturnsRemoteDataSource
     this._dio, {
     this.baseUrl,
     this.errorLogger,
-  }) {
-    baseUrl ??= 'https://ivory-snail-183262.hostingersite.com/api/v1/';
-  }
+  });
 
   final Dio _dio;
 

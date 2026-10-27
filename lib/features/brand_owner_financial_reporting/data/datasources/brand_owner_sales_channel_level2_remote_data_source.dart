@@ -12,8 +12,11 @@ class BrandOwnerSalesChannelLevel2RemoteDataSourceImpl
 
   BrandOwnerSalesChannelLevel2RemoteDataSourceImpl(
     this._dio, {
-    this.baseUrl = ApiEndpoint.baseUrl,
-  });
+    String? baseUrl,
+  }) : baseUrl =
+           (baseUrl == null || baseUrl.trim().isEmpty)
+               ? ''
+               : ApiEndpoint.normalizeBaseUrl(baseUrl);
 
   @override
   Future<SalesChannelLevel2Model> getSalesChannelLevel2({

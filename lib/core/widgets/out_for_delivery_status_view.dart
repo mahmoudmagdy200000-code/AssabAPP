@@ -161,8 +161,3 @@ class OutForDeliveryStatusView extends StatelessWidget {
   }
 }
 
-/*
-
-  "url": "https://ivory-snail-183262.hostingersite.com/storage/supplier/drivers/vwWMZiLp8lwz8WpTybwu4pI9IgnkpNc6Um6N2WVe.jpg"
-
-*/

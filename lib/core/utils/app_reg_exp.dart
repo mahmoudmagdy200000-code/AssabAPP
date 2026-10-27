@@ -4,21 +4,23 @@ class AppRegExp {
   const AppRegExp._();
 
   static bool emailValidator(String email) {
+    final trimmed = email.trim();
+    if (trimmed.isEmpty) return false;
     final emailRegex = RegExp(
-      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+      r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$",
     );
 
-    return emailRegex.hasMatch(email);
+    return emailRegex.hasMatch(trimmed);
   }
 
   static bool phoneValidator(String phone) {
     final phoneRegex = RegExp(r'^\d{9}$');
-    return phoneRegex.hasMatch(phone);
+    return phoneRegex.hasMatch(phone.trim());
   }
 
   static bool passwordValidator(String password) {
     final passwordRegex = RegExp(
-      r'^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$',
+      r'^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+~=/]).{8,}$',
     );
     return passwordRegex.hasMatch(password);
   }
@@ -47,7 +49,7 @@ class AppRegExp {
     final hasLower = RegExp(r'[a-z]');
     final hasUpper = RegExp(r'[A-Z]');
     final hasDigit = RegExp(r'\d');
-    final hasSpecial = RegExp(r'[!@#%^&*(),.?":{}|<>_\-]');
+    final hasSpecial = RegExp(r'[!@#$%^&*(),.?":{}|<>_\-+~=/]');
 
     int patternsMatched = 0;
     if (hasLower.hasMatch(password)) patternsMatched++;

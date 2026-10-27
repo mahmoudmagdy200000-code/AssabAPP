@@ -1,7 +1,9 @@
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/routing/app_route_name.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/services/token_storage_service.dart';
 import 'package:assab/core/widgets/app_button_loading.dart';
 import 'package:assab/features/active_account/data/models/reset_password_activation_account_request_model.dart';
 import 'package:assab/features/active_account/presentation/cubits/active_account/active_account_cubit.dart';
@@ -47,7 +49,13 @@ class _ResetPasswordActiveAccountFormState
   }
 
   void _resetPassword() {
-    UserTypeService.selectedUserTypeStrategy!.resetPasswordFirstLogin(
+    if (UserTypeService.selectedUserTypeStrategy == null) {
+      UserTypeService.restoreSavedUserType();
+    }
+    final strategy = UserTypeService.selectedUserTypeStrategy;
+    if (strategy == null) return;
+
+    strategy.resetPasswordFirstLogin(
       context,
       ResetPasswordActivationAccountRequestModel(
         password: _passwordController.text,
@@ -56,8 +64,14 @@ class _ResetPasswordActiveAccountFormState
     );
   }
 
-  void _resetPasswordListener(BuildContext context, ActiveAccountState state) {
+  Future<void> _resetPasswordListener(
+    BuildContext context,
+    ActiveAccountState state,
+  ) async {
     if (state is ResetPasswordActiveAccountSuccess) {
+      if (getIt.isRegistered<TokenStorageService>()) {
+        await getIt<TokenStorageService>().clearTokens();
+      }
       NavigationService.I.offAllNamed(AppRouteName.resetPasswordSuccessScreen);
     } else if (state is ActiveAccountFailure) {
       AppDialog.showErrorDialog(context: context, failure: state.failure);
@@ -88,9 +102,13 @@ class _ResetPasswordActiveAccountFormState
                       label: context.tr.createNewPassword,
                       hint: context.tr.passwordHint,
                       textFormType: TextFormType.password,
-                      error: context.read<ResetPasswordFormCubit>().state.passwordError,
-                      onChanged: (value) =>
-                          context.read<ResetPasswordFormCubit>().updatePassword(value),
+                      error: context
+                          .read<ResetPasswordFormCubit>()
+                          .state
+                          .passwordError,
+                      onChanged: (value) => context
+                          .read<ResetPasswordFormCubit>()
+                          .updatePassword(value),
                     ),
                     16.verticalSpace,
                     AppTextFormField(
@@ -98,12 +116,20 @@ class _ResetPasswordActiveAccountFormState
                       label: context.tr.confirmPassword,
                       hint: context.tr.passwordHint,
                       textFormType: TextFormType.password,
-                      error: context.read<ResetPasswordFormCubit>().state.confirmPasswordError,
-                      onChanged: (value) =>
-                          context.read<ResetPasswordFormCubit>().updateConfirmPassword(value),
+                      error: context
+                          .read<ResetPasswordFormCubit>()
+                          .state
+                          .confirmPasswordError,
+                      onChanged: (value) => context
+                          .read<ResetPasswordFormCubit>()
+                          .updateConfirmPassword(value),
                     ),
                     176.verticalSpace,
-                    BlocSelector<ResetPasswordFormCubit, ResetPasswordFormState, bool>(
+                    BlocSelector<
+                      ResetPasswordFormCubit,
+                      ResetPasswordFormState,
+                      bool
+                    >(
                       selector: (state) => state.isFormValid,
                       builder: (context, isFormValid) {
                         return BlocConsumer<
