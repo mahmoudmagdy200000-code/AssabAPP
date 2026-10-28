@@ -119,6 +119,82 @@ void main() {
       expect(key2, isNot(equals(key1)), reason: 'New submission after client error gets fresh key');
     });
 
+    test('Preserves idempotency key on 409 IDEMPOTENCY_IN_PROGRESS so retry reuses key', () {
+      final attempt1 = RequestOptions(
+        method: 'POST',
+        path: 'cashier/shifts/101/end-with-handover',
+        data: {'total_sales': '100.00', 'counted_cash': '100.00'},
+      );
+      final handler1 = _CaptureRequestHandler();
+      interceptor.onRequest(attempt1, handler1);
+      final key1 = handler1.options!.headers['Idempotency-Key'];
+
+      // Server responds 409 IDEMPOTENCY_IN_PROGRESS with Retry-After header
+      final err409 = DioException(
+        requestOptions: attempt1,
+        response: Response(
+          requestOptions: attempt1,
+          statusCode: 409,
+          data: {'code': 'IDEMPOTENCY_IN_PROGRESS', 'message': 'Operation in progress'},
+          headers: Headers.fromMap({'retry-after': ['5']}),
+        ),
+        type: DioExceptionType.badResponse,
+      );
+      final errorHandler = _CaptureErrorHandler();
+      interceptor.onError(err409, errorHandler);
+
+      // User retries identical operation after wait
+      final retry = RequestOptions(
+        method: 'POST',
+        path: 'cashier/shifts/101/end-with-handover',
+        data: {'total_sales': '100.00', 'counted_cash': '100.00'},
+      );
+      final handler2 = _CaptureRequestHandler();
+      interceptor.onRequest(retry, handler2);
+      final key2 = handler2.options!.headers['Idempotency-Key'];
+
+      expect(key2, equals(key1), reason: '409 IDEMPOTENCY_IN_PROGRESS must preserve key across retry');
+    });
+
+    test('Attaches idempotency key to handover approve, accept, and reject routes', () {
+      final routes = [
+        'branch-manager/shifts/202/handover/approve',
+        'cashier/shifts/202/handover/accept',
+        'cashier/shifts/202/handover/reject',
+      ];
+
+      for (final route in routes) {
+        final options = RequestOptions(method: 'POST', path: route);
+        final handler = _CaptureRequestHandler();
+        interceptor.onRequest(options, handler);
+        final key = handler.options!.headers['Idempotency-Key'];
+        expect(key, isNotNull, reason: 'Route $route must attach Idempotency-Key');
+        expect(key.toString().length, equals(36));
+      }
+    });
+
+    test('Different payload data generates different scope and fresh key', () {
+      final attempt1 = RequestOptions(
+        method: 'POST',
+        path: 'branch-manager/shifts/202/handover/approve',
+        data: {'confirmed_amount': '100.00'},
+      );
+      final handler1 = _CaptureRequestHandler();
+      interceptor.onRequest(attempt1, handler1);
+      final key1 = handler1.options!.headers['Idempotency-Key'];
+
+      final attempt2 = RequestOptions(
+        method: 'POST',
+        path: 'branch-manager/shifts/202/handover/approve',
+        data: {'confirmed_amount': '90.00'}, // user corrected amount
+      );
+      final handler2 = _CaptureRequestHandler();
+      interceptor.onRequest(attempt2, handler2);
+      final key2 = handler2.options!.headers['Idempotency-Key'];
+
+      expect(key2, isNot(equals(key1)), reason: 'Payload change must isolate scope and generate fresh key');
+    });
+
     test('Does not attach Idempotency-Key to GET requests', () {
       final options = RequestOptions(
         method: 'GET',

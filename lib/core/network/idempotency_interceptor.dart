@@ -1,17 +1,44 @@
 import 'dart:math';
+import 'package:assab/core/services/user_type_service.dart';
 import 'package:dio/dio.dart';
 
 /// Manages idempotency keys across logical financial operations and user-initiated retries.
 class IdempotencyScopeManager {
   static final Map<String, String> _activeKeys = {};
 
+  static String _payloadFingerprint(dynamic data) {
+    if (data == null) return '';
+    if (data is Map) {
+      final sortedKeys = data.keys.map((k) => k.toString()).toList()..sort();
+      final buffer = StringBuffer();
+      for (final k in sortedKeys) {
+        buffer.write('$k=${data[k]};');
+      }
+      return buffer.toString().hashCode.toRadixString(16);
+    }
+    if (data is FormData) {
+      final fields = data.fields.map((e) => '${e.key}=${e.value}').toList()..sort();
+      return fields.join(';').hashCode.toRadixString(16);
+    }
+    return data.toString().hashCode.toRadixString(16);
+  }
+
   /// Derive or obtain a logical scope identifier from the request.
-  static String deriveScope(String method, String path, [String? explicitScope]) {
+  /// Scoped to authenticated actor, method, path, and concrete payload.
+  static String deriveScope(
+    String method,
+    String path, [
+    String? explicitScope,
+    dynamic data,
+  ]) {
     if (explicitScope != null && explicitScope.isNotEmpty) {
       return explicitScope;
     }
     final normalizedPath = path.replaceFirst(RegExp(r'^/'), '');
-    return '${method.toUpperCase()}:$normalizedPath';
+    final actor = UserTypeService.selectedUserType?.value ?? 'actor';
+    final payloadHash = _payloadFingerprint(data);
+    final payloadPart = payloadHash.isNotEmpty ? ':$payloadHash' : '';
+    return '$actor:${method.toUpperCase()}:$normalizedPath$payloadPart';
   }
 
   /// Get the active key for a logical scope, or generate a new one if none exists.
@@ -52,7 +79,7 @@ class IdempotencyScopeManager {
 /// Reuses the same key across separate RequestOptions instances if retrying the same uncertain operation.
 class IdempotencyInterceptor extends Interceptor {
   static final RegExp _financialPathRegex = RegExp(
-    r'(shifts/[^/]+/(end|start-handover|end-with-handover|reassign-with-handover)|shifts/end|replace-recipient|handover-receipts|custody/handover)',
+    r'(shifts/[^/]+/(end|start-handover|end-with-handover|reassign-with-handover|handover(/approve|/accept|/reject)?)|shifts/end|replace-recipient|handover-receipts|custody/handover|shift-transfers|shift-transfer-attempts)',
     caseSensitive: false,
   );
 
@@ -67,6 +94,7 @@ class IdempotencyInterceptor extends Interceptor {
           options.method,
           options.path,
           options.extra['idempotency_scope'] as String?,
+          options.data,
         );
 
         String? key = options.extra['idempotency_key'] as String? ??
@@ -108,8 +136,19 @@ class IdempotencyInterceptor extends Interceptor {
         status == 504 ||
         status == 502;
 
+    final responseData = err.response?.data;
+    final isIdempotencyInProgress = status == 409 &&
+        (responseData is Map &&
+            (responseData['code'] == 'IDEMPOTENCY_IN_PROGRESS' ||
+                responseData['message']?.toString().contains('in progress') == true));
+
+    final hasRetryAfter = err.response?.headers.value('retry-after') != null;
+
+    final shouldPreserveScope =
+        isUncertain || isIdempotencyInProgress || hasRetryAfter || status == 409;
+
     // Only clear on deterministic 4xx client errors where the server processed and rejected
-    if (!isUncertain && status != null && status >= 400 && status < 500) {
+    if (!shouldPreserveScope && status != null && status >= 400 && status < 500) {
       final scope = err.requestOptions.extra['idempotency_scope'] as String?;
       if (scope != null) {
         IdempotencyScopeManager.clearScope(scope);
