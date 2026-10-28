@@ -17,51 +17,53 @@ class HandoverAcceptedSheetWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(context.tr.shiftAccepted, style: AppStyles.s17W500),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(context.tr.shiftAccepted, style: AppStyles.s17W500),
 
-          10.verticalSpace,
+            10.verticalSpace,
 
-          Text(
-            context.tr.yourSuccessfullyAcceptedTheHandover,
-            textAlign: TextAlign.center,
-            style: AppStyles.s13W400.copyWith(color: context.customColor.text4),
-          ),
+            Text(
+              context.tr.yourSuccessfullyAcceptedTheHandover,
+              textAlign: TextAlign.center,
+              style: AppStyles.s13W400.copyWith(color: context.customColor.text4),
+            ),
 
-          5.verticalSpace,
+            5.verticalSpace,
 
-          Text(
-            context
-                .tr
-                .allSalesExpensesAndHandoverActionsFromThisPointForwardWillBeRecordedUnderYourName,
-            textAlign: TextAlign.center,
-            style: AppStyles.s13W400.copyWith(color: context.customColor.text4),
-          ),
+            Text(
+              context
+                  .tr
+                  .allSalesExpensesAndHandoverActionsFromThisPointForwardWillBeRecordedUnderYourName,
+              textAlign: TextAlign.center,
+              style: AppStyles.s13W400.copyWith(color: context.customColor.text4),
+            ),
 
-          100.verticalSpace,
+            60.verticalSpace,
 
-          AppButton(
-            onClick: () {
-              Navigator.pop(context);
-              NavigationService.I.pushNamed(
-                AppRouteName.shiftDetailsScreen,
-                arguments: {
-                  'shiftId': shiftId,
-                  'isNavigatedFromCashier': false,
-                },
-              );
-            },
-            text: context.tr.shiftDetails,
-            borderRadius: BorderRadius.circular(10.r),
-            isTransparent: true,
-            borderColor: context.customColor.border,
-            textColor: AppColors.sBlack,
-            enabled: true,
-          ),
-        ],
+            AppButton(
+              onClick: () {
+                Navigator.pop(context);
+                NavigationService.I.pushNamed(
+                  AppRouteName.shiftDetailsScreen,
+                  arguments: {
+                    'shiftId': shiftId,
+                    'isNavigatedFromCashier': false,
+                  },
+                );
+              },
+              text: context.tr.shiftDetails,
+              borderRadius: BorderRadius.circular(10.r),
+              isTransparent: true,
+              borderColor: context.customColor.border,
+              textColor: AppColors.sBlack,
+              enabled: true,
+            ),
+          ],
+        ),
       ),
     );
   }

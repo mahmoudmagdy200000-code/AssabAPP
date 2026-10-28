@@ -109,6 +109,7 @@ void main() {
       await cubit.confirmHandoverReceipt(
         shiftId: 'shift-101',
         confirmedAmount: '175.00',
+        expectedAmount: 175.00,
         actorRole: UserType.branchManager,
         comment: 'Safe audit matches',
       );
@@ -117,12 +118,14 @@ void main() {
       expect(mockDataSource.lastApproveBody?.confirmedAmount, equals('175.00'));
       expect(mockDataSource.lastApproveBody?.managerComment, equals('Safe audit matches'));
       expect(mockDataSource.lastAcceptCashierShiftId, isNull);
+      expect(cubit.state, isA<HandoverActionSuccess>());
     });
 
     test('Cashier receipt confirmation calls acceptCashierHandover with confirmed_amount', () async {
       await cubit.confirmHandoverReceipt(
         shiftId: 'shift-202',
         confirmedAmount: '250.00',
+        expectedAmount: 250.00,
         actorRole: UserType.cashier,
         comment: 'Drawer physically counted',
       );
@@ -131,6 +134,7 @@ void main() {
       expect(mockDataSource.lastAcceptCashierBody?.confirmedAmount, equals('250.00'));
       expect(mockDataSource.lastAcceptCashierBody?.comment, equals('Drawer physically counted'));
       expect(mockDataSource.lastApproveShiftId, isNull);
+      expect(cubit.state, isA<HandoverActionSuccess>());
     });
 
     test('Cashier rejection calls rejectCashierHandover', () async {
@@ -143,6 +147,7 @@ void main() {
       expect(mockDataSource.lastRejectCashierShiftId, equals('shift-303'));
       expect(mockDataSource.lastRejectCashierBody?.rejectionReason, equals('Physical count was 20 SAR short'));
       expect(mockDataSource.lastRejectShiftId, isNull);
+      expect(cubit.state, isA<HandoverActionSuccess>());
     });
 
     test('Branch Manager rejection calls rejectHandover', () async {
@@ -155,6 +160,60 @@ void main() {
       expect(mockDataSource.lastRejectShiftId, equals('shift-404'));
       expect(mockDataSource.lastRejectBody?.rejectionReason, equals('Missing receipts attached'));
       expect(mockDataSource.lastRejectCashierShiftId, isNull);
+      expect(cubit.state, isA<HandoverActionSuccess>());
+    });
+
+    test('CASH-09: Confirmation is strictly blocked when counted cash differs from expected handover amount', () async {
+      await cubit.confirmHandoverReceipt(
+        shiftId: 'shift-505',
+        confirmedAmount: '120.00',
+        expectedAmount: 150.00,
+        actorRole: UserType.cashier,
+        comment: 'Partial physical cash in drawer',
+      );
+
+      // Must not dispatch to API
+      expect(mockDataSource.lastAcceptCashierShiftId, isNull);
+      expect(mockDataSource.lastApproveShiftId, isNull);
+
+      // Must fail closed with 422 error
+      expect(cubit.state, isA<HandoverActionFailure>());
+      final failureState = cubit.state as HandoverActionFailure;
+      expect(failureState.failure.statusCode, equals(422));
+      expect(failureState.failure.error.getErrorMessage, contains('CASH-09'));
+    });
+
+    test('Absent authenticated role in confirmHandoverReceipt fails closed with HTTP 403', () async {
+      UserTypeService.selectedUserType = null;
+
+      await cubit.confirmHandoverReceipt(
+        shiftId: 'shift-606',
+        confirmedAmount: '100.00',
+        expectedAmount: 100.00,
+      );
+
+      expect(mockDataSource.lastAcceptCashierShiftId, isNull);
+      expect(mockDataSource.lastApproveShiftId, isNull);
+      expect(cubit.state, isA<HandoverActionFailure>());
+      final failureState = cubit.state as HandoverActionFailure;
+      expect(failureState.failure.statusCode, equals(403));
+      expect(failureState.failure.error.getErrorMessage, contains('Unauthorized'));
+    });
+
+    test('Absent authenticated role in rejectHandover fails closed with HTTP 403', () async {
+      UserTypeService.selectedUserType = null;
+
+      await cubit.rejectHandover(
+        shiftId: 'shift-707',
+        managerComment: 'Unauthorized rejection attempt',
+      );
+
+      expect(mockDataSource.lastRejectCashierShiftId, isNull);
+      expect(mockDataSource.lastRejectShiftId, isNull);
+      expect(cubit.state, isA<HandoverActionFailure>());
+      final failureState = cubit.state as HandoverActionFailure;
+      expect(failureState.failure.statusCode, equals(403));
+      expect(failureState.failure.error.getErrorMessage, contains('Unauthorized'));
     });
   });
 }

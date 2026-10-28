@@ -40,6 +40,7 @@ void main() {
 
       expect(mockDataSource.lastCashierStartShiftId, equals('shift-101'));
       expect(mockDataSource.lastManagerStartShiftId, isNull);
+      expect(cubit.state, isA<StartCashierShiftSuccess>());
     });
 
     test('Branch Manager starts cashier shift dispatches to startShiftByManager (/api/v1/branch-manager/shifts/start-by-manager/{shiftId})', () async {
@@ -47,6 +48,7 @@ void main() {
 
       expect(mockDataSource.lastManagerStartShiftId, equals('shift-202'));
       expect(mockDataSource.lastCashierStartShiftId, isNull);
+      expect(cubit.state, isA<StartCashierShiftSuccess>());
     });
 
     test('Falls back to UserTypeService authenticated role when actorRole is omitted', () async {
@@ -56,6 +58,7 @@ void main() {
 
       expect(mockDataSource.lastManagerStartShiftId, equals('shift-303'));
       expect(mockDataSource.lastCashierStartShiftId, isNull);
+      expect(cubit.state, isA<StartCashierShiftSuccess>());
     });
 
     test('Cashier default role does not escalate to manager endpoint', () async {
@@ -65,6 +68,31 @@ void main() {
 
       expect(mockDataSource.lastCashierStartShiftId, equals('shift-404'));
       expect(mockDataSource.lastManagerStartShiftId, isNull);
+      expect(cubit.state, isA<StartCashierShiftSuccess>());
+    });
+
+    test('Absent authenticated role fails closed with HTTP 403 error without dispatching to any API', () async {
+      UserTypeService.selectedUserType = null;
+
+      await cubit.startShift(shiftId: 'shift-505');
+
+      expect(mockDataSource.lastCashierStartShiftId, isNull);
+      expect(mockDataSource.lastManagerStartShiftId, isNull);
+      expect(cubit.state, isA<StartCashierShiftFailure>());
+      final failureState = cubit.state as StartCashierShiftFailure;
+      expect(failureState.failure.statusCode, equals(403));
+      expect(failureState.failure.error.getErrorMessage, contains('Unauthorized'));
+    });
+
+    test('Unknown or unsupported role (supplier) fails closed with HTTP 403 error without dispatching to any API', () async {
+      await cubit.startShift(shiftId: 'shift-606', actorRole: UserType.supplier);
+
+      expect(mockDataSource.lastCashierStartShiftId, isNull);
+      expect(mockDataSource.lastManagerStartShiftId, isNull);
+      expect(cubit.state, isA<StartCashierShiftFailure>());
+      final failureState = cubit.state as StartCashierShiftFailure;
+      expect(failureState.failure.statusCode, equals(403));
+      expect(failureState.failure.error.getErrorMessage, contains('Unauthorized'));
     });
   });
 }

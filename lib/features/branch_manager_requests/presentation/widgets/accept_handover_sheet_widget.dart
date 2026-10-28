@@ -16,6 +16,7 @@ import '../../../../../../../../core/widgets/custom_divider.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../shift_module_features/shift_management/presentation/logic/shifts/approve_and_reject_handover/approve_and_reject_handover_cubit.dart';
 import '../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/shift_card.dart';
+import '../../../shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/reject_handover_widgets/reject_handover_modal_sheet_widget.dart';
 import 'handover_accepted_sheet_widget.dart';
 
 class AcceptHandoverSheetWidget extends StatefulWidget {
@@ -58,13 +59,32 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
     super.dispose();
   }
 
-  bool get _isValidAmount {
-    final text = confirmedAmountController.text.trim();
-    if (text.isEmpty) return false;
+  double? get _expectedAmount {
+    final cleaned = widget.cashGiven.replaceAll(',', '').trim();
+    return double.tryParse(cleaned);
+  }
+
+  double? get _confirmedAmount {
+    final text = confirmedAmountController.text.replaceAll(',', '').trim();
+    if (text.isEmpty) return null;
     final regex = RegExp(r'^\d+(\.\d{1,2})?$');
-    if (!regex.hasMatch(text)) return false;
+    if (!regex.hasMatch(text)) return null;
     final val = double.tryParse(text);
-    return val != null && val >= 0;
+    return val != null && val >= 0 ? val : null;
+  }
+
+  bool get _hasAmountMismatch {
+    final confirmed = _confirmedAmount;
+    final expected = _expectedAmount;
+    if (confirmed == null || expected == null) return false;
+    return (confirmed - expected).abs() > 0.001;
+  }
+
+  bool get _canConfirm {
+    final confirmed = _confirmedAmount;
+    final expected = _expectedAmount;
+    if (confirmed == null || expected == null) return false;
+    return (confirmed - expected).abs() <= 0.001;
   }
 
   @override
@@ -194,15 +214,74 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                 ),
               ),
 
-              if (confirmedAmountController.text.trim().isNotEmpty &&
-                  confirmedAmountController.text.trim() != widget.cashGiven)
-                Padding(
-                  padding: EdgeInsets.only(top: 8.h),
-                  child: Text(
-                    'Note: Confirmed physical cash (${confirmedAmountController.text.trim()} SAR) differs from reported handover (${widget.cashGiven} SAR)',
-                    style: AppStyles.s12W400.copyWith(color: AppColors.yellow),
+              if (_hasAmountMismatch) ...[
+                Container(
+                  margin: EdgeInsets.only(top: 10.h),
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.red.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(
+                      color: AppColors.red.withValues(alpha: 0.5),
+                      width: 1.w,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: AppColors.red,
+                            size: 20.r,
+                          ),
+                          8.horizontalSpace,
+                          Expanded(
+                            child: Text(
+                              'CASH-09: Receipt Amount Mismatch',
+                              style: AppStyles.s14W600.copyWith(
+                                color: AppColors.red,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      6.verticalSpace,
+                      Text(
+                        'Counted physical cash (${_confirmedAmount!.toStringAsFixed(2)} SAR) does not match reported handover (${widget.cashGiven} SAR). Under CASH-09, confirmation is blocked. You must reject this handover to request recounting and correction.',
+                        style: AppStyles.s12W400.copyWith(
+                          color: AppColors.red,
+                        ),
+                      ),
+                      12.verticalSpace,
+                      AppButton(
+                        onClick: () {
+                          final approveCubit =
+                              context.read<ApproveAndRejectHandoverCubit>();
+                          NavigationService.I.pop(context);
+                          AppBottomSheet.showModal(
+                            context,
+                            (sheetContext) => BlocProvider.value(
+                              value: approveCubit,
+                              child: RejectHandoverModalSheetWidget(
+                                shiftId: widget.shiftId,
+                                successFunction: widget.successFunction,
+                                openedFromModalSheet: true,
+                              ),
+                            ),
+                          );
+                        },
+                        text: 'Reject & Request Recount',
+                        borderRadius: BorderRadius.circular(8.r),
+                        background: AppColors.red,
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        isFlexible: true,
+                      ),
+                    ],
                   ),
                 ),
+              ],
 
               15.verticalSpace,
 
@@ -269,13 +348,14 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
 
                         return AppButton(
                           onClick: () {
-                            if (!_isValidAmount) return;
+                            if (!_canConfirm) return;
                             context
                                 .read<ApproveAndRejectHandoverCubit>()
                                 .confirmHandoverReceipt(
                                   shiftId: widget.shiftId,
                                   confirmedAmount:
                                       confirmedAmountController.text.trim(),
+                                  expectedAmount: _expectedAmount,
                                   comment:
                                       managerCommentController.text.isNotEmpty
                                           ? managerCommentController.text
@@ -284,8 +364,8 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                           },
                           text: context.tr.approveHandover,
                           borderRadius: BorderRadius.circular(10.r),
-                          enabled: _isValidAmount,
-                          background: _isValidAmount
+                          enabled: _canConfirm,
+                          background: _canConfirm
                               ? AppColors.primaryLight
                               : AppColors.lightGray,
                         );

@@ -1,7 +1,8 @@
+import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../../../core/helpers/safe_cubit.dart';
@@ -44,7 +45,7 @@ class StartCashierShiftCubit extends SafeCubit<StartCashierShiftState> {
   }
 
   /// Dispatches the start shift request according to the authenticated actor's validated role
-  /// or explicit command context, preventing role inference solely based on widget placement.
+  /// or explicit command context, failing closed if the role is absent or unknown.
   Future<void> startShift({
     required String shiftId,
     UserType? actorRole,
@@ -55,8 +56,19 @@ class StartCashierShiftCubit extends SafeCubit<StartCashierShiftState> {
 
     if (effectiveRole == UserType.branchManager) {
       await startShiftByManager(shiftId);
-    } else {
+    } else if (effectiveRole == UserType.cashier) {
       await startCashierShift(shiftId);
+    } else {
+      emit(StartCashierShiftFailure(AuthFailure(
+        error: LocalErrorModel(
+          message:
+              'Unauthorized: Valid authenticated cashier or branch manager role required to start shift',
+          errors: null,
+        ),
+        icon: CupertinoIcons.exclamationmark_shield,
+        statusCode: 403,
+        stackTrace: StackTrace.empty,
+      )));
     }
   }
 }
