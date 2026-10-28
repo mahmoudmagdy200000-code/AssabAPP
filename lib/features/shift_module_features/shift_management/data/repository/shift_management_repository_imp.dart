@@ -371,16 +371,62 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
 
   FutureApiResult approveHandover({
     required String shiftId,
+    String? confirmedAmount,
     String? managerComment,
+    String? transferAttemptId,
   }) async {
     return execute(() async {
       await _remoteDataSource.approveHandover(
         shiftId: shiftId,
-        handoverApproveAndRejectBodyRequest: managerComment != null
-            ? HandoverApproveAndRejectBodyRequest(
-                managerComment: managerComment,
-              )
-            : null,
+        handoverApproveAndRejectBodyRequest: HandoverApproveAndRejectBodyRequest(
+          confirmedAmount: confirmedAmount,
+          managerComment: managerComment,
+          transferAttemptId: transferAttemptId,
+        ),
+      );
+      return true;
+    });
+  }
+
+  FutureApiResult acceptCashierHandover({
+    required String shiftId,
+    required String confirmedAmount,
+    String? receivingShiftId,
+    String? transferAttemptId,
+    String? comment,
+  }) async {
+    return execute(() async {
+      await _remoteDataSource.acceptCashierHandover(
+        shiftId: shiftId,
+        body: HandoverApproveAndRejectBodyRequest(
+          confirmedAmount: confirmedAmount,
+          receivingShiftId: receivingShiftId,
+          transferAttemptId: transferAttemptId,
+          comment: comment,
+        ),
+      );
+      return true;
+    });
+  }
+
+  FutureApiResult rejectCashierHandover({
+    required String shiftId,
+    String? rejectionReason,
+    String? correctionReason,
+    String? confirmedAmount,
+    String? transferAttemptId,
+    String? managerComment,
+  }) async {
+    return execute(() async {
+      await _remoteDataSource.rejectCashierHandover(
+        shiftId: shiftId,
+        body: HandoverApproveAndRejectBodyRequest(
+          rejectionReason: rejectionReason,
+          correctionReason: correctionReason,
+          confirmedAmount: confirmedAmount,
+          transferAttemptId: transferAttemptId,
+          managerComment: managerComment,
+        ),
       );
       return true;
     });
@@ -435,6 +481,13 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
   FutureApiResult startCashierShift(String shiftId) async {
     return execute(() async {
       await _remoteDataSource.startCashierShift(shiftId: shiftId);
+      return true;
+    });
+  }
+
+  FutureApiResult startShiftByManager(String shiftId) async {
+    return execute(() async {
+      await _remoteDataSource.startShiftByManager(shiftId: shiftId);
       return true;
     });
   }

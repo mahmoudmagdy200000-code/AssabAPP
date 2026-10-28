@@ -1,3 +1,4 @@
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -129,7 +130,7 @@ class _CashierMyPendingShiftsHasToStartCardState
 
             ValueListenableBuilder<Duration>(
               valueListenable: remainingNotifier,
-              builder: (_, value, __) {
+              builder: (_, value, _) {
                 return buildShiftCardRowWidget(
                   context: context,
                   title: context.tr.start_time,
@@ -227,7 +228,7 @@ class _CashierMyPendingShiftsHasToStartCardState
             // ),
             ValueListenableBuilder<Duration>(
               valueListenable: remainingNotifier,
-              builder: (_, value, __) {
+              builder: (_, value, _) {
                 // StartCashierShiftCubit
                 return BlocConsumer<
                   StartCashierShiftCubit,
@@ -256,7 +257,7 @@ class _CashierMyPendingShiftsHasToStartCardState
                       onClick: () {
                         context
                             .read<StartCashierShiftCubit>()
-                            .startCashierShift(widget.shift.id);
+                            .startShift(shiftId: widget.shift.id, actorRole: UserType.cashier);
                       },
                       text: context.tr.start_shift,
                       isTransparent: !(value.inSeconds <= 0),

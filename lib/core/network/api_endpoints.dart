@@ -192,6 +192,8 @@ class ApiEndpoint {
   //  =================== Shift Management Endpoints ===================
 
   static const String branchManagerShifts = '${branchManager}shifts';
+  static const String branchManagerStartShift =
+      '$branchManagerShifts/start-by-manager/{shiftId}';
   static const String branchManagerBranches = '${branchManager}branches';
 
   // Branch Manager — Price Comparison

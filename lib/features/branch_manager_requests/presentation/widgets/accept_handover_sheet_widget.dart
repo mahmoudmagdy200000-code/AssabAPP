@@ -1,4 +1,6 @@
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/widgets/custom_text_field.dart';
+import 'package:assab/core/widgets/label_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,19 +41,31 @@ class AcceptHandoverSheetWidget extends StatefulWidget {
 
 class _AcceptHandoverSheetWidgetModalSheetWidgetState
     extends State<AcceptHandoverSheetWidget> {
+  late final TextEditingController managerCommentController;
+  late final TextEditingController confirmedAmountController;
+
   @override
   void initState() {
     super.initState();
     managerCommentController = TextEditingController();
+    confirmedAmountController = TextEditingController();
   }
 
   @override
   void dispose() {
     managerCommentController.dispose();
+    confirmedAmountController.dispose();
     super.dispose();
   }
 
-  late final TextEditingController managerCommentController;
+  bool get _isValidAmount {
+    final text = confirmedAmountController.text.trim();
+    if (text.isEmpty) return false;
+    final regex = RegExp(r'^\d+(\.\d{1,2})?$');
+    if (!regex.hasMatch(text)) return false;
+    final val = double.tryParse(text);
+    return val != null && val >= 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +73,6 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
       padding: MediaQuery.of(context).viewInsets,
       child: Container(
         width: double.maxFinite,
-        // height: 350.h,
         padding: EdgeInsetsGeometry.symmetric(horizontal: 20.w, vertical: 10.h),
         child: SingleChildScrollView(
           child: Column(
@@ -85,7 +98,6 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                         color: context.customColor.text1,
                       ),
                     ),
-
                     TextSpan(text: context.tr.forTheShiftYouAreAboutToStart),
                   ],
                 ),
@@ -149,37 +161,83 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                 ),
               ),
 
-              //
-              // LabelTextField(
-              //   text: context.tr.managerComment,
-              //   style:  AppStyles.s14W400,
-              //   isLabelOptional: true,
-              //   isLabelRequired: false,
-              // ),
-              //
-              // 5.verticalSpace,
-              // Container(
-              //   height: 130.h,
-              //   decoration: BoxDecoration(
-              //     color: AppColors.lightBackground,
-              //     borderRadius: BorderRadius.circular(20.r),
-              //     border: Border.all(
-              //         color: context.customColor.border,
-              //         width: 1.w
-              //     ),
-              //   ),
-              //   padding: EdgeInsets.symmetric(
-              //     vertical: 18.r,
-              //     horizontal: 16.r,
-              //   ),
-              //   child: CustomTextField(
-              //     hintText: context.tr.whyAreUApprovingTheRequest,
-              //     controller: managerCommentController,
-              //     maxLines: 5,
-              //     isEnabled: true,
-              //   ),),
+              10.verticalSpace,
+
+              LabelTextField(
+                text: context.tr.amount,
+                style: AppStyles.s14W400,
+                isLabelRequired: true,
+              ),
+
+              5.verticalSpace,
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.lightBackground,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: context.customColor.border,
+                    width: 1.w,
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(
+                  vertical: 4.r,
+                  horizontal: 16.r,
+                ),
+                child: CustomTextField(
+                  hintText: '0.00',
+                  controller: confirmedAmountController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  isEnabled: true,
+                  onChanged: (_) {
+                    setState(() {});
+                  },
+                ),
+              ),
+
+              if (confirmedAmountController.text.trim().isNotEmpty &&
+                  confirmedAmountController.text.trim() != widget.cashGiven)
+                Padding(
+                  padding: EdgeInsets.only(top: 8.h),
+                  child: Text(
+                    'Note: Confirmed physical cash (${confirmedAmountController.text.trim()} SAR) differs from reported handover (${widget.cashGiven} SAR)',
+                    style: AppStyles.s12W400.copyWith(color: AppColors.yellow),
+                  ),
+                ),
+
+              15.verticalSpace,
+
+              LabelTextField(
+                text: context.tr.managerComment,
+                style: AppStyles.s14W400,
+                isLabelOptional: true,
+                isLabelRequired: false,
+              ),
+
+              5.verticalSpace,
+              Container(
+                height: 100.h,
+                decoration: BoxDecoration(
+                  color: AppColors.lightBackground,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: context.customColor.border,
+                    width: 1.w,
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(
+                  vertical: 8.r,
+                  horizontal: 16.r,
+                ),
+                child: CustomTextField(
+                  hintText: context.tr.whyAreUApprovingTheRequest,
+                  controller: managerCommentController,
+                  maxLines: 3,
+                  isEnabled: true,
+                ),
+              ),
+
               Padding(
-                padding: EdgeInsets.only(top: 70.h),
+                padding: EdgeInsets.only(top: 25.h),
                 child:
                     BlocConsumer<
                       ApproveAndRejectHandoverCubit,
@@ -211,17 +269,25 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
 
                         return AppButton(
                           onClick: () {
+                            if (!_isValidAmount) return;
                             context
                                 .read<ApproveAndRejectHandoverCubit>()
-                                .approveHandover(
+                                .confirmHandoverReceipt(
                                   shiftId: widget.shiftId,
-                                  managerComment: managerCommentController.text,
+                                  confirmedAmount:
+                                      confirmedAmountController.text.trim(),
+                                  comment:
+                                      managerCommentController.text.isNotEmpty
+                                          ? managerCommentController.text
+                                          : null,
                                 );
                           },
                           text: context.tr.approveHandover,
                           borderRadius: BorderRadius.circular(10.r),
-                          enabled: true,
-                          background: AppColors.primaryLight,
+                          enabled: _isValidAmount,
+                          background: _isValidAmount
+                              ? AppColors.primaryLight
+                              : AppColors.lightGray,
                         );
                       },
                     ),

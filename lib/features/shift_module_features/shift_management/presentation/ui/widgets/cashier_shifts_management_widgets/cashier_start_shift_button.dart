@@ -1,3 +1,4 @@
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/widgets/app_button_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,9 +14,11 @@ class CashierStartShiftButton extends StatelessWidget {
     super.key,
     required this.selectedShiftsStatus,
     required this.shiftId,
+    this.actorRole,
   });
   final String shiftId;
   final ShiftStatus selectedShiftsStatus;
+  final UserType? actorRole;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,10 @@ class CashierStartShiftButton extends StatelessWidget {
             padding: EdgeInsets.all(12.w),
             borderRadius: BorderRadius.circular(12.r),
             onClick: () {
-              context.read<StartCashierShiftCubit>().startCashierShift(shiftId);
+              context.read<StartCashierShiftCubit>().startShift(
+                shiftId: shiftId,
+                actorRole: actorRole,
+              );
             },
             text: context.tr.start_shift,
             enabled: true,

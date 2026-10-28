@@ -29,6 +29,9 @@ class HandoversResponseItem {
   final String cashFrom;
   final String? acceptanceMessage;
   final String? responsibilityReviewedAt;
+  final bool? isIncoming;
+  final bool? isOutgoing;
+  final bool? canBeAccepted;
 
   const HandoversResponseItem({
     required this.id,
@@ -41,6 +44,9 @@ class HandoversResponseItem {
     required this.cashFrom,
     required this.acceptanceMessage,
     this.responsibilityReviewedAt,
+    this.isIncoming,
+    this.isOutgoing,
+    this.canBeAccepted,
   });
 
   factory HandoversResponseItem.fromJson(Map<String, dynamic> json) {
@@ -55,6 +61,9 @@ class HandoversResponseItem {
       varianceAmount: json['variance_amount'],
       cashFrom: json['cash_from'],
       acceptanceMessage: json['acceptance_message'],
+      isIncoming: json['is_incoming'] as bool?,
+      isOutgoing: json['is_outgoing'] as bool?,
+      canBeAccepted: json['can_be_accepted'] as bool?,
     );
   }
 }
