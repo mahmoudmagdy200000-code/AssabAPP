@@ -7,6 +7,7 @@ import 'package:assab/core/utils/app_logger.dart';
 import 'package:dio/dio.dart';
 
 import '../di/dependency_injection.dart';
+import '../network/idempotency_interceptor.dart';
 import 'token_storage_service.dart';
 
 class AuthService {
@@ -82,6 +83,8 @@ class AuthService {
     if (getIt.isRegistered<TokenStorageService>()) {
       await getIt<TokenStorageService>().clearTokens();
     }
+
+    IdempotencyScopeManager.resetAll();
 
     if (getIt.isRegistered<SharedPreferencesHelper>()) {
       final prefs = getIt<SharedPreferencesHelper>();
