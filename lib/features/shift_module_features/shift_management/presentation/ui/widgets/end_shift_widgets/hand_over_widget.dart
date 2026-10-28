@@ -393,6 +393,7 @@ class HandOverWidget extends StatelessWidget {
                                         top: 15.r,
                                         child: AppGestureDetectorButton(
                                           onTap: () {
+                                            if (cashier.disabled) return;
                                             context
                                                 .read<ChooseItemCubit>()
                                                 .selectItem(index);
@@ -406,7 +407,9 @@ class HandOverWidget extends StatelessWidget {
 
                                             selectedCashier = cashier;
                                           },
-                                          child: Row(
+                                          child: Opacity(
+                                            opacity: cashier.disabled ? 0.45 : 1.0,
+                                            child: Row(
                                             children: [
                                               Expanded(
                                                 child: Row(
@@ -446,8 +449,13 @@ class HandOverWidget extends StatelessWidget {
 
                                                     CashierNameAndBranch(
                                                       Name: cashier.name,
-                                                      BranchName:
-                                                          cashier.branchName,
+                                                      BranchName: cashier.isSuggested
+                                                          ? (cashier.suggestionReason ??
+                                                              'Next scheduled cashier (auto-handover)')
+                                                          : (cashier.disabled &&
+                                                                  cashier.reasonDisabled != null)
+                                                              ? cashier.reasonDisabled!
+                                                              : cashier.branchName,
                                                     ),
                                                   ],
                                                 ),
@@ -493,7 +501,8 @@ class HandOverWidget extends StatelessWidget {
                                             ],
                                           ),
                                         ),
-                                      );
+                                      ),
+                                    );
                                     },
                                   );
                                 },

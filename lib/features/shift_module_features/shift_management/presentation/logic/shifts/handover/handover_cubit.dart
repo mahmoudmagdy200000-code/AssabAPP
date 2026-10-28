@@ -61,6 +61,36 @@ class HandoverCubit extends SafeCubit<HandoverState> {
   }
 
   Future<void> initFetch() async {
+    emit(HandoverCashiersFetchingLoading());
+
+    if (shiftId.isNotEmpty) {
+      final result = await _repository.getAvailableRecipients(shiftId);
+      handle(
+        result,
+        failure: (f) => emit(HandoverCashiersFetchingFailure(failure: f)),
+        success: (response) {
+          final items = response.data.recipients.map((r) => HandoverUserItem(
+            id: r.id,
+            name: r.name,
+            image: r.image,
+            status: CashierStatus.active,
+            branchName: '',
+            isManager: r.type == 'branch_manager',
+            disabled: r.disabled || !r.isAvailable,
+            reasonDisabled: r.reasonDisabled,
+            isSuggested: r.isSuggested,
+            suggestionReason: r.suggestionReason,
+          )).toList();
+
+          if (items.isNotEmpty) {
+            emit(HandoverCashiersFetchingSuccess(usersList: items));
+          } else {
+            emit(HandoverCashiersFetchingEmpty());
+          }
+        },
+      );
+      return;
+    }
     paginator.reset();
     emit(HandoverCashiersFetchingLoading());
 
@@ -80,6 +110,7 @@ class HandoverCubit extends SafeCubit<HandoverState> {
   }
 
   Future<void> loadMore() async {
+    if (shiftId.isNotEmpty) return;
     if (!paginator.hasMore) return;
 
     final result = await paginator.loadNextPage();

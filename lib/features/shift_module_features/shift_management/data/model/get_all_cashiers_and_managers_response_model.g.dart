@@ -45,15 +45,15 @@ BranchManager _$BranchManagerFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       name: json['name'] as String,
       email: json['email'] as String,
-      phone: json['phone'] as String,
+      phone: json['phone'] as String?,
       image: json['image'] as String?,
       branch: Branch.fromJson(json['branch'] as Map<String, dynamic>),
       status: StatusModel.fromJson(json['status'] as Map<String, dynamic>),
       isActive: json['is_active'] as bool,
       isFirstLogin: json['is_first_login'] as bool,
-      emailVerified: json['email_verified'] as bool,
-      phoneVerified: json['phone_verified'] as bool,
-      createdAt: json['created_at'] as String,
+      emailVerified: json['email_verified'] as bool? ?? false,
+      phoneVerified: json['phone_verified'] as bool? ?? false,
+      createdAt: json['created_at'] as String?,
     );
 
 Map<String, dynamic> _$BranchManagerToJson(BranchManager instance) =>

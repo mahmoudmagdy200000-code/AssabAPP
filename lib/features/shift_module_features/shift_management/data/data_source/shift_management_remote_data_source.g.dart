@@ -666,7 +666,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager/shifts/${shiftId}/start-handover',
+            'cashier/shifts/${shiftId}/start-handover',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -687,7 +687,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'branch-manager/shifts/start-by-manager/${shiftId}',
+            'cashier/shifts/${shiftId}/start',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -695,6 +695,35 @@ class _ShiftManagementRemoteDataSource
     );
     final _result = await _dio.fetch(_options);
     final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<AvailableRecipientsResponseModel> getAvailableRecipients({
+    required String shiftId,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<AvailableRecipientsResponseModel>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'cashier/shifts/${shiftId}/available-recipients',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late AvailableRecipientsResponseModel _value;
+    try {
+      _value = AvailableRecipientsResponseModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
     return _value;
   }
 

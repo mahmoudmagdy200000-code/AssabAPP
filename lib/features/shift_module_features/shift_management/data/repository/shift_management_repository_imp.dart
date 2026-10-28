@@ -31,6 +31,7 @@ import '../mapper/manager_shift/manager_shift_update_data_mapper.dart';
 import '../mapper/shift/handover_status_details_mappers/handover_status_details_mapper.dart';
 import '../mapper/shift/variance_details/handover_variance_details_mapper.dart';
 import '../model/add_cashier_models/update_cashier_request.dart';
+import '../model/available_recipients_response_model.dart';
 import '../model/cashiers_response_model.dart';
 import '../model/get_all_cashiers_and_managers_response_model.dart';
 import '../model/manager_shift_management_models/end_shift_models/update_manager_handover_request_model.dart';
@@ -459,6 +460,14 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         ),
       );
       return response;
+    });
+  }
+
+  FutureApiResult<AvailableRecipientsResponseModel> getAvailableRecipients(
+    String shiftId,
+  ) async {
+    return execute(() async {
+      return await _remoteDataSource.getAvailableRecipients(shiftId: shiftId);
     });
   }
 

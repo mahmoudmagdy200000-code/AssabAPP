@@ -44,7 +44,7 @@ class BranchManager {
   final String id;
   final String name;
   final String email;
-  final String phone;
+  final String? phone;
   final String? image;
   final Branch branch;
   final StatusModel status;
@@ -57,13 +57,13 @@ class BranchManager {
   @JsonKey(name: 'phone_verified')
   final bool phoneVerified;
   @JsonKey(name: 'created_at')
-  final String createdAt;
+  final String? createdAt;
 
   BranchManager({
     required this.id,
     required this.name,
     required this.email,
-    required this.phone,
+    this.phone,
     this.image,
     required this.branch,
     required this.status,
@@ -71,7 +71,7 @@ class BranchManager {
     required this.isFirstLogin,
     required this.emailVerified,
     required this.phoneVerified,
-    required this.createdAt,
+    this.createdAt,
   });
 
   factory BranchManager.fromJson(Map<String, dynamic> json) =>
@@ -127,9 +127,9 @@ class Cashier {
     required this.id,
     required this.name,
     required this.email,
-    required this.phone,
+    this.phone,
     required this.branch,
-    required this.createdAt,
+    this.createdAt,
     this.statusLabel,
     this.image,
     this.status,

@@ -11,9 +11,17 @@ abstract class SafeCubit<State> extends Cubit<State> {
     ApiResult<T> result, {
     required void Function(T data) success,
     required void Function(ApiFailure failure) failure,
+    void Function()? onCancel,
     bool resetOnCancel = true,
   }) {
-    if (isClosed || result.isCancelled) return;
+    if (isClosed) return;
+
+    if (result.isCancelled) {
+      if (onCancel != null) {
+        onCancel();
+      }
+      return;
+    }
 
     result.when(success: success, failure: failure);
   }

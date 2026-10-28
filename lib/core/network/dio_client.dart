@@ -4,6 +4,7 @@ import 'api_endpoints.dart';
 import 'auth_interceptor.dart';
 import 'cancel_token_interceptor.dart';
 import 'dio_logger_interceptor.dart';
+import 'idempotency_interceptor.dart';
 
 class DioClient {
   DioClient._();
@@ -18,6 +19,7 @@ class DioClient {
         baseUrl: effectiveBaseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
         contentType: 'application/json',
         responseType: ResponseType.json,
         headers: const {'Accept': 'application/json'},
@@ -28,6 +30,7 @@ class DioClient {
       ...DioLoggerInterceptor.createInterceptors(),
       AuthInterceptor(),
       CancelTokenInterceptor(),
+      IdempotencyInterceptor(),
     ]);
 
     return dio;

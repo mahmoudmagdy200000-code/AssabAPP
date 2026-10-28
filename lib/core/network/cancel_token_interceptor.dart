@@ -43,6 +43,7 @@ class CancelTokenInterceptor extends Interceptor {
         'Request cancelled: ${err.requestOptions.path}',
         tag: 'CancelInterceptor',
       );
+      handler.next(err);
       return;
     }
 

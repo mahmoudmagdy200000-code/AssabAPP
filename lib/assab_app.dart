@@ -34,6 +34,7 @@ class AssabApp extends StatelessWidget {
           child: BlocBuilder<LocaleCubit, Locale>(
             builder: (context, locale) {
               return MaterialApp(
+                debugShowCheckedModeBanner: false,
                 theme: AppTheme.light,
                 locale: locale,
                 localizationsDelegates: const [

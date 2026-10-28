@@ -32,8 +32,14 @@ class AllDetailsTabWidget implements ShiftTabStrategy {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(context.tr.shiftProgress, style: AppStyles.s16W600),
-
+                    Expanded(
+                      child: Text(
+                        context.tr.shiftProgress,
+                        style: AppStyles.s16W600,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    10.horizontalSpace,
                     Container(
                       alignment: Alignment.center,
                       padding: EdgeInsetsGeometry.symmetric(

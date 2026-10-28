@@ -7,6 +7,10 @@ class HandoverUserItem {
   final CashierStatus status;
   final String branchName;
   final bool isManager;
+  final bool disabled;
+  final String? reasonDisabled;
+  final bool isSuggested;
+  final String? suggestionReason;
 
   HandoverUserItem({
     required this.id,
@@ -15,5 +19,9 @@ class HandoverUserItem {
     required this.status,
     required this.branchName,
     required this.isManager,
+    this.disabled = false,
+    this.reasonDisabled,
+    this.isSuggested = false,
+    this.suggestionReason,
   });
 }

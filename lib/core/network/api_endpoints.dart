@@ -230,6 +230,9 @@ class ApiEndpoint {
   static const String cashierMe = '${cashier}profile';
   static const String cashierLogout = '${cashier}logout';
   static const String cashierShifts = '${cashier}shifts';
+  static const String cashierStartShift = '$cashierShifts/{shiftId}/start';
+  static const String cashierStartHandover = '$cashierShifts/{shift}/start-handover';
+  static const String cashierAvailableRecipients = '$cashierShifts/{shift}/available-recipients';
   static const String cashierMyInfo = '${cashier}my-info';
   static const String cashierBranchInfo = '${cashier}branch-info';
 

@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../../core/network/api_endpoints.dart';
+import '../model/available_recipients_response_model.dart';
 import '../model/add_cashier_models/check_email_response_model.dart';
 import '../model/cashier_details_response_model.dart';
 import '../model/cashiers_response_model.dart';
@@ -157,14 +158,19 @@ abstract class ShiftManagementRemoteDataSource {
     required UpdateManagerHandoverRequestModel updateManagerShiftRequestModel,
   });
 
-  @POST('${ApiEndpoint.branchManagerShifts}/{shift}/start-handover')
+  @POST(ApiEndpoint.cashierStartHandover)
   Future<dynamic> handOver({
     @Path('shift') required String shiftId,
     @Body() required HandOverRequest handOverRequest,
   });
 
-  @POST('${ApiEndpoint.branchManagerShifts}/start-by-manager/{shiftId}')
+  @POST(ApiEndpoint.cashierStartShift)
   Future startCashierShift({@Path('shiftId') required String shiftId});
+
+  @GET(ApiEndpoint.cashierAvailableRecipients)
+  Future<AvailableRecipientsResponseModel> getAvailableRecipients({
+    @Path('shift') required String shiftId,
+  });
 
   @GET('${ApiEndpoint.branchManagerShifts}/{shift}/variance')
   Future<VarianceResponseModel> getVarianceDetails({

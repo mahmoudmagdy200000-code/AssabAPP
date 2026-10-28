@@ -135,25 +135,29 @@ class _ShiftProgressIndicatorState extends State<ShiftProgressIndicator> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            RichText(
-              text: TextSpan(
-                style: TextStyle(fontSize: 14.w, color: Colors.black),
-                children: [
-                  TextSpan(
-                    text: formattedElapsed,
-                    style: AppStyles.s18W600.copyWith(
-                      color: AppColors.primaryLight,
+            Expanded(
+              child: RichText(
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  style: TextStyle(fontSize: 14.w, color: Colors.black),
+                  children: [
+                    TextSpan(
+                      text: formattedElapsed,
+                      style: AppStyles.s18W600.copyWith(
+                        color: AppColors.primaryLight,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: context.tr.slashWithTotalHrs(formattedTotal),
-                    style: AppStyles.s12W400.copyWith(
-                      color: context.customColor.text4,
+                    TextSpan(
+                      text: context.tr.slashWithTotalHrs(formattedTotal),
+                      style: AppStyles.s12W400.copyWith(
+                        color: context.customColor.text4,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
+            10.horizontalSpace,
 
             Text(
               '${(progress * 100).toStringAsFixed(1)}%',
@@ -182,16 +186,23 @@ class _ShiftProgressIndicatorState extends State<ShiftProgressIndicator> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              _formatTime(widget.startTime),
-              style: AppStyles.s12W400.copyWith(
-                color: context.customColor.text4,
+            Flexible(
+              child: Text(
+                _formatTime(widget.startTime),
+                style: AppStyles.s12W400.copyWith(
+                  color: context.customColor.text4,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            Text(
-              _formatTime(widget.endTime),
-              style: AppStyles.s12W400.copyWith(
-                color: context.customColor.text4,
+            10.horizontalSpace,
+            Flexible(
+              child: Text(
+                _formatTime(widget.endTime),
+                style: AppStyles.s12W400.copyWith(
+                  color: context.customColor.text4,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
