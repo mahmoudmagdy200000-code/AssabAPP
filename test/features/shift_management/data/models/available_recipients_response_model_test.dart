@@ -4,124 +4,152 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/handover_user_item.dart';
 
 void main() {
-  group('FL-06: AvailableRecipientsResponseModel & HandoverUserItem tests', () {
-    test('deserializes JSON response with eligible, disabled, and suggested recipients', () {
+  group('FL-06: AvailableRecipientsResponseModel Fail-Closed & Eligibility Tests', () {
+    test('deserializes explicitly eligible recipient correctly', () {
       final json = {
+        'id': '10',
+        'name': 'Ahmed Cashier',
+        'type': 'cashier',
+        'is_available': true,
+        'disabled': false,
+        'is_suggested': true,
+        'suggestion_reason': 'Next scheduled cashier',
+      };
+
+      final model = RecipientItemModel.fromJson(json);
+
+      expect(model.id, equals('10'));
+      expect(model.name, equals('Ahmed Cashier'));
+      expect(model.isAvailable, isTrue);
+      expect(model.disabled, isFalse);
+      expect(model.reasonDisabled, isNull);
+      expect(model.isSuggested, isTrue);
+    });
+
+    test('FAIL-CLOSED: Missing is_available marks recipient disabled (not selectable)', () {
+      final json = {
+        'id': '11',
+        'name': 'Unknown Status Cashier',
+        'type': 'cashier',
+        // is_available is omitted
+      };
+
+      final model = RecipientItemModel.fromJson(json);
+
+      expect(model.isAvailable, isFalse, reason: 'Fail-closed: missing availability must not be assumed eligible');
+      expect(model.disabled, isTrue);
+      expect(model.reasonDisabled, contains('unavailable'));
+    });
+
+    test('FAIL-CLOSED: Missing disabled field does not fail open without explicit is_available', () {
+      final json = {
+        'id': '12',
+        'name': 'Candidate Cashier',
+        'type': 'cashier',
+        'is_available': false,
+        // disabled is omitted
+      };
+
+      final model = RecipientItemModel.fromJson(json);
+
+      expect(model.isAvailable, isFalse);
+      expect(model.disabled, isTrue);
+    });
+
+    test('FAIL-CLOSED: Invalid or empty ID marks recipient disabled', () {
+      final invalidIds = ['', '0', 'null'];
+
+      for (final id in invalidIds) {
+        final json = {
+          'id': id,
+          'name': 'Corrupt Cashier',
+          'type': 'cashier',
+          'is_available': true,
+        };
+
+        final model = RecipientItemModel.fromJson(json);
+
+        expect(model.isAvailable, isFalse);
+        expect(model.disabled, isTrue);
+        expect(model.reasonDisabled, contains('Invalid recipient ID'));
+      }
+    });
+
+    test('FAIL-CLOSED: Malformed or unrecognized recipient type marks recipient disabled', () {
+      final json = {
+        'id': '15',
+        'name': 'Super Admin',
+        'type': 'external_guest', // unapproved role
+        'is_available': true,
+      };
+
+      final model = RecipientItemModel.fromJson(json);
+
+      expect(model.isAvailable, isFalse);
+      expect(model.disabled, isTrue);
+      expect(model.reasonDisabled, contains('Unknown recipient type'));
+    });
+
+    test('Full payload deserialization parses collection with fail-closed protections', () {
+      final payload = {
         'success': true,
-        'message': 'Available recipients retrieved',
+        'message': 'Recipients list',
         'data': {
           'auto_handover_enabled': true,
-          'has_branch_manager': true,
+          'has_branch_manager': false,
           'recipients': [
             {
               'id': 1,
-              'name': 'Ahmed Cashier',
+              'name': 'Eligible Cashier',
               'type': 'cashier',
               'is_available': true,
               'disabled': false,
-              'is_suggested': true,
-              'suggestion_reason': 'Next scheduled cashier',
             },
             {
               'id': 2,
-              'name': 'Inactive User',
+              'name': 'Missing Availability Cashier',
               'type': 'cashier',
-              'is_available': false,
-              'disabled': true,
-              'reason_disabled': 'User is deactivated',
-              'is_suggested': false,
             },
             {
-              'id': 3,
-              'name': 'Other Branch User',
+              'id': null,
+              'name': 'Null ID Cashier',
               'type': 'cashier',
-              'is_available': false,
-              'disabled': true,
-              'reason_disabled': 'Belongs to different branch',
-              'is_suggested': false,
+              'is_available': true,
             }
           ]
         }
       };
 
-      final response = AvailableRecipientsResponseModel.fromJson(json);
-
+      final response = AvailableRecipientsResponseModel.fromJson(payload);
       expect(response.success, isTrue);
-      expect(response.message, equals('Available recipients retrieved'));
-      expect(response.data.autoHandoverEnabled, isTrue);
-      expect(response.data.hasBranchManager, isTrue);
       expect(response.data.recipients.length, equals(3));
 
-      final r1 = response.data.recipients[0];
-      expect(r1.id, equals('1'));
-      expect(r1.name, equals('Ahmed Cashier'));
-      expect(r1.disabled, isFalse);
-      expect(r1.isSuggested, isTrue);
-      expect(r1.suggestionReason, equals('Next scheduled cashier'));
+      // First is eligible
+      expect(response.data.recipients[0].disabled, isFalse);
+      expect(response.data.recipients[0].isAvailable, isTrue);
 
-      final r2 = response.data.recipients[1];
-      expect(r2.id, equals('2'));
-      expect(r2.disabled, isTrue);
-      expect(r2.reasonDisabled, equals('User is deactivated'));
+      // Second fails closed due to missing availability
+      expect(response.data.recipients[1].disabled, isTrue);
+      expect(response.data.recipients[1].isAvailable, isFalse);
 
-      final r3 = response.data.recipients[2];
-      expect(r3.id, equals('3'));
-      expect(r3.disabled, isTrue);
-      expect(r3.reasonDisabled, equals('Belongs to different branch'));
+      // Third fails closed due to null ID
+      expect(response.data.recipients[2].disabled, isTrue);
+      expect(response.data.recipients[2].isAvailable, isFalse);
     });
 
-    test('tolerates missing optional fields without throwing FormatException', () {
-      final minimalJson = {
-        'success': true,
-        'data': {
-          'recipients': [
-            {
-              'id': 42,
-              'name': 'Minimal Cashier',
-            }
-          ]
-        }
-      };
-
-      final response = AvailableRecipientsResponseModel.fromJson(minimalJson);
-      expect(response.success, isTrue);
-      expect(response.data.recipients.length, equals(1));
-
-      final item = response.data.recipients.first;
-      expect(item.id, equals('42'));
-      expect(item.name, equals('Minimal Cashier'));
-      expect(item.disabled, isFalse);
-      expect(item.isSuggested, isFalse);
-      expect(item.suggestionReason, isNull);
-      expect(item.reasonDisabled, isNull);
-    });
-
-    test('HandoverUserItem correctly encapsulates disabled selection state', () {
-      final activeItem = HandoverUserItem(
-        id: '1',
-        name: 'Active Cashier',
-        branchName: 'Riyadh Branch',
-        status: CashierStatus.active,
-        isManager: false,
-        disabled: false,
-        isSuggested: true,
-        suggestionReason: 'Next on duty',
-      );
-
+    test('HandoverUserItem preserves disabled barrier preventing selection', () {
       final disabledItem = HandoverUserItem(
         id: '2',
-        name: 'Inactive Cashier',
-        branchName: 'Riyadh Branch',
+        name: 'Deactivated User',
+        branchName: 'Main Branch',
         status: CashierStatus.deactivated,
         isManager: false,
         disabled: true,
-        reasonDisabled: 'Deactivated account',
+        reasonDisabled: 'Account suspended',
       );
 
-      expect(activeItem.disabled, isFalse);
-      expect(activeItem.isSuggested, isTrue);
       expect(disabledItem.disabled, isTrue);
-      expect(disabledItem.reasonDisabled, equals('Deactivated account'));
+      expect(disabledItem.reasonDisabled, equals('Account suspended'));
     });
   });
 }

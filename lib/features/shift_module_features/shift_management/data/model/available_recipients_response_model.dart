@@ -84,14 +84,37 @@ class RecipientItemModel {
   });
 
   factory RecipientItemModel.fromJson(Map<String, dynamic> json) {
+    final rawId = (json['id'] ?? '').toString().trim();
+    final rawType = (json['type'] as String? ?? '').trim().toLowerCase();
+    final bool isValidType = rawType == 'cashier' || rawType == 'branch_manager';
+    final bool hasValidId = rawId.isNotEmpty && rawId != '0' && rawId != 'null';
+
+    // FAIL-CLOSED: Explicit server confirmation is strictly required for eligibility
+    final bool isExplicitlyAvailable = json['is_available'] == true;
+    final bool isExplicitlyDisabled = json['disabled'] == true;
+
+    final bool isEligible = hasValidId && isValidType && isExplicitlyAvailable && !isExplicitlyDisabled;
+    final bool isDisabled = !isEligible;
+
+    String? reason = json['reason_disabled'] as String?;
+    if (reason == null || reason.isEmpty) {
+      if (!hasValidId) {
+        reason = 'Invalid recipient ID';
+      } else if (!isValidType) {
+        reason = 'Unknown recipient type';
+      } else if (!isExplicitlyAvailable) {
+        reason = 'Recipient is currently unavailable';
+      }
+    }
+
     return RecipientItemModel(
-      id: (json['id'] ?? '').toString(),
+      id: rawId,
       name: json['name'] as String? ?? '',
       image: json['image'] as String?,
-      type: json['type'] as String? ?? 'cashier',
-      isAvailable: json['is_available'] as bool? ?? true,
-      disabled: json['disabled'] as bool? ?? false,
-      reasonDisabled: json['reason_disabled'] as String?,
+      type: isValidType ? rawType : (rawType.isNotEmpty ? rawType : 'unknown'),
+      isAvailable: isEligible,
+      disabled: isDisabled,
+      reasonDisabled: isDisabled ? reason : null,
       isSuggested: json['is_suggested'] as bool? ?? false,
       suggestionReason: json['suggestion_reason'] as String?,
     );

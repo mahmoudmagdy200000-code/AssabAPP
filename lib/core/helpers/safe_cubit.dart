@@ -5,7 +5,9 @@ import '../utils/api_result.dart';
 import '../utils/app_logger.dart';
 
 abstract class SafeCubit<State> extends Cubit<State> {
-  SafeCubit(super.initialState);
+  final State _initialState;
+
+  SafeCubit(super.initialState) : _initialState = initialState;
 
   void handle<T>(
     ApiResult<T> result, {
@@ -19,6 +21,8 @@ abstract class SafeCubit<State> extends Cubit<State> {
     if (result.isCancelled) {
       if (onCancel != null) {
         onCancel();
+      } else if (resetOnCancel) {
+        emit(_initialState);
       }
       return;
     }
