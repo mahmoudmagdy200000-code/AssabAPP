@@ -85,7 +85,7 @@ class RecipientItemModel {
 
   factory RecipientItemModel.fromJson(Map<String, dynamic> json) {
     return RecipientItemModel(
-      id: json['id'] as String,
+      id: (json['id'] ?? '').toString(),
       name: json['name'] as String? ?? '',
       image: json['image'] as String?,
       type: json['type'] as String? ?? 'cashier',
