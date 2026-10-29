@@ -30,7 +30,7 @@ class ShiftModel {
 
   final double? cardPayments;
 
-  final int? variance;
+  final double? variance;
   final String? posReceipt;
   final String? actualStartTime;
   final String? actualEndTime;
@@ -82,7 +82,7 @@ class ShiftModel {
       vatAmount: JsonValueParser.toDouble(json['vat_amount']),
       cashCollected: JsonValueParser.toDouble(json['cash_collected']),
       cardPayments: JsonValueParser.toDouble(json['card_payments']),
-      variance: JsonValueParser.toInt(json['variance']),
+      variance: JsonValueParser.toDouble(json['variance']),
       posReceipt: json['pos_receipt'] as String?,
       actualStartTime: json['actual_start_time'] as String?,
       actualEndTime: json['actual_end_time'] as String?,

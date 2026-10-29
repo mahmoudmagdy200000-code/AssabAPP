@@ -58,7 +58,7 @@ class ManagerApproveButtonWidget extends StatelessWidget {
                   child: AcceptHandoverSheetWidget(
                     shiftId: cashierShiftId,
                     cashFrom: cashFrom ?? cashierName,
-                    cashGiven: CurrencyNormalizer.formatSar(cashGiven ?? 0),
+                    cashGiven: cashGiven == null ? '' : CurrencyNormalizer.formatSar(cashGiven!),
                     variance: CurrencyNormalizer.formatSar(variance ?? 0),
                     successFunction: successFunction,
                     actorRole: UserType.branchManager,

@@ -19,7 +19,7 @@ class ShiftEntity {
   final double? openingBalance;
   final double? closingBalance;
   final double? expectedBalance;
-  final int? variance;
+  final double? variance;
   // final double? variance;
   final HandoverToEntity? handoverTo;
   final double? totalSales;

@@ -23,7 +23,7 @@ class HandoversResponseItem {
   final String shiftDate;
   final String shiftDateIso;
   final HandoverStatus status;
-  final num cashGiven;
+  final num? cashGiven;
   final String variance;
   final num varianceAmount;
   final String cashFrom;
@@ -55,7 +55,7 @@ class HandoversResponseItem {
       shiftDate: json['shift_date'],
       shiftDateIso: json['shift_date_iso'],
       status: handoverStatusFromJson(json['status']),
-      cashGiven: json['cash_given'] is num ? (json['cash_given'] as num) : (num.tryParse(json['cash_given']?.toString() ?? '') ?? 0),
+      cashGiven: json['cash_given'] is num ? (json['cash_given'] as num) : num.tryParse(json['cash_given']?.toString() ?? ''),
       responsibilityReviewedAt: json['responsibility_reviewed_at'],
       variance: json['variance'],
       varianceAmount: json['variance_amount'] is num ? (json['variance_amount'] as num) : (num.tryParse(json['variance_amount']?.toString() ?? '') ?? 0),

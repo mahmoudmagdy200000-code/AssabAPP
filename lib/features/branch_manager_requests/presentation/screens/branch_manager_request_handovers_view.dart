@@ -129,7 +129,7 @@ class _BranchManagerRequestHandoversViewState
                         context: context,
                         asset: AppAssets.cash,
                         title: context.tr.cashGiven,
-                        value: orders[index].cashGiven.toString(),
+                        value: orders[index].cashGiven == null ? '-' : CurrencyNormalizer.formatSar(orders[index].cashGiven!),
                         isCurrancy: true,
                       ),
                       _buildRowItem(
@@ -215,8 +215,7 @@ class _BranchManagerRequestHandoversViewState
                                         child: AcceptHandoverSheetWidget(
                                           shiftId: orders[index].id,
                                           cashFrom: orders[index].cashFrom,
-                                          cashGiven: CurrencyNormalizer.formatSar(
-                                              orders[index].cashGiven),
+                                          cashGiven: orders[index].cashGiven == null ? '' : CurrencyNormalizer.formatSar(orders[index].cashGiven!),
                                           variance: orders[index].variance,
                                           actorRole: _effectiveRole,
                                           successFunction: () {
@@ -258,8 +257,7 @@ class _BranchManagerRequestHandoversViewState
                                 child: AcceptHandoverSheetWidget(
                                   shiftId: orders[index].id,
                                   cashFrom: orders[index].cashFrom,
-                                  cashGiven: CurrencyNormalizer.formatSar(
-                                      orders[index].cashGiven),
+                                  cashGiven: orders[index].cashGiven == null ? '' : CurrencyNormalizer.formatSar(orders[index].cashGiven!),
                                   variance: orders[index].variance,
                                   actorRole: _effectiveRole ?? UserType.branchManager,
                                   successFunction: () {

@@ -27,7 +27,7 @@ part 'shift_details_model.g.dart';
 //   final double? closingBalance;
 //   @JsonKey(name: 'expected_balance')
 //   final String expectedBalance;
-//   final int? variance;
+//   final double? variance;
 //   @JsonKey(name: 'total_sales')
 //   final String totalSales;
 //   @JsonKey(name: 'net_sales')
@@ -115,13 +115,13 @@ class ShiftDetailsModel {
 
   final ShiftInfoDetailsModel shiftInfoDetails;
 
-  final int? openingBalance;
+  final double? openingBalance;
 
-  final int? closingBalance;
+  final double? closingBalance;
 
-  final int? expectedBalance;
+  final double? expectedBalance;
 
-  final int? variance;
+  final double? variance;
 
   final int? totalSales;
 
@@ -143,7 +143,7 @@ class ShiftDetailsModel {
 
   final String? handoverNotes;
 
-  final int? handoverAmount;
+  final double? handoverAmount;
 
   final HandoverStatusModel? handoverStatus;
 
@@ -171,7 +171,7 @@ class ShiftDetailsModel {
 
   final bool? isShiftReassignedToMe;
 
-  final int? cashGiven;
+  final double? cashGiven;
 
   final String? previousCashier;
 
@@ -229,10 +229,10 @@ class ShiftDetailsModel {
     shiftInfoDetails: ShiftInfoDetailsModel.fromJson(
       json['shift'] as Map<String, dynamic>,
     ),
-    openingBalance: JsonValueParser.toInt(json['opening_balance']),
-    closingBalance: JsonValueParser.toInt(json['closing_balance']),
-    expectedBalance: JsonValueParser.toInt(json['expected_balance']),
-    variance: JsonValueParser.toInt(json['variance']),
+    openingBalance: JsonValueParser.toDouble(json['opening_balance']),
+    closingBalance: JsonValueParser.toDouble(json['closing_balance']),
+    expectedBalance: JsonValueParser.toDouble(json['expected_balance']),
+    variance: JsonValueParser.toDouble(json['variance']),
     totalSales: JsonValueParser.toInt(json['total_sales']),
     netSales: JsonValueParser.toInt(json['net_sales']),
     vatAmount: JsonValueParser.toInt(json['vat_amount']),
@@ -243,7 +243,7 @@ class ShiftDetailsModel {
     actualEndTime: json['actual_end_time'] as String?,
     handedOverAt: json['handed_over_at'] as String?,
     handoverNotes: json['handover_notes'] as String?,
-    handoverAmount: JsonValueParser.toInt(json['handover_amount']),
+    handoverAmount: JsonValueParser.toDouble(json['handover_amount']),
     handoverStatus: json['handover_status'] == null
         ? null
         : HandoverStatusModel.fromJson(
@@ -288,7 +288,7 @@ class ShiftDetailsModel {
     isMidReassign: json['is_mid_reassign'] as bool?,
     canBeAccepted: json['can_be_accepted'] as bool?,
     isShiftReassignedToMe: json['is_shift_reassigned_to_me'] as bool?,
-    cashGiven: JsonValueParser.toInt(json['cash_given']),
+    cashGiven: JsonValueParser.toDouble(json['cash_given']),
     previousCashier: json['previous_cashier'] as String?,
     reassignReason: json['reassign_reason'] as String?,
     varianceReason: json['variance_reason'] as String?,
