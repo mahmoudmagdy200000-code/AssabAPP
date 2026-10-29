@@ -1,4 +1,5 @@
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/reject_handover_widgets/successfully_rejected_handover_bottom_sheet_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,12 +24,14 @@ class RejectHandoverModalSheetWidget extends StatefulWidget {
     required this.successFunction,
     this.openedFromModalSheet = false,
     this.isFromRequestsScreen = false,
+    this.initialComment,
   });
 
   final Function() successFunction;
   final String shiftId;
   final bool openedFromModalSheet;
   final bool isFromRequestsScreen;
+  final String? initialComment;
 
   @override
   State<RejectHandoverModalSheetWidget> createState() =>
@@ -37,10 +40,14 @@ class RejectHandoverModalSheetWidget extends StatefulWidget {
 
 class _RejectHandoverModalSheetWidgetState
     extends State<RejectHandoverModalSheetWidget> {
+  late final TextEditingController managerCommentController;
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
-    managerCommentController = TextEditingController();
+    managerCommentController =
+        TextEditingController(text: widget.initialComment ?? '');
   }
 
   @override
@@ -49,15 +56,12 @@ class _RejectHandoverModalSheetWidgetState
     super.dispose();
   }
 
-  late final TextEditingController managerCommentController;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: MediaQuery.of(context).viewInsets,
       child: Container(
         width: double.maxFinite,
-        // height: 350.h,
         padding: EdgeInsetsGeometry.symmetric(horizontal: 20.w, vertical: 10.h),
         child: SingleChildScrollView(
           child: Column(
@@ -80,10 +84,6 @@ class _RejectHandoverModalSheetWidgetState
               const CustomDivider(),
               15.verticalSpace,
 
-              // Text(
-              //     context.tr.managerComment,
-              //     style:  AppStyles.s14W400
-              // ),
               LabelTextField(
                 text: context.tr.reasonForRejection,
                 style: AppStyles.s14W400,
@@ -106,7 +106,7 @@ class _RejectHandoverModalSheetWidgetState
                   hintText: context.tr.provideAnySuggestionsOrNotes,
                   controller: managerCommentController,
                   maxLines: 5,
-                  isEnabled: true,
+                  isEnabled: !_isSubmitting,
                 ),
               ),
 
@@ -119,6 +119,7 @@ class _RejectHandoverModalSheetWidgetState
                     >(
                       listener: (context, state) {
                         if (state is HandoverActionSuccess) {
+                          _isSubmitting = false;
                           NavigationService.I.pop(context);
 
                           if (widget.openedFromModalSheet &&
@@ -138,6 +139,7 @@ class _RejectHandoverModalSheetWidgetState
 
                           widget.successFunction();
                         } else if (state is HandoverActionFailure) {
+                          _isSubmitting = false;
                           AppDialog.showErrorDialog(
                             context: context,
                             failure: state.failure,
@@ -145,7 +147,9 @@ class _RejectHandoverModalSheetWidgetState
                         }
                       },
                       builder: (context, state) {
-                        if (state is HandoverActionLoading) {
+                        final isLoading =
+                            state is HandoverActionLoading || _isSubmitting;
+                        if (isLoading) {
                           return const AppButtonLoading(
                             background: AppColors.red,
                           );
@@ -154,19 +158,26 @@ class _RejectHandoverModalSheetWidgetState
                         return ValueListenableBuilder<TextEditingValue>(
                           valueListenable: managerCommentController,
                           builder: (_, value, _) {
+                            final canSubmit =
+                                value.text.trim().isNotEmpty && !_isSubmitting;
                             return AppButton(
                               onClick: () {
+                                if (!canSubmit) return;
+                                setState(() {
+                                  _isSubmitting = true;
+                                });
                                 context
                                     .read<ApproveAndRejectHandoverCubit>()
                                     .rejectHandover(
                                       shiftId: widget.shiftId,
                                       managerComment:
-                                          managerCommentController.text,
+                                          managerCommentController.text.trim(),
+                                      actorRole: UserType.branchManager,
                                     );
                               },
                               text: context.tr.rejectAndAskForCorrection,
                               borderRadius: BorderRadius.circular(10.r),
-                              enabled: value.text.isNotEmpty,
+                              enabled: canSubmit,
                               background: AppColors.red,
                             );
                           },

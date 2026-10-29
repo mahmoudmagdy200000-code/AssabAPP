@@ -9,9 +9,15 @@ import '../../../../core/routing/app_route_name.dart';
 import '../../../../core/services/navigation/navigation_service.dart';
 
 class HandoverAcceptedSheetWidget extends StatelessWidget {
-  const HandoverAcceptedSheetWidget({super.key, required this.shiftId});
+  const HandoverAcceptedSheetWidget({
+    super.key,
+    required this.shiftId,
+    this.isManager = false,
+  });
 
   final String shiftId;
+  final bool isManager;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,9 +41,11 @@ class HandoverAcceptedSheetWidget extends StatelessWidget {
             5.verticalSpace,
 
             Text(
-              context
-                  .tr
-                  .allSalesExpensesAndHandoverActionsFromThisPointForwardWillBeRecordedUnderYourName,
+              isManager
+                  ? 'Custody transfer has been verified and recorded. The shift has been successfully reconciled.'
+                  : context
+                      .tr
+                      .allSalesExpensesAndHandoverActionsFromThisPointForwardWillBeRecordedUnderYourName,
               textAlign: TextAlign.center,
               style: AppStyles.s13W400.copyWith(color: context.customColor.text4),
             ),
@@ -51,7 +59,7 @@ class HandoverAcceptedSheetWidget extends StatelessWidget {
                   AppRouteName.shiftDetailsScreen,
                   arguments: {
                     'shiftId': shiftId,
-                    'isNavigatedFromCashier': false,
+                    'isNavigatedFromCashier': !isManager,
                   },
                 );
               },

@@ -1,4 +1,8 @@
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/services/user_type_service.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
+import 'package:assab/core/utils/currency_normalizer.dart';
 import 'package:assab/core/widgets/custom_text_field.dart';
 import 'package:assab/core/widgets/label_text_field.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +31,7 @@ class AcceptHandoverSheetWidget extends StatefulWidget {
     required this.cashGiven,
     required this.variance,
     required this.cashFrom,
+    this.actorRole,
   });
 
   final String cashGiven;
@@ -34,6 +39,7 @@ class AcceptHandoverSheetWidget extends StatefulWidget {
   final String cashFrom;
   final String shiftId;
   final Function() successFunction;
+  final UserType? actorRole;
 
   @override
   State<AcceptHandoverSheetWidget> createState() =>
@@ -60,31 +66,25 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
   }
 
   double? get _expectedAmount {
-    final cleaned = widget.cashGiven.replaceAll(',', '').trim();
-    return double.tryParse(cleaned);
+    return CurrencyNormalizer.parseSarAmount(widget.cashGiven);
   }
 
   double? get _confirmedAmount {
-    final text = confirmedAmountController.text.replaceAll(',', '').trim();
-    if (text.isEmpty) return null;
-    final regex = RegExp(r'^\d+(\.\d{1,2})?$');
-    if (!regex.hasMatch(text)) return null;
-    final val = double.tryParse(text);
-    return val != null && val >= 0 ? val : null;
+    return CurrencyNormalizer.parseSarAmount(confirmedAmountController.text);
   }
 
   bool get _hasAmountMismatch {
     final confirmed = _confirmedAmount;
     final expected = _expectedAmount;
     if (confirmed == null || expected == null) return false;
-    return (confirmed - expected).abs() > 0.001;
+    return !CurrencyNormalizer.areAmountsEqual(confirmed, expected);
   }
 
   bool get _canConfirm {
     final confirmed = _confirmedAmount;
     final expected = _expectedAmount;
     if (confirmed == null || expected == null) return false;
-    return (confirmed - expected).abs() <= 0.001;
+    return CurrencyNormalizer.areAmountsEqual(confirmed, expected);
   }
 
   @override
@@ -112,13 +112,20 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                     TextSpan(
                       text: context.tr.youAreConfirmingReceiptOfThisHandover,
                     ),
+                    const TextSpan(text: ' '),
                     TextSpan(
                       text: context.tr.openingBalanceTitle,
                       style: AppStyles.s15W500.copyWith(
                         color: context.customColor.text1,
                       ),
                     ),
-                    TextSpan(text: context.tr.forTheShiftYouAreAboutToStart),
+                    TextSpan(
+                      text: (widget.actorRole == UserType.branchManager ||
+                              UserTypeService.selectedUserType ==
+                                  UserType.branchManager)
+                          ? ' as the responsible manager for custody verification.'
+                          : context.tr.forTheShiftYouAreAboutToStart,
+                    ),
                   ],
                 ),
               ),
@@ -249,7 +256,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                       ),
                       6.verticalSpace,
                       Text(
-                        'Counted physical cash (${_confirmedAmount!.toStringAsFixed(2)} SAR) does not match reported handover (${widget.cashGiven} SAR). Under CASH-09, confirmation is blocked. You must reject this handover to request recounting and correction.',
+                        'Counted physical cash (${CurrencyNormalizer.formatSar(_confirmedAmount!)} SAR) does not match reported handover (${widget.cashGiven} SAR). Under CASH-09, confirmation is blocked. You must reject this handover to request recounting and correction.',
                         style: AppStyles.s12W400.copyWith(
                           color: AppColors.red,
                         ),
@@ -257,26 +264,39 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                       12.verticalSpace,
                       AppButton(
                         onClick: () {
-                          final approveCubit =
-                              context.read<ApproveAndRejectHandoverCubit>();
-                          NavigationService.I.pop(context);
-                          AppBottomSheet.showModal(
-                            context,
-                            (sheetContext) => BlocProvider.value(
-                              value: approveCubit,
-                              child: RejectHandoverModalSheetWidget(
-                                shiftId: widget.shiftId,
-                                successFunction: widget.successFunction,
-                                openedFromModalSheet: true,
-                              ),
-                            ),
-                          );
+                          final countedStr = CurrencyNormalizer.formatSar(_confirmedAmount!);
+                          final reportedStr = widget.cashGiven;
+                          final mismatchComment =
+                              'CASH-09: Counted physical cash ($countedStr SAR) does not match reported handover ($reportedStr SAR). Recounting and correction required.';
+
+                          NavigationService.I.pop();
+
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            final currentContext = NavigationService.I.context;
+                            if (currentContext != null && currentContext.mounted) {
+                              AppBottomSheet.showModal(
+                                currentContext,
+                                (sheetContext) => BlocProvider(
+                                  create: (_) =>
+                                      getIt<ApproveAndRejectHandoverCubit>(),
+                                  child: RejectHandoverModalSheetWidget(
+                                    shiftId: widget.shiftId,
+                                    successFunction: widget.successFunction,
+                                    openedFromModalSheet: false,
+                                    initialComment: mismatchComment,
+                                  ),
+                                ),
+                                isScrollControlled: true,
+                              );
+                            }
+                          });
                         },
                         text: 'Reject & Request Recount',
                         borderRadius: BorderRadius.circular(8.r),
                         background: AppColors.red,
                         padding: EdgeInsets.symmetric(vertical: 10.h),
                         isFlexible: true,
+                        enabled: true,
                       ),
                     ],
                   ),
@@ -324,12 +344,15 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                     >(
                       listener: (context, state) {
                         if (state is HandoverActionSuccess) {
-                          NavigationService.I.pop(context);
+                          NavigationService.I.pop();
 
                           AppBottomSheet.showModal(
-                            context,
+                            NavigationService.I.context ?? context,
                             (context) => HandoverAcceptedSheetWidget(
                               shiftId: widget.shiftId,
+                              isManager: (widget.actorRole == UserType.branchManager ||
+                                  UserTypeService.selectedUserType ==
+                                      UserType.branchManager),
                             ),
                           );
 
@@ -356,6 +379,8 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                                   confirmedAmount:
                                       confirmedAmountController.text.trim(),
                                   expectedAmount: _expectedAmount,
+                                  actorRole: widget.actorRole ??
+                                      UserType.branchManager,
                                   comment:
                                       managerCommentController.text.isNotEmpty
                                           ? managerCommentController.text

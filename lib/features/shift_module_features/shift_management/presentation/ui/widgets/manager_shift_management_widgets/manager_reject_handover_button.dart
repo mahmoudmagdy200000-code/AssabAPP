@@ -1,3 +1,4 @@
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/approve_and_reject_handover/approve_and_reject_handover_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/reject_handover_widgets/reject_handover_modal_sheet_widget.dart';
 import 'package:flutter/material.dart';
@@ -16,32 +17,21 @@ class ManagerRejectHandoverButton extends StatelessWidget {
     this.buttonWidth,
     required this.openedFromModalSheet,
     required this.successFunction,
-    // required this.cashierName,
-    // required this.isTheCurrentStatusRejected,
-    // required this.managerName
   });
 
   final double? buttonWidth;
   final String shiftId;
   final bool openedFromModalSheet;
   final Function() successFunction;
-  // final String cashierName;
-  // final bool isTheCurrentStatusRejected;
-  // final String managerName;
 
   @override
   Widget build(BuildContext context) {
     return AppButton(
       onClick: () {
-        final approveAndRejectHandoverCubit = context
-            .read<ApproveAndRejectHandoverCubit>();
-
         AppBottomSheet.showModal(
           context,
-          (context) => MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: approveAndRejectHandoverCubit),
-            ],
+          (sheetContext) => BlocProvider(
+            create: (_) => getIt<ApproveAndRejectHandoverCubit>(),
             child: RejectHandoverModalSheetWidget(
               shiftId: shiftId,
               openedFromModalSheet: openedFromModalSheet,
