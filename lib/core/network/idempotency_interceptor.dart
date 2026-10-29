@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 /// Manages idempotency keys across logical financial operations and user-initiated retries.
 class IdempotencyScopeManager {
   static final Map<String, String> _activeKeys = {};
+  static final Map<String, DateTime> _keyTimestamps = {};
+  static const Duration defaultTtl = Duration(minutes: 5);
 
   static String _payloadFingerprint(dynamic data) {
     if (data == null) return '';
@@ -41,27 +43,52 @@ class IdempotencyScopeManager {
     return '$actor:${method.toUpperCase()}:$normalizedPath$payloadPart';
   }
 
-  /// Get the active key for a logical scope, or generate a new one if none exists.
+  /// Start a new explicit user intent for a logical scope.
+  /// Generates a fresh RFC4122 v4 UUID (or uses [explicitKey]), updating the timestamp.
+  static String startNewIntent(String scope, [String? explicitKey]) {
+    final key = explicitKey ?? generateUuidV4();
+    _activeKeys[scope] = key;
+    _keyTimestamps[scope] = DateTime.now();
+    return key;
+  }
+
+  /// Clears the intent and stored key for a scope.
+  static void clearIntent(String scope) {
+    _activeKeys.remove(scope);
+    _keyTimestamps.remove(scope);
+  }
+
+  /// Alias for clearIntent to maintain backward compatibility.
+  static void clearScope(String scope) => clearIntent(scope);
+
+  /// Check if a scope has an active and unexpired key.
+  static bool hasActiveKey(String scope) {
+    if (!_activeKeys.containsKey(scope)) return false;
+    final ts = _keyTimestamps[scope];
+    if (ts == null || DateTime.now().difference(ts) > defaultTtl) {
+      clearIntent(scope);
+      return false;
+    }
+    return true;
+  }
+
+  /// Get the active key for a logical scope, or generate a fresh one if none exists or if expired.
   static String getOrCreateKey(String scope) {
-    return _activeKeys.putIfAbsent(scope, () => generateUuidV4());
+    if (hasActiveKey(scope)) {
+      return _activeKeys[scope]!;
+    }
+    return startNewIntent(scope);
   }
 
   /// Set or override key for an explicit scope
   static void setKey(String scope, String key) {
-    _activeKeys[scope] = key;
+    startNewIntent(scope, key);
   }
-
-  /// Clear the key once an operation is confirmed successful, or when reset by user.
-  static void clearScope(String scope) {
-    _activeKeys.remove(scope);
-  }
-
-  /// Check if a scope has an active key
-  static bool hasActiveKey(String scope) => _activeKeys.containsKey(scope);
 
   /// Reset all stored keys
   static void resetAll() {
     _activeKeys.clear();
+    _keyTimestamps.clear();
   }
 
   /// Generate RFC4122 v4 UUID
@@ -97,13 +124,18 @@ class IdempotencyInterceptor extends Interceptor {
           options.data,
         );
 
-        String? key = options.extra['idempotency_key'] as String? ??
-            options.headers['Idempotency-Key'] as String?;
-
-        if (key == null || key.isEmpty) {
-          key = IdempotencyScopeManager.getOrCreateKey(scope);
+        String? key;
+        if (options.extra['force_new_intent'] == true) {
+          key = IdempotencyScopeManager.startNewIntent(scope);
         } else {
-          IdempotencyScopeManager.setKey(scope, key);
+          key = options.extra['idempotency_key'] as String? ??
+              options.headers['Idempotency-Key'] as String?;
+
+          if (key == null || key.isEmpty) {
+            key = IdempotencyScopeManager.getOrCreateKey(scope);
+          } else {
+            IdempotencyScopeManager.setKey(scope, key);
+          }
         }
 
         options.extra['idempotency_key'] = key;
@@ -121,7 +153,7 @@ class IdempotencyInterceptor extends Interceptor {
         response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
-      IdempotencyScopeManager.clearScope(scope);
+      IdempotencyScopeManager.clearIntent(scope);
     }
     handler.next(response);
   }
@@ -129,6 +161,26 @@ class IdempotencyInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final status = err.response?.statusCode;
+    final responseData = err.response?.data;
+    final scope = err.requestOptions.extra['idempotency_scope'] as String?;
+
+    final errorCode = responseData is Map ? responseData['code']?.toString() : null;
+    final errorMessage = responseData is Map ? responseData['message']?.toString() : null;
+
+    final isIdempotencyExpiredOrReused = errorCode == 'IDEMPOTENCY_KEY_REUSED' ||
+        errorCode == 'RESPONSE_EXPIRED' ||
+        errorCode == 'SCOPE_CHANGED' ||
+        errorCode == 'PAYLOAD_MISMATCH' ||
+        (errorMessage?.contains('idempotency') == true &&
+            (errorMessage?.contains('reused') == true ||
+                errorMessage?.contains('expired') == true ||
+                errorMessage?.contains('scope') == true));
+
+    final isIdempotencyInProgress = status == 409 &&
+        !isIdempotencyExpiredOrReused &&
+        (errorCode == 'IDEMPOTENCY_IN_PROGRESS' ||
+            (errorMessage?.toLowerCase().contains('in progress') == true));
+
     final isUncertain = err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.sendTimeout ||
         err.type == DioExceptionType.receiveTimeout ||
@@ -136,22 +188,16 @@ class IdempotencyInterceptor extends Interceptor {
         status == 504 ||
         status == 502;
 
-    final responseData = err.response?.data;
-    final isIdempotencyInProgress = status == 409 &&
-        (responseData is Map &&
-            (responseData['code'] == 'IDEMPOTENCY_IN_PROGRESS' ||
-                responseData['message']?.toString().contains('in progress') == true));
-
     final hasRetryAfter = err.response?.headers.value('retry-after') != null;
 
-    final shouldPreserveScope =
-        isUncertain || isIdempotencyInProgress || hasRetryAfter || status == 409;
+    // Only preserve scope key if operation is explicitly in-progress on the server (to allow polling/settling)
+    // or if an uncertain network timeout occurred (without explicit key expiry/rejection).
+    final shouldPreserveScope = !isIdempotencyExpiredOrReused &&
+        (isIdempotencyInProgress || (isUncertain && !isIdempotencyExpiredOrReused) || (hasRetryAfter && isIdempotencyInProgress));
 
-    // Only clear on deterministic 4xx client errors where the server processed and rejected
-    if (!shouldPreserveScope && status != null && status >= 400 && status < 500) {
-      final scope = err.requestOptions.extra['idempotency_scope'] as String?;
-      if (scope != null) {
-        IdempotencyScopeManager.clearScope(scope);
+    if (scope != null) {
+      if (!shouldPreserveScope) {
+        IdempotencyScopeManager.clearIntent(scope);
       }
     }
 
