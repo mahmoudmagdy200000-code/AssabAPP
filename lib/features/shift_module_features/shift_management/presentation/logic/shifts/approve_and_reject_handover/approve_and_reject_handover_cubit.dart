@@ -1,4 +1,5 @@
 import 'package:assab/core/errors/api_error_model.dart';
+import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/utils/currency_normalizer.dart';
@@ -13,11 +14,32 @@ part 'approve_and_reject_handover_state.dart';
 
 @injectable
 class ApproveAndRejectHandoverCubit
-    extends SafeCubit<ApproveAndRejectHandoverState> {
+    extends SafeCubit<ApproveAndRejectHandoverState>
+    with UserIntentOwner {
   ApproveAndRejectHandoverCubit(this._repositoryImp)
     : super(ApproveAndRejectHandoverInitial());
 
   final ShiftManagementRepositoryImp _repositoryImp;
+
+  /// Runs one financial submission as ONE user intent (F-04). Returns null and
+  /// emits a failure when a different submission is blocked until the unknown
+  /// outcome of the previous one is reconciled.
+  Future<T?> _asUserIntent<T>(String fingerprint, Future<T> Function() op) async {
+    final result = await runUserIntent<T>(fingerprint, op);
+    if (result == null) {
+      emit(HandoverActionFailure(ValidationFailure(
+        error: LocalErrorModel(
+          message:
+              'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
+          errors: null,
+        ),
+        icon: CupertinoIcons.exclamationmark_triangle,
+        statusCode: 409,
+        stackTrace: StackTrace.empty,
+      )));
+    }
+    return result;
+  }
 
   Future<void> approveHandover({
     required String shiftId,
@@ -42,12 +64,16 @@ class ApproveAndRejectHandoverCubit
 
     emit(HandoverActionLoading());
 
-    final result = await _repositoryImp.approveHandover(
-      shiftId: shiftId,
-      confirmedAmount: normalized,
-      managerComment: managerComment,
-      transferAttemptId: transferAttemptId,
+    final result = await _asUserIntent(
+      'approve:$shiftId:$normalized:${managerComment ?? ''}',
+      () => _repositoryImp.approveHandover(
+        shiftId: shiftId,
+        confirmedAmount: normalized,
+        managerComment: managerComment,
+        transferAttemptId: transferAttemptId,
+      ),
     );
+    if (result == null) return;
 
     handle(
       result,
@@ -80,13 +106,17 @@ class ApproveAndRejectHandoverCubit
 
     emit(HandoverActionLoading());
 
-    final result = await _repositoryImp.acceptCashierHandover(
+    final result = await _asUserIntent(
+      'accept:$shiftId:$normalized:${comment ?? ''}',
+      () => _repositoryImp.acceptCashierHandover(
       shiftId: shiftId,
       confirmedAmount: normalized,
       receivingShiftId: receivingShiftId,
       transferAttemptId: transferAttemptId,
       comment: comment,
+      ),
     );
+    if (result == null) return;
 
     handle(
       result,
@@ -105,14 +135,18 @@ class ApproveAndRejectHandoverCubit
   }) async {
     emit(HandoverActionLoading());
 
-    final result = await _repositoryImp.rejectCashierHandover(
-      shiftId: shiftId,
-      rejectionReason: rejectionReason,
-      correctionReason: correctionReason,
-      confirmedAmount: confirmedAmount,
-      transferAttemptId: transferAttemptId,
-      managerComment: managerComment,
+    final result = await _asUserIntent(
+      'cashier-reject:$shiftId:${rejectionReason ?? ''}:${correctionReason ?? ''}:${confirmedAmount ?? ''}:${managerComment ?? ''}',
+      () => _repositoryImp.rejectCashierHandover(
+        shiftId: shiftId,
+        rejectionReason: rejectionReason,
+        correctionReason: correctionReason,
+        confirmedAmount: confirmedAmount,
+        transferAttemptId: transferAttemptId,
+        managerComment: managerComment,
+      ),
     );
+    if (result == null) return;
 
     handle(
       result,
@@ -167,7 +201,20 @@ class ApproveAndRejectHandoverCubit
       return;
     }
 
-    if (expectedAmount != null) {
+    if (expectedAmount == null) {
+      emit(HandoverActionFailure(ValidationFailure(
+        error: LocalErrorModel(
+          message:
+              'Handover amount unavailable: cannot confirm receipt without the authoritative handover amount.',
+          errors: null,
+        ),
+        icon: CupertinoIcons.exclamationmark_triangle,
+        statusCode: 422,
+        stackTrace: StackTrace.empty,
+      )));
+      return;
+    }
+    {
       if (!CurrencyNormalizer.areAmountsEqual(parsed, expectedAmount)) {
         emit(HandoverActionFailure(ValidationFailure(
           error: LocalErrorModel(
@@ -227,17 +274,22 @@ class ApproveAndRejectHandoverCubit
       return;
     }
 
+    final validatedRole = effectiveRole!;
     emit(HandoverActionLoading());
 
-    final result = effectiveRole == UserType.cashier
-        ? await _repositoryImp.rejectCashierHandover(
-            shiftId: shiftId,
-            rejectionReason: managerComment,
-          )
-        : await _repositoryImp.rejectHandover(
-            shiftId: shiftId,
-            managerComment: managerComment,
-          );
+    final result = await _asUserIntent(
+      'reject:${validatedRole.name}:$shiftId:$managerComment',
+      () => validatedRole == UserType.cashier
+          ? _repositoryImp.rejectCashierHandover(
+              shiftId: shiftId,
+              rejectionReason: managerComment,
+            )
+          : _repositoryImp.rejectHandover(
+              shiftId: shiftId,
+              managerComment: managerComment,
+            ),
+    );
+    if (result == null) return;
 
     handle(
       result,
@@ -252,10 +304,14 @@ class ApproveAndRejectHandoverCubit
   }) async {
     emit(HandoverActionLoading());
 
-    final result = await _repositoryImp.requestHandoverCorrection(
-      shiftId: shiftId,
-      managerComment: managerComment,
+    final result = await _asUserIntent(
+      'correction:$shiftId:${managerComment ?? ''}',
+      () => _repositoryImp.requestHandoverCorrection(
+        shiftId: shiftId,
+        managerComment: managerComment,
+      ),
     );
+    if (result == null) return;
 
     handle(
       result,

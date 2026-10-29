@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:dio/dio.dart';
@@ -19,7 +20,11 @@ class UserIntent {
   UserIntent(this.key, {this.state = IntentState.inFlight})
       : createdAt = DateTime.now();
 
+  /// A retryable (unresolved) intent never expires by TTL: its outcome is unknown,
+  /// so silently minting a new key could duplicate a financial command. It is
+  /// released only by a definitive response or explicit reconciliation.
   bool get isExpired =>
+      state != IntentState.retryable &&
       DateTime.now().difference(createdAt) > IdempotencyScopeManager.defaultTtl;
 }
 
@@ -28,6 +33,20 @@ class IdempotencyScopeManager {
   static final Map<String, UserIntent> _activeIntents = {};
   static final Set<String> _completedKeys = {};
   static const Duration defaultTtl = Duration(minutes: 5);
+
+  /// Per-user-action intent ids whose last attempt had an unknown outcome
+  /// (timeout / 502 / 504 / IDEMPOTENCY_IN_PROGRESS). Cleared on any definitive result.
+  static final Set<String> _unresolvedIntentIds = {};
+
+  static bool isIntentUnresolved(String intentId) =>
+      _unresolvedIntentIds.contains(intentId);
+
+  static void markIntentUnresolved(String intentId) =>
+      _unresolvedIntentIds.add(intentId);
+
+  /// Explicit reconciliation / abandonment of a user action.
+  static void resolveIntent(String intentId) =>
+      _unresolvedIntentIds.remove(intentId);
 
   static String _payloadFingerprint(dynamic data) {
     if (data == null) return '';
@@ -53,6 +72,7 @@ class IdempotencyScopeManager {
     String path, [
     String? explicitScope,
     dynamic data,
+    String? intentId,
   ]) {
     if (explicitScope != null && explicitScope.isNotEmpty) {
       return explicitScope;
@@ -61,7 +81,9 @@ class IdempotencyScopeManager {
     final actor = UserTypeService.selectedUserType?.value ?? 'actor';
     final payloadHash = _payloadFingerprint(data);
     final payloadPart = payloadHash.isNotEmpty ? ':$payloadHash' : '';
-    return '$actor:${method.toUpperCase()}:$normalizedPath$payloadPart';
+    final intentPart =
+        (intentId != null && intentId.isNotEmpty) ? ':intent=$intentId' : '';
+    return '$actor:${method.toUpperCase()}:$normalizedPath$payloadPart$intentPart';
   }
 
   /// Start a new explicit user intent for a logical scope.
@@ -141,6 +163,7 @@ class IdempotencyScopeManager {
   static void resetAll() {
     _activeIntents.clear();
     _completedKeys.clear();
+    _unresolvedIntentIds.clear();
   }
 
   /// Generate RFC4122 v4 UUID
@@ -169,11 +192,14 @@ class IdempotencyInterceptor extends Interceptor {
     if (options.method.toUpperCase() == 'POST') {
       final isFinancial = _financialPathRegex.hasMatch(options.path);
       if (isFinancial) {
+        final intentId = options.extra['idempotency_intent_id'] as String? ??
+            IdempotencyIntent.current;
         final scope = IdempotencyScopeManager.deriveScope(
           options.method,
           options.path,
           options.extra['idempotency_scope'] as String?,
           options.data,
+          intentId,
         );
 
         String? key;
@@ -192,6 +218,7 @@ class IdempotencyInterceptor extends Interceptor {
 
         options.extra['idempotency_key'] = key;
         options.extra['idempotency_scope'] = scope;
+        if (intentId != null) options.extra['idempotency_intent_id'] = intentId;
         options.headers['Idempotency-Key'] = key;
       }
     }
@@ -214,6 +241,9 @@ class IdempotencyInterceptor extends Interceptor {
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
       IdempotencyScopeManager.markIntentCompleted(scope, key);
+      final doneIntent =
+          response.requestOptions.extra['idempotency_intent_id'] as String?;
+      if (doneIntent != null) IdempotencyScopeManager.resolveIntent(doneIntent);
     }
     handler.next(response);
   }
@@ -261,12 +291,95 @@ class IdempotencyInterceptor extends Interceptor {
     final shouldPreserveScope = !isIdempotencyExpiredOrReused &&
         (isIdempotencyInProgress || (isUncertain && !isIdempotencyExpiredOrReused) || (hasRetryAfter && isIdempotencyInProgress));
 
+    final errIntent =
+        err.requestOptions.extra['idempotency_intent_id'] as String?;
     if (shouldPreserveScope) {
       IdempotencyScopeManager.markIntentRetryable(scope);
+      if (errIntent != null) {
+        IdempotencyScopeManager.markIntentUnresolved(errIntent);
+      }
     } else {
       IdempotencyScopeManager.clearIntent(scope);
+      if (errIntent != null) IdempotencyScopeManager.resolveIntent(errIntent);
     }
 
     handler.next(err);
+  }
+}
+
+
+/// Carries the identity of ONE user-initiated business action (a tap on
+/// "submit") down to [IdempotencyInterceptor] through the async call chain
+/// (Dart [Zone]), so no Retrofit signature / generated code needs to change.
+///
+/// Requests made inside [run] with the same intent id share an idempotency
+/// scope (genuine retransmissions keep their key); a different intent id can
+/// never reuse another action's key, regardless of identical payloads or TTL.
+class IdempotencyIntent {
+  IdempotencyIntent._();
+
+  static const Symbol _zoneKey = #assabIdempotencyIntentId;
+
+  static String newId() => IdempotencyScopeManager.generateUuidV4();
+
+  static String? get current => Zone.current[_zoneKey] as String?;
+
+  static Future<T> run<T>(String intentId, Future<T> Function() body) {
+    return runZoned(body, zoneValues: {_zoneKey: intentId});
+  }
+}
+
+/// Mixin for presentation-layer owners (cubits) of a financial submission.
+///
+/// - A new submission (no unresolved prior attempt) gets a fresh intent id.
+/// - A user retry of the SAME unresolved submission (same fingerprint) re-uses
+///   the intent id, hence the original key.
+/// - A DIFFERENT submission while one is unresolved is refused (returns null):
+///   the outcome of the first must be reconciled first; its key is never
+///   silently swapped.
+/// - Definitive outcomes (success, rejection, validation failure) release the
+///   intent, so the next tap is a new business action with a new key.
+mixin UserIntentOwner {
+  String? _userIntentId;
+  String? _userIntentFingerprint;
+
+  /// Returns null when blocked pending reconciliation.
+  Future<T?> runUserIntent<T>(
+    String fingerprint,
+    Future<T> Function() operation,
+  ) async {
+    final existing = _userIntentId;
+    if (existing != null &&
+        _userIntentFingerprint != fingerprint &&
+        IdempotencyScopeManager.isIntentUnresolved(existing)) {
+      return null;
+    }
+    if (existing == null || _userIntentFingerprint != fingerprint) {
+      _userIntentId = IdempotencyIntent.newId();
+      _userIntentFingerprint = fingerprint;
+    }
+    final id = _userIntentId!;
+    try {
+      return await IdempotencyIntent.run<T>(id, operation);
+    } finally {
+      if (!IdempotencyScopeManager.isIntentUnresolved(id)) {
+        _userIntentId = null;
+        _userIntentFingerprint = null;
+      }
+    }
+  }
+
+  /// True while the last submission's outcome is unknown.
+  bool get hasUnresolvedUserIntent =>
+      _userIntentId != null &&
+      IdempotencyScopeManager.isIntentUnresolved(_userIntentId!);
+
+  /// Call only after server state has been reconciled (e.g. a refetch showed
+  /// the outcome). The next submission becomes a distinct action with a new key.
+  void reconcileUserIntent() {
+    final id = _userIntentId;
+    if (id != null) IdempotencyScopeManager.resolveIntent(id);
+    _userIntentId = null;
+    _userIntentFingerprint = null;
   }
 }

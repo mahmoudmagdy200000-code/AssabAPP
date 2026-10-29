@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
+import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_request_with_variance.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
@@ -64,7 +65,7 @@ class EndShiftAllocationsUpdated extends EndShiftState {
 }
 
 @injectable
-class EndShiftCubit extends SafeCubit<EndShiftState> {
+class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   final ShiftManagementRepositoryImp _repository;
 
   EndShiftCubit(
@@ -376,12 +377,18 @@ class EndShiftCubit extends SafeCubit<EndShiftState> {
       variance: variance,
     );
 
-    final result = await _repository.endShift(
-      shiftId: shiftId,
-      endShiftRequest: request,
+    final result = await runUserIntent(
+      'end:$shiftId:${request.countedCash}:${request.totalSales}:${request.cashCollected}:${request.cardPayments}',
+      () => _repository.endShift(shiftId: shiftId, endShiftRequest: request),
     );
 
     _isSubmitting = false;
+    if (result == null) {
+      emit(EndShiftFailure(_createValidationFailure(
+        'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
+      )));
+      return;
+    }
     handle(
       result,
       success: (_) => emit(EndShiftSuccess()),
@@ -464,9 +471,18 @@ class EndShiftCubit extends SafeCubit<EndShiftState> {
       isManager: request.isManager,
     );
 
-    final result = await _repository.endShiftWithHandOver(shiftId, boundRequest);
+    final result = await runUserIntent(
+      'end-with-handover:$shiftId:${boundRequest.countedCash}:${boundRequest.nextCashierId}:${boundRequest.handoverAmount}:${boundRequest.totalSales}',
+      () => _repository.endShiftWithHandOver(shiftId, boundRequest),
+    );
 
     _isSubmitting = false;
+    if (result == null) {
+      emit(EndShiftFailure(_createValidationFailure(
+        'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
+      )));
+      return;
+    }
     handle(
       result,
       success: (_) => emit(EndShiftSuccess()),

@@ -1,4 +1,7 @@
+import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
+import 'package:assab/core/network/idempotency_interceptor.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/reassign_shift/reassign_shift_with_handover.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/available_cashier_entity.dart';
@@ -19,7 +22,8 @@ import '../../../../domain/entity/shift/aggregator_entites.dart';
 part 'reassign_shift_state.dart';
 
 @injectable
-class ReassignShiftCubit extends SafeCubit<ReassignShiftState> {
+class ReassignShiftCubit extends SafeCubit<ReassignShiftState>
+    with UserIntentOwner {
   final ShiftManagementRepositoryImp _repository;
   final ReassignShiftParams params;
 
@@ -129,10 +133,23 @@ class ReassignShiftCubit extends SafeCubit<ReassignShiftState> {
   }) async {
     emit(ReassignShiftLoading());
 
-    final result = await _repository.reassignShiftWithHandOver(
-      shift.id,
-      request,
+    final result = await runUserIntent(
+      'reassign-with-handover:${shift.id}',
+      () => _repository.reassignShiftWithHandOver(shift.id, request),
     );
+    if (result == null) {
+      emit(ReassignShiftFailure(ValidationFailure(
+        error: LocalErrorModel(
+          message:
+              'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
+          errors: null,
+        ),
+        icon: CupertinoIcons.exclamationmark_triangle,
+        statusCode: 409,
+        stackTrace: StackTrace.empty,
+      )));
+      return;
+    }
 
     handle(
       result,
