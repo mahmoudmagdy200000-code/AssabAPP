@@ -1,4 +1,5 @@
 import 'package:assab/core/widgets/app_button.dart';
+import 'package:assab/core/utils/currency_normalizer.dart';
 import 'package:assab/core/widgets/app_failure_widget.dart';
 import 'package:assab/core/widgets/app_loading_widget.dart';
 import 'package:assab/features/branch_manager_requests/presentation/widgets/approve_responibility_sheet_widget.dart';
@@ -37,7 +38,7 @@ class VarianceDetailsBottomSheetWidget extends StatefulWidget {
   });
   final String shiftId;
   final double handoverAmount;
-  final int varianceAmount;
+  final num varianceAmount;
   final bool? showButtons;
   final bool isResponsibilityRejected;
   final Function()? successFunction;
@@ -135,14 +136,14 @@ class _VarianceDetailsBottomSheetWidgetState
                               const CustomDivider(),
                               14.verticalSpace,
                               ShiftRowTitleAndAmount(
-                                amount: widget.handoverAmount.toString(),
+                                amount: CurrencyNormalizer.formatSar(widget.handoverAmount),
                                 title: context.tr.cashHandover,
                               ),
                               14.verticalSpace,
                               const CustomDivider(),
                               14.verticalSpace,
                               ShiftRowTitleAndAmount(
-                                amount: widget.varianceAmount.toString(),
+                                amount: CurrencyNormalizer.formatSar(widget.varianceAmount),
                                 title: context.tr.varianceAmount,
                               ),
                               14.verticalSpace,

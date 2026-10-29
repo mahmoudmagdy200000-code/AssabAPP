@@ -4,7 +4,6 @@ import 'package:assab/features/shift_module_features/shift_management/domain/ent
 import 'package:assab/features/shift_module_features/shift_management/presentation/strategies/manager_shift_Management_screen_strategy/manager_shift_handover_card_strategy/manager_shift_handover_widget_strategy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../../../../../core/constants/app_assets.dart';
 import '../../../../../../../core/di/dependency_injection.dart';
 import '../../../../../../../core/enums/shift_status/shift_handover_status.dart';
@@ -22,7 +21,6 @@ import '../../../ui/widgets/cashier_shifts_management_widgets/shift_card_widgets
 import '../../../ui/widgets/manager_shift_management_widgets/manager_approve_button_widget.dart';
 import '../../../ui/widgets/manager_shift_management_widgets/manager_see_details_button_widget.dart';
 import '../../../ui/widgets/variance/variance_details_bottom_sheet_widget.dart';
-
 class ManagerShiftHandoverRejectedWidget
     extends ManagerShiftHandoverCardStrategy {
   final HandoverDetailsEntity handover;
@@ -33,7 +31,6 @@ class ManagerShiftHandoverRejectedWidget
     this.showButtons = true,
     required this.managerName,
   });
-
   @override
   Widget buildTabContent(BuildContext context) {
     return CashierInfoContainerWidget(
@@ -42,7 +39,6 @@ class ManagerShiftHandoverRejectedWidget
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(context.tr.handover, style: AppStyles.s13W600),
-
             Container(
               color: Colors.white,
               alignment: Alignment.center,
@@ -56,7 +52,6 @@ class ManagerShiftHandoverRejectedWidget
             ),
           ],
         ),
-
         1.verticalSpace,
         buildShiftCardRowWidget(
           context: context,
@@ -66,7 +61,6 @@ class ManagerShiftHandoverRejectedWidget
           hasSpaceBetweenTitleAndValue: true,
           value: handover.handoverAmount.toStringAsFixed(2),
         ),
-
         1.verticalSpace,
         buildShiftCardRowWidget(
           context: context,
@@ -76,7 +70,6 @@ class ManagerShiftHandoverRejectedWidget
           hasSpaceBetweenTitleAndValue: true,
           value: handover.varianceAmount.toStringAsFixed(2),
         ),
-
         if (handover.varianceAmount != 0) // Variance != 0
         ...[
           1.verticalSpace,
@@ -88,8 +81,7 @@ class ManagerShiftHandoverRejectedWidget
                   create: (context) => getIt<VarianceCubit>(),
                   child: VarianceDetailsBottomSheetWidget(
                     handoverAmount: handover.handoverAmount,
-                    varianceAmount:
-                        int.tryParse((handover.varianceAmount).toString()) ?? 0,
+                    varianceAmount: handover.varianceAmount,
                     shiftId: handover.cashierShiftId,
                   ),
                 );
@@ -109,9 +101,7 @@ class ManagerShiftHandoverRejectedWidget
                     color: AppColors.darkOrange,
                     size: 17.w,
                   ),
-
                   13.horizontalSpace,
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +113,6 @@ class ManagerShiftHandoverRejectedWidget
                             color: context.customColor.text1,
                           ),
                         ),
-
                         Text(
                           context.tr.varianceReasonWasAddedDuringHandover,
                           textAlign: TextAlign.start,
@@ -135,7 +124,6 @@ class ManagerShiftHandoverRejectedWidget
                       ],
                     ),
                   ),
-
                   AppSvg(
                     assetName: Directionality.of(context) == TextDirection.ltr
                         ? AppAssets.arrowRight
@@ -150,7 +138,6 @@ class ManagerShiftHandoverRejectedWidget
             ),
           ),
         ],
-
         1.verticalSpace,
         buildShiftCardRowWidget(
           context: context,
@@ -159,7 +146,6 @@ class ManagerShiftHandoverRejectedWidget
           hasSpaceBetweenTitleAndValue: true,
           value: handover.handoverTo ?? context.tr.no_name,
         ),
-
         1.verticalSpace,
         buildShiftCardRowWidget(
           context: context,
@@ -168,7 +154,6 @@ class ManagerShiftHandoverRejectedWidget
           hasSpaceBetweenTitleAndValue: true,
           value: handover.formattedHandoverDate,
         ),
-
         1.verticalSpace,
         buildShiftCardRowWidget(
           context: context,
@@ -177,7 +162,6 @@ class ManagerShiftHandoverRejectedWidget
           hasSpaceBetweenTitleAndValue: true,
           value: handover.formattedHandoverTime,
         ),
-
         Container(
           alignment: Alignment.center,
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
@@ -190,9 +174,7 @@ class ManagerShiftHandoverRejectedWidget
             ),
           ),
         ),
-
         const CustomDivider(),
-
         if (showButtons)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -213,7 +195,6 @@ class ManagerShiftHandoverRejectedWidget
                     handover.handoverStatus == HandoverStatus.rejected,
                 openedFromModalSheet: true,
               ),
-
               ManagerSeeDetailsButtonWidget(
                 buttonWidth: 150.w,
                 handover: handover,

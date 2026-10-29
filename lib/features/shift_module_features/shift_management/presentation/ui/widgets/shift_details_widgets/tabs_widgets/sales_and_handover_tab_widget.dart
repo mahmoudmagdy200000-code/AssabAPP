@@ -364,7 +364,7 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
                       cashierName: shift.cashier.name,
                       handoverAt: shift.formattedHandedOverDateTime,
                       branchName: shift.shiftInfoDetails?.branchName ?? 'N/A',
-                      cashGiven: shift.cashGiven ?? shift.handoverAmount ?? shift.closingBalance,
+                      cashGiven: shift.cashGiven ?? shift.handoverAmount,
                       variance: shift.variance,
                     ),
                   ),
@@ -402,7 +402,7 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
                     cashierShiftId: shift.id,
                     cashierName: shift.cashier.name,
                     cashFrom: shift.cashier.name,
-                    cashGiven: shift.cashGiven ?? shift.handoverAmount ?? shift.closingBalance,
+                      cashGiven: shift.cashGiven ?? shift.handoverAmount,
                     variance: shift.variance,
                     managerName: context.tr.manager,
                     successFunction: () {

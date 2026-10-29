@@ -9,7 +9,6 @@ import 'package:assab/core/widgets/saudi_riyal_svg_widget.dart';
 import 'package:assab/features/branch_manager_requests/presentation/mappers/responsibility_ui_mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../../core/cubits/validation/validation_cubit.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/styles/app_colors.dart';
@@ -25,35 +24,28 @@ import '../cubit/get_variances/get_variances_state.dart';
 import '../formatters/variance_time_format.dart';
 import '../widgets/branch_manager_requests_empty_widget.dart';
 import '../widgets/branch_requests_status_widget.dart';
-
 class BranchManagerRequestVarianceView extends StatefulWidget {
   const BranchManagerRequestVarianceView({super.key});
-
   @override
   State<BranchManagerRequestVarianceView> createState() =>
       _BranchManagerRequestVarianceViewState();
 }
-
 class _BranchManagerRequestVarianceViewState
     extends State<BranchManagerRequestVarianceView> {
   late final ScrollController _scrollController;
-
   @override
   void initState() {
     super.initState();
     _getVariances();
-
     _scrollController = ScrollController();
     _scrollController.addListener(_listenToScroll);
   }
-
   @override
   void dispose() {
     _scrollController.removeListener(_listenToScroll);
     _scrollController.dispose();
     super.dispose();
   }
-
   void _listenToScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 400.r) {
@@ -62,11 +54,9 @@ class _BranchManagerRequestVarianceViewState
       }
     }
   }
-
   void _getVariances({bool loadMore = false}) {
     context.read<GetVariancesCubit>().getVariances(loadMore: loadMore);
   }
-
   @override
   Widget build(BuildContext context) {
     return AppPaddingWidget(
@@ -75,7 +65,6 @@ class _BranchManagerRequestVarianceViewState
       child: BlocBuilder<GetVariancesCubit, GetVariancesState>(
         builder: (context, state) {
           final orders = <VarianceItem>[];
-
           if (state is GetVariancesLoading) {
             return const AppLoadingWidget();
           } else if (state is GetVariancesFailure) {
@@ -86,21 +75,18 @@ class _BranchManagerRequestVarianceViewState
             );
           } else if (state is GetVariancesSuccess) {
             orders.addAll(state.variances);
-
             context.read<ValidationCubit>().validateFieldAndStoreValue(
               fieldName: 'count_variance',
               value: orders.length.toString(),
               isValid: true,
             );
           }
-
           if (orders.isEmpty) {
             return BranchManagerRequestsEmptyWidget(
               onRefresh: _getVariances,
               message: context.tr.noVariances,
             );
           }
-
           return RefreshIndicator(
             onRefresh: () async => _getVariances(),
             child: ListView.builder(
@@ -133,7 +119,6 @@ class _BranchManagerRequestVarianceViewState
                               ),
                             ),
                           ),
-
                           BranchRequestsStatusWidget(
                             status: orders[index].responsibilityStatus.title(
                               context,
@@ -192,7 +177,6 @@ class _BranchManagerRequestVarianceViewState
                                         orders[index].responsibilityReviewedAt,
                                       ),
                               ),
-
                           style: AppStyles.s14W400.copyWith(
                             color: orders[index].responsibilityStatus
                                 .textColor(),
@@ -200,7 +184,6 @@ class _BranchManagerRequestVarianceViewState
                           textAlign: TextAlign.center,
                         ),
                       ),
-
                       CustomTextButton(
                         text: context.tr.reviewDetails,
                         onTap: () {
@@ -210,16 +193,11 @@ class _BranchManagerRequestVarianceViewState
                               child: VarianceDetailsBottomSheetWidget(
                                 handoverAmount:
                                     double.tryParse(
-                                      (orders[index].cashHandoverAmount ?? 0)
+                                      orders[index].cashHandoverAmount
                                           .toString(),
                                     ) ??
                                     0,
-                                varianceAmount:
-                                    int.tryParse(
-                                      (orders[index].varianceAmount ?? 0)
-                                          .toString(),
-                                    ) ??
-                                    0,
+                                 varianceAmount: orders[index].varianceAmount,
                                 showButtons:
                                     orders[index].responsibilityStatus !=
                                     ResponsibilityStatus.approved,
@@ -257,7 +235,6 @@ class _BranchManagerRequestVarianceViewState
       ),
     );
   }
-
   Widget _buildRowItem({
     required BuildContext context,
     required String asset,
