@@ -595,10 +595,14 @@ class _ShiftManagementRemoteDataSource
   @override
   Future<ShiftEndResponseModel> endManagerShift({
     required EndManagerShiftRequestModel endManagerShiftRequestModel,
+    String? idempotencyKey,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      if (idempotencyKey != null) r'Idempotency-Key': idempotencyKey,
+    };
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(endManagerShiftRequestModel.toJson());
     final _options = _setStreamType<ShiftEndResponseModel>(
@@ -625,10 +629,14 @@ class _ShiftManagementRemoteDataSource
   @override
   Future<ManagerShiftUpdateResponseModel> updateManagerHandoverShift({
     required UpdateManagerHandoverRequestModel updateManagerShiftRequestModel,
+    String? idempotencyKey,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      if (idempotencyKey != null) r'Idempotency-Key': idempotencyKey,
+    };
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(updateManagerShiftRequestModel.toJson());
     final _options = _setStreamType<ManagerShiftUpdateResponseModel>(

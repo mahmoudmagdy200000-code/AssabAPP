@@ -7,6 +7,12 @@ class CashierBreakdownModel {
   @JsonKey(name: 'cashier_id')
   final String cashierId;
 
+  @JsonKey(name: 'cashier_shift_id')
+  final String? cashierShiftId;
+
+  @JsonKey(name: 'expected_revision')
+  final int? expectedRevision;
+
   @JsonKey(name: 'cashier_name')
   final String cashierName;
 
@@ -28,6 +34,8 @@ class CashierBreakdownModel {
 
   const CashierBreakdownModel({
     required this.cashierId,
+    this.cashierShiftId,
+    this.expectedRevision,
     required this.cashierName,
     this.cashCollected,
     this.cardPayments,

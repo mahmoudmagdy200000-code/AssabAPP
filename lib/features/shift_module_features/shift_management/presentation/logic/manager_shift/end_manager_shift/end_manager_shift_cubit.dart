@@ -1,4 +1,5 @@
 import 'package:assab/core/errors/api_failure.dart';
+import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/end_shift_models/cashier_breakdown_request_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/end_shift_models/manager_end_shift_request_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/final_daily_close/cashier_breakdown_entity.dart';
@@ -34,6 +35,10 @@ class EndAndUpdateManagerShiftCubit
 
     emit(EndManagerShiftButtonLoading());
 
+    final hasMutations = cashierBreakdown.any((e) => e.isModified);
+    final idempotencyKey =
+        hasMutations ? IdempotencyScopeManager.generateUuidV4() : null;
+
     final result = await _repo.endManagerShift(
       request: EndManagerShiftRequestModel(
         handoverTiming: handoverTiming,
@@ -45,14 +50,20 @@ class EndAndUpdateManagerShiftCubit
             .map(
               (e) => CashierBreakdownRequestModel(
                 cashierId: e.cashierId,
+                cashierShiftId: e.cashierShiftId,
                 cashCollected: e.cashCollected,
                 cardPayments: e.cardPayments,
                 deliveryAppPayments: e.deliveryAppPayments,
-                sales: e.cashierTotal,
+                sales: e.totalSales,
+                expectedRevision: e.isModified ? e.expectedRevision : null,
+                reason: e.isModified
+                    ? (e.reason ?? 'Manager daily close correction')
+                    : null,
               ),
             )
             .toList(),
       ),
+      idempotencyKey: idempotencyKey,
     );
 
     handle(
@@ -71,20 +82,30 @@ class EndAndUpdateManagerShiftCubit
 
     emit(EndManagerShiftButtonLoading());
 
+    final hasMutations = cashierBreakdown.any((e) => e.isModified);
+    final idempotencyKey =
+        hasMutations ? IdempotencyScopeManager.generateUuidV4() : null;
+
     final result = await _repo.updateManagerHandoverShift(
       request: UpdateManagerHandoverRequestModel(
         cashierBreakdown: cashierBreakdown
             .map(
               (e) => CashierBreakdownRequestModel(
                 cashierId: e.cashierId,
+                cashierShiftId: e.cashierShiftId,
                 cashCollected: e.cashCollected,
                 cardPayments: e.cardPayments,
                 deliveryAppPayments: e.deliveryAppPayments,
-                sales: e.cashierTotal,
+                sales: e.totalSales,
+                expectedRevision: e.isModified ? e.expectedRevision : null,
+                reason: e.isModified
+                    ? (e.reason ?? 'Manager daily close correction')
+                    : null,
               ),
             )
             .toList(),
       ),
+      idempotencyKey: idempotencyKey,
     );
 
     handle(

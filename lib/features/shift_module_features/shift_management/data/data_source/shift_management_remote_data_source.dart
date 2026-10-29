@@ -150,12 +150,14 @@ abstract class ShiftManagementRemoteDataSource {
   @POST('${ApiEndpoint.branchWorkDayMgmt}/end')
   Future<ShiftEndResponseModel> endManagerShift({
     @Body() required EndManagerShiftRequestModel endManagerShiftRequestModel,
+    @Header('Idempotency-Key') String? idempotencyKey,
   });
 
   @PUT('${ApiEndpoint.branchWorkDayMgmt}/daily-close')
   Future<ManagerShiftUpdateResponseModel> updateManagerHandoverShift({
     @Body()
     required UpdateManagerHandoverRequestModel updateManagerShiftRequestModel,
+    @Header('Idempotency-Key') String? idempotencyKey,
   });
 
   @POST(ApiEndpoint.cashierStartHandover)

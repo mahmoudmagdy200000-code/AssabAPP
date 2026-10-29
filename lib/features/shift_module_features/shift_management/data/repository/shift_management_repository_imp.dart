@@ -343,10 +343,12 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
 
   FutureApiResult<ManagerShiftEndDataEntity> endManagerShift({
     required EndManagerShiftRequestModel request,
+    String? idempotencyKey,
   }) async {
     return execute(() async {
       final response = await _remoteDataSource.endManagerShift(
         endManagerShiftRequestModel: request,
+        idempotencyKey: idempotencyKey,
       );
 
       final ManagerShiftEndDataEntity entity = response.data.toEntity();
@@ -357,10 +359,12 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
 
   FutureApiResult<ManagerShiftUpdateDataEntity> updateManagerHandoverShift({
     required UpdateManagerHandoverRequestModel request,
+    String? idempotencyKey,
   }) async {
     return execute(() async {
       final response = await _remoteDataSource.updateManagerHandoverShift(
         updateManagerShiftRequestModel: request,
+        idempotencyKey: idempotencyKey,
       );
 
       final ManagerShiftUpdateDataEntity entity = response.data.toEntity();

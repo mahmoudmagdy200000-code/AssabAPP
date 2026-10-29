@@ -24,7 +24,7 @@ class TotalsEntity {
         (sum, c) => sum + c.deliveryAppPayments,
       ),
       totalVariance: cashiers.fold(0, (sum, c) => sum + c.variance.abs()),
-      totalSales: cashiers.fold(0, (sum, c) => sum + c.cashierTotal),
+      totalSales: cashiers.fold(0, (sum, c) => sum + c.totalSales),
     );
   }
 

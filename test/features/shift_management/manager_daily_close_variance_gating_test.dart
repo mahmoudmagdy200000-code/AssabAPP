@@ -32,6 +32,8 @@ class _MockShiftManagementRepo extends ShiftManagementRepositoryImp {
   int updateManagerHandoverCallCount = 0;
   EndManagerShiftRequestModel? lastEndRequest;
   UpdateManagerHandoverRequestModel? lastUpdateRequest;
+  String? lastEndIdempotencyKey;
+  String? lastUpdateIdempotencyKey;
 
   static const _dummyEndData = ManagerShiftEndDataEntity(
     finalHandover: FinalHandoverEndShiftEntity(
@@ -76,18 +78,22 @@ class _MockShiftManagementRepo extends ShiftManagementRepositoryImp {
   @override
   FutureApiResult<ManagerShiftEndDataEntity> endManagerShift({
     required EndManagerShiftRequestModel request,
+    String? idempotencyKey,
   }) async {
     endManagerShiftCallCount++;
     lastEndRequest = request;
+    lastEndIdempotencyKey = idempotencyKey;
     return ApiResult.success(_dummyEndData);
   }
 
   @override
   FutureApiResult<ManagerShiftUpdateDataEntity> updateManagerHandoverShift({
     required UpdateManagerHandoverRequestModel request,
+    String? idempotencyKey,
   }) async {
     updateManagerHandoverCallCount++;
     lastUpdateRequest = request;
+    lastUpdateIdempotencyKey = idempotencyKey;
     return ApiResult.success(_dummyUpdateData);
   }
 }
@@ -173,6 +179,8 @@ void main() {
     test('CashierBreakdownModel deserializes server variance but omits it during toJson', () {
       final serverJson = {
         'cashier_id': 'c-001',
+        'cashier_shift_id': 'cs-001',
+        'expected_revision': 1,
         'cashier_name': 'Test Cashier',
         'cash_collected': 100.0,
         'card_payments': 200.0,
@@ -183,10 +191,14 @@ void main() {
 
       final model = CashierBreakdownModel.fromJson(serverJson);
       expect(model.variance, equals(-15.5), reason: 'Server response variance must be readable for display');
+      expect(model.cashierShiftId, equals('cs-001'));
+      expect(model.expectedRevision, equals(1));
 
       final serialized = model.toJson();
       expect(serialized.containsKey('variance'), isFalse,
           reason: 'includeToJson: false must ensure variance is omitted when model is serialized');
+      expect(serialized['cashier_shift_id'], equals('cs-001'));
+      expect(serialized['expected_revision'], equals(1));
     });
   });
 
@@ -256,6 +268,167 @@ void main() {
 
       expect(mockRepo.endManagerShiftCallCount, equals(0),
           reason: 'In-flight double submission must be dropped');
+    });
+
+    test('5. Shift WITH variance != 0 asserts serialized sales EQUALS server total_sales (115), NOT variance-reduced value (85)', () async {
+      final mockRepo = _MockShiftManagementRepo();
+      final cubit = EndAndUpdateManagerShiftCubit(mockRepo);
+      cubit.handoverTiming = HandoverTiming.today;
+
+      // Server provided shift with gross total_sales = 115.0, cards = 50.0, apps = 25.0, cash = 40.0, variance = 30.0
+      // Previous defect computed cashierTotal = (40 + 50 + 25) - 30 = 85.0 and sent sales: 85.0!
+      final cashier = CashierBreakdownEntity(
+        cashierId: 'cashier-101',
+        cashierShiftId: 'shift-uuid-101',
+        expectedRevision: 2,
+        cashierName: 'Ahmad Cashier',
+        cashCollected: 40.0,
+        cardPayments: 50.0,
+        deliveryAppPayments: 25.0,
+        variance: 30.0,
+        totalSales: 115.0,
+      );
+
+      await cubit.endManagerShift(
+        totalSales: 115.0,
+        cashCollected: 40.0,
+        cardPayments: 50.0,
+        aggregatorPayments: 25.0,
+        cashierBreakdown: [cashier],
+      );
+
+      expect(mockRepo.endManagerShiftCallCount, equals(1));
+      final serializedRow = mockRepo.lastEndRequest!.cashierBreakdown!.first.toJson();
+
+      // Assert sales EQUALS server-provided total_sales (115.0), NOT variance-reduced value (85.0)
+      expect(serializedRow['sales'], equals(115.0),
+          reason: 'Gross sales must remain authoritative (115.0) and never reduced by variance');
+      expect(serializedRow.containsKey('variance'), isFalse,
+          reason: 'Payload must never contain variance key');
+    });
+
+    test('6. Pure review with NO manager edits is a NO-OP: carries no expected_revision/reason/idempotency-key', () async {
+      final mockRepo = _MockShiftManagementRepo();
+      final cubit = EndAndUpdateManagerShiftCubit(mockRepo);
+
+      // Server provided cashier shift in daily close summary
+      final serverCashier = CashierBreakdownEntity(
+        cashierId: 'cashier-201',
+        cashierShiftId: 'shift-uuid-201',
+        expectedRevision: 5,
+        cashierName: 'Fatima Cashier',
+        cashCollected: 200.0,
+        cardPayments: 200.0,
+        deliveryAppPayments: 100.0,
+        variance: 0.0,
+        totalSales: 500.0,
+      );
+
+      // Manager reviews without making ANY edits: isModified must be false
+      expect(serverCashier.isModified, isFalse);
+
+      await cubit.updateManagerHandoverShift(
+        cashierBreakdown: [serverCashier],
+      );
+
+      expect(mockRepo.updateManagerHandoverCallCount, equals(1));
+      expect(mockRepo.lastUpdateIdempotencyKey, isNull,
+          reason: 'Pure NO-OP review must omit Idempotency-Key header');
+
+      final serializedRow = mockRepo.lastUpdateRequest!.cashierBreakdown.first.toJson();
+      expect(serializedRow['cashier_id'], equals('cashier-201'));
+      expect(serializedRow['cashier_shift_id'], equals('shift-uuid-201'));
+      expect(serializedRow['sales'], equals(500.0));
+      expect(serializedRow['cash_collected'], equals(200.0));
+      expect(serializedRow['card_payments'], equals(200.0));
+      expect(serializedRow['delivery_app_payments'], equals(100.0));
+
+      // Assert NO expected_revision or reason sent on NO-OP
+      expect(serializedRow.containsKey('expected_revision'), isFalse,
+          reason: 'NO-OP report review must omit expected_revision');
+      expect(serializedRow.containsKey('reason'), isFalse,
+          reason: 'NO-OP report review must omit reason');
+      expect(serializedRow.containsKey('variance'), isFalse);
+
+      // Now verify that if manager DOES edit a field, expected_revision, reason, and idempotency key are attached
+      final editedCashier = serverCashier.copyWith(cashCollected: 250.0);
+      expect(editedCashier.isModified, isTrue);
+
+      await cubit.updateManagerHandoverShift(
+        cashierBreakdown: [editedCashier],
+      );
+
+      expect(mockRepo.updateManagerHandoverCallCount, equals(2));
+      expect(mockRepo.lastUpdateIdempotencyKey, isNotNull,
+          reason: 'Mutation requires Idempotency-Key');
+      final editedRow = mockRepo.lastUpdateRequest!.cashierBreakdown.first.toJson();
+      expect(editedRow['expected_revision'], equals(5));
+      expect(editedRow['reason'], equals('Manager daily close correction'));
+      expect(editedRow['cash_collected'], equals(250.0));
+      expect(editedRow['sales'], equals(500.0), reason: 'Sales remains server gross sales even on cash edit');
+    });
+
+    test('7. Shortage, surplus, and multi-aggregator cases all preserve gross sales without variance contamination', () async {
+      final mockRepo = _MockShiftManagementRepo();
+      final cubit = EndAndUpdateManagerShiftCubit(mockRepo);
+
+      // Case 7a: Shortage (variance > 0: sales 250.0, counted 220.0, shortage 30.0)
+      final shortageCashier = CashierBreakdownEntity(
+        cashierId: 'c-short',
+        cashierShiftId: 'shift-short',
+        cashierName: 'Short Cashier',
+        cashCollected: 100.0,
+        cardPayments: 80.0,
+        deliveryAppPayments: 40.0,
+        variance: 30.0,
+        totalSales: 250.0,
+      );
+
+      // Case 7b: Surplus (variance < 0: sales 200.0, counted 220.0, surplus -20.0)
+      final surplusCashier = CashierBreakdownEntity(
+        cashierId: 'c-surplus',
+        cashierShiftId: 'shift-surplus',
+        cashierName: 'Surplus Cashier',
+        cashCollected: 150.0,
+        cardPayments: 50.0,
+        deliveryAppPayments: 20.0,
+        variance: -20.0,
+        totalSales: 200.0,
+      );
+
+      // Case 7c: Multi-aggregator breakdown (multiple delivery apps: Jahez 50 + HungerStation 70 + Toyo 30 = 150.0)
+      final multiAggCashier = CashierBreakdownEntity(
+        cashierId: 'c-multiagg',
+        cashierShiftId: 'shift-multiagg',
+        cashierName: 'MultiAgg Cashier',
+        cashCollected: 100.0,
+        cardPayments: 100.0,
+        deliveryAppPayments: 150.0,
+        variance: 0.0,
+        totalSales: 350.0,
+      );
+
+      // TotalsEntity must compute totalSales as sum of authoritative totalSales (250 + 200 + 350 = 800.0)
+      final totals = TotalsEntity.fromCashiers([shortageCashier, surplusCashier, multiAggCashier]);
+      expect(totals.totalSales, equals(800.0),
+          reason: 'TotalsEntity totalSales must be sum of authoritative cashier totalSales, NOT variance-reduced cashierTotal');
+      expect(totals.totalDeliveryApps, equals(210.0));
+      expect(totals.totalVariance, equals(50.0));
+
+      await cubit.updateManagerHandoverShift(
+        cashierBreakdown: [shortageCashier, surplusCashier, multiAggCashier],
+      );
+
+      final breakdown = mockRepo.lastUpdateRequest!.cashierBreakdown;
+      expect(breakdown[0].sales, equals(250.0), reason: 'Shortage case preserves gross sales (250.0)');
+      expect(breakdown[0].toJson().containsKey('variance'), isFalse);
+
+      expect(breakdown[1].sales, equals(200.0), reason: 'Surplus case preserves gross sales (200.0)');
+      expect(breakdown[1].toJson().containsKey('variance'), isFalse);
+
+      expect(breakdown[2].sales, equals(350.0), reason: 'Multi-aggregator case preserves gross sales (350.0)');
+      expect(breakdown[2].deliveryAppPayments, equals(150.0));
+      expect(breakdown[2].toJson().containsKey('variance'), isFalse);
     });
   });
 
