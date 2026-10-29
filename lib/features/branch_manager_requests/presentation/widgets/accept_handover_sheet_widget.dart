@@ -7,7 +7,6 @@ import 'package:assab/core/widgets/custom_text_field.dart';
 import 'package:assab/core/widgets/label_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../../../../../../core/extensions/build_context_extensions.dart';
 import '../../../../../../../../core/extensions/number_extensions.dart';
 import '../../../../../../../../core/styles/app_colors.dart';
@@ -22,7 +21,6 @@ import '../../../shift_module_features/shift_management/presentation/logic/shift
 import '../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/shift_card.dart';
 import '../../../shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/reject_handover_widgets/reject_handover_modal_sheet_widget.dart';
 import 'handover_accepted_sheet_widget.dart';
-
 class AcceptHandoverSheetWidget extends StatefulWidget {
   const AcceptHandoverSheetWidget({
     super.key,
@@ -33,60 +31,51 @@ class AcceptHandoverSheetWidget extends StatefulWidget {
     required this.cashFrom,
     this.actorRole,
   });
-
   final String cashGiven;
   final String variance;
   final String cashFrom;
   final String shiftId;
   final Function() successFunction;
   final UserType? actorRole;
-
   @override
   State<AcceptHandoverSheetWidget> createState() =>
       _AcceptHandoverSheetWidgetModalSheetWidgetState();
 }
-
 class _AcceptHandoverSheetWidgetModalSheetWidgetState
     extends State<AcceptHandoverSheetWidget> {
   late final TextEditingController managerCommentController;
   late final TextEditingController confirmedAmountController;
-
+  UserType? get _effectiveRole => widget.actorRole ?? UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType();
   @override
   void initState() {
     super.initState();
     managerCommentController = TextEditingController();
     confirmedAmountController = TextEditingController();
   }
-
   @override
   void dispose() {
     managerCommentController.dispose();
     confirmedAmountController.dispose();
     super.dispose();
   }
-
   double? get _expectedAmount {
     return CurrencyNormalizer.parseSarAmount(widget.cashGiven);
   }
-
   double? get _confirmedAmount {
     return CurrencyNormalizer.parseSarAmount(confirmedAmountController.text);
   }
-
   bool get _hasAmountMismatch {
     final confirmed = _confirmedAmount;
     final expected = _expectedAmount;
     if (confirmed == null || expected == null) return false;
     return !CurrencyNormalizer.areAmountsEqual(confirmed, expected);
   }
-
   bool get _canConfirm {
     final confirmed = _confirmedAmount;
     final expected = _expectedAmount;
     if (confirmed == null || expected == null) return false;
     return CurrencyNormalizer.areAmountsEqual(confirmed, expected);
   }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -100,9 +89,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(context.tr.acceptHandover, style: AppStyles.s17W500),
-
               5.verticalSpace,
-
               RichText(
                 text: TextSpan(
                   style: AppStyles.s15W500.copyWith(
@@ -120,20 +107,16 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                       ),
                     ),
                     TextSpan(
-                      text: (widget.actorRole == UserType.branchManager ||
-                              UserTypeService.selectedUserType ==
-                                  UserType.branchManager)
+                      text: (_effectiveRole == UserType.branchManager)
                           ? ' as the responsible manager for custody verification.'
                           : context.tr.forTheShiftYouAreAboutToStart,
                     ),
                   ],
                 ),
               ),
-
               10.verticalSpace,
               const CustomDivider(),
               15.verticalSpace,
-
               Container(
                 margin: EdgeInsetsDirectional.only(bottom: 10.h),
                 child: Container(
@@ -150,9 +133,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                         context.tr.openingBalanceTitle,
                         style: AppStyles.s15W600,
                       ),
-
                       12.verticalSpace,
-
                       buildShiftCardRowWidget(
                         context: context,
                         firstTitleSvgAsset: AppAssets.cash,
@@ -161,7 +142,6 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                         firstValueSvgAsset: AppAssets.saudiRiyal,
                         hasSpaceBetweenTitleAndValue: true,
                       ),
-
                       12.verticalSpace,
                       buildShiftCardRowWidget(
                         context: context,
@@ -171,9 +151,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                         firstValueSvgAsset: AppAssets.saudiRiyal,
                         hasSpaceBetweenTitleAndValue: true,
                       ),
-
                       12.verticalSpace,
-
                       buildShiftCardRowWidget(
                         context: context,
                         firstTitleSvgAsset: AppAssets.personSvg,
@@ -181,21 +159,17 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                         value: widget.cashFrom,
                         hasSpaceBetweenTitleAndValue: true,
                       ),
-
                       12.verticalSpace,
                     ],
                   ),
                 ),
               ),
-
               10.verticalSpace,
-
               LabelTextField(
                 text: context.tr.amount,
                 style: AppStyles.s14W400,
                 isLabelRequired: true,
               ),
-
               5.verticalSpace,
               Container(
                 decoration: BoxDecoration(
@@ -220,7 +194,6 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                   },
                 ),
               ),
-
               if (_hasAmountMismatch) ...[
                 Container(
                   margin: EdgeInsets.only(top: 10.h),
@@ -268,9 +241,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                           final reportedStr = widget.cashGiven;
                           final mismatchComment =
                               'CASH-09: Counted physical cash ($countedStr SAR) does not match reported handover ($reportedStr SAR). Recounting and correction required.';
-
                           NavigationService.I.pop();
-
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             final currentContext = NavigationService.I.context;
                             if (currentContext != null && currentContext.mounted) {
@@ -284,6 +255,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                                     successFunction: widget.successFunction,
                                     openedFromModalSheet: false,
                                     initialComment: mismatchComment,
+                                    actorRole: _effectiveRole,
                                   ),
                                 ),
                                 isScrollControlled: true,
@@ -302,16 +274,13 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                   ),
                 ),
               ],
-
               15.verticalSpace,
-
               LabelTextField(
                 text: context.tr.managerComment,
                 style: AppStyles.s14W400,
                 isLabelOptional: true,
                 isLabelRequired: false,
               ),
-
               5.verticalSpace,
               Container(
                 height: 100.h,
@@ -334,7 +303,6 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                   isEnabled: true,
                 ),
               ),
-
               Padding(
                 padding: EdgeInsets.only(top: 25.h),
                 child:
@@ -345,17 +313,13 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                       listener: (context, state) {
                         if (state is HandoverActionSuccess) {
                           NavigationService.I.pop();
-
                           AppBottomSheet.showModal(
                             NavigationService.I.context ?? context,
                             (context) => HandoverAcceptedSheetWidget(
                               shiftId: widget.shiftId,
-                              isManager: (widget.actorRole == UserType.branchManager ||
-                                  UserTypeService.selectedUserType ==
-                                      UserType.branchManager),
+                              isManager: _effectiveRole == UserType.branchManager,
                             ),
                           );
-
                           widget.successFunction();
                         } else if (state is HandoverActionFailure) {
                           AppDialog.showErrorDialog(
@@ -368,7 +332,6 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                         if (state is HandoverActionLoading) {
                           return const AppButtonLoading();
                         }
-
                         return AppButton(
                           onClick: () {
                             if (!_canConfirm) return;
@@ -379,8 +342,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                                   confirmedAmount:
                                       confirmedAmountController.text.trim(),
                                   expectedAmount: _expectedAmount,
-                                  actorRole: widget.actorRole ??
-                                      UserType.branchManager,
+                                  actorRole: _effectiveRole,
                                   comment:
                                       managerCommentController.text.isNotEmpty
                                           ? managerCommentController.text

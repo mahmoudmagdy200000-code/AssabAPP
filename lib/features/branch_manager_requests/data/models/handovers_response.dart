@@ -55,15 +55,15 @@ class HandoversResponseItem {
       shiftDate: json['shift_date'],
       shiftDateIso: json['shift_date_iso'],
       status: handoverStatusFromJson(json['status']),
-      cashGiven: json['cash_given'],
+      cashGiven: json['cash_given'] is num ? (json['cash_given'] as num) : (num.tryParse(json['cash_given']?.toString() ?? '') ?? 0),
       responsibilityReviewedAt: json['responsibility_reviewed_at'],
       variance: json['variance'],
-      varianceAmount: json['variance_amount'],
+      varianceAmount: json['variance_amount'] is num ? (json['variance_amount'] as num) : (num.tryParse(json['variance_amount']?.toString() ?? '') ?? 0),
       cashFrom: json['cash_from'],
       acceptanceMessage: json['acceptance_message'],
       isIncoming: json['is_incoming'] as bool?,
       isOutgoing: json['is_outgoing'] as bool?,
-      canBeAccepted: json['can_be_accepted'] as bool?,
+      canBeAccepted: json['can_be_accepted'] as bool? ?? false,
     );
   }
 }

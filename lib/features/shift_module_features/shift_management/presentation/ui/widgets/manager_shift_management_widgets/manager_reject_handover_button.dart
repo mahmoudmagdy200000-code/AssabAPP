@@ -1,4 +1,5 @@
 import 'package:assab/core/di/dependency_injection.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/approve_and_reject_handover/approve_and_reject_handover_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/reject_handover_widgets/reject_handover_modal_sheet_widget.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ class ManagerRejectHandoverButton extends StatelessWidget {
               shiftId: shiftId,
               openedFromModalSheet: openedFromModalSheet,
               successFunction: successFunction,
+              actorRole: UserType.branchManager,
             ),
           ),
           isScrollControlled: true,

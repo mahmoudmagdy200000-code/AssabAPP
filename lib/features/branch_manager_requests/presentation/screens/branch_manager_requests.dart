@@ -10,6 +10,7 @@ import '../widgets/branch_manager_request_top_section.dart';
 import 'branch_manager_request_handovers_view.dart';
 import 'branch_manager_request_order_view.dart';
 import 'branch_manager_request_variance_view.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 
 class BranchManagerRequests extends StatelessWidget {
   const BranchManagerRequests({super.key});
@@ -41,7 +42,7 @@ class BranchManagerRequests extends StatelessWidget {
                         return IndexedStack(
                           index: state,
                           children: const [
-                            BranchManagerRequestHandoversView(),
+                            BranchManagerRequestHandoversView(actorRole: UserType.branchManager),
                             BranchManagerRequestOrderView(),
                             BranchManagerRequestVarianceView(),
                           ],

@@ -11,7 +11,6 @@ import 'package:assab/features/branch_manager_requests/data/models/handovers_res
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/shift/shift_details/handover_status_ui_mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../../core/cubits/validation/validation_cubit.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/enums/shift_status/shift_handover_status.dart';
@@ -27,35 +26,38 @@ import '../cubit/get_handovers/get_handovers_state.dart';
 import '../formatters/variance_time_format.dart';
 import '../widgets/accept_handover_sheet_widget.dart';
 import '../widgets/branch_manager_requests_empty_widget.dart';
-
+import '../../../../core/services/user_type_service.dart';
+import '../../../../core/utils/currency_normalizer.dart';
 class BranchManagerRequestHandoversView extends StatefulWidget {
-  const BranchManagerRequestHandoversView({super.key});
-
+  const BranchManagerRequestHandoversView({
+    super.key,
+    this.actorRole,
+  });
+  final UserType? actorRole;
   @override
   State<BranchManagerRequestHandoversView> createState() =>
       _BranchManagerRequestHandoversViewState();
 }
-
 class _BranchManagerRequestHandoversViewState
     extends State<BranchManagerRequestHandoversView> {
   late final ScrollController _scrollController;
-
+  UserType? get _effectiveRole =>
+      widget.actorRole ??
+      UserTypeService.selectedUserType ??
+      UserTypeService.getSavedUserType();
   @override
   void initState() {
     super.initState();
     _getHandovers();
-
     _scrollController = ScrollController();
     _scrollController.addListener(_listenToScroll);
   }
-
   @override
   void dispose() {
     _scrollController.removeListener(_listenToScroll);
     _scrollController.dispose();
     super.dispose();
   }
-
   void _listenToScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 400.r) {
@@ -64,11 +66,9 @@ class _BranchManagerRequestHandoversViewState
       }
     }
   }
-
   void _getHandovers({bool loadMore = false}) {
     context.read<GetHandoversCubit>().getHandovers(loadMore: loadMore);
   }
-
   @override
   Widget build(BuildContext context) {
     return AppPaddingWidget(
@@ -77,7 +77,6 @@ class _BranchManagerRequestHandoversViewState
       child: BlocBuilder<GetHandoversCubit, GetHandoversState>(
         builder: (context, state) {
           final orders = <HandoversResponseItem>[];
-
           if (state is GetHandoversLoading) {
             return const AppLoadingWidget();
           } else if (state is GetHandoversFailure) {
@@ -88,21 +87,18 @@ class _BranchManagerRequestHandoversViewState
             );
           } else if (state is GetHandoversSuccess) {
             orders.addAll(state.handovers);
-
             context.read<ValidationCubit>().validateFieldAndStoreValue(
               fieldName: 'count_handover',
               value: orders.length.toString(),
               isValid: true,
             );
           }
-
           if (orders.isEmpty) {
             return BranchManagerRequestsEmptyWidget(
               onRefresh: _getHandovers,
               message: context.tr.noHandovers,
             );
           }
-
           return RefreshIndicator(
             onRefresh: () async => _getHandovers(),
             child: ListView.builder(
@@ -149,7 +145,6 @@ class _BranchManagerRequestHandoversViewState
                         title: context.tr.cashFrom,
                         value: orders[index].cashFrom,
                       ),
-
                       if (orders[index].status != HandoverStatus.pending)
                         Container(
                           width: double.infinity,
@@ -165,84 +160,93 @@ class _BranchManagerRequestHandoversViewState
                                 orders[index].responsibilityReviewedAt,
                               ),
                             ),
-
                             style: AppStyles.s14W400.copyWith(
                               color: orders[index].status.textColor,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ),
-
                       if (orders[index].status == HandoverStatus.pending)
-                        Row(
-                          spacing: 12.w,
-                          children: [
-                            Expanded(
-                              child: CustomTextButton(
-                                text: context.tr.rejectHandover,
-                                onTap: () {
-                                  AppBottomSheet.showModal(
-                                    context,
-                                    (sheetContext) => BlocProvider(
-                                      create: (sheetContext) =>
-                                          getIt<
-                                            ApproveAndRejectHandoverCubit
-                                          >(),
-                                      child: RejectHandoverModalSheetWidget(
-                                        shiftId: orders[index].id,
-                                        isFromRequestsScreen: true,
-                                        successFunction: () {
-                                          _getHandovers(loadMore: false);
-                                        },
+                        if (orders[index].canBeAccepted == true)
+                          Row(
+                            spacing: 12.w,
+                            children: [
+                              Expanded(
+                                child: CustomTextButton(
+                                  text: context.tr.rejectHandover,
+                                  onTap: () {
+                                    AppBottomSheet.showModal(
+                                      context,
+                                      (sheetContext) => BlocProvider(
+                                        create: (sheetContext) =>
+                                            getIt<
+                                              ApproveAndRejectHandoverCubit
+                                            >(),
+                                        child: RejectHandoverModalSheetWidget(
+                                          shiftId: orders[index].id,
+                                          isFromRequestsScreen: true,
+                                          actorRole: _effectiveRole,
+                                          successFunction: () {
+                                            _getHandovers(loadMore: false);
+                                          },
+                                        ),
                                       ),
-                                    ),
-
-                                    isScrollControlled: true,
-                                  );
-                                },
-                                backgroundColor:
-                                    context.customColor.reversedTextColor,
-                                textColor: context.customColor.error,
-                                borderRadius: 1000.r,
-                                padding: EdgeInsets.symmetric(vertical: 18.r),
+                                      isScrollControlled: true,
+                                    );
+                                  },
+                                  backgroundColor:
+                                      context.customColor.reversedTextColor,
+                                  textColor: context.customColor.error,
+                                  borderRadius: 1000.r,
+                                  padding: EdgeInsets.symmetric(vertical: 18.r),
+                                ),
+                              ),
+                              Expanded(
+                                child: CustomTextButton(
+                                  text: context.tr.acceptHandover,
+                                  onTap: () {
+                                    AppBottomSheet.showModal(
+                                      context,
+                                      (sheetContext) => BlocProvider(
+                                        create: (sheetContext) =>
+                                            getIt<
+                                              ApproveAndRejectHandoverCubit
+                                            >(),
+                                        child: AcceptHandoverSheetWidget(
+                                          shiftId: orders[index].id,
+                                          cashFrom: orders[index].cashFrom,
+                                          cashGiven: CurrencyNormalizer.formatSar(
+                                              orders[index].cashGiven),
+                                          variance: orders[index].variance,
+                                          actorRole: _effectiveRole,
+                                          successFunction: () {
+                                            _getHandovers(loadMore: false);
+                                          },
+                                        ),
+                                      ),
+                                      isScrollControlled: true,
+                                    );
+                                  },
+                                  backgroundColor: context.theme.primaryColor,
+                                  textColor:
+                                      context.customColor.reversedTextColor,
+                                  borderRadius: 1000.r,
+                                  padding: EdgeInsets.symmetric(vertical: 18.r),
+                                ),
+                              ),
+                            ],
+                          )
+                        else if (_effectiveRole == UserType.branchManager)
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            child: Text(
+                              context.tr.waitingForYourApproval,
+                              textAlign: TextAlign.center,
+                              style: AppStyles.s13W500.copyWith(
+                                color: context.customColor.text2,
                               ),
                             ),
-                            Expanded(
-                              child: CustomTextButton(
-                                text: context.tr.acceptHandover,
-                                onTap: () {
-                                  AppBottomSheet.showModal(
-                                    context,
-                                    (sheetContext) => BlocProvider(
-                                      create: (sheetContext) =>
-                                          getIt<
-                                            ApproveAndRejectHandoverCubit
-                                          >(),
-                                      child: AcceptHandoverSheetWidget(
-                                        shiftId: orders[index].id,
-                                        cashFrom: orders[index].cashFrom,
-                                        cashGiven: orders[index].cashGiven
-                                            .toString(),
-                                        variance: orders[index].variance,
-                                        successFunction: () {
-                                          _getHandovers(loadMore: false);
-                                        },
-                                      ),
-                                    ),
-
-                                    isScrollControlled: true,
-                                  );
-                                },
-                                backgroundColor: context.theme.primaryColor,
-                                textColor:
-                                    context.customColor.reversedTextColor,
-                                borderRadius: 1000.r,
-                                padding: EdgeInsets.symmetric(vertical: 18.r),
-                              ),
-                            ),
-                          ],
-                        ),
-
+                          ),
                       if (orders[index].status == HandoverStatus.rejected)
                         AppButton(
                           onClick: () {
@@ -254,15 +258,15 @@ class _BranchManagerRequestHandoversViewState
                                 child: AcceptHandoverSheetWidget(
                                   shiftId: orders[index].id,
                                   cashFrom: orders[index].cashFrom,
-                                  cashGiven: orders[index].cashGiven.toString(),
+                                  cashGiven: CurrencyNormalizer.formatSar(
+                                      orders[index].cashGiven),
                                   variance: orders[index].variance,
-                                  actorRole: UserType.branchManager,
+                                  actorRole: _effectiveRole ?? UserType.branchManager,
                                   successFunction: () {
                                     _getHandovers(loadMore: false);
                                   },
                                 ),
                               ),
-
                               isScrollControlled: true,
                             );
                           },
@@ -283,7 +287,6 @@ class _BranchManagerRequestHandoversViewState
       ),
     );
   }
-
   Widget _buildRowItem({
     required BuildContext context,
     required String asset,

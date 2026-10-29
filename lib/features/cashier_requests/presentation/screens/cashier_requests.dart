@@ -12,6 +12,7 @@ import '../cubits/accept_reassigned_shift/accept_reassigned_shift_cubit.dart';
 import '../widgets/cashier_request_app_bar.dart';
 import '../widgets/cashier_requests_request_top_section.dart';
 import 'cashier_request_reassignments_view.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 
 class CashierRequests extends StatelessWidget {
   const CashierRequests({super.key});
@@ -43,7 +44,7 @@ class CashierRequests extends StatelessWidget {
                         return IndexedStack(
                           index: state,
                           children: [
-                            const BranchManagerRequestHandoversView(),
+                            const BranchManagerRequestHandoversView(actorRole: UserType.cashier),
                             const BranchManagerRequestVarianceView(),
 
                             BlocProvider(

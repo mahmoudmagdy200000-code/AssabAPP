@@ -1,4 +1,5 @@
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/reject_handover_widgets/successfully_rejected_handover_bottom_sheet_widget.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class RejectHandoverModalSheetWidget extends StatefulWidget {
     this.openedFromModalSheet = false,
     this.isFromRequestsScreen = false,
     this.initialComment,
+    this.actorRole,
   });
 
   final Function() successFunction;
@@ -32,6 +34,7 @@ class RejectHandoverModalSheetWidget extends StatefulWidget {
   final bool openedFromModalSheet;
   final bool isFromRequestsScreen;
   final String? initialComment;
+  final UserType? actorRole;
 
   @override
   State<RejectHandoverModalSheetWidget> createState() =>
@@ -42,6 +45,7 @@ class _RejectHandoverModalSheetWidgetState
     extends State<RejectHandoverModalSheetWidget> {
   late final TextEditingController managerCommentController;
   bool _isSubmitting = false;
+  UserType? get _effectiveRole => widget.actorRole ?? UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType();
 
   @override
   void initState() {
@@ -172,7 +176,7 @@ class _RejectHandoverModalSheetWidgetState
                                       shiftId: widget.shiftId,
                                       managerComment:
                                           managerCommentController.text.trim(),
-                                      actorRole: UserType.branchManager,
+                                      actorRole: _effectiveRole,
                                     );
                               },
                               text: context.tr.rejectAndAskForCorrection,
