@@ -66,7 +66,8 @@ class FinalDailyCloseCubit extends SafeCubit<FinalDailyCloseState> {
         case CashierField.deliveryAppPayments:
           return c.copyWith(deliveryAppPayments: value);
         case CashierField.variance:
-          return c.copyWith(variance: value);
+          // Variance is server-derived and strictly read-only; mutations are ignored
+          return c;
         case CashierField.totalSales:
           return c.copyWith(totalSales: value);
       }

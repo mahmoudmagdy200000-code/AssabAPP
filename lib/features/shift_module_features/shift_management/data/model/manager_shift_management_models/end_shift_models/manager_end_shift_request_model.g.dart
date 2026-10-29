@@ -18,7 +18,9 @@ EndManagerShiftRequestModel _$EndManagerShiftRequestModelFromJson(
   cardPayments: (json['card_payments'] as num?)?.toDouble(),
   aggregatorPayments: (json['aggregator_payments'] as num?)?.toDouble(),
   cashierBreakdown: (json['cashier_breakdown'] as List<dynamic>?)
-      ?.map((e) => CashierBreakdownModel.fromJson(e as Map<String, dynamic>))
+      ?.map(
+        (e) => CashierBreakdownRequestModel.fromJson(e as Map<String, dynamic>),
+      )
       .toList(),
 );
 

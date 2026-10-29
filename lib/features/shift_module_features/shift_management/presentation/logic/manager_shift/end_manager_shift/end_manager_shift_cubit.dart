@@ -1,14 +1,13 @@
 import 'package:assab/core/errors/api_failure.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/end_shift_models/cashier_breakdown_request_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/end_shift_models/manager_end_shift_request_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/final_daily_close/cashier_breakdown_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/enums/manager_shift/end_shift_handover_timing.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
-import 'package:meta/meta.dart';
 
 import '../../../../../../../core/helpers/safe_cubit.dart';
 import '../../../../data/model/manager_shift_management_models/end_shift_models/update_manager_handover_request_model.dart';
-import '../../../../data/model/manager_shift_management_models/final_daily_close/cashier_breakdown_model.dart';
 import '../../../../data/repository/shift_management_repository_imp.dart';
 import '../../../../domain/entity/manager_shift/end_shift_response_entites/manager_shift_end_data_entity.dart';
 
@@ -30,6 +29,9 @@ class EndAndUpdateManagerShiftCubit
     required double cardPayments,
     required double aggregatorPayments,
   }) async {
+    // Guard against double submission while network request is in-flight
+    if (state is EndManagerShiftButtonLoading) return;
+
     emit(EndManagerShiftButtonLoading());
 
     final result = await _repo.endManagerShift(
@@ -41,13 +43,11 @@ class EndAndUpdateManagerShiftCubit
         aggregatorPayments: aggregatorPayments,
         cashierBreakdown: cashierBreakdown
             .map(
-              (e) => CashierBreakdownModel(
+              (e) => CashierBreakdownRequestModel(
                 cashierId: e.cashierId,
-                cashierName: e.cashierName,
                 cashCollected: e.cashCollected,
                 cardPayments: e.cardPayments,
                 deliveryAppPayments: e.deliveryAppPayments,
-                variance: e.variance,
                 sales: e.cashierTotal,
               ),
             )
@@ -66,19 +66,20 @@ class EndAndUpdateManagerShiftCubit
   Future<void> updateManagerHandoverShift({
     required List<CashierBreakdownEntity> cashierBreakdown,
   }) async {
+    // Guard against double submission while network request is in-flight
+    if (state is EndManagerShiftButtonLoading) return;
+
     emit(EndManagerShiftButtonLoading());
 
     final result = await _repo.updateManagerHandoverShift(
       request: UpdateManagerHandoverRequestModel(
         cashierBreakdown: cashierBreakdown
             .map(
-              (e) => CashierBreakdownModel(
+              (e) => CashierBreakdownRequestModel(
                 cashierId: e.cashierId,
-                cashierName: e.cashierName,
                 cashCollected: e.cashCollected,
                 cardPayments: e.cardPayments,
                 deliveryAppPayments: e.deliveryAppPayments,
-                variance: e.variance,
                 sales: e.cashierTotal,
               ),
             )

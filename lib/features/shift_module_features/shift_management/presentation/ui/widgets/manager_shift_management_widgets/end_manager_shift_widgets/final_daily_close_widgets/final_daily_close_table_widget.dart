@@ -120,20 +120,12 @@ class FinalDailyCloseTableWidget extends StatelessWidget {
                               ),
 
                               FinalDailyCloseCenterTableCellWidget(
-                                isEnabled: isEnabled,
+                                isEnabled: false,
                                 key: ValueKey(
                                   '${cashier.cashierId}-v',
-                                ), // Variance == v
+                                ), // Variance == v (server-derived, strictly read-only)
                                 value: cashier.variance.abs(),
-                                onChanged: (value) {
-                                  context
-                                      .read<FinalDailyCloseCubit>()
-                                      .updateCashierField(
-                                        cashierId: cashier.cashierId,
-                                        field: CashierField.variance,
-                                        value: value,
-                                      );
-                                },
+                                onChanged: (_) {},
                               ),
 
                               if (!isExpanded)

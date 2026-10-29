@@ -19,7 +19,8 @@ class CashierBreakdownModel {
   @JsonKey(name: 'delivery_app_payments')
   final double? deliveryAppPayments;
 
-  @JsonKey(name: 'variance')
+  /// Server-derived financial balance indicator. Strictly read-only; never serialized to write payloads.
+  @JsonKey(name: 'variance', includeToJson: false)
   final double? variance;
 
   @JsonKey(name: 'sales')

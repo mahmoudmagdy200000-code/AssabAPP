@@ -65,6 +65,7 @@ class AppRouteName {
 
   /// Custody Module
   static const String custodyScreen = '/custodyScreen';
+  static const String accountStatementScreen = '/accountStatementScreen';
   static const String custodyRequestSuccessScreen =
       '/custodyRequestSuccessScreen';
   static const String custodyRequestDetailsScreen =

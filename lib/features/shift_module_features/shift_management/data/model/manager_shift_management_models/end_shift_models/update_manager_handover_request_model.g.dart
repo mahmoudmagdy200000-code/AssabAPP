@@ -10,7 +10,9 @@ UpdateManagerHandoverRequestModel _$UpdateManagerHandoverRequestModelFromJson(
   Map<String, dynamic> json,
 ) => UpdateManagerHandoverRequestModel(
   cashierBreakdown: (json['cashier_breakdown'] as List<dynamic>)
-      .map((e) => CashierBreakdownModel.fromJson(e as Map<String, dynamic>))
+      .map(
+        (e) => CashierBreakdownRequestModel.fromJson(e as Map<String, dynamic>),
+      )
       .toList(),
 );
 

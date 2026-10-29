@@ -76,7 +76,6 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
   }
 
   void _onNextButtonPressed(BuildContext context, int currentIndex) {
-    _changeView(context);
     if (currentIndex == 2) {
       final cubit = context.read<FinalDailyCloseCubit>();
       final totals = cubit.totals;
@@ -87,6 +86,8 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
         totalSales: totals.totalSales,
         cashierBreakdown: cubit.cashiersBreakdown,
       );
+    } else {
+      _changeView(context);
     }
   }
 

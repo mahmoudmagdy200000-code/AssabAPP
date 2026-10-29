@@ -26,6 +26,5 @@ Map<String, dynamic> _$CashierBreakdownModelToJson(
   'cash_collected': instance.cashCollected,
   'card_payments': instance.cardPayments,
   'delivery_app_payments': instance.deliveryAppPayments,
-  'variance': instance.variance,
   'sales': instance.sales,
 };

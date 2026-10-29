@@ -8,6 +8,7 @@ import '../../../../core/constants/app_assets.dart';
 import '../../../../core/styles/app_styles.dart';
 import '../../../../core/widgets/custom_divider.dart';
 import 'branch_manager_grid_view_item.dart';
+import '../../../../core/utils/app_snack_bar.dart';
 
 class BranchManagerHomeBottomSection extends StatelessWidget {
   const BranchManagerHomeBottomSection({super.key});
@@ -116,8 +117,13 @@ class BranchManagerHomeBottomSection extends StatelessWidget {
                 colorHex: 0xfffffdf5,
                 title: context.tr.myLedger,
                 iconAssetName: AppAssets.myLedger,
-                subtitle: '16',
-                onTap: () {},
+                subtitle: '',
+                onTap: () {
+                  AppSnackBar.showError(
+                    context,
+                    'My Ledger feature is coming soon',
+                  );
+                },
               ),
               BranchManagerGridViewItem(
                 colorHex: 0xfff2fcfc,
@@ -134,8 +140,12 @@ class BranchManagerHomeBottomSection extends StatelessWidget {
                 colorHex: 0xfffef8f4,
                 title: context.tr.accountStatement,
                 iconAssetName: AppAssets.accountStatement,
-                subtitle: '16',
-                onTap: () {},
+                subtitle: '',
+                onTap: () {
+                  NavigationService.I.pushNamed(
+                    AppRouteName.accountStatementScreen,
+                  );
+                },
               ),
               BranchManagerGridViewItem(
                 colorHex: 0xfff4f4f7,

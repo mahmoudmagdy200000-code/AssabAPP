@@ -1,7 +1,7 @@
 import 'package:assab/features/shift_module_features/shift_management/domain/enums/manager_shift/end_shift_handover_timing.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../final_daily_close/cashier_breakdown_model.dart';
+import 'cashier_breakdown_request_model.dart';
 
 part 'manager_end_shift_request_model.g.dart';
 
@@ -33,9 +33,9 @@ class EndManagerShiftRequestModel {
   @JsonKey(name: 'aggregator_payments')
   final double? aggregatorPayments;
 
-  // Cashier breakdown
+  // Cashier breakdown (dedicated request DTO without derived fields)
   @JsonKey(name: 'cashier_breakdown')
-  final List<CashierBreakdownModel>? cashierBreakdown;
+  final List<CashierBreakdownRequestModel>? cashierBreakdown;
 
   const EndManagerShiftRequestModel({
     this.handoverTo,

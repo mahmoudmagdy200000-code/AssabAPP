@@ -125,6 +125,8 @@ import '../../features/custody/presentation/screens/custody_balance_trend_state.
 import '../../features/custody/presentation/screens/custody_handover_to_cashier_details_screen.dart';
 import '../../features/custody/presentation/screens/custody_request_success_screen.dart';
 import '../../features/custody/presentation/screens/custody_screen.dart';
+import '../../features/custody/presentation/cubit/get_personal_balance_transactions/get_personal_balance_transactions_cubit.dart';
+import '../../features/custody/presentation/widgets/see_all_personal_custody_activities.dart';
 import '../../features/fixed_assets/data/models/fixed_assets_search_response.dart';
 import '../../features/fixed_assets/domain/enums/fixed_assets_handover_status_filter_enum.dart';
 import '../../features/fixed_assets/domain/strategies/fixed_assets_transfer_types_strategy.dart';
@@ -834,6 +836,19 @@ class AppRouter {
               BlocProvider(create: (context) => getIt<GetBranchBalanceCubit>()),
             ],
             child: const CustodyScreen(),
+          ),
+        );
+      case AppRouteName.accountStatementScreen:
+        return MaterialPageRoute(
+          builder: (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => PagingCubit(totalSteps: 2)),
+              BlocProvider(
+                create: (context) =>
+                    getIt<GetPersonalBalanceTransactionsCubit>(),
+              ),
+            ],
+            child: const SeeAllPersonalCustodyActivities(),
           ),
         );
       case AppRouteName.custodyRequestSuccessScreen:
