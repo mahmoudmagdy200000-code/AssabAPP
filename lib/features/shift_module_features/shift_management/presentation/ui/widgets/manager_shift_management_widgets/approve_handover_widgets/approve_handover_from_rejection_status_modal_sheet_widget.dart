@@ -38,19 +38,22 @@ class ApprovedHandoverFromRejectionStatusModalSheetWidget
 
 class _ApprovedHandoverFromRejectionStatusModalSheetWidgetState
     extends State<ApprovedHandoverFromRejectionStatusModalSheetWidget> {
+  late final TextEditingController managerCommentController;
+  late final TextEditingController confirmedAmountController;
+
   @override
   void initState() {
     super.initState();
     managerCommentController = TextEditingController();
+    confirmedAmountController = TextEditingController();
   }
 
   @override
   void dispose() {
     managerCommentController.dispose();
+    confirmedAmountController.dispose();
     super.dispose();
   }
-
-  late final TextEditingController managerCommentController;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +61,6 @@ class _ApprovedHandoverFromRejectionStatusModalSheetWidgetState
       padding: MediaQuery.of(context).viewInsets,
       child: Container(
         width: double.maxFinite,
-        // height: 350.h,
         padding: EdgeInsetsGeometry.symmetric(horizontal: 20.w, vertical: 10.h),
         child: SingleChildScrollView(
           child: Column(
@@ -90,6 +92,37 @@ class _ApprovedHandoverFromRejectionStatusModalSheetWidgetState
               15.verticalSpace,
 
               LabelTextField(
+                text: context.tr.amount,
+                style: AppStyles.s14W400,
+                isLabelRequired: true,
+              ),
+
+              5.verticalSpace,
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.lightBackground,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: context.customColor.border,
+                    width: 1.w,
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(
+                  vertical: 4.r,
+                  horizontal: 16.r,
+                ),
+                child: CustomTextField(
+                  hintText: '0.00',
+                  controller: confirmedAmountController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  isEnabled: true,
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+
+              15.verticalSpace,
+
+              LabelTextField(
                 text: context.tr.managerComment,
                 style: AppStyles.s14W400,
                 isLabelOptional: true,
@@ -117,7 +150,7 @@ class _ApprovedHandoverFromRejectionStatusModalSheetWidgetState
               ),
 
               Padding(
-                padding: EdgeInsets.only(top: 70.h),
+                padding: EdgeInsets.only(top: 40.h),
                 child:
                     BlocConsumer<
                       ApproveAndRejectHandoverCubit,
@@ -152,19 +185,26 @@ class _ApprovedHandoverFromRejectionStatusModalSheetWidgetState
                           return const AppButtonLoading();
                         }
 
+                        final hasAmount =
+                            confirmedAmountController.text.trim().isNotEmpty;
                         return AppButton(
                           onClick: () {
+                            if (!hasAmount) return;
                             context
                                 .read<ApproveAndRejectHandoverCubit>()
                                 .approveHandover(
                                   shiftId: widget.shiftId,
+                                  confirmedAmount:
+                                      confirmedAmountController.text.trim(),
                                   managerComment: managerCommentController.text,
                                 );
                           },
                           text: context.tr.approveHandover,
                           borderRadius: BorderRadius.circular(10.r),
-                          enabled: true,
-                          background: AppColors.primaryLight,
+                          enabled: hasAmount,
+                          background: hasAmount
+                              ? AppColors.primaryLight
+                              : AppColors.lightGray,
                         );
                       },
                     ),

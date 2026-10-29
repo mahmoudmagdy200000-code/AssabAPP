@@ -364,6 +364,8 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
                       cashierName: shift.cashier.name,
                       handoverAt: shift.formattedHandedOverDateTime,
                       branchName: shift.shiftInfoDetails?.branchName ?? 'N/A',
+                      cashGiven: shift.cashGiven ?? shift.handoverAmount ?? shift.closingBalance,
+                      variance: shift.variance,
                     ),
                   ),
                   isScrollControlled: true,
@@ -399,6 +401,9 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
                     buttonWidth: 150.w,
                     cashierShiftId: shift.id,
                     cashierName: shift.cashier.name,
+                    cashFrom: shift.cashier.name,
+                    cashGiven: shift.cashGiven ?? shift.handoverAmount ?? shift.closingBalance,
+                    variance: shift.variance,
                     managerName: context.tr.manager,
                     successFunction: () {
                       context.read<ShiftDetailsCubit>().getShiftDetails();

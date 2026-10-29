@@ -1,3 +1,4 @@
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -20,7 +21,6 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_failure_widget.dart';
 import '../../../../core/widgets/app_loading_widget.dart';
 import '../../../shift_module_features/shift_management/presentation/logic/shifts/approve_and_reject_handover/approve_and_reject_handover_cubit.dart';
-import '../../../shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/approve_handover_widgets/approve_handover_modal_sheet_widget.dart';
 import '../../../shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/reject_handover_widgets/reject_handover_modal_sheet_widget.dart';
 import '../cubit/get_handovers/get_handovers_cubit.dart';
 import '../cubit/get_handovers/get_handovers_state.dart';
@@ -251,10 +251,12 @@ class _BranchManagerRequestHandoversViewState
                               (sheetContext) => BlocProvider(
                                 create: (sheetContext) =>
                                     getIt<ApproveAndRejectHandoverCubit>(),
-                                child: ApprovedHandoverFromModalSheetWidget(
+                                child: AcceptHandoverSheetWidget(
                                   shiftId: orders[index].id,
-                                  currentCashierName: orders[index].cashFrom,
-                                  openedFromModalSheet: false,
+                                  cashFrom: orders[index].cashFrom,
+                                  cashGiven: orders[index].cashGiven.toString(),
+                                  variance: orders[index].variance,
+                                  actorRole: UserType.branchManager,
                                   successFunction: () {
                                     _getHandovers(loadMore: false);
                                   },

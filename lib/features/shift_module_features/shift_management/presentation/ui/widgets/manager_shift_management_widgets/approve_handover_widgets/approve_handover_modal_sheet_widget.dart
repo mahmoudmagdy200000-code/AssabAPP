@@ -1,3 +1,5 @@
+import 'package:assab/core/widgets/custom_text_field.dart';
+import 'package:assab/core/widgets/label_text_field.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/approve_handover_widgets/successfully_approved_handover_bottom_sheet_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,12 +36,25 @@ class ApprovedHandoverFromModalSheetWidget extends StatefulWidget {
 
 class _ApprovedHandoverFromModalSheetWidgetState
     extends State<ApprovedHandoverFromModalSheetWidget> {
+  late final TextEditingController confirmedAmountController;
+
+  @override
+  void initState() {
+    super.initState();
+    confirmedAmountController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    confirmedAmountController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      // height: 350.h,
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 20.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -81,7 +96,36 @@ class _ApprovedHandoverFromModalSheetWidgetState
               ],
             ),
 
-            100.verticalSpace,
+            20.verticalSpace,
+            LabelTextField(
+              text: context.tr.amount,
+              style: AppStyles.s14W400,
+              isLabelRequired: true,
+            ),
+            5.verticalSpace,
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.lightBackground,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: context.customColor.border,
+                  width: 1.w,
+                ),
+              ),
+              padding: EdgeInsets.symmetric(
+                vertical: 4.r,
+                horizontal: 16.r,
+              ),
+              child: CustomTextField(
+                hintText: '0.00',
+                controller: confirmedAmountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                isEnabled: true,
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+
+            40.verticalSpace,
 
             BlocConsumer<
               ApproveAndRejectHandoverCubit,
@@ -115,16 +159,25 @@ class _ApprovedHandoverFromModalSheetWidgetState
                   return const AppButtonLoading();
                 }
 
+                final hasAmount =
+                    confirmedAmountController.text.trim().isNotEmpty;
                 return AppButton(
                   onClick: () {
+                    if (!hasAmount) return;
                     context
                         .read<ApproveAndRejectHandoverCubit>()
-                        .approveHandover(shiftId: widget.shiftId);
+                        .approveHandover(
+                          shiftId: widget.shiftId,
+                          confirmedAmount:
+                              confirmedAmountController.text.trim(),
+                        );
                   },
                   text: context.tr.approveHandover,
                   borderRadius: BorderRadius.circular(10.r),
-                  enabled: true,
-                  background: AppColors.primaryLight,
+                  enabled: hasAmount,
+                  background: hasAmount
+                      ? AppColors.primaryLight
+                      : AppColors.lightGray,
                 );
               },
             ),

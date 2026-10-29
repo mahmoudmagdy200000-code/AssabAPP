@@ -22,6 +22,8 @@ class HandoverRejectionReasonBottomSheetWidget extends StatefulWidget {
     required this.handoverAt,
     required this.branchName,
     this.openedFromModalSheet = false,
+    this.cashGiven,
+    this.variance,
   });
 
   final String shiftId;
@@ -29,6 +31,8 @@ class HandoverRejectionReasonBottomSheetWidget extends StatefulWidget {
   final String cashierName;
   final String handoverAt;
   final String branchName;
+  final num? cashGiven;
+  final num? variance;
 
   @override
   State<HandoverRejectionReasonBottomSheetWidget> createState() =>
@@ -130,6 +134,9 @@ class _HandoverRejectionReasonBottomSheetWidgetState
                       ManagerApproveButtonWidget(
                         cashierShiftId: widget.shiftId,
                         cashierName: widget.cashierName,
+                        cashFrom: widget.cashierName,
+                        cashGiven: widget.cashGiven,
+                        variance: widget.variance,
                         managerName: context.tr.manager,
                         successFunction: () {
                           context.read<ShiftDetailsCubit>().getShiftDetails();

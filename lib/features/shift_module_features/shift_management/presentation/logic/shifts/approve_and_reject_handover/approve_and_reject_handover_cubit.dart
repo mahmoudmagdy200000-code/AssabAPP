@@ -1,6 +1,7 @@
 import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
+import 'package:assab/core/utils/currency_normalizer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:injectable/injectable.dart';
 
@@ -24,11 +25,26 @@ class ApproveAndRejectHandoverCubit
     String? managerComment,
     String? transferAttemptId,
   }) async {
+    final normalized = CurrencyNormalizer.normalizeSarInput(confirmedAmount);
+    if (normalized == null) {
+      emit(HandoverActionFailure(ValidationFailure(
+        error: LocalErrorModel(
+          message:
+              'Confirmed amount is required and must be a valid non-negative number.',
+          errors: null,
+        ),
+        icon: CupertinoIcons.exclamationmark_triangle,
+        statusCode: 422,
+        stackTrace: StackTrace.empty,
+      )));
+      return;
+    }
+
     emit(HandoverActionLoading());
 
     final result = await _repositoryImp.approveHandover(
       shiftId: shiftId,
-      confirmedAmount: confirmedAmount,
+      confirmedAmount: normalized,
       managerComment: managerComment,
       transferAttemptId: transferAttemptId,
     );
@@ -47,11 +63,26 @@ class ApproveAndRejectHandoverCubit
     String? transferAttemptId,
     String? comment,
   }) async {
+    final normalized = CurrencyNormalizer.normalizeSarInput(confirmedAmount);
+    if (normalized == null) {
+      emit(HandoverActionFailure(ValidationFailure(
+        error: LocalErrorModel(
+          message:
+              'Confirmed amount is required and must be a valid non-negative number.',
+          errors: null,
+        ),
+        icon: CupertinoIcons.exclamationmark_triangle,
+        statusCode: 422,
+        stackTrace: StackTrace.empty,
+      )));
+      return;
+    }
+
     emit(HandoverActionLoading());
 
     final result = await _repositoryImp.acceptCashierHandover(
       shiftId: shiftId,
-      confirmedAmount: confirmedAmount,
+      confirmedAmount: normalized,
       receivingShiftId: receivingShiftId,
       transferAttemptId: transferAttemptId,
       comment: comment,
@@ -121,10 +152,23 @@ class ApproveAndRejectHandoverCubit
       return;
     }
 
+    final parsed = CurrencyNormalizer.parseSarAmount(confirmedAmount);
+    if (parsed == null) {
+      emit(HandoverActionFailure(ValidationFailure(
+        error: LocalErrorModel(
+          message:
+              'Confirmed amount is required and must be a valid non-negative number.',
+          errors: null,
+        ),
+        icon: CupertinoIcons.exclamationmark_triangle,
+        statusCode: 422,
+        stackTrace: StackTrace.empty,
+      )));
+      return;
+    }
+
     if (expectedAmount != null) {
-      final parsed =
-          double.tryParse(confirmedAmount.replaceAll(',', '').trim());
-      if (parsed == null || (parsed - expectedAmount).abs() > 0.001) {
+      if (!CurrencyNormalizer.areAmountsEqual(parsed, expectedAmount)) {
         emit(HandoverActionFailure(ValidationFailure(
           error: LocalErrorModel(
             message:
@@ -139,10 +183,12 @@ class ApproveAndRejectHandoverCubit
       }
     }
 
+    final normalizedConfirmed = CurrencyNormalizer.formatSar(parsed);
+
     if (effectiveRole == UserType.cashier) {
       await acceptCashierHandover(
         shiftId: shiftId,
-        confirmedAmount: confirmedAmount,
+        confirmedAmount: normalizedConfirmed,
         receivingShiftId: receivingShiftId,
         transferAttemptId: transferAttemptId,
         comment: comment,
@@ -150,7 +196,7 @@ class ApproveAndRejectHandoverCubit
     } else {
       await approveHandover(
         shiftId: shiftId,
-        confirmedAmount: confirmedAmount,
+        confirmedAmount: normalizedConfirmed,
         managerComment: comment,
         transferAttemptId: transferAttemptId,
       );

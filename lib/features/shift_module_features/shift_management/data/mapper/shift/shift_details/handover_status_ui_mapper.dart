@@ -92,6 +92,9 @@ extension HandoverStatusUIMapper on HandoverStatus {
                 buttonWidth: 150.w,
                 cashierShiftId: handover.cashierShiftId,
                 cashierName: handover.cashierName,
+                cashFrom: handover.cashierName,
+                cashGiven: handover.handoverAmount,
+                variance: handover.varianceAmount,
                 managerName: managerName,
                 successFunction: () {
                   context.read<ManagerShiftCubit>().getCurrentShift();
@@ -151,6 +154,9 @@ extension HandoverStatusUIMapper on HandoverStatus {
                 buttonWidth: 150.w,
                 cashierShiftId: handover.cashierShiftId,
                 cashierName: handover.cashierName,
+                cashFrom: handover.cashierName,
+                cashGiven: handover.handoverAmount,
+                variance: handover.varianceAmount,
                 managerName: managerName,
                 successFunction: () {
                   context.read<ManagerShiftCubit>().getCurrentShift();
@@ -180,6 +186,9 @@ extension HandoverStatusUIMapper on HandoverStatus {
                 buttonWidth: 150.w,
                 cashierShiftId: handover.cashierShiftId,
                 cashierName: handover.cashierName,
+                cashFrom: handover.cashierName,
+                cashGiven: handover.handoverAmount,
+                variance: handover.varianceAmount,
                 managerName: managerName,
                 successFunction: () {
                   context.read<ManagerShiftCubit>().getCurrentShift();
