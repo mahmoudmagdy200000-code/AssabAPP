@@ -10,6 +10,13 @@ class _CaptureRequestHandler extends RequestInterceptorHandler {
   }
 }
 
+class _CaptureResponseHandler extends ResponseInterceptorHandler {
+  Response? response;
+  @override
+  void next(Response resp) {
+    response = resp;
+  }
+}
 class _CaptureErrorHandler extends ErrorInterceptorHandler {
   DioException? error;
   @override
@@ -163,6 +170,69 @@ void main() {
       final key3 = handler3.options!.headers['Idempotency-Key'];
 
       expect(key3, isNot(equals(key1)));
+    });
+    test('markIntentCompleted prevents stale-success replay and mints fresh key on subsequent submission', () {
+      final attempt1 = RequestOptions(
+        method: 'POST',
+        path: 'shifts/101/handover/approve',
+        data: {'confirmed_amount': '100.00'},
+      );
+      final handler1 = _CaptureRequestHandler();
+      interceptor.onRequest(attempt1, handler1);
+      final key1 = handler1.options!.headers['Idempotency-Key'];
+      expect(key1, isNotNull);
+
+      final response = Response(
+        requestOptions: attempt1,
+        statusCode: 200,
+        data: {'status': 'success'},
+      );
+      final responseHandler = _CaptureResponseHandler();
+      interceptor.onResponse(response, responseHandler);
+
+      final scope = IdempotencyScopeManager.deriveScope('POST', 'shifts/101/handover/approve', null, {'confirmed_amount': '100.00'});
+      expect(IdempotencyScopeManager.hasActiveKey(scope), isFalse);
+
+      final attempt2 = RequestOptions(
+        method: 'POST',
+        path: 'shifts/101/handover/approve',
+        data: {'confirmed_amount': '100.00'},
+      );
+      final handler2 = _CaptureRequestHandler();
+      interceptor.onRequest(attempt2, handler2);
+      final key2 = handler2.options!.headers['Idempotency-Key'];
+
+      expect(key2, isNotNull);
+      expect(key2, isNot(equals(key1)), reason: 'Stale-success key must never be replayed');
+    });
+
+    test('Unresolved network timeout marks intent retryable and preserves key across retry', () {
+      final attempt1 = RequestOptions(
+        method: 'POST',
+        path: 'shifts/101/handover/accept',
+        data: {'confirmed_amount': '500.00'},
+      );
+      final handler1 = _CaptureRequestHandler();
+      interceptor.onRequest(attempt1, handler1);
+      final key1 = handler1.options!.headers['Idempotency-Key'];
+
+      final timeoutErr = DioException(
+        requestOptions: attempt1,
+        type: DioExceptionType.connectionTimeout,
+        message: 'Timeout connecting to backend',
+      );
+      interceptor.onError(timeoutErr, _CaptureErrorHandler());
+
+      final retryAttempt = RequestOptions(
+        method: 'POST',
+        path: 'shifts/101/handover/accept',
+        data: {'confirmed_amount': '500.00'},
+      );
+      final handler2 = _CaptureRequestHandler();
+      interceptor.onRequest(retryAttempt, handler2);
+      final key2 = handler2.options!.headers['Idempotency-Key'];
+
+      expect(key2, equals(key1), reason: 'Unresolved retry must preserve intent key');
     });
   });
 }

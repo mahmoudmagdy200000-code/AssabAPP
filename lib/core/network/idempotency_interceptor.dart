@@ -2,10 +2,31 @@ import 'dart:math';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:dio/dio.dart';
 
+/// State of an individual user intent
+enum IntentState {
+  inFlight,
+  retryable,
+  completed,
+  failed,
+}
+
+/// Represents an explicit, intent-owned idempotency lifecycle entry
+class UserIntent {
+  final String key;
+  final DateTime createdAt;
+  IntentState state;
+
+  UserIntent(this.key, {this.state = IntentState.inFlight})
+      : createdAt = DateTime.now();
+
+  bool get isExpired =>
+      DateTime.now().difference(createdAt) > IdempotencyScopeManager.defaultTtl;
+}
+
 /// Manages idempotency keys across logical financial operations and user-initiated retries.
 class IdempotencyScopeManager {
-  static final Map<String, String> _activeKeys = {};
-  static final Map<String, DateTime> _keyTimestamps = {};
+  static final Map<String, UserIntent> _activeIntents = {};
+  static final Set<String> _completedKeys = {};
   static const Duration defaultTtl = Duration(minutes: 5);
 
   static String _payloadFingerprint(dynamic data) {
@@ -47,37 +68,68 @@ class IdempotencyScopeManager {
   /// Generates a fresh RFC4122 v4 UUID (or uses [explicitKey]), updating the timestamp.
   static String startNewIntent(String scope, [String? explicitKey]) {
     final key = explicitKey ?? generateUuidV4();
-    _activeKeys[scope] = key;
-    _keyTimestamps[scope] = DateTime.now();
+    _activeIntents[scope] = UserIntent(key, state: IntentState.inFlight);
     return key;
+  }
+
+  /// Mark the intent for this scope and key as completed on 2xx response.
+  /// The key is recorded in [_completedKeys] so it can never be re-used or replayed across separate submissions.
+  static void markIntentCompleted(String scope, [String? key]) {
+    final intent = _activeIntents[scope];
+    if (intent != null) {
+      intent.state = IntentState.completed;
+      _completedKeys.add(intent.key);
+    }
+    if (key != null) {
+      _completedKeys.add(key);
+    }
+    _activeIntents.remove(scope);
   }
 
   /// Clears the intent and stored key for a scope.
   static void clearIntent(String scope) {
-    _activeKeys.remove(scope);
-    _keyTimestamps.remove(scope);
+    _activeIntents.remove(scope);
   }
 
   /// Alias for clearIntent to maintain backward compatibility.
   static void clearScope(String scope) => clearIntent(scope);
 
-  /// Check if a scope has an active and unexpired key.
+  /// Check if a scope has an active and retryable key.
   static bool hasActiveKey(String scope) {
-    if (!_activeKeys.containsKey(scope)) return false;
-    final ts = _keyTimestamps[scope];
-    if (ts == null || DateTime.now().difference(ts) > defaultTtl) {
-      clearIntent(scope);
+    final intent = _activeIntents[scope];
+    if (intent == null) return false;
+    if (intent.isExpired ||
+        intent.state == IntentState.completed ||
+        intent.state == IntentState.failed ||
+        _completedKeys.contains(intent.key)) {
+      _activeIntents.remove(scope);
       return false;
     }
     return true;
   }
 
-  /// Get the active key for a logical scope, or generate a fresh one if none exists or if expired.
+  /// Get the active key for an in-flight or retryable user intent, or generate a fresh one
+  /// if starting a separate submission. Stale successes and failed attempts never replay.
   static String getOrCreateKey(String scope) {
-    if (hasActiveKey(scope)) {
-      return _activeKeys[scope]!;
+    final intent = _activeIntents[scope];
+    if (intent != null && !intent.isExpired) {
+      if (intent.state == IntentState.completed ||
+          intent.state == IntentState.failed ||
+          _completedKeys.contains(intent.key)) {
+        _activeIntents.remove(scope);
+        return startNewIntent(scope);
+      }
+      return intent.key;
     }
     return startNewIntent(scope);
+  }
+
+  /// Mark intent as retryable after an unresolved network error (timeout / 502 / 504 / 409 in-progress).
+  static void markIntentRetryable(String scope) {
+    final intent = _activeIntents[scope];
+    if (intent != null && intent.state != IntentState.completed) {
+      intent.state = IntentState.retryable;
+    }
   }
 
   /// Set or override key for an explicit scope
@@ -85,10 +137,10 @@ class IdempotencyScopeManager {
     startNewIntent(scope, key);
   }
 
-  /// Reset all stored keys
+  /// Reset all stored keys and completed set
   static void resetAll() {
-    _activeKeys.clear();
-    _keyTimestamps.clear();
+    _activeIntents.clear();
+    _completedKeys.clear();
   }
 
   /// Generate RFC4122 v4 UUID
@@ -148,12 +200,20 @@ class IdempotencyInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    final scope = response.requestOptions.extra['idempotency_scope'] as String?;
-    if (scope != null &&
-        response.statusCode != null &&
+    final scope = response.requestOptions.extra['idempotency_scope'] as String? ??
+        IdempotencyScopeManager.deriveScope(
+          response.requestOptions.method,
+          response.requestOptions.path,
+          null,
+          response.requestOptions.data,
+        );
+    final key = response.requestOptions.extra['idempotency_key'] as String? ??
+        response.requestOptions.headers['Idempotency-Key'] as String?;
+
+    if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
-      IdempotencyScopeManager.clearIntent(scope);
+      IdempotencyScopeManager.markIntentCompleted(scope, key);
     }
     handler.next(response);
   }
@@ -162,7 +222,13 @@ class IdempotencyInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final status = err.response?.statusCode;
     final responseData = err.response?.data;
-    final scope = err.requestOptions.extra['idempotency_scope'] as String?;
+    final scope = err.requestOptions.extra['idempotency_scope'] as String? ??
+        IdempotencyScopeManager.deriveScope(
+          err.requestOptions.method,
+          err.requestOptions.path,
+          null,
+          err.requestOptions.data,
+        );
 
     final errorCode = responseData is Map ? responseData['code']?.toString() : null;
     final errorMessage = responseData is Map ? responseData['message']?.toString() : null;
@@ -195,10 +261,10 @@ class IdempotencyInterceptor extends Interceptor {
     final shouldPreserveScope = !isIdempotencyExpiredOrReused &&
         (isIdempotencyInProgress || (isUncertain && !isIdempotencyExpiredOrReused) || (hasRetryAfter && isIdempotencyInProgress));
 
-    if (scope != null) {
-      if (!shouldPreserveScope) {
-        IdempotencyScopeManager.clearIntent(scope);
-      }
+    if (shouldPreserveScope) {
+      IdempotencyScopeManager.markIntentRetryable(scope);
+    } else {
+      IdempotencyScopeManager.clearIntent(scope);
     }
 
     handler.next(err);
