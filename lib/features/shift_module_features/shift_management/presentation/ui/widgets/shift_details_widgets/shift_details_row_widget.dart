@@ -22,20 +22,51 @@ class ShiftDetailsRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        AppSvg(assetName: iconSVGAsset, width: 20.w, height: 20.h),
-        6.horizontalSpace,
+    final Widget effectiveValueWidget = valueWidget ??
         Text(
-          title,
-          style: AppStyles.s12W500.copyWith(color: context.customColor.text3),
+          value ?? '',
+          style: AppStyles.s13W500,
+          textAlign: textAlign ?? TextAlign.end,
+          softWrap: true,
+        );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Flexible(
+          flex: 2,
+          fit: FlexFit.loose,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              AppSvg(assetName: iconSVGAsset, width: 20.w, height: 20.h),
+              6.horizontalSpace,
+              Flexible(
+                fit: FlexFit.loose,
+                child: Text(
+                  title,
+                  style: AppStyles.s12W500.copyWith(
+                    color: context.customColor.text3,
+                  ),
+                  softWrap: true,
+                ),
+              ),
+            ],
+          ),
         ),
-
-        const Spacer(),
-
-        valueWidget != null
-            ? valueWidget!
-            : Text(value!, style: AppStyles.s13W500, textAlign: textAlign),
+        Flexible(
+          flex: 3,
+          fit: FlexFit.loose,
+          child: Padding(
+            padding: EdgeInsetsDirectional.only(start: 8.w),
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: effectiveValueWidget,
+            ),
+          ),
+        ),
       ],
     );
   }
