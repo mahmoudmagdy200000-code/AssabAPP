@@ -290,21 +290,10 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                     return totalSales && countedCash;
                                   }
 
-                                  final cubit = context.read<EndShiftCubit>();
-                                  final preview = cubit.previewData;
-                                  if (preview != null && pagingState.isLastStep) {
-                                    final pMap = (preview['data'] is Map<String, dynamic>)
-                                        ? preview['data'] as Map<String, dynamic>
-                                        : preview;
-                                    final allocationRequired =
-                                        pMap['allocation_required'] == true;
-                                    final shortage = (pMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
-                                    if (allocationRequired && shortage > 0) {
-                                      final allocated = cubit.shortageAllocations
-                                          .fold<double>(0.0, (sum, a) => sum + a.amount);
-                                      if ((allocated - shortage).abs() > 0.01) {
-                                        return false;
-                                      }
+                                  if (pagingState.isLastStep) {
+                                    final cubit = context.read<EndShiftCubit>();
+                                    if (!cubit.canProceedToEndShift) {
+                                      return false;
                                     }
                                   }
 
@@ -371,10 +360,18 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                           context: context,
                                           failure: state.failure,
                                         );
+                                      } else if (state is EndShiftPreviewFailure) {
+                                        return AppDialog.showErrorDialog(
+                                          context: context,
+                                          failure: state.failure,
+                                        );
                                       }
                                     },
                                     builder: (context, state) {
-                                      if (state is EndShiftLoading) {
+                                      final cubit = context.read<EndShiftCubit>();
+                                      if (state is EndShiftLoading ||
+                                          state is EndShiftPreviewLoading ||
+                                          cubit.isPreviewLoading) {
                                         return const AppButtonLoading();
                                       }
                                       return AppButton(
@@ -431,52 +428,53 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                                   ),
                                                 );
                                               }
-                                            : () {
+                                            : () async {
                                                 if (currentIndex == 0) {
+                                                  if (cubit.isPreviewLoading) return;
+
                                                   final counted = double.tryParse(
                                                     _countedCashController.text.trim(),
                                                   );
-                                                  context
-                                                      .read<EndShiftCubit>()
-                                                      .setCountedCash(counted);
+                                                  cubit.setCountedCash(counted);
 
-                                                  context
-                                                      .read<EndShiftCubit>()
-                                                      .endShiftTotalSalesValuesUpdated(
-                                                        totalSales:
-                                                            double.tryParse(
-                                                              _totalSaleSController
-                                                                  .text,
-                                                            ) ??
-                                                            0,
-                                                        cashCollected:
-                                                            double.tryParse(
-                                                              _cashController
-                                                                  .text,
-                                                            ) ??
-                                                            0,
-                                                        cardPayments:
-                                                            double.tryParse(
-                                                              _madaSController
-                                                                  .text,
-                                                            ) ??
-                                                            0,
-                                                        aggregators: context
-                                                            .read<
-                                                              AggregatorCubit
-                                                            >()
-                                                            .addedAggregators,
-                                                      );
+                                                  cubit.endShiftTotalSalesValuesUpdated(
+                                                    totalSales:
+                                                        double.tryParse(
+                                                          _totalSaleSController
+                                                              .text,
+                                                        ) ??
+                                                        0,
+                                                    cashCollected:
+                                                        double.tryParse(
+                                                          _cashController
+                                                              .text,
+                                                        ) ??
+                                                        0,
+                                                    cardPayments:
+                                                        double.tryParse(
+                                                          _madaSController
+                                                              .text,
+                                                        ) ??
+                                                        0,
+                                                    aggregators: context
+                                                        .read<
+                                                          AggregatorCubit
+                                                        >()
+                                                        .addedAggregators,
+                                                  );
 
-                                                  // Fetch server preview calculation
-                                                  context
-                                                      .read<EndShiftCubit>()
-                                                      .fetchCashReconciliationPreview();
+                                                  // Await server preview calculation
+                                                  final previewSuccess =
+                                                      await cubit
+                                                          .fetchCashReconciliationPreview();
+                                                  if (!context.mounted) return;
+                                                  if (!previewSuccess) {
+                                                    // Stay on step 0 if preview failed or is invalid
+                                                    return;
+                                                  }
 
                                                   final isVarianceDetected =
-                                                      context
-                                                          .read<EndShiftCubit>()
-                                                          .varianceAmount !=
+                                                      cubit.varianceAmount !=
                                                       0;
 
                                                   if (isVarianceDetected) {
@@ -527,9 +525,7 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                                           'attachments',
                                                         });
 
-                                                    context
-                                                        .read<EndShiftCubit>()
-                                                        .setVarianceType(null);
+                                                    cubit.setVarianceType(null);
 
                                                     context
                                                         .read<PagingCubit>()
@@ -540,29 +536,17 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                                 if (pagingState.totalSteps ==
                                                     3) {
                                                   if (currentIndex == 1) {
-                                                    context
-                                                        .read<EndShiftCubit>()
-                                                        .setVarianceType(
-                                                          context
-                                                                  .read<
-                                                                    ValidationCubit
-                                                                  >()
-                                                                  .state
-                                                                  .fieldsValue['responsibilityType'] ??
-                                                              '',
-                                                        );
+                                                    cubit.setVarianceType(
+                                                      context
+                                                              .read<
+                                                                ValidationCubit
+                                                              >()
+                                                              .state
+                                                              .fieldsValue['responsibilityType'] ??
+                                                          '',
+                                                    );
                                                   }
                                                 }
-
-                                                // if(pagingState.totalSteps == 3){
-                                                //   if(currentIndex == 1){
-                                                //     context.read<EndShiftCubit>().setVarianceType(context.read<ValidationCubit>().state.fieldsValue['responsibilityType'] ?? '');
-                                                //   }
-                                                // }else if(pagingState.totalSteps == 2 ){
-                                                //   if(currentIndex == 1){
-                                                //     context.read<EndShiftCubit>().setVarianceType(null);
-                                                //   }
-                                                // }
 
                                                 _onNextButtonPressed(
                                                   context,
@@ -570,7 +554,9 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                                 );
                                               },
 
-                                        enabled: enableButton,
+                                        enabled: pagingState.isLastStep
+                                            ? (enableButton && cubit.canProceedToEndShift)
+                                            : enableButton,
                                         text: pagingState.totalSteps == 2
                                             ? (currentIndex == 1
                                                   ? context.tr.end_shift

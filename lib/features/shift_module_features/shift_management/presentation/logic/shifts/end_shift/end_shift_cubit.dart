@@ -86,13 +86,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   HandoverUserItem? cashier;
   String? handOverNote;
   String? nextCashierId;
-  double _varianceAmount = 0;
 
   // Physical cash count (null = unentered, distinct from 0.0)
   double? _countedCash;
   Map<String, dynamic>? _previewData;
   bool _previewStale = true;
   bool _isPreviewLoading = false;
+  int _previewRequestId = 0;
   List<CashShortageAllocation> _shortageAllocations = [];
   String? _allocationReason;
   bool _isSubmitting = false;
@@ -101,9 +101,85 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   Map<String, dynamic>? get previewData => _previewData;
   bool get previewStale => _previewStale;
   bool get isPreviewLoading => _isPreviewLoading;
+  int get previewRequestId => _previewRequestId;
   List<CashShortageAllocation> get shortageAllocations => _shortageAllocations;
   String? get allocationReason => _allocationReason;
   bool get isSubmitting => _isSubmitting;
+
+  String _computeInputFingerprint() {
+    final aggList = _aggregators
+        .map((a) => '${a.aggregatorId}:${a.amount.toStringAsFixed(2)}')
+        .toList()
+      ..sort();
+    return '$_countedCash:${_totalSales.toStringAsFixed(2)}:${_cardPayments.toStringAsFixed(2)}:${aggList.join(',')}';
+  }
+
+  bool get canProceedToEndShift {
+    if (_countedCash == null) return false;
+    if (_previewStale || _previewData == null) return false;
+    if (_isPreviewLoading || _isSubmitting) return false;
+
+    final previewMap = (_previewData!['data'] is Map<String, dynamic>)
+        ? _previewData!['data'] as Map<String, dynamic>
+        : _previewData!;
+    final allocationRequired = previewMap['allocation_required'] == true;
+    final shortageToAllocate =
+        (previewMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
+
+    if (allocationRequired && shortageToAllocate > 0) {
+      final allocatedSum =
+          _shortageAllocations.fold<double>(0.0, (sum, a) => sum + a.amount);
+      if ((allocatedSum - shortageToAllocate).abs() > 0.01) {
+        return false;
+      }
+    } else {
+      if (_shortageAllocations.isNotEmpty) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  Map<String, dynamic>? get cashReconciliation {
+    if (_previewData == null) return null;
+    final previewMap = (_previewData!['data'] is Map<String, dynamic>)
+        ? _previewData!['data'] as Map<String, dynamic>
+        : _previewData!;
+    return previewMap['cash_reconciliation'] as Map<String, dynamic>?;
+  }
+
+  double? get expectedCash {
+    final val = cashReconciliation?['expected_cash'];
+    if (val is num) return val.toDouble();
+    if (val != null) return double.tryParse(val.toString());
+    return null;
+  }
+
+  double? get previewCountedCash {
+    final val = cashReconciliation?['counted_cash'];
+    if (val is num) return val.toDouble();
+    if (val != null) return double.tryParse(val.toString());
+    return _countedCash;
+  }
+
+  double? get cashVariance {
+    final val = cashReconciliation?['cash_variance'];
+    if (val is num) return val.toDouble();
+    if (val != null) return double.tryParse(val.toString());
+    return null;
+  }
+
+  String? get cashVarianceType {
+    return cashReconciliation?['cash_variance_type']?.toString();
+  }
+
+  double? get confirmedOpeningCash {
+    final val = cashReconciliation?['confirmed_opening_cash'];
+    if (val is num) return val.toDouble();
+    if (val != null) return double.tryParse(val.toString());
+    return null;
+  }
 
   static ApiFailure _createValidationFailure(String message) {
     return ValidationFailure(
@@ -122,8 +198,10 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   }
 
   void invalidatePreview() {
+    _previewRequestId++;
     _previewData = null;
     _previewStale = true;
+    _isPreviewLoading = false;
     _shortageAllocations = [];
     emit(EndShiftPreviewInvalidated());
   }
@@ -137,7 +215,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     emit(EndShiftAllocationsUpdated(allocations: _shortageAllocations));
   }
 
-  Future<void> fetchCashReconciliationPreview() async {
+  Future<bool> fetchCashReconciliationPreview() async {
     if (_countedCash == null) {
       emit(
         EndShiftPreviewFailure(
@@ -146,8 +224,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
           ),
         ),
       );
-      return;
+      return false;
     }
+
+    _previewRequestId++;
+    final currentRequestId = _previewRequestId;
+    final currentFingerprint = _computeInputFingerprint();
+
     _isPreviewLoading = true;
     emit(EndShiftPreviewLoading());
 
@@ -161,7 +244,15 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
           .toList(),
     );
 
+    // If an invalidation or newer request occurred while in-flight, discard response
+    if (currentRequestId != _previewRequestId ||
+        currentFingerprint != _computeInputFingerprint()) {
+      return false;
+    }
+
     _isPreviewLoading = false;
+    bool isSuccess = false;
+
     handle(
       result,
       success: (data) {
@@ -189,13 +280,17 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
             cashVarianceType: varianceType,
           ),
         );
+        isSuccess = true;
       },
       failure: (f) {
         _previewData = null;
         _previewStale = true;
         emit(EndShiftPreviewFailure(f));
+        isSuccess = false;
       },
     );
+
+    return isSuccess;
   }
 
   void endShiftHandOverValuesUpdated({
@@ -264,20 +359,18 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     final calculatedMethodsTotal = paymentMethodsTotal;
 
     if (calculatedMethodsTotal == 0) {
-      return _varianceAmount = 0;
+      return 0;
     }
     if (totalSales > (calculatedMethodsTotal)) {
-      return _varianceAmount = totalSales - (calculatedMethodsTotal);
+      return totalSales - (calculatedMethodsTotal);
     } else if (totalSales < (calculatedMethodsTotal)) {
-      return _varianceAmount = (calculatedMethodsTotal) - totalSales;
+      return (calculatedMethodsTotal) - totalSales;
     }
 
-    return _varianceAmount = 0;
+    return 0;
   }
 
-  set varianceAmount(double value) {
-    _varianceAmount = value;
-  }
+  set varianceAmount(double value) {}
 
   double get cashGiven => _cashGiven;
 

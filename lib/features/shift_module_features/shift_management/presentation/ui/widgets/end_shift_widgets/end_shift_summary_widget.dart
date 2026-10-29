@@ -122,7 +122,7 @@ class EndShiftSummaryWidget extends StatelessWidget {
                       value: context
                           .read<EndShiftCubit>()
                           .aggregators
-                          .fold<double>(0, (sum, e) => sum + (e.amount ?? 0))
+                          .fold<double>(0, (sum, e) => sum + e.amount)
                           .toStringAsFixed(2),
 
                       firstValueSvgAsset: AppAssets.saudiRiyal,
@@ -157,6 +157,79 @@ class EndShiftSummaryWidget extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                if (context.read<EndShiftCubit>().previewData != null) ...[
+                  10.verticalSpace,
+                  SummarizeCardWidget(
+                    children: [
+                      Text(
+                        'Cash Reconciliation',
+                        style: AppStyles.s14W500.copyWith(
+                          color: context.customColor.text1,
+                        ),
+                      ),
+                      SizedBox(width: 250.w, child: const CustomDivider()),
+                      if (context.read<EndShiftCubit>().expectedCash != null)
+                        buildShiftCardRowWidget(
+                          context: context,
+                          firstTitleSvgAsset: AppAssets.cash,
+                          title: 'Expected Cash',
+                          value: context
+                              .read<EndShiftCubit>()
+                              .expectedCash!
+                              .toStringAsFixed(2),
+                          firstValueSvgAsset: AppAssets.saudiRiyal,
+                          hasSpaceBetweenTitleAndValue: true,
+                        ),
+                      if (context.read<EndShiftCubit>().previewCountedCash != null)
+                        buildShiftCardRowWidget(
+                          context: context,
+                          firstTitleSvgAsset: AppAssets.cash,
+                          title: context.tr.physicalCountedCash,
+                          value: context
+                              .read<EndShiftCubit>()
+                              .previewCountedCash!
+                              .toStringAsFixed(2),
+                          firstValueSvgAsset: AppAssets.saudiRiyal,
+                          hasSpaceBetweenTitleAndValue: true,
+                        ),
+                      if (context.read<EndShiftCubit>().cashVariance != null)
+                        buildShiftCardRowWidget(
+                          context: context,
+                          firstTitleSvgAsset: AppAssets.cash,
+                          title: context.tr.variance,
+                          value: context
+                              .read<EndShiftCubit>()
+                              .cashVariance!
+                              .toStringAsFixed(2),
+                          firstValueSvgAsset: AppAssets.saudiRiyal,
+                          hasSpaceBetweenTitleAndValue: true,
+                        ),
+                      if (context.read<EndShiftCubit>().cashVarianceType != null)
+                        buildShiftCardRowWidget(
+                          context: context,
+                          firstTitleSvgAsset: AppAssets.cash,
+                          title: context.tr.varianceType,
+                          value: context
+                              .read<EndShiftCubit>()
+                              .cashVarianceType!,
+                          hasSpaceBetweenTitleAndValue: true,
+                        ),
+                      if (context.read<EndShiftCubit>().confirmedOpeningCash != null)
+                        buildShiftCardRowWidget(
+                          context: context,
+                          firstTitleSvgAsset: AppAssets.cash,
+                          title: context.tr.openingBalanceTitle,
+                          value: context
+                              .read<EndShiftCubit>()
+                              .confirmedOpeningCash!
+                              .toStringAsFixed(2),
+                          firstValueSvgAsset: AppAssets.saudiRiyal,
+                          hasSpaceBetweenTitleAndValue: true,
+                        ),
+                    ],
+                  ),
+                ],
 
                 10.verticalSpace,
               ],
