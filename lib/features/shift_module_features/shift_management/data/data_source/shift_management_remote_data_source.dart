@@ -195,7 +195,10 @@ abstract class ShiftManagementRemoteDataSource {
   });
 
   @GET('${ApiEndpoint.branchWorkDayMgmt}/daily-close')
-  Future<FinalDailyCloseResponse> getDailyClose();
+  Future<FinalDailyCloseResponse> getDailyClose({
+    @Query('manager_workday_id') String? managerWorkdayId,
+    @Query('workday') String? workday,
+  });
 
   @POST('${ApiEndpoint.branchManagerShifts}/{shift}/handover/approve')
   Future approveHandover({

@@ -7,6 +7,9 @@ part 'manager_end_shift_request_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class EndManagerShiftRequestModel {
+  @JsonKey(name: 'manager_workday_id')
+  final String managerWorkdayId;
+
   @JsonKey(name: 'handover_to')
   final String? handoverTo;
 
@@ -38,6 +41,7 @@ class EndManagerShiftRequestModel {
   final List<CashierBreakdownRequestModel>? cashierBreakdown;
 
   const EndManagerShiftRequestModel({
+    required this.managerWorkdayId,
     this.handoverTo,
     this.handoverAmount,
     required this.handoverTiming,

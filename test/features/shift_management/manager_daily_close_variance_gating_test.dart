@@ -98,6 +98,14 @@ class _MockShiftManagementRepo extends ShiftManagementRepositoryImp {
   }
 }
 
+
+FinalDailyCloseLoadedOrUpdated _workday(List<CashierBreakdownEntity> rows) {
+  final cashiers = rows.map((row) => row.cashierShiftId == null
+      ? row.copyWith(cashierShiftId: 'fixture-${row.cashierId}') : row).toList();
+  return FinalDailyCloseLoadedOrUpdated(managerWorkdayId: 'manager-day-29', businessDate: '2026-10-29',
+      cashiers: cashiers, totals: TotalsEntity.fromCashiers(cashiers));
+}
+
 void main() {
   group('Manager Daily Close - Variance Gating & Serialization Tests', () {
     test('CashierBreakdownRequestModel serializes correctly and omits variance completely', () {
@@ -122,6 +130,7 @@ void main() {
 
     test('EndManagerShiftRequestModel cashier_breakdown entries NEVER contain variance', () {
       const request = EndManagerShiftRequestModel(
+        managerWorkdayId: 'manager-day-29',
         handoverTiming: HandoverTiming.today,
         totalSales: 1000.0,
         cashCollected: 400.0,
@@ -158,6 +167,7 @@ void main() {
 
     test('UpdateManagerHandoverRequestModel cashier_breakdown entries NEVER contain variance', () {
       const request = UpdateManagerHandoverRequestModel(
+        managerWorkdayId: 'manager-day-29',
         cashierBreakdown: [
           CashierBreakdownRequestModel(
             cashierId: 'c-001',
@@ -211,6 +221,7 @@ void main() {
       final cashiers = [
         CashierBreakdownEntity(
           cashierId: 'c-1',
+          cashierShiftId: 'shift-c-1',
           cashierName: 'Cashier 1',
           cashCollected: 100.0,
           cardPayments: 150.0,
@@ -220,13 +231,7 @@ void main() {
         ),
       ];
 
-      await cubit.endManagerShift(
-        totalSales: 300.0,
-        cashCollected: 100.0,
-        cardPayments: 150.0,
-        aggregatorPayments: 50.0,
-        cashierBreakdown: cashiers,
-      );
+      await cubit.endManagerShift(workday: _workday(cashiers));
 
       expect(mockRepo.endManagerShiftCallCount, equals(1));
       expect(mockRepo.lastEndRequest, isNotNull);
@@ -248,6 +253,7 @@ void main() {
       final cashiers = [
         CashierBreakdownEntity(
           cashierId: 'c-1',
+          cashierShiftId: 'shift-c-1',
           cashierName: 'Cashier 1',
           cashCollected: 100.0,
           cardPayments: 150.0,
@@ -258,13 +264,7 @@ void main() {
       ];
 
       // Attempt second call while in-flight
-      await cubit.endManagerShift(
-        totalSales: 300.0,
-        cashCollected: 100.0,
-        cardPayments: 150.0,
-        aggregatorPayments: 50.0,
-        cashierBreakdown: cashiers,
-      );
+      await cubit.endManagerShift(workday: _workday(cashiers));
 
       expect(mockRepo.endManagerShiftCallCount, equals(0),
           reason: 'In-flight double submission must be dropped');
@@ -289,13 +289,7 @@ void main() {
         totalSales: 115.0,
       );
 
-      await cubit.endManagerShift(
-        totalSales: 115.0,
-        cashCollected: 40.0,
-        cardPayments: 50.0,
-        aggregatorPayments: 25.0,
-        cashierBreakdown: [cashier],
-      );
+      await cubit.endManagerShift(workday: _workday([cashier]));
 
       expect(mockRepo.endManagerShiftCallCount, equals(1));
       final serializedRow = mockRepo.lastEndRequest!.cashierBreakdown!.first.toJson();
@@ -327,9 +321,7 @@ void main() {
       // Manager reviews without making ANY edits: isModified must be false
       expect(serverCashier.isModified, isFalse);
 
-      await cubit.updateManagerHandoverShift(
-        cashierBreakdown: [serverCashier],
-      );
+      await cubit.updateManagerHandoverShift(workday: _workday([serverCashier]));
 
       expect(mockRepo.updateManagerHandoverCallCount, equals(1));
       expect(mockRepo.lastUpdateIdempotencyKey, isNull,
@@ -351,19 +343,17 @@ void main() {
       expect(serializedRow.containsKey('variance'), isFalse);
 
       // Now verify that if manager DOES edit a field, expected_revision, reason, and idempotency key are attached
-      final editedCashier = serverCashier.copyWith(cashCollected: 250.0);
+      final editedCashier = serverCashier.copyWith(cashCollected: 250.0, reason: 'POS count corrected');
       expect(editedCashier.isModified, isTrue);
 
-      await cubit.updateManagerHandoverShift(
-        cashierBreakdown: [editedCashier],
-      );
+      await cubit.updateManagerHandoverShift(workday: _workday([editedCashier]));
 
       expect(mockRepo.updateManagerHandoverCallCount, equals(2));
       expect(mockRepo.lastUpdateIdempotencyKey, isNotNull,
           reason: 'Mutation requires Idempotency-Key');
       final editedRow = mockRepo.lastUpdateRequest!.cashierBreakdown.first.toJson();
       expect(editedRow['expected_revision'], equals(5));
-      expect(editedRow['reason'], equals('Manager daily close correction'));
+      expect(editedRow['reason'], equals('POS count corrected'));
       expect(editedRow['cash_collected'], equals(250.0));
       expect(editedRow['sales'], equals(500.0), reason: 'Sales remains server gross sales even on cash edit');
     });
@@ -415,9 +405,7 @@ void main() {
       expect(totals.totalDeliveryApps, equals(210.0));
       expect(totals.totalVariance, equals(50.0));
 
-      await cubit.updateManagerHandoverShift(
-        cashierBreakdown: [shortageCashier, surplusCashier, multiAggCashier],
-      );
+      await cubit.updateManagerHandoverShift(workday: _workday([shortageCashier, surplusCashier, multiAggCashier]));
 
       final breakdown = mockRepo.lastUpdateRequest!.cashierBreakdown;
       expect(breakdown[0].sales, equals(250.0), reason: 'Shortage case preserves gross sales (250.0)');
@@ -440,6 +428,7 @@ void main() {
       final initialCashiers = [
         CashierBreakdownEntity(
           cashierId: 'c-1',
+          cashierShiftId: 'shift-c-1',
           cashierName: 'Cashier 1',
           cashCollected: 100.0,
           cardPayments: 200.0,
@@ -456,7 +445,7 @@ void main() {
 
       // Attempt to mutate variance
       cubit.updateCashierField(
-        cashierId: 'c-1',
+        cashierShiftId: 'shift-c-1',
         field: CashierField.variance,
         value: 999.0,
       );
@@ -467,7 +456,7 @@ void main() {
 
       // Mutate cashCollected
       cubit.updateCashierField(
-        cashierId: 'c-1',
+        cashierShiftId: 'shift-c-1',
         field: CashierField.cashCollected,
         value: 120.0,
       );

@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 class CashierBreakdownEntity {
+  final List<Map<String, dynamic>>? aggregators;
+  final List<Map<String, dynamic>>? initialAggregators;
+
   final String cashierId;
   final String? cashierShiftId;
   final int? expectedRevision;
@@ -17,6 +22,8 @@ class CashierBreakdownEntity {
   final String? reason;
 
   CashierBreakdownEntity({
+    this.aggregators,
+    List<Map<String, dynamic>>? initialAggregators,
     required this.cashierId,
     this.cashierShiftId,
     this.expectedRevision,
@@ -31,14 +38,16 @@ class CashierBreakdownEntity {
     double? initialDeliveryAppPayments,
     double? initialTotalSales,
     this.reason,
-  })  : initialCashCollected = initialCashCollected ?? cashCollected,
-        initialCardPayments = initialCardPayments ?? cardPayments,
-        initialDeliveryAppPayments =
-            initialDeliveryAppPayments ?? deliveryAppPayments,
-        initialTotalSales = initialTotalSales ?? totalSales;
+  }) : initialAggregators = initialAggregators ?? aggregators,
+       initialCashCollected = initialCashCollected ?? cashCollected,
+       initialCardPayments = initialCardPayments ?? cardPayments,
+       initialDeliveryAppPayments =
+           initialDeliveryAppPayments ?? deliveryAppPayments,
+       initialTotalSales = initialTotalSales ?? totalSales;
 
   /// True if manager explicitly altered any financial field from the server's authoritative state
   bool get isModified =>
+      jsonEncode(aggregators) != jsonEncode(initialAggregators) ||
       (cashCollected - initialCashCollected).abs() > 0.001 ||
       (cardPayments - initialCardPayments).abs() > 0.001 ||
       (deliveryAppPayments - initialDeliveryAppPayments).abs() > 0.001 ||
@@ -51,6 +60,7 @@ class CashierBreakdownEntity {
   }
 
   CashierBreakdownEntity copyWith({
+    List<Map<String, dynamic>>? aggregators,
     String? cashierId,
     String? cashierShiftId,
     int? expectedRevision,
@@ -67,6 +77,8 @@ class CashierBreakdownEntity {
     String? reason,
   }) {
     return CashierBreakdownEntity(
+      aggregators: aggregators ?? this.aggregators,
+      initialAggregators: initialAggregators,
       cashierId: cashierId ?? this.cashierId,
       cashierShiftId: cashierShiftId ?? this.cashierShiftId,
       expectedRevision: expectedRevision ?? this.expectedRevision,

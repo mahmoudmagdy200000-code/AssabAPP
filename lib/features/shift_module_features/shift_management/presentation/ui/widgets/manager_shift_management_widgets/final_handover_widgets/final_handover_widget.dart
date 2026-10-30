@@ -143,6 +143,7 @@ class FinalHandoverWidget extends StatelessWidget {
                         NavigationService.I.pushNamed(
                           AppRouteName.updateManagerFinalDailyCloseScreen,
                           arguments: {
+                            'manager_workday_id': currentManagerShift.shift.id,
                             'branchName': currentManagerShift
                                 .shift
                                 .shiftDetails
@@ -167,7 +168,7 @@ class FinalHandoverWidget extends StatelessWidget {
                           context,
                           (context) => BlocProvider(
                             create: (context) =>
-                                getIt<FinalDailyCloseCubit>()..getDailyClose(),
+                                getIt<FinalDailyCloseCubit>()..getDailyClose(managerWorkdayId: currentManagerShift.shift.id),
                             child: FinalHandoverSummaryWidget(
                               currentTimeSetting: currentManagerShift
                                   .shift
@@ -197,7 +198,7 @@ class FinalHandoverWidget extends StatelessWidget {
                     context,
                     (context) => BlocProvider(
                       create: (context) =>
-                          getIt<FinalDailyCloseCubit>()..getDailyClose(),
+                          getIt<FinalDailyCloseCubit>()..getDailyClose(managerWorkdayId: currentManagerShift.shift.id),
                       child: FinalHandoverSummaryWidget(
                         currentTimeSetting: currentManagerShift
                             .shift

@@ -24,6 +24,15 @@ Map<String, dynamic> _$FinalDailyCloseResponseToJson(
 
 FinalDailyCloseData _$FinalDailyCloseDataFromJson(Map<String, dynamic> json) =>
     FinalDailyCloseData(
+      managerWorkdayId: json['manager_workday_id'] as String?,
+      businessDate: json['business_date'] as String?,
+      serverTime: json['server_time'] as String?,
+      timezone: json['timezone'] as String?,
+      workdayDates:
+          (json['workday_dates'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, e as String),
+          ) ??
+          const {},
       cashierBreakdown: (json['cashier_breakdown'] as List<dynamic>)
           .map((e) => CashierBreakdownModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -40,6 +49,11 @@ FinalDailyCloseData _$FinalDailyCloseDataFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$FinalDailyCloseDataToJson(
   FinalDailyCloseData instance,
 ) => <String, dynamic>{
+  'manager_workday_id': instance.managerWorkdayId,
+  'business_date': instance.businessDate,
+  'server_time': instance.serverTime,
+  'timezone': instance.timezone,
+  'workday_dates': instance.workdayDates,
   'cashier_breakdown': instance.cashierBreakdown
       .map((e) => e.toJson())
       .toList(),
@@ -78,6 +92,9 @@ Map<String, dynamic> _$AggregatorFinalDailyCloseModelToJson(
 CashierBreakdownFinalDailyCloseModel
 _$CashierBreakdownFinalDailyCloseModelFromJson(Map<String, dynamic> json) =>
     CashierBreakdownFinalDailyCloseModel(
+      cashierShiftId: json['cashier_shift_id'] as String?,
+      notes: json['notes'] as String?,
+      present: json['present'] as bool? ?? true,
       cashierId: json['cashier_id'] as String,
       cashierName: json['cashier_name'] as String,
       amount: (json['amount'] as num).toDouble(),
@@ -86,6 +103,9 @@ _$CashierBreakdownFinalDailyCloseModelFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CashierBreakdownFinalDailyCloseModelToJson(
   CashierBreakdownFinalDailyCloseModel instance,
 ) => <String, dynamic>{
+  'cashier_shift_id': instance.cashierShiftId,
+  'notes': instance.notes,
+  'present': instance.present,
   'cashier_id': instance.cashierId,
   'cashier_name': instance.cashierName,
   'amount': instance.amount,

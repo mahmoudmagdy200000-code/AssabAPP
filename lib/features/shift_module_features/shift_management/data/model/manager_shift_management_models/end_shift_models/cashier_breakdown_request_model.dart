@@ -4,6 +4,9 @@ part 'cashier_breakdown_request_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class CashierBreakdownRequestModel {
+  @JsonKey(name: 'aggregators', includeIfNull: false)
+  final List<Map<String, dynamic>>? aggregators;
+
   @JsonKey(name: 'cashier_id')
   final String cashierId;
 
@@ -29,6 +32,7 @@ class CashierBreakdownRequestModel {
   final String? reason;
 
   const CashierBreakdownRequestModel({
+    this.aggregators,
     required this.cashierId,
     this.cashierShiftId,
     this.cashCollected,

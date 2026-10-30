@@ -24,12 +24,27 @@ class FinalDailyCloseResponse {
 
 @JsonSerializable(explicitToJson: true)
 class FinalDailyCloseData {
+  @JsonKey(name: 'manager_workday_id')
+  final String? managerWorkdayId;
+  @JsonKey(name: 'business_date')
+  final String? businessDate;
+  @JsonKey(name: 'server_time')
+  final String? serverTime;
+  final String? timezone;
+  @JsonKey(name: 'workday_dates')
+  final Map<String, String> workdayDates;
+
   @JsonKey(name: 'cashier_breakdown')
   final List<CashierBreakdownModel> cashierBreakdown;
   final Totals totals;
   final List<AggregatorFinalDailyCloseModel>? aggregators;
 
   FinalDailyCloseData({
+    this.managerWorkdayId,
+    this.businessDate,
+    this.serverTime,
+    this.timezone,
+    this.workdayDates = const {},
     required this.cashierBreakdown,
     required this.totals,
     required this.aggregators,
@@ -65,6 +80,10 @@ class AggregatorFinalDailyCloseModel {
 
 @JsonSerializable(explicitToJson: true)
 class CashierBreakdownFinalDailyCloseModel {
+  @JsonKey(name: 'cashier_shift_id')
+  final String? cashierShiftId;
+  final String? notes;
+  final bool present;
   @JsonKey(name: 'cashier_id')
   final String cashierId;
   @JsonKey(name: 'cashier_name')
@@ -72,6 +91,9 @@ class CashierBreakdownFinalDailyCloseModel {
   final double amount;
 
   CashierBreakdownFinalDailyCloseModel({
+    this.cashierShiftId,
+    this.notes,
+    this.present = true,
     required this.cashierId,
     required this.cashierName,
     required this.amount,
@@ -85,11 +107,17 @@ class CashierBreakdownFinalDailyCloseModel {
       _$CashierBreakdownFinalDailyCloseModelToJson(this);
 
   CashierBreakdownFinalDailyCloseModel copyWith({
+    String? cashierShiftId,
+    String? notes,
+    bool? present,
     String? cashierId,
     String? cashierName,
     double? amount,
   }) {
     return CashierBreakdownFinalDailyCloseModel(
+      cashierShiftId: cashierShiftId ?? this.cashierShiftId,
+      notes: notes ?? this.notes,
+      present: present ?? this.present,
       cashierId: cashierId ?? this.cashierId,
       cashierName: cashierName ?? this.cashierName,
       amount: amount ?? this.amount,

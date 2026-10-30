@@ -9,6 +9,9 @@ part of 'cashier_breakdown_request_model.dart';
 CashierBreakdownRequestModel _$CashierBreakdownRequestModelFromJson(
   Map<String, dynamic> json,
 ) => CashierBreakdownRequestModel(
+  aggregators: (json['aggregators'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
   cashierId: json['cashier_id'] as String,
   cashierShiftId: json['cashier_shift_id'] as String?,
   cashCollected: (json['cash_collected'] as num?)?.toDouble(),
@@ -22,6 +25,7 @@ CashierBreakdownRequestModel _$CashierBreakdownRequestModelFromJson(
 Map<String, dynamic> _$CashierBreakdownRequestModelToJson(
   CashierBreakdownRequestModel instance,
 ) => <String, dynamic>{
+  'aggregators': ?instance.aggregators,
   'cashier_id': instance.cashierId,
   'cashier_shift_id': ?instance.cashierShiftId,
   'cash_collected': instance.cashCollected,

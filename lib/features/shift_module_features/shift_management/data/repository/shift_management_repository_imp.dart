@@ -540,9 +540,9 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     });
   }
 
-  FutureApiResult<FinalDailyCloseData> getDailyClose() async {
+  FutureApiResult<FinalDailyCloseData> getDailyClose({String? managerWorkdayId, String? workday}) async {
     return execute(() async {
-      final response = await _remoteDataSource.getDailyClose();
+      final response = await _remoteDataSource.getDailyClose(managerWorkdayId: managerWorkdayId, workday: workday);
 
       return response.data;
     });

@@ -37,6 +37,7 @@ class UpdateManagerFinalDailyCloseScreen extends StatefulWidget {
 
 class _UpdateManagerFinalDailyCloseScreenState
     extends State<UpdateManagerFinalDailyCloseScreen> {
+  late String draftManagerWorkdayId;
   late List<CashierBreakdownEntity> draftCashiersBreakdowns;
   late TotalsEntity draftTotals;
   late List<AggregatorFinalDailyCloseEntity> draftAggregators;
@@ -293,6 +294,8 @@ class _UpdateManagerFinalDailyCloseScreenState
                                                         FinalDailyCloseCubit
                                                       >();
                                                   cubit.undoChanges(
+                                                    managerWorkdayId:
+                                                        draftManagerWorkdayId,
                                                     draftCashiers:
                                                         draftCashiersBreakdowns,
                                                     draftTotals: draftTotals,
@@ -307,23 +310,41 @@ class _UpdateManagerFinalDailyCloseScreenState
                                             ),
                                             10.horizontalSpace,
                                             Expanded(
-                                              child: AppButton(
-                                                onClick: () {
-                                                  context
-                                                      .read<
-                                                        EndAndUpdateManagerShiftCubit
-                                                      >()
-                                                      .updateManagerHandoverShift(
-                                                        cashierBreakdown: context
+                                              child:
+                                                  BlocBuilder<
+                                                    FinalDailyCloseCubit,
+                                                    FinalDailyCloseState
+                                                  >(
+                                                    builder: (context, dailyState) => AppButton(
+                                                      onClick: () {
+                                                        final daily = context
                                                             .read<
                                                               FinalDailyCloseCubit
+                                                            >();
+                                                        final snapshot =
+                                                            daily.state;
+                                                        if (snapshot
+                                                                is! FinalDailyCloseLoadedOrUpdated ||
+                                                            !snapshot.canSubmit) {
+                                                          return;
+                                                        }
+                                                        context
+                                                            .read<
+                                                              EndAndUpdateManagerShiftCubit
                                                             >()
-                                                            .cashiersBreakdown,
-                                                      );
-                                                },
-                                                enabled: true,
-                                                text: context.tr.submitChanges,
-                                              ),
+                                                            .updateManagerHandoverShift(
+                                                              workday: snapshot,
+                                                            );
+                                                      },
+                                                      enabled:
+                                                          dailyState
+                                                              is FinalDailyCloseLoadedOrUpdated &&
+                                                          dailyState.canSubmit,
+                                                      text: context
+                                                          .tr
+                                                          .submitChanges,
+                                                    ),
+                                                  ),
                                             ),
                                           ],
                                         );
@@ -331,6 +352,16 @@ class _UpdateManagerFinalDailyCloseScreenState
 
                                       return AppButton(
                                         onClick: () {
+                                          final snapshot = context
+                                              .read<FinalDailyCloseCubit>()
+                                              .state;
+                                          if (snapshot
+                                                  is! FinalDailyCloseLoadedOrUpdated ||
+                                              snapshot.managerWorkdayId == null) {
+                                            return;
+                                          }
+                                          draftManagerWorkdayId =
+                                              snapshot.managerWorkdayId!;
                                           draftCashiersBreakdowns = context
                                               .read<FinalDailyCloseCubit>()
                                               .cashiersBreakdown;

@@ -6,10 +6,16 @@ part 'update_manager_handover_request_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class UpdateManagerHandoverRequestModel {
+  @JsonKey(name: 'manager_workday_id')
+  final String managerWorkdayId;
+
   @JsonKey(name: 'cashier_breakdown')
   final List<CashierBreakdownRequestModel> cashierBreakdown;
 
-  const UpdateManagerHandoverRequestModel({required this.cashierBreakdown});
+  const UpdateManagerHandoverRequestModel({
+    required this.managerWorkdayId,
+    required this.cashierBreakdown,
+  });
 
   factory UpdateManagerHandoverRequestModel.fromJson(
     Map<String, dynamic> json,

@@ -61,6 +61,10 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
   }
 
   void _onBackButtonPressed(BuildContext context, int currentIndex) {
+    if (context.read<EndAndUpdateManagerShiftCubit>().state
+        is EndManagerShiftButtonLoading) {
+      return;
+    }
     _goBackView(context);
 
     switch (currentIndex) {
@@ -78,13 +82,12 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
   void _onNextButtonPressed(BuildContext context, int currentIndex) {
     if (currentIndex == 2) {
       final cubit = context.read<FinalDailyCloseCubit>();
-      final totals = cubit.totals;
+      final snapshot = cubit.state;
+      if (snapshot is! FinalDailyCloseLoadedOrUpdated || !snapshot.canSubmit) {
+        return;
+      }
       context.read<EndAndUpdateManagerShiftCubit>().endManagerShift(
-        aggregatorPayments: totals.totalDeliveryApps,
-        cardPayments: totals.totalCardPayments,
-        cashCollected: totals.totalCashCollected,
-        totalSales: totals.totalSales,
-        cashierBreakdown: cubit.cashiersBreakdown,
+        workday: snapshot,
       );
     } else {
       _changeView(context);
@@ -241,15 +244,27 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
                                           is EndManagerShiftButtonLoading) {
                                         return const AppButtonLoading();
                                       }
-                                      return AppButton(
-                                        onClick: () => _onNextButtonPressed(
-                                          context,
-                                          currentIndex,
+                                      return BlocBuilder<
+                                        FinalDailyCloseCubit,
+                                        FinalDailyCloseState
+                                      >(
+                                        builder: (context, dailyState) => AppButton(
+                                          onClick: () => _onNextButtonPressed(
+                                            context,
+                                            currentIndex,
+                                          ),
+                                          enabled:
+                                              enableButton &&
+                                              (currentIndex == 0 ||
+                                                  (dailyState
+                                                          is FinalDailyCloseLoadedOrUpdated &&
+                                                      (currentIndex != 2 ||
+                                                          dailyState
+                                                              .canSubmit))),
+                                          text: currentIndex == 2
+                                              ? context.tr.end_shift
+                                              : context.tr.next,
                                         ),
-                                        enabled: enableButton,
-                                        text: currentIndex == 2
-                                            ? context.tr.end_shift
-                                            : context.tr.next,
                                       );
                                     },
                                   );

@@ -1051,7 +1051,7 @@ class AppRouter {
                 create: (_) => getIt<EndAndUpdateManagerShiftCubit>(),
               ),
               BlocProvider(
-                create: (_) => getIt<FinalDailyCloseCubit>()..getDailyClose(),
+                create: (_) => getIt<FinalDailyCloseCubit>()..getDailyClose(managerWorkdayId: managerCubit.managerShift.shift.id),
               ),
               BlocProvider.value(value: managerCubit),
             ],
@@ -1073,7 +1073,7 @@ class AppRouter {
                 create: (_) => getIt<EndAndUpdateManagerShiftCubit>(),
               ),
               BlocProvider(
-                create: (_) => getIt<FinalDailyCloseCubit>()..getDailyClose(),
+                create: (_) => getIt<FinalDailyCloseCubit>()..getDailyClose(managerWorkdayId: args['manager_workday_id'] as String? ?? managerCubit.managerShift.shift.id),
               ),
               BlocProvider.value(value: managerCubit),
             ],

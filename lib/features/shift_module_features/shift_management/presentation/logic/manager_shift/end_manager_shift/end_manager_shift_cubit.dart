@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:assab/core/errors/api_failure.dart';
+import '../../../../../../../core/errors/api_error_model.dart';
+import '../final_daily_close/final_daily_close_cubit.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/end_shift_models/cashier_breakdown_request_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/end_shift_models/manager_end_shift_request_model.dart';
@@ -21,51 +24,76 @@ class EndAndUpdateManagerShiftCubit
 
   final ShiftManagementRepositoryImp _repo;
 
-  late HandoverTiming handoverTiming;
+  HandoverTiming handoverTiming = HandoverTiming.today;
+  String? _intentFingerprint;
+  String? _intentKey;
+
+  String _idempotencyKey(String action, Map<String, dynamic> payload) {
+    final fingerprint = '$action:${jsonEncode(payload)}';
+    if (_intentFingerprint != fingerprint) {
+      _intentFingerprint = fingerprint;
+      _intentKey = IdempotencyScopeManager.generateUuidV4();
+    }
+    return _intentKey!;
+  }
+
+  bool _validate(FinalDailyCloseLoadedOrUpdated workday) {
+    if (workday.canSubmit) return true;
+    emit(
+      EndManagerShiftFailure(
+        ValidationFailure(
+          error: LocalErrorModel(
+            message:
+                'Load the selected workday and provide a reason and current revision for every correction.',
+          ),
+          icon: Icons.error_outline,
+          statusCode: 422,
+          stackTrace: StackTrace.current,
+        ),
+      ),
+    );
+    return false;
+  }
+
+  List<CashierBreakdownRequestModel> _rows(
+    List<CashierBreakdownEntity> cashiers,
+  ) => cashiers
+      .map(
+        (e) => CashierBreakdownRequestModel(
+          cashierId: e.cashierId,
+          cashierShiftId: e.cashierShiftId,
+          cashCollected: e.cashCollected,
+          cardPayments: e.cardPayments,
+          deliveryAppPayments: e.deliveryAppPayments,
+          sales: e.totalSales,
+          aggregators:
+              jsonEncode(e.aggregators) != jsonEncode(e.initialAggregators)
+              ? e.aggregators
+              : null,
+          expectedRevision: e.isModified ? e.expectedRevision : null,
+          reason: e.isModified ? e.reason?.trim() : null,
+        ),
+      )
+      .toList();
 
   Future<void> endManagerShift({
-    required List<CashierBreakdownEntity> cashierBreakdown,
-    required double totalSales,
-    required double cashCollected,
-    required double cardPayments,
-    required double aggregatorPayments,
+    required FinalDailyCloseLoadedOrUpdated workday,
   }) async {
-    // Guard against double submission while network request is in-flight
-    if (state is EndManagerShiftButtonLoading) return;
-
+    if (state is EndManagerShiftButtonLoading || !_validate(workday)) return;
     emit(EndManagerShiftButtonLoading());
-
-    final hasMutations = cashierBreakdown.any((e) => e.isModified);
-    final idempotencyKey =
-        hasMutations ? IdempotencyScopeManager.generateUuidV4() : null;
-
-    final result = await _repo.endManagerShift(
-      request: EndManagerShiftRequestModel(
-        handoverTiming: handoverTiming,
-        totalSales: totalSales,
-        cashCollected: cashCollected,
-        cardPayments: cardPayments,
-        aggregatorPayments: aggregatorPayments,
-        cashierBreakdown: cashierBreakdown
-            .map(
-              (e) => CashierBreakdownRequestModel(
-                cashierId: e.cashierId,
-                cashierShiftId: e.cashierShiftId,
-                cashCollected: e.cashCollected,
-                cardPayments: e.cardPayments,
-                deliveryAppPayments: e.deliveryAppPayments,
-                sales: e.totalSales,
-                expectedRevision: e.isModified ? e.expectedRevision : null,
-                reason: e.isModified
-                    ? (e.reason ?? 'Manager daily close correction')
-                    : null,
-              ),
-            )
-            .toList(),
-      ),
-      idempotencyKey: idempotencyKey,
+    final request = EndManagerShiftRequestModel(
+      managerWorkdayId: workday.managerWorkdayId!,
+      handoverTiming: handoverTiming,
+      totalSales: workday.totals.totalSales,
+      cashCollected: workday.totals.totalCashCollected,
+      cardPayments: workday.totals.totalCardPayments,
+      aggregatorPayments: workday.totals.totalDeliveryApps,
+      cashierBreakdown: _rows(workday.cashiers),
     );
-
+    final result = await _repo.endManagerShift(
+      request: request,
+      idempotencyKey: _idempotencyKey('end', request.toJson()),
+    );
     handle(
       result,
       failure: (failure) => emit(EndManagerShiftFailure(failure)),
@@ -75,39 +103,20 @@ class EndAndUpdateManagerShiftCubit
   }
 
   Future<void> updateManagerHandoverShift({
-    required List<CashierBreakdownEntity> cashierBreakdown,
+    required FinalDailyCloseLoadedOrUpdated workday,
   }) async {
-    // Guard against double submission while network request is in-flight
-    if (state is EndManagerShiftButtonLoading) return;
-
+    if (state is EndManagerShiftButtonLoading || !_validate(workday)) return;
     emit(EndManagerShiftButtonLoading());
-
-    final hasMutations = cashierBreakdown.any((e) => e.isModified);
-    final idempotencyKey =
-        hasMutations ? IdempotencyScopeManager.generateUuidV4() : null;
-
-    final result = await _repo.updateManagerHandoverShift(
-      request: UpdateManagerHandoverRequestModel(
-        cashierBreakdown: cashierBreakdown
-            .map(
-              (e) => CashierBreakdownRequestModel(
-                cashierId: e.cashierId,
-                cashierShiftId: e.cashierShiftId,
-                cashCollected: e.cashCollected,
-                cardPayments: e.cardPayments,
-                deliveryAppPayments: e.deliveryAppPayments,
-                sales: e.totalSales,
-                expectedRevision: e.isModified ? e.expectedRevision : null,
-                reason: e.isModified
-                    ? (e.reason ?? 'Manager daily close correction')
-                    : null,
-              ),
-            )
-            .toList(),
-      ),
-      idempotencyKey: idempotencyKey,
+    final request = UpdateManagerHandoverRequestModel(
+      managerWorkdayId: workday.managerWorkdayId!,
+      cashierBreakdown: _rows(workday.cashiers),
     );
-
+    final result = await _repo.updateManagerHandoverShift(
+      request: request,
+      idempotencyKey: workday.cashiers.any((e) => e.isModified)
+          ? _idempotencyKey('update', request.toJson())
+          : null,
+    );
     handle(
       result,
       failure: (failure) => emit(EndManagerShiftFailure(failure)),
