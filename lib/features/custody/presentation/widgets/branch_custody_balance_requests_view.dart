@@ -12,6 +12,7 @@ import '../../../../core/styles/app_styles.dart';
 import '../../../../core/widgets/app_svg.dart';
 import '../../data/models/custody_requests_response.dart';
 import '../cubit/custody_get_requets/custody_get_requets_cubit.dart';
+import '../cubit/get_branch_balance/get_branch_balance_cubit.dart';
 import 'custody_empty_widget.dart';
 import 'recent_branch_custody_requests_section.dart';
 import 'see_all_branch_custody_requests.dart';
@@ -51,10 +52,16 @@ class BranchCustodyBalanceRequestsView extends StatelessWidget {
               10.horizontalSpace,
               AppGestureDetectorButton(
                 onTap: () {
+                  final balance = context.read<GetBranchBalanceCubit>();
                   AppBottomSheet.customPageRoute(
                     context,
-                    (context) => BlocProvider(
-                      create: (context) => getIt<CustodyGetRequetsCubit>(),
+                    (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => getIt<CustodyGetRequetsCubit>(),
+                        ),
+                        BlocProvider.value(value: balance),
+                      ],
                       child: const SeeAllBranchCustodyRequests(),
                     ),
                   );

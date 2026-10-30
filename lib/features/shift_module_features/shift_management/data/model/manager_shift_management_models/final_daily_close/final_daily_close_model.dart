@@ -34,6 +34,30 @@ class FinalDailyCloseData {
   @JsonKey(name: 'workday_dates')
   final Map<String, String> workdayDates;
 
+  // The backend returns the manager revision and submission flag under
+  // shift.daily_close, independently of each cashier report revision.
+  final Map<String, dynamic>? shift;
+
+  int? get managerReportRevision {
+    final dailyClose = shift?['daily_close'];
+    final revision = dailyClose is Map ? dailyClose['report_revision'] : null;
+    return revision is int ? revision : null;
+  }
+
+  bool? get serverSubmitted {
+    final dailyClose = shift?['daily_close'];
+    final submitted = dailyClose is Map ? dailyClose['is_submitted'] : null;
+    return submitted is bool ? submitted : null;
+  }
+
+  bool get managerShiftCompleted => shift?['status'] == 'completed';
+  String? get managerId => (shift?['shift_details'] is Map)
+      ? (shift!['shift_details']['manager_id'] as String?)
+      : null;
+  String? get branchId => (shift?['shift_details'] is Map)
+      ? (shift!['shift_details']['branch_id'] as String?)
+      : null;
+
   @JsonKey(name: 'cashier_breakdown')
   final List<CashierBreakdownModel> cashierBreakdown;
   final Totals totals;
@@ -45,6 +69,7 @@ class FinalDailyCloseData {
     this.serverTime,
     this.timezone,
     this.workdayDates = const {},
+    this.shift,
     required this.cashierBreakdown,
     required this.totals,
     required this.aggregators,

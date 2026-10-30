@@ -23,6 +23,7 @@ class CustodyRequestDetailsData {
   final TimeLineResponse timeline;
   final CancelReasonResponse? cancelReason;
   final CustodyRequestDetailsApproval? approval;
+  final bool canConfirmReceipt;
 
   CustodyRequestDetailsData({
     required this.requestId,
@@ -31,6 +32,7 @@ class CustodyRequestDetailsData {
     required this.timeline,
     required this.approval,
     required this.cancelReason,
+    required this.canConfirmReceipt,
   });
 
   factory CustodyRequestDetailsData.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class CustodyRequestDetailsData {
       approval: json['approval'] == null
           ? null
           : CustodyRequestDetailsApproval.fromJson(json['approval']),
+      canConfirmReceipt: json['canConfirmReceipt'] == true,
       cancelReason: json['cancellation'] == null
           ? null
           : CancelReasonInOrderResponse.fromJson(

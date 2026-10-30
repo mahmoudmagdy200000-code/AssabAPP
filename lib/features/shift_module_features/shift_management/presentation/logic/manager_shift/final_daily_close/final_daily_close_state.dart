@@ -13,6 +13,21 @@ class FinalDailyCloseLoadedOrUpdated extends FinalDailyCloseState {
   final String? serverTime;
   final String? timezone;
   final Map<String, String> workdayDates;
+  final int? managerReportRevision;
+  final bool? serverSubmitted;
+  final bool managerShiftCompleted;
+  final String? managerId;
+  final String? branchId;
+
+  bool get canSubmitFinal =>
+      canSubmit &&
+      managerShiftCompleted &&
+      managerId?.isNotEmpty == true &&
+      branchId?.isNotEmpty == true &&
+      serverSubmitted == false &&
+      managerReportRevision != null &&
+      managerReportRevision! > 0 &&
+      cashiers.every((c) => !c.isModified);
 
   bool get canSubmit =>
       managerWorkdayId?.isNotEmpty == true &&
@@ -38,6 +53,11 @@ class FinalDailyCloseLoadedOrUpdated extends FinalDailyCloseState {
     this.serverTime,
     this.timezone,
     this.workdayDates = const {},
+    this.managerReportRevision,
+    this.serverSubmitted,
+    this.managerShiftCompleted = false,
+    this.managerId,
+    this.branchId,
     required this.cashiers,
     required this.totals,
     this.aggregators,
@@ -58,6 +78,11 @@ class FinalDailyCloseLoadedOrUpdated extends FinalDailyCloseState {
       serverTime: serverTime,
       timezone: timezone,
       workdayDates: workdayDates,
+      managerReportRevision: managerReportRevision,
+      serverSubmitted: serverSubmitted,
+      managerShiftCompleted: managerShiftCompleted,
+      managerId: managerId,
+      branchId: branchId,
       cashiers: cashiers ?? this.cashiers,
       totals: totals ?? this.totals,
       aggregators: aggregators ?? this.aggregators,

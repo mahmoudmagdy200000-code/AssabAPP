@@ -1,4 +1,5 @@
 import 'package:assab/core/constants/app_assets.dart';
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/utils/date_formatter.dart';
@@ -15,6 +16,7 @@ import '../../../../core/styles/app_styles.dart';
 import '../../../../core/widgets/saudi_riyal_svg_widget.dart';
 import '../../data/models/custody_requests_response.dart';
 import '../cubit/custody_get_requets/custody_get_requets_cubit.dart';
+import '../cubit/get_branch_balance/get_branch_balance_cubit.dart';
 import '../screens/custody_request_details_screen.dart';
 
 class BranchCustodyRequestViewItemListWidget extends StatelessWidget {
@@ -36,12 +38,17 @@ class BranchCustodyRequestViewItemListWidget extends StatelessWidget {
     return AppGestureDetectorButton(
       onTap: () {
         final custodyGetRequetsCubit = context.read<CustodyGetRequetsCubit>();
+        final branchBalanceCubit = context.read<GetBranchBalanceCubit?>();
         NavigationService.I.push(
           MaterialPageRoute(
             builder: (context) => MultiBlocProvider(
               providers: [
                 BlocProvider(create: (context) => PagingCubit(totalSteps: 3)),
                 BlocProvider.value(value: custodyGetRequetsCubit),
+                if (branchBalanceCubit != null)
+                  BlocProvider.value(value: branchBalanceCubit)
+                else
+                  BlocProvider(create: (_) => getIt<GetBranchBalanceCubit>()),
               ],
               child: CustodyRequestDetailsScreen(
                 requestId: request.id,

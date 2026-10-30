@@ -14,6 +14,11 @@ import 'package:assab/features/custody/presentation/cubit/get_custody_details/ge
 import 'package:assab/features/custody/presentation/widgets/custody_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:assab/core/enums/custody_requests_status_enum.dart';
+import '../../data/custody_receipt_action.dart';
+import '../cubit/get_branch_balance/get_branch_balance_cubit.dart';
 
 import '../cubit/get_custody_details/get_custody_details_state.dart';
 import 'custody_request_details_screen_approval_view.dart';
@@ -178,6 +183,16 @@ class _CustodyRequestDetailsScreen extends StatelessWidget {
                             },
                           ),
                         ),
+                        if (userTypeStrategy is BranchManagerUserStrategy &&
+                            getCustodyDetailsState.details.data.requestId ==
+                                requestId)
+                          _ConfirmReceiptButton(
+                            requestId: requestId,
+                            eligible: getCustodyDetailsState
+                                .details
+                                .data
+                                .canConfirmReceipt,
+                          ),
                       ],
                     );
                   }
@@ -194,4 +209,173 @@ class _CustodyRequestDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ConfirmReceiptButton extends StatefulWidget {
+  const _ConfirmReceiptButton({
+    required this.requestId,
+    required this.eligible,
+  });
+  final String requestId;
+  final bool eligible;
+  @override
+  State<_ConfirmReceiptButton> createState() => _ConfirmReceiptButtonState();
+}
+
+class _ConfirmReceiptButtonState extends State<_ConfirmReceiptButton> {
+  static final Set<String> _inFlight = {};
+  bool _busy = false;
+
+  Future<void> _reconcile() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final details = context.read<GetCustodyDetailsCubit>();
+    final balance = context.read<GetBranchBalanceCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    final requestId = widget.requestId;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final actor = prefs.getString('u_id') ?? '';
+      final action = CustodyReceiptAction(getIt<Dio>(), prefs, actorId: actor);
+      if (!action.hasCurrentActor) throw StateError('Account unavailable.');
+      await Future.wait([
+        details.getRequestDetails(requestId: requestId),
+        balance.getBranchBalance(),
+      ]);
+      final refreshed = details.state;
+      if (action.hasCurrentActor &&
+          refreshed is GetCustodyRequestDetailsSuccess &&
+          refreshed.details.data.requestId == requestId &&
+          refreshed.details.data.status ==
+              CustodyRequestsStatusEnum.completed) {
+        await action.resolveConfirmed(requestId);
+        messenger.showSnackBar(
+          const SnackBar(content: Text('تم التحقق من استلام الطلب.')),
+        );
+      } else {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'النتيجة غير مؤكدة. تواصل مع المحاسب أو مسؤول النظام قبل أي إجراء آخر.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('تعذر تحديث الحالة. تواصل مع المحاسب أو مسؤول النظام.'),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _confirm() async {
+    if (_busy || !_inFlight.add(widget.requestId)) return;
+    setState(() => _busy = true);
+    try {
+      final agreed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('تأكيد استلام التغذية'),
+          content: const Text('هل استلمت المبلغ فعلياً؟'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('إلغاء'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('تأكيد الاستلام'),
+            ),
+          ],
+        ),
+      );
+      if (agreed != true || !mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final actor = prefs.getString('u_id') ?? '';
+      final action = CustodyReceiptAction(getIt<Dio>(), prefs, actorId: actor);
+      if (!action.hasCurrentActor || !widget.eligible) {
+        throw StateError('Account or eligibility unavailable.');
+      }
+      if (action.isUnresolved(widget.requestId)) {
+        throw StateError('Receipt outcome requires reconciliation.');
+      }
+      final details = context.read<GetCustodyDetailsCubit>();
+      final balance = context.read<GetBranchBalanceCubit>();
+      final messenger = ScaffoldMessenger.of(context);
+      final requestId = widget.requestId;
+      final confirmed = await action.confirmAndReconcile(
+        requestId,
+        refreshDetails: () async {
+          await details.getRequestDetails(requestId: requestId);
+          final refreshed = details.state;
+          return refreshed is GetCustodyRequestDetailsSuccess &&
+              refreshed.details.data.requestId == requestId &&
+              refreshed.details.data.status ==
+                  CustodyRequestsStatusEnum.completed;
+        },
+        refreshBalance: balance.getBranchBalance,
+      );
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            confirmed
+                ? 'تم تأكيد الاستلام. راجع رصيد الفرع بعد تحديثه.'
+                : 'لم تتأكد نتيجة الاستلام. راجع حالة الطلب قبل أي محاولة أخرى.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تعذر تأكيد الاستلام بأمان. راجع حالة الطلب.'),
+          ),
+        );
+      }
+    } finally {
+      _inFlight.remove(widget.requestId);
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<SharedPreferences>(
+    future: SharedPreferences.getInstance(),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) return const SizedBox.shrink();
+      final prefs = snapshot.data!;
+      final actor = prefs.getString('u_id') ?? '';
+      final action = CustodyReceiptAction(getIt<Dio>(), prefs, actorId: actor);
+      final unresolved = action.isUnresolved(widget.requestId);
+      if (!unresolved && !widget.eligible) return const SizedBox.shrink();
+      return Column(
+        children: [
+          if (unresolved) ...[
+            const Text(
+              'الاستلام معلّق. حدّث الحالة، وإن بقيت غير مؤكدة تواصل مع المحاسب أو مسؤول النظام.',
+            ),
+            TextButton(
+              onPressed: _busy || !action.hasCurrentActor ? null : _reconcile,
+              child: const Text('تحديث حالة الاستلام'),
+            ),
+          ],
+          FilledButton(
+            onPressed:
+                _busy ||
+                    unresolved ||
+                    !widget.eligible ||
+                    !action.hasCurrentActor
+                ? null
+                : _confirm,
+            child: Text(_busy ? 'جارٍ التأكيد...' : 'تأكيد استلام التغذية'),
+          ),
+        ],
+      );
+    },
+  );
 }

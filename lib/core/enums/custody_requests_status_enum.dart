@@ -7,7 +7,8 @@ enum CustodyRequestsStatusEnum {
   all('All'),
   pending('Pending'),
   approved('Approved'),
-  rejected('Rejected');
+  rejected('Rejected'),
+  completed('Completed');
 
   final String _value;
 
@@ -34,6 +35,8 @@ enum CustodyRequestsStatusEnum {
         return context.tr.approved;
       case CustodyRequestsStatusEnum.rejected:
         return context.tr.rejected;
+      case CustodyRequestsStatusEnum.completed:
+        return 'تم الاستلام';
     }
   }
 
@@ -49,6 +52,8 @@ enum CustodyRequestsStatusEnum {
         return AppColors.lightGreen;
       case CustodyRequestsStatusEnum.rejected:
         return context.customColor.error;
+      case CustodyRequestsStatusEnum.completed:
+        return AppColors.lightGreen;
     }
   }
 }

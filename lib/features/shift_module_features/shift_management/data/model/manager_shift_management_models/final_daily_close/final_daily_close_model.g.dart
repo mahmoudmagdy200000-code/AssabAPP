@@ -33,6 +33,7 @@ FinalDailyCloseData _$FinalDailyCloseDataFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, e as String),
           ) ??
           const {},
+      shift: json['shift'] as Map<String, dynamic>?,
       cashierBreakdown: (json['cashier_breakdown'] as List<dynamic>)
           .map((e) => CashierBreakdownModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -54,6 +55,7 @@ Map<String, dynamic> _$FinalDailyCloseDataToJson(
   'server_time': instance.serverTime,
   'timezone': instance.timezone,
   'workday_dates': instance.workdayDates,
+  'shift': instance.shift,
   'cashier_breakdown': instance.cashierBreakdown
       .map((e) => e.toJson())
       .toList(),

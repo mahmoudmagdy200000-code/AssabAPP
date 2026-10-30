@@ -57,4 +57,5 @@ const _$CustodyRequestsStatusEnumEnumMap = {
   CustodyRequestsStatusEnum.pending: 'pending',
   CustodyRequestsStatusEnum.approved: 'approved',
   CustodyRequestsStatusEnum.rejected: 'rejected',
+  CustodyRequestsStatusEnum.completed: 'completed',
 };
