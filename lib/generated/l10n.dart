@@ -2614,10 +2614,10 @@ class S {
     return Intl.message('Delete', name: 'delete', desc: '', args: []);
   }
 
-  /// `{count} Shifts Daily`
+  /// `{count} Shifts today`
   String shiftCountsDaily(int count) {
     return Intl.message(
-      '$count Shifts Daily',
+      '$count Shifts today',
       name: 'shiftCountsDaily',
       desc: 'Displays shifts\' count',
       args: [count],
@@ -2834,10 +2834,10 @@ class S {
     );
   }
 
-  /// `The assigned workdays and hours for this branch {BranchName} are listed below:`
+  /// `Available shifts for this branch {BranchName} are listed below:`
   String chooseEmplyeeShiftDesc(String BranchName) {
     return Intl.message(
-      'The assigned workdays and hours for this branch $BranchName are listed below:',
+      'Available shifts for this branch $BranchName are listed below:',
       name: 'chooseEmplyeeShiftDesc',
       desc: 'Displays shifts',
       args: [BranchName],

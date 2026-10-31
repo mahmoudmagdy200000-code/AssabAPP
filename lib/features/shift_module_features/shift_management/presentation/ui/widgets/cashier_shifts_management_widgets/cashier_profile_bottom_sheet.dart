@@ -385,20 +385,18 @@ Widget _CashierProfileView({
                               ),
 
                               CashierInfoRowWidget(
-                                title: context.tr.workDays,
-                                value: context.tr.sundayThursday,
-                              ),
-                              CashierInfoRowWidget(
                                 title: context.tr.shift,
                                 value:
-                                    (cashier.workingShifts == null ||
-                                        cashier.workingShifts!.isEmpty)
+                                    (!state.isEditing &&
+                                        (cashier.workingShifts?.isEmpty ??
+                                            true))
                                     ? 'N/A'
                                     : null,
 
                                 valueWidget:
-                                    (cashier.workingShifts != null &&
-                                        cashier.workingShifts!.isNotEmpty)
+                                    (state.isEditing ||
+                                        (cashier.workingShifts?.isNotEmpty ??
+                                            false))
                                     ? state.isEditing
                                           ? SizedBox(
                                               width: 150.w,
@@ -492,28 +490,18 @@ Widget _CashierProfileView({
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.end,
                                               children: [
-                                                Text(
-                                                  (cashier.workingShifts !=
-                                                              null &&
-                                                          cashier
-                                                              .workingShifts!
-                                                              .isNotEmpty)
-                                                      ? cashier
-                                                            .workingShifts![0]
-                                                            .name
-                                                      : '-',
-                                                  style: AppStyles.s13W500,
-                                                ),
-                                                Text(
-                                                  (cashier.workingShifts !=
-                                                              null &&
-                                                          cashier
-                                                              .workingShifts!
-                                                              .isNotEmpty)
-                                                      ? '${cashier.workingShifts![0].startTimeAmPm} - ${cashier.workingShifts![0].endTimeAmPm}'
-                                                      : '-',
-                                                  style: AppStyles.s13W500,
-                                                ),
+                                                for (final shift
+                                                    in cashier.workingShifts ??
+                                                        []) ...[
+                                                  Text(
+                                                    shift.name,
+                                                    style: AppStyles.s13W500,
+                                                  ),
+                                                  Text(
+                                                    '${shift.startTimeAmPm} - ${shift.endTimeAmPm}',
+                                                    style: AppStyles.s13W500,
+                                                  ),
+                                                ],
                                               ],
                                             )
                                     : null,

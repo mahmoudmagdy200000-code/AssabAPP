@@ -18,6 +18,6 @@ class UpdateCashierRequest {
     if (email != null) 'email': email,
     if (storeBranchId != null) 'store_branch_id': storeBranchId,
     if (status != null) 'status': status,
-    if (shiftIds?.isNotEmpty == true) 'shift_ids': shiftIds,
+    if (shiftIds != null) 'shift_ids': shiftIds,
   };
 }

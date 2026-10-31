@@ -27,8 +27,12 @@ class CashierUpdateCubit extends SafeCubit<CashierUpdateState> {
     final newShiftIds =
         newCashier.workingShifts?.map((s) => s.id).toSet() ?? {};
 
-    final List<String> shiftIdsToSend = oldShiftIds.containsAll(newShiftIds)
-        ? []
+    // A subset is a real removal. Null means unchanged; [] is explicit and
+    // remains subject to the server's minimum-one-shift validation.
+    final List<String>? shiftIdsToSend =
+        oldShiftIds.length == newShiftIds.length &&
+            oldShiftIds.containsAll(newShiftIds)
+        ? null
         : newShiftIds.toList();
 
     final result = await _repository.updateCashier(

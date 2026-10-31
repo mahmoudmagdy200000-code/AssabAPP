@@ -328,7 +328,7 @@
   "itemSubCategories": "Item Sub-Categories",
   "save": "Save",
   "delete": "Delete",
-  "shiftCountsDaily": "{count} Shifts Daily",
+  "shiftCountsDaily": "{count} Shifts today",
   "@shiftCountsDaily": {
     "description": "Displays shifts' count",
     "placeholders": {
@@ -363,7 +363,7 @@
   "cashierStoreBranch": "Cashier’s Store Branch",
   "cashierStoreBranchDesc": "The location this cashier will be assigned to and work from. All shifts, sales, and reports are tracked under selected store.",
   "chooseEmplyeeShift": "Choose Employee’s Shift",
-  "chooseEmplyeeShiftDesc": "The assigned workdays and hours for this branch {BranchName} are listed below:",
+  "chooseEmplyeeShiftDesc": "Available shifts for this branch {BranchName} are listed below:",
   "@chooseEmplyeeShiftDesc": {
     "description": "Displays shifts",
     "placeholders": {

@@ -92,11 +92,6 @@ class DetailsSummarizeWidget extends StatelessWidget {
                             'N/A',
                       ),
                       SummarizeRowAttributeEntityWidget(
-                        title: context.tr.workDays,
-                        data: context.tr.sundayThursday,
-                      ),
-
-                      SummarizeRowAttributeEntityWidget(
                         title: context.tr.shiftTitle,
                         data:
                             context.read<AddCashierCubit>().shift?.name ??

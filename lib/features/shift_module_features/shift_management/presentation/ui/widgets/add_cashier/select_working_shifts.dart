@@ -39,6 +39,8 @@ class SelectWorkingShiftWidget extends StatefulWidget {
 
 class _SelectWorkingShiftWidgetState extends State<SelectWorkingShiftWidget> {
   final ScrollController _controller = ScrollController();
+  ShiftInfoDetailsEntity? _selectedShift;
+  bool _initialSelectionApplied = false;
 
   @override
   void initState() {
@@ -66,7 +68,6 @@ class _SelectWorkingShiftWidgetState extends State<SelectWorkingShiftWidget> {
   @override
   Widget build(BuildContext context) {
     final validationCubit = context.read<ValidationCubit>();
-    late ShiftInfoDetailsEntity selectedShiftEntity;
 
     return AppPaddingWidget(
       child: SizedBox(
@@ -101,38 +102,6 @@ class _SelectWorkingShiftWidgetState extends State<SelectWorkingShiftWidget> {
                 child: Column(
                   children: [
                     10.verticalSpace,
-
-                    Container(
-                      decoration: BoxDecoration(
-                        color: context.customColor.text2,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 10.h,
-                        horizontal: 50.w,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-
-                        children: [
-                          Text(
-                            context.tr.sundayThursday,
-                            style: AppStyles.s14W500.copyWith(
-                              color: context.customColor.text1,
-                            ),
-                          ),
-
-                          Text(
-                            context.tr.workHoursFrom_t0('6:00 AM', '6:00 PM'),
-                            style: AppStyles.s11W500.copyWith(
-                              color: context.customColor.text3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(width: 250.w, child: const CustomDivider()),
 
                     BlocBuilder<
                       GetAvailableCashierShiftsCubit,
@@ -254,11 +223,15 @@ class _SelectWorkingShiftWidgetState extends State<SelectWorkingShiftWidget> {
                                             .workShifts ??
                                         [];
 
-                                    if (widget.initialShiftId != null) {
+                                    if (!_initialSelectionApplied &&
+                                        widget.initialShiftId != null) {
                                       final searchIndex = shifts.indexWhere(
                                         (s) => s.id == widget.initialShiftId,
                                       );
-                                      if (searchIndex != -1) {
+                                      if (searchIndex != -1 &&
+                                          shifts[searchIndex].isActive) {
+                                        _initialSelectionApplied = true;
+                                        _selectedShift = shifts[searchIndex];
                                         context
                                             .read<ChooseItemCubit>()
                                             .selectItem(searchIndex);
@@ -296,9 +269,12 @@ class _SelectWorkingShiftWidgetState extends State<SelectWorkingShiftWidget> {
                                               isValid: true,
                                             );
 
-                                        selectedShiftEntity = shift;
+                                        setState(() {
+                                          _initialSelectionApplied = true;
+                                          _selectedShift = shift;
+                                        });
                                         if (!widget.showButton) {
-                                          widget.onAction(selectedShiftEntity);
+                                          widget.onAction(shift);
                                         }
                                       },
                                       child: BlocSelector<ChooseItemCubit, ChooseItemState, int?>(
@@ -403,20 +379,17 @@ class _SelectWorkingShiftWidgetState extends State<SelectWorkingShiftWidget> {
                     text: context.tr.confirm,
                     enabled:
                         selectedShift?.isNotEmpty == true &&
-                        (context
-                                .read<GetAvailableCashierShiftsCubit>()
-                                .workShifts
-                                ?.any((shift) => shift.isActive) ??
-                            false),
+                        _selectedShift?.isActive == true,
                     onClick: () {
-                      if (selectedShift != null) {
+                      if (selectedShift != null &&
+                          _selectedShift?.isActive == true) {
                         validationCubit.validateFieldAndStoreValue(
                           fieldName: 'selectedShift',
                           value: selectedShift,
                           isValid: true,
                         );
 
-                        widget.onAction(selectedShiftEntity);
+                        widget.onAction(_selectedShift!);
                       }
                     },
                   );

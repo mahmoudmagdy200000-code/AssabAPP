@@ -60,7 +60,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m22(branchName) => "Cashier list (${branchName})";
 
   static String m23(BranchName) =>
-      "The assigned workdays and hours for this branch ${BranchName} are listed below:";
+      "Available shifts for this branch ${BranchName} are listed below:";
 
   static String m24(count) =>
       "Choose Inventory Method for Today\'s Inventory (${count} selected products):";
@@ -269,7 +269,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m108(count) =>
       "Selected Products for Today\'s Inventory (${count} products): ";
 
-  static String m109(count) => "${count} Shifts Daily";
+  static String m109(count) => "${count} Shifts today";
 
   static String m110(cashierName) =>
       "Your cash handover is now pending approval from ${cashierName}. You’ll be notified once they confirm it.";
