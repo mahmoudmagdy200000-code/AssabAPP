@@ -20,295 +20,297 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m8(cashierName) =>
+  static String m0(cashierName) =>
       "Add the sales recorded so far and the amount to be handed over to the ${cashierName}.";
 
-  static String m9(date) => "Accepted on: ${date}";
+  static String m1(date) => "Accepted on: ${date}";
 
-  static String m10(from, to) => "From ${from} → To ${to}";
+  static String m2(from, to) => "From ${from} → To ${to}";
 
-  static String m0(number) => "Add Asset #${number}";
+  static String m3(number) => "Add Asset #${number}";
 
-  static String m11(zone) => "Added to ${zone}";
+  static String m4(zone) => "Added to ${zone}";
 
-  static String m12(count) =>
+  static String m5(count) =>
       "All ${count} Asset’s have been selected, how would you like to proceed?";
 
-  static String m13(count) => "All Inventoried Products (${count}):";
+  static String m6(count) => "All Inventoried Products (${count}):";
 
-  static String m14(count) => "All Returns (${count})";
+  static String m7(count) => "All Returns (${count})";
 
-  static String m15(count) => "Approve All Items (${count})";
+  static String m8(count) => "Approve All Items (${count})";
 
-  static String m16(date) => "Approved on: ${date}";
+  static String m9(date) => "Approved on: ${date}";
 
-  static String m17(count) => "Asset List (${count}):";
+  static String m10(count) => "Asset List (${count}):";
 
-  static String m1(count) => "${count} Assets";
+  static String m11(count) => "${count} Assets";
 
-  static String m18(name) =>
+  static String m12(name) =>
       "You’ve assigned ${name} to handle this daily count. They’ll receive the task and log the quantity.";
 
-  static String m19(count) => "Attachment (${count})";
+  static String m13(count) => "Attachment (${count})";
 
-  static String m2(count) => "${count}";
+  static String m14(count) => "${count}";
 
-  static String m20(number) => "Cashier list (${number})";
+  static String m15(number) => "Cashier list (${number})";
 
-  static String m21(cashierName) => "${cashierName}\'s Shift Details";
+  static String m16(cashierName) => "${cashierName}\'s Shift Details";
 
-  static String m22(branchName) => "Cashier list (${branchName})";
+  static String m17(branchName) => "Cashier list (${branchName})";
 
-  static String m23(BranchName) =>
+  static String m18(BranchName) =>
       "Available shifts for this branch ${BranchName} are listed below:";
 
-  static String m24(count) =>
+  static String m19(count) =>
       "Choose Inventory Method for Today\'s Inventory (${count} selected products):";
 
-  static String m25(date, time) => "Completed on: ${date} - ${time}";
+  static String m20(date, time) => "Completed on: ${date} - ${time}";
 
-  static String m26(count) => "Completed Orders (${count})";
+  static String m21(count) => "Completed Orders (${count})";
 
-  static String m27(count) => "Completed Products (${count})";
+  static String m22(count) => "Completed Products (${count})";
 
-  static String m28(name) =>
+  static String m23(name) =>
       "${name} has completed the assigned task of registering waste and Damages. You can review it, edit or contact ${name} for adjustments.";
 
-  static String m29(CashierName) =>
+  static String m24(CashierName) =>
       "${CashierName} has not completed any shift yet.";
 
-  static String m30(count) => "(${count}) Employees Selected.";
+  static String m25(count) => "(${count}) Employees Selected.";
 
-  static String m31(count) => "${count} Items Received";
+  static String m26(count) => "${count} Items Received";
 
-  static String m32(count) => "${count} Draft";
+  static String m27(count) => "${count} Draft";
 
-  static String m33(count) => "${count} Incidents";
+  static String m28(count) => "${count} Incidents";
 
-  static String m34(count) => "${count} Quantity Variance";
+  static String m29(count) => "${count} Quantity Variance";
 
-  static String m35(count) => "${count} Sales Chanels Recorded:";
+  static String m30(count) => "${count} Sales Chanels Recorded:";
 
-  static String m36(count) => "${count} Specified Products";
+  static String m31(count) => "${count} Specified Products";
 
-  static String m37(count) => "Daily Inventory (${count})";
+  static String m32(count) => "Daily Inventory (${count})";
 
-  static String m38(date) => "${date} Daily Inventory Details";
+  static String m33(date) => "${date} Daily Inventory Details";
 
-  static String m39(itemName) => "Enter ${itemName} Actual Quantity";
+  static String m34(itemName) => "Enter ${itemName} Actual Quantity";
 
-  static String m40(date) => "Escalated on: ${date}";
+  static String m35(date) => "Escalated on: ${date}";
 
-  static String m41(count) => "Expected Deliveries Today (${count})";
+  static String m36(count) => "Expected Deliveries Today (${count})";
 
-  static String m42(date, time) =>
+  static String m37(date, time) =>
       "Final disposal request confirmed for proposed ${date} & ${time}";
 
-  static String m43(name) =>
+  static String m38(name) =>
       "Generated order is currently being Confirmation from ${name}.";
 
-  static String m44(count) => "Goods Inspection (${count}):";
+  static String m39(count) => "Goods Inspection (${count}):";
 
-  static String m45(count) => "Goods Inspection (${count}):";
+  static String m40(count) => "Goods Inspection (${count}):";
 
-  static String m46(selectedCashierName) =>
+  static String m41(selectedCashierName) =>
       " The cash handover is awaiting confirmation from ${selectedCashierName}. You’ll be notified once they approve it.";
 
-  static String m47(cashierName, dateAndTime) =>
+  static String m42(cashierName, dateAndTime) =>
       "Handover accepted by ${cashierName} on: ${dateAndTime}";
 
-  static String m48(approveDate) =>
+  static String m43(approveDate) =>
       "Handover Approved by YOU on: ${approveDate}";
 
-  static String m49(count) =>
+  static String m44(count) =>
       "Handover Complete with ${count} Recorded Discrepancies";
 
-  static String m50(cashierName) => "Waiting for approval from ${cashierName}.";
+  static String m45(cashierName) => "Waiting for approval from ${cashierName}.";
 
-  static String m51(cashierName) =>
+  static String m46(cashierName) =>
       "Rejected by ${cashierName}. This issue has been escalated and is now waiting for your review and final decision.";
 
-  static String m52(name) =>
+  static String m47(name) =>
       "Your handover Request to ${name}, has been sent. You will be notified when they accept it.";
 
-  static String m53(hours) => "Starts in ${hours}h";
+  static String m48(hours) => "Starts in ${hours}h";
 
-  static String m54(date) =>
+  static String m49(date) =>
       "How would you like to export ${date} Monthly Regular Inventory:";
 
-  static String m55(productName) =>
+  static String m50(productName) =>
       "How would you like to respond to the discrepancy of ${productName}:";
 
-  static String m56(branchName) => "In ${branchName} as branch manager";
+  static String m51(branchName) => "In ${branchName} as branch manager";
 
-  static String m57(count) => "In Progress (${count})";
+  static String m52(count) => "In Progress (${count})";
 
-  static String m58(count) => "Inventoried Products (${count}):";
+  static String m53(count) => "Inventoried Products (${count}):";
 
-  static String m59(name) => "It\'s been reassigned by ${name}";
+  static String m54(name) => "It\'s been reassigned by ${name}";
 
-  static String m60(count) => "Item Count & Availability (${count})";
+  static String m55(count) => "Item Count & Availability (${count})";
 
-  static String m61(quantity, unit) =>
+  static String m56(quantity, unit) =>
       "Item delivered is ${quantity} ${unit} lower than requested & Confirmed Qty.";
 
-  static String m62(itemName) => "${itemName}:";
+  static String m57(itemName) => "${itemName}:";
 
-  static String m63(count) => "Items & Quantities (${count}):";
+  static String m58(count) => "Items & Quantities (${count}):";
 
-  static String m64(count) => "Items (${count}):";
+  static String m59(count) => "Items (${count}):";
 
-  static String m65(count) => "${count} Items Received";
+  static String m60(count) => "${count} Items Received";
 
-  static String m66(managerName) =>
+  static String m61(managerName) =>
       "${managerName} submitted this item return request for review and approval.";
 
-  static String m67(managerName) =>
+  static String m62(managerName) =>
       "${managerName} submitted this order Request for review and approval.";
 
-  static String m68(name) =>
+  static String m63(name) =>
       "Manager\'s ${name} (you) submitted this daily inventory for review and approval.";
 
-  static String m69(managerName) => "${managerName}’s Handover";
+  static String m64(managerName) => "${managerName}’s Handover";
 
-  static String m70(mins) => "(${mins} Mins ago)";
+  static String m65(mins) => "(${mins} Mins ago)";
 
-  static String m71(minutes) => "Starts in ${minutes}m";
+  static String m66(minutes) => "Starts in ${minutes}m";
 
-  static String m72(count) => "Monthly Inventory (${count})";
+  static String m67(count) => "Monthly Inventory (${count})";
 
-  static String m73(location) => "Moved to ${location}";
+  static String m68(location) => "Moved to ${location}";
 
-  static String m74(count) => "My Work Lists (${count})";
+  static String m69(count) => "My Work Lists (${count})";
 
-  static String m75(date) =>
+  static String m70(date) =>
       "New ${date} extension has been approved by you. Order delivery date has been updated";
 
-  static String m76(date, branchName) =>
+  static String m71(date, branchName) =>
       "New ${date} extension has been approved by ${branchName}. Order delivery date has been updated";
 
-  static String m77(date) =>
+  static String m72(date) =>
       "You have rejected New ${date} extension and Order has been canceled.";
 
-  static String m78(date, time) =>
+  static String m73(date, time) =>
       "Your next order will be automatically generated on ${date} at ${time}.";
 
-  static String m79(when) => "Next Schedule: ${when}";
+  static String m74(when) => "Next Schedule: ${when}";
 
-  static String m80(count) => "Next scheduled run (${count})";
+  static String m75(count) => "Next scheduled run (${count})";
 
-  static String m81(CashierName) =>
+  static String m76(CashierName) =>
       "${CashierName} has not started any shift yet. Check “Pending” to see a list of upcoming shifts";
 
-  static String m82(CashierName) => "${CashierName} has no pending shifts.";
+  static String m77(CashierName) => "${CashierName} has no pending shifts.";
 
-  static String m83(total) => "of ${total}";
+  static String m78(total) => "of ${total}";
 
-  static String m84(sourceName) => "Order From ${sourceName}";
+  static String m79(sourceName) => "Order From ${sourceName}";
 
-  static String m85(sourceName) => "Order From ${sourceName}";
+  static String m80(sourceName) => "Order From ${sourceName}";
 
-  static String m86(July) => "${July} Overall Performance breakdown";
+  static String m81(July) => "${July} Overall Performance breakdown";
 
-  static String m87(count) => "Paused Schedules (${count})";
+  static String m82(count) => "Paused Schedules (${count})";
 
-  static String m88(count) => "Payment Aggregators (${count}).";
+  static String m83(count) => "Payment Aggregators (${count}).";
 
-  static String m89(supplierName) =>
+  static String m84(supplierName) =>
       "Pending approval from ${supplierName}, you will be notified when they respond.";
 
-  static String m90(count) => "Pending Products (${count})";
+  static String m85(count) => "Pending Products (${count})";
 
-  static String m91(count) => "${count} Products";
+  static String m86(count) => "${count} Products";
 
-  static String m92(count) => "Products requiring clarification (${count}):";
+  static String m87(count) => "Products requiring clarification (${count}):";
 
-  static String m93(count) => "${count} Quantity Variance";
+  static String m88(count) => "${count} Quantity Variance";
 
-  static String m3(branchName) => "Quick Expense For ${branchName}";
+  static String m89(branchName) => "Quick Expense For ${branchName}";
 
-  static String m94(cashierName) =>
+  static String m90(cashierName) =>
       "This shift has been reassigned to another staff by ${cashierName}";
 
-  static String m95(CashierName) =>
+  static String m91(CashierName) =>
       "You have not reassigned any shifts to ${CashierName}";
 
-  static String m96(supplierName) => "Receive ${supplierName}";
+  static String m92(supplierName) => "Receive ${supplierName}";
 
-  static String m97(name) =>
+  static String m93(name) =>
       "${name} (Recipient) has reviewed and signed the handover.\nYour confirmation is now required to complete the process.";
 
-  static String m4(count) => "${count} Records";
+  static String m94(count) => "${count} Records";
 
-  static String m98(area) => "Relocate Within ${area}";
+  static String m95(area) => "Relocate Within ${area}";
 
-  static String m99(name) =>
+  static String m96(name) =>
       "Your report has been successfully submitted by ${name} to management for review.";
 
-  static String m100(branchName) =>
+  static String m97(branchName) =>
       "${branchName} has submitted a Waste & Damage Report for review.";
 
-  static String m5(count) => "${count} Requests";
+  static String m98(count) => "${count} Requests";
 
-  static String m101(date) => "Resolved on: ${date}";
+  static String m99(date) => "Resolved on: ${date}";
 
-  static String m102(count) =>
+  static String m100(count) =>
       "Review all ${count} zones and complete any required actions before continuing.";
 
-  static String m103(name) => "${name} is handling it...";
+  static String m101(name) => "${name} is handling it...";
 
-  static String m104(count) => "Saved scenarios (${count})";
+  static String m102(count) => "Saved scenarios (${count})";
 
-  static String m105(count) => "Saved Tests (${count})";
+  static String m103(count) => "Saved Tests (${count})";
 
-  static String m106(managerName) =>
+  static String m104(managerName) =>
       "See the details of ${managerName}’s handover breakdown below:";
 
-  static String m107(count) => "Selected Product (${count}):";
+  static String m105(count) => "Selected Product (${count}):";
 
-  static String m108(count) =>
+  static String m106(count) =>
       "Selected Products for Today\'s Inventory (${count} products): ";
 
-  static String m109(count) => "${count} Shifts today";
+  static String m107(count) => "${count} Shifts today";
 
-  static String m110(cashierName) =>
+  static String m108(cashierName) =>
       "Your cash handover is now pending approval from ${cashierName}. You’ll be notified once they confirm it.";
 
-  static String m111(quantity, unit, value) =>
+  static String m109(quantity, unit, value) =>
       "Short ${quantity} ${unit} (${value} SAR value)";
 
-  static String m112(count) => "Show All ${count} Photos";
+  static String m110(count) => "Show All ${count} Photos";
 
-  static String m113(hours) => " / ${hours} hrs";
+  static String m111(hours) => " / ${hours} hrs";
 
-  static String m114(branchName) => "Submitted From ${branchName}";
+  static String m112(branchName) => "Submitted From ${branchName}";
 
-  static String m115(count) => "Supplier Credit (${count})";
+  static String m113(count) => "Supplier Credit (${count})";
 
-  static String m116(date) =>
+  static String m114(date) =>
       "Supplier has requested a delivery ${date} extension. Pending your approval";
 
-  static String m117(date) =>
+  static String m115(date) =>
       "This cycle’s order was manually canceled. The recurring schedule remains active — next order will generate on ${date}.";
 
-  static String m118(month) => "This month so far (${month}):";
+  static String m116(month) => "This month so far (${month}):";
 
-  static String m119(month) => "This Month\'s (${month}) Achievements";
+  static String m117(month) => "This Month\'s (${month}) Achievements";
 
-  static String m120(dates) =>
+  static String m118(dates) =>
       "This order will repeat on every: ${dates} of every week.";
 
-  static String m121(dates) =>
+  static String m119(dates) =>
       "This order will repeat on every: ${dates} of every month.";
 
-  static String m122(cashierName, managerName) =>
+  static String m120(cashierName, managerName) =>
       "This will send the handover back to ${cashierName} for updates based on ${managerName}’s feedback.";
 
-  static String m123(date) => "${date}, Discrepancy Report";
+  static String m121(date) => "${date}, Discrepancy Report";
 
-  static String m124(date) => "Today: ${date}";
+  static String m122(date) => "Today: ${date}";
 
-  static String m6(count) => "${count} =";
+  static String m123(count) => "Tools & Records (${count})";
+
+  static String m124(count) => "${count} =";
 
   static String m125(count) => "Transfer All ${count} Assets";
 
@@ -339,40 +341,40 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m135(dateAndTime) =>
       "You accepted your part in the variance on: ${dateAndTime}";
 
-  static String m7(count) => "You currently have ${count} zones added";
-
-  static String m136(dateAndTime) =>
-      "You rejected this handover on: ${dateAndTime}";
+  static String m136(count) => "You currently have ${count} zones added";
 
   static String m137(dateAndTime) =>
+      "You rejected this handover on: ${dateAndTime}";
+
+  static String m138(dateAndTime) =>
       "You rejected your part in the variance on: ${dateAndTime}";
 
-  static String m138(cashierName) =>
+  static String m139(cashierName) =>
       "You’ve requested ${cashierName} to make corrections to this handover.";
 
-  static String m139(cashierName) =>
+  static String m140(cashierName) =>
       "You’ve requested ${cashierName} to make corrections to the submitted variance.";
 
-  static String m140(dateAndTime) =>
+  static String m141(dateAndTime) =>
       "You saved this request to draft on: ${dateAndTime}";
 
-  static String m141(date, branchName) =>
+  static String m142(date, branchName) =>
       "You submitted a delivery ${date} extension. Pending approval from ${branchName}";
 
-  static String m142(cashierName) =>
+  static String m143(cashierName) =>
       "Your correction request has been sent to ${cashierName}.";
 
-  static String m143(AccountantName) =>
+  static String m144(AccountantName) =>
       "Your shift has been submitted for final review.\nYou’ll be notified once ${AccountantName} approves or rejects your handover.\nNo further changes can be made to today’s records.";
 
-  static String m144(Amount) =>
+  static String m145(Amount) =>
       "You’ve successfully transferred ${Amount} to Branch Custody.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "Accountant": MessageLookupByLibrary.simpleMessage("Accountant"),
     "EndShiftFirst": MessageLookupByLibrary.simpleMessage("End Shift First"),
-    "SalesAndHandoverBreakdownDesc": m8,
+    "SalesAndHandoverBreakdownDesc": m0,
     "SalesAndHandoverBreakdownTitle": MessageLookupByLibrary.simpleMessage(
       "Sales & Handover Breakdown",
     ),
@@ -400,11 +402,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Accept Variance As Is",
     ),
     "accepted": MessageLookupByLibrary.simpleMessage("Accepted"),
-    "acceptedOnDate": m9,
+    "acceptedOnDate": m1,
     "accessAllPurchasingAndGoodsrelatedActionsInOneView":
         MessageLookupByLibrary.simpleMessage(
           "Access all purchasing and goods-related actions in one view.",
         ),
+    "accountAssignedTo": MessageLookupByLibrary.simpleMessage("Assigned to"),
     "accountCreated": MessageLookupByLibrary.simpleMessage("Account Created"),
     "accountCreatedDesc_after": MessageLookupByLibrary.simpleMessage(
       " They will be able to start once they activate their account.",
@@ -413,12 +416,24 @@ class MessageLookup extends MessageLookupByLibrary {
       "An account activation link has been sent to the employee\'s email ",
     ),
     "accountDetails": MessageLookupByLibrary.simpleMessage("Account Details"),
+    "accountDetailsDescription": MessageLookupByLibrary.simpleMessage(
+      "Edit your personal and profile details.",
+    ),
+    "accountDetailsHrNotice": MessageLookupByLibrary.simpleMessage(
+      "Only HR can make changes to this information. Please contact them for any updates.",
+    ),
+    "accountEmailAddress": MessageLookupByLibrary.simpleMessage(
+      "Email address",
+    ),
+    "accountFirstName": MessageLookupByLibrary.simpleMessage("First Name"),
+    "accountLastName": MessageLookupByLibrary.simpleMessage("Last Name"),
     "accountPassword": MessageLookupByLibrary.simpleMessage(
       "Account & Password",
     ),
     "accountRelatedQuickLinks": MessageLookupByLibrary.simpleMessage(
       "Account Related Quick Links",
     ),
+    "accountRole": MessageLookupByLibrary.simpleMessage("Role"),
     "accountStatement": MessageLookupByLibrary.simpleMessage(
       "Account Statement",
     ),
@@ -427,6 +442,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "accountVerifiedDescription": MessageLookupByLibrary.simpleMessage(
       "Change your default account password to enhance your account security.",
     ),
+    "accountWorkShift": MessageLookupByLibrary.simpleMessage("Work Shift"),
+    "accountWorkdays": MessageLookupByLibrary.simpleMessage("Workdays"),
     "accountantName": MessageLookupByLibrary.simpleMessage("Accountant Name"),
     "accountingImpact": MessageLookupByLibrary.simpleMessage(
       "Accounting Impact",
@@ -462,7 +479,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "active": MessageLookupByLibrary.simpleMessage("Active"),
     "activeBranches": MessageLookupByLibrary.simpleMessage("Active Branches"),
-    "activeHandoverFromTo": m10,
+    "activeHandoverFromTo": m2,
     "activeHandoverSession": MessageLookupByLibrary.simpleMessage(
       "Active Handover Session",
     ),
@@ -478,7 +495,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addAnyDetailsRegardingThisRequest": MessageLookupByLibrary.simpleMessage(
       "Add any details regarding this request",
     ),
-    "addAssetNumber": m0,
+    "addAssetNumber": m3,
     "addAttachments": MessageLookupByLibrary.simpleMessage("Add Attachments"),
     "addCashier": MessageLookupByLibrary.simpleMessage("Add Cashier"),
     "addDeliveryDetailsBeforeDispatching": MessageLookupByLibrary.simpleMessage(
@@ -519,7 +536,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addZonesAndCountAssetsAsNewBranch": MessageLookupByLibrary.simpleMessage(
       "Add Zones and count assets as a New Branch",
     ),
-    "addedToZone": m11,
+    "addedToZone": m4,
     "additionalFactors": MessageLookupByLibrary.simpleMessage(
       "Additional Factors",
     ),
@@ -555,7 +572,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "All 3 requested products & Quantities will be approved, when you click ",
         ),
     "allAssets": MessageLookupByLibrary.simpleMessage("All Assets"),
-    "allAssetsSelectedProceed": m12,
+    "allAssetsSelectedProceed": m5,
     "allBranches": MessageLookupByLibrary.simpleMessage("All Branches"),
     "allHandoverAndShiftsWillBeRecordedUnderTodayWorkday":
         MessageLookupByLibrary.simpleMessage(
@@ -572,7 +589,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allInventoriedProducts": MessageLookupByLibrary.simpleMessage(
       "All Inventoried Products",
     ),
-    "allInventoriedProductsCount": m13,
+    "allInventoriedProductsCount": m6,
     "allItems": MessageLookupByLibrary.simpleMessage("All Items"),
     "allItemsCounted": MessageLookupByLibrary.simpleMessage(
       "All items have been counted",
@@ -583,7 +600,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allProductsInventoried": MessageLookupByLibrary.simpleMessage(
       "All products inventoried",
     ),
-    "allReturnsCount": m14,
+    "allReturnsCount": m7,
     "allReturnsFromAllStoreBranches": MessageLookupByLibrary.simpleMessage(
       "All Returns from All Store Branches",
     ),
@@ -649,7 +666,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "approve": MessageLookupByLibrary.simpleMessage("Approve"),
     "approveAll": MessageLookupByLibrary.simpleMessage("Approve All"),
-    "approveAllItems": m15,
+    "approveAllItems": m8,
     "approveAllItemsDesc": MessageLookupByLibrary.simpleMessage(
       "All items in this list will be automatically approved, and the order status will be updated to Confirmed.",
     ),
@@ -680,7 +697,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "approvedInvoices": MessageLookupByLibrary.simpleMessage(
       "Approved Invoices",
     ),
-    "approvedOn": m16,
+    "approvedOn": m9,
     "approvedTransferToEast": MessageLookupByLibrary.simpleMessage(
       "Approved Transfer to East",
     ),
@@ -713,7 +730,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "assetIsAlreadyChosen": MessageLookupByLibrary.simpleMessage(
       "This asset is already chosen. Please select another one.",
     ),
-    "assetListCount": m17,
+    "assetListCount": m10,
     "assetListForReview": MessageLookupByLibrary.simpleMessage(
       "Asset List for Review",
     ),
@@ -724,7 +741,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Asset Value Update",
     ),
     "assets": MessageLookupByLibrary.simpleMessage("Assets"),
-    "assetsCount": m1,
+    "assetsCount": m11,
     "assetsCount_a": MessageLookupByLibrary.simpleMessage("Assets Count"),
     "assetsDisposalRequest": MessageLookupByLibrary.simpleMessage(
       "Assets Disposal request",
@@ -749,7 +766,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "assignedStaff": MessageLookupByLibrary.simpleMessage("Assigned staff: -"),
     "assignedTasks": MessageLookupByLibrary.simpleMessage("Assigned Tasks"),
     "assignedTo": MessageLookupByLibrary.simpleMessage("Assigned To"),
-    "assignedToHandleDailyCount": m18,
+    "assignedToHandleDailyCount": m12,
     "assignedToMeBranchManager": MessageLookupByLibrary.simpleMessage(
       "Me\n(Branch Manager)",
     ),
@@ -774,7 +791,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Attached Evidence(s)",
     ),
     "attachment": MessageLookupByLibrary.simpleMessage("Attachment"),
-    "attachmentCount": m19,
+    "attachmentCount": m13,
     "attachments": MessageLookupByLibrary.simpleMessage("Attachments"),
     "autoAdjustQuantitiesBasedOnConsumption":
         MessageLookupByLibrary.simpleMessage(
@@ -1017,7 +1034,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cashTransferAndOwnerPaymentLog": MessageLookupByLibrary.simpleMessage(
       "Cash Transfer And Owner Payment Log.",
     ),
-    "cashTransferCount": m2,
+    "cashTransferCount": m14,
     "cashTransferHandovers": MessageLookupByLibrary.simpleMessage(
       "Cash Transfer & Handovers",
     ),
@@ -1042,13 +1059,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "cashierHandoffNotSubmittedDesc": MessageLookupByLibrary.simpleMessage(
       "The final cashier has not handed over to you yet. Please check in with them to complete the process before continuing.",
     ),
-    "cashierList": m20,
+    "cashierList": m15,
     "cashierListDescription": MessageLookupByLibrary.simpleMessage(
       "Once more cashiers are added, you\'ll be able to view a timeline of everyone\'s shifts and workdays here.",
     ),
     "cashierListTitle": MessageLookupByLibrary.simpleMessage("Cashier List"),
     "cashierProfile": MessageLookupByLibrary.simpleMessage("Cashier Profile"),
-    "cashierShiftDetails": m21,
+    "cashierShiftDetails": m16,
     "cashierShifts": MessageLookupByLibrary.simpleMessage("Cashier Shifts"),
     "cashierStoreBranch": MessageLookupByLibrary.simpleMessage(
       "Cashier’s Store Branch",
@@ -1056,7 +1073,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cashierStoreBranchDesc": MessageLookupByLibrary.simpleMessage(
       "The location this cashier will be assigned to and work from. All shifts, sales, and reports are tracked under selected store.",
     ),
-    "cashiersInStore": m22,
+    "cashiersInStore": m17,
     "cashiersList": MessageLookupByLibrary.simpleMessage("Cashiers List"),
     "category": MessageLookupByLibrary.simpleMessage("Category"),
     "categoryAnalysis": MessageLookupByLibrary.simpleMessage(
@@ -1113,7 +1130,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "chooseEmplyeeShift": MessageLookupByLibrary.simpleMessage(
       "Choose Employee’s Shift",
     ),
-    "chooseEmplyeeShiftDesc": m23,
+    "chooseEmplyeeShiftDesc": m18,
     "chooseFromButtonsToResolveShortage": MessageLookupByLibrary.simpleMessage(
       "Choose from  the buttons below to resolve this shortage",
     ),
@@ -1121,7 +1138,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Choose how soon you can restock and deliver the full quantity. This timeline will be sent to the buyer for approval.",
         ),
-    "chooseInventoryMethodForTodaysInventory": m24,
+    "chooseInventoryMethodForTodaysInventory": m19,
     "chooseItemsAndRequiredQuantity": MessageLookupByLibrary.simpleMessage(
       "Choose items and required quantity.",
     ),
@@ -1279,14 +1296,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "completed": MessageLookupByLibrary.simpleMessage("Completed"),
     "completedForm": MessageLookupByLibrary.simpleMessage("Completed form"),
-    "completedOnDateTime": m25,
-    "completedOrdersCount": m26,
+    "completedOnDateTime": m20,
+    "completedOrdersCount": m21,
     "completedProducts": MessageLookupByLibrary.simpleMessage(
       "Completed products",
     ),
-    "completedProductsCount": m27,
-    "completedTaskReview": m28,
-    "completed_cashiers_desc": m29,
+    "completedProductsCount": m22,
+    "completedTaskReview": m23,
+    "completed_cashiers_desc": m24,
     "completed_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "No Completed shift",
     ),
@@ -1403,14 +1420,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "count": MessageLookupByLibrary.simpleMessage("Count"),
     "countAssets": MessageLookupByLibrary.simpleMessage("Count Assets"),
     "countCompleted": MessageLookupByLibrary.simpleMessage("Count Completed!"),
-    "countEmployeesSelected": m30,
-    "countItemsReceived": m31,
-    "countOfDraft": m32,
-    "countOfIncidents": m33,
+    "countEmployeesSelected": m25,
+    "countItemsReceived": m26,
+    "countOfDraft": m27,
+    "countOfIncidents": m28,
     "countProgress": MessageLookupByLibrary.simpleMessage("Count Progress:"),
-    "countQuantityVariance": m34,
-    "countSalesChanelsRecorded": m35,
-    "countSpecifiedProducts": m36,
+    "countQuantityVariance": m29,
+    "countSalesChanelsRecorded": m30,
+    "countSpecifiedProducts": m31,
     "createAccountDesc": MessageLookupByLibrary.simpleMessage(
       "We’re excited to have you onboard — Assab is built to help restaurants and cafés like yours run smoother, smarter, and more profitably.",
     ),
@@ -1510,7 +1527,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customFilter": MessageLookupByLibrary.simpleMessage("Custom"),
     "daily": MessageLookupByLibrary.simpleMessage("Daily"),
     "dailyFilter": MessageLookupByLibrary.simpleMessage("Daily"),
-    "dailyInventory": m37,
+    "dailyInventory": m32,
     "dailyInventoryAction": MessageLookupByLibrary.simpleMessage(
       "Daily Inventory",
     ),
@@ -1541,13 +1558,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "damaged": MessageLookupByLibrary.simpleMessage("Damaged"),
     "damages": MessageLookupByLibrary.simpleMessage("Damages:"),
+    "darkMode": MessageLookupByLibrary.simpleMessage("Dark"),
     "dataIsSentToTheAccountant": MessageLookupByLibrary.simpleMessage(
       "3. Data is sent to the accountant",
     ),
     "date": MessageLookupByLibrary.simpleMessage("Date"),
     "dateAdded": MessageLookupByLibrary.simpleMessage("Date Added"),
     "dateAndTime": MessageLookupByLibrary.simpleMessage("Date & Time"),
-    "dateDailyInventoryDetails": m38,
+    "dateDailyInventoryDetails": m33,
     "dateFilterCustomRange": MessageLookupByLibrary.simpleMessage(
       "Custom Range",
     ),
@@ -1876,7 +1894,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterFullVolumeThenDragToEstimateLeft": MessageLookupByLibrary.simpleMessage(
       "Enter full volume, then drag to estimate what\'s left. We\'ll auto-calculate the rest.",
     ),
-    "enterItemActualQuantity": m39,
+    "enterItemActualQuantity": m34,
     "enterName": MessageLookupByLibrary.simpleMessage("Enter Name"),
     "enterQuantity": MessageLookupByLibrary.simpleMessage("Enter quantity"),
     "enterReason": MessageLookupByLibrary.simpleMessage(
@@ -1898,7 +1916,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Escalate Rejection",
     ),
     "escalated": MessageLookupByLibrary.simpleMessage("Escalated"),
-    "escalatedOnDate": m40,
+    "escalatedOnDate": m35,
     "escalation": MessageLookupByLibrary.simpleMessage("Escalation"),
     "escalationRequests": MessageLookupByLibrary.simpleMessage(
       "Escalation Requests",
@@ -1936,7 +1954,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "expectedClassification": MessageLookupByLibrary.simpleMessage(
       "Expected Classification",
     ),
-    "expectedDeliveriesTodayCount": m41,
+    "expectedDeliveriesTodayCount": m36,
     "expectedDeliveryTime": MessageLookupByLibrary.simpleMessage(
       "Expected delivery Time",
     ),
@@ -2103,7 +2121,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Final Delivery Receipt or Invoice",
     ),
     "finalDisposal": MessageLookupByLibrary.simpleMessage("Final Disposal"),
-    "finalDisposalConfirmed": m42,
+    "finalDisposalConfirmed": m37,
     "finalDisposalDetails": MessageLookupByLibrary.simpleMessage(
       "Final Disposal request details",
     ),
@@ -2214,7 +2232,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "generateReport": MessageLookupByLibrary.simpleMessage("Generate Report"),
     "generated": MessageLookupByLibrary.simpleMessage("Generated"),
-    "generatedOrderConfirmation": m43,
+    "generatedOrderConfirmation": m38,
     "generatedOrderConfirmed": MessageLookupByLibrary.simpleMessage(
       "Generated order has been confirmed and is currently being processed.",
     ),
@@ -2222,6 +2240,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToOriginalPruchaseOrderDetails": MessageLookupByLibrary.simpleMessage(
       "Go to original pruchase order details",
     ),
+    "goToPettyCash": MessageLookupByLibrary.simpleMessage("Go to petty cash"),
     "goToRecurringOrders": MessageLookupByLibrary.simpleMessage(
       "Go To Recurring Orders",
     ),
@@ -2234,8 +2253,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "goodsInspection": MessageLookupByLibrary.simpleMessage(
       "Goods Inspection:",
     ),
-    "goodsInspectionCount": m44,
-    "goodsInspectionCountTitle": m45,
+    "goodsInspectionCount": m39,
+    "goodsInspectionCountTitle": m40,
     "goodsReturns": MessageLookupByLibrary.simpleMessage("Goods Returns"),
     "grade": MessageLookupByLibrary.simpleMessage("Grade"),
     "grandTotalCost": MessageLookupByLibrary.simpleMessage("Grand Total Cost"),
@@ -2256,7 +2275,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "halt": MessageLookupByLibrary.simpleMessage("Halt"),
     "handOffCashNow": MessageLookupByLibrary.simpleMessage("Handoff Cash Now"),
     "handOverAmount": MessageLookupByLibrary.simpleMessage("Handover Amount"),
-    "handOverDesc": m46,
+    "handOverDesc": m41,
     "handOverFrom": MessageLookupByLibrary.simpleMessage("Hand Over From"),
     "handOverTo": MessageLookupByLibrary.simpleMessage("Hand Over To"),
     "handoffNotApproved": MessageLookupByLibrary.simpleMessage(
@@ -2267,7 +2286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "handoveDetails": MessageLookupByLibrary.simpleMessage("Handover Details"),
     "handover": MessageLookupByLibrary.simpleMessage("Handover"),
-    "handoverAcceptedDesc": m47,
+    "handoverAcceptedDesc": m42,
     "handoverAmount": MessageLookupByLibrary.simpleMessage("Handover Amount"),
     "handoverAmountHintText": MessageLookupByLibrary.simpleMessage(
       "Amount the next cashier will receive",
@@ -2275,9 +2294,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "handoverAmountTitle": MessageLookupByLibrary.simpleMessage(
       "Handover Amount",
     ),
-    "handoverApprovedByYou": m48,
+    "handoverApprovedByYou": m43,
     "handoverBy": MessageLookupByLibrary.simpleMessage("Handover By"),
-    "handoverCompleteWithRecordedDiscrepancies": m49,
+    "handoverCompleteWithRecordedDiscrepancies": m44,
     "handoverCompleted": MessageLookupByLibrary.simpleMessage(
       "Handover Completed",
     ),
@@ -2304,7 +2323,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You have successfully joined the handover session.",
     ),
     "handoverMethod": MessageLookupByLibrary.simpleMessage("Handover Method"),
-    "handoverPendingDesc": m50,
+    "handoverPendingDesc": m45,
     "handoverRecipient": MessageLookupByLibrary.simpleMessage(
       "Handover Recipient",
     ),
@@ -2314,9 +2333,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "handoverRejected": MessageLookupByLibrary.simpleMessage(
       "Handover Rejected",
     ),
-    "handoverRejectedDesc": m51,
+    "handoverRejectedDesc": m46,
     "handoverRequest": MessageLookupByLibrary.simpleMessage("Handover Request"),
-    "handoverRequestSent": m52,
+    "handoverRequestSent": m47,
     "handoverSession": MessageLookupByLibrary.simpleMessage("Handover Session"),
     "handoverSessionPreparation": MessageLookupByLibrary.simpleMessage(
       "Handover Session Preparation",
@@ -2367,7 +2386,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "home": MessageLookupByLibrary.simpleMessage("Home"),
     "hour": MessageLookupByLibrary.simpleMessage("Hour"),
     "hours": MessageLookupByLibrary.simpleMessage("Hours"),
-    "hoursRemaining": m53,
+    "hoursRemaining": m48,
     "howMuchDidUSell": MessageLookupByLibrary.simpleMessage(
       "How much did you sell in your shift today? (Total amount, including VAT).",
     ),
@@ -2387,7 +2406,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "howWasThisExpensePaid": MessageLookupByLibrary.simpleMessage(
       "How was this expense paid?",
     ),
-    "howWouldYouLikeToExportDateMonthlyRegularInventory": m54,
+    "howWouldYouLikeToExportDateMonthlyRegularInventory": m49,
     "howWouldYouLikeToProceedWithThisItem":
         MessageLookupByLibrary.simpleMessage(
           "How would you like to proceed with this item?",
@@ -2396,7 +2415,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "How would you like to record this inventory suggestions?",
         ),
-    "howWouldYouLikeToRespondToDiscrepancy": m55,
+    "howWouldYouLikeToRespondToDiscrepancy": m50,
     "howWouldYouLikeToRespondToDiscrepancyAtOnce":
         MessageLookupByLibrary.simpleMessage(
           "How would you like to respond to the discrepancy for the following items at once:",
@@ -2477,11 +2496,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "inAppNotification": MessageLookupByLibrary.simpleMessage(
       "In-App Notification",
     ),
-    "inBranchAsBranchManager": m56,
+    "inBranchAsBranchManager": m51,
     "inMaintenance": MessageLookupByLibrary.simpleMessage("In Maintenance"),
     "inMyCustody": MessageLookupByLibrary.simpleMessage("In My Custody"),
     "inProgress": MessageLookupByLibrary.simpleMessage("In Progress"),
-    "inProgressCount": m57,
+    "inProgressCount": m52,
     "inStock": MessageLookupByLibrary.simpleMessage("In Stock"),
     "in_progress_name": MessageLookupByLibrary.simpleMessage("In Progress"),
     "inappNotification": MessageLookupByLibrary.simpleMessage(
@@ -2541,7 +2560,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Internal Transfer (No Cost)",
     ),
     "invalidQr": MessageLookupByLibrary.simpleMessage("Invalid Qr"),
-    "inventoriedProducts": m58,
+    "inventoriedProducts": m53,
     "inventory": MessageLookupByLibrary.simpleMessage("Inventory"),
     "inventoryActions": MessageLookupByLibrary.simpleMessage(
       "Inventory Actions",
@@ -2597,16 +2616,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "itCouldBeDueToManualEntryErrors": MessageLookupByLibrary.simpleMessage(
       "It could be due to manual entry errors, forgotten sales, or unrecorded transactions.",
     ),
-    "itIsBeenReassignedByTheBranchManager": m59,
+    "itIsBeenReassignedByTheBranchManager": m54,
     "itWillBeSentForApprovalByTheBrandManagerOrStoreOwner":
         MessageLookupByLibrary.simpleMessage(
           "It will be sent for approval by the Brand Manager or Store Owner",
         ),
     "item": MessageLookupByLibrary.simpleMessage("Item"),
     "itemCancelled": MessageLookupByLibrary.simpleMessage("Item Cancelled"),
-    "itemCountAndAvailability": m60,
+    "itemCountAndAvailability": m55,
     "itemData": MessageLookupByLibrary.simpleMessage("Item Data"),
-    "itemDeliveredIsQuantityUnitLowerThanRequestedAndConfirmedQty": m61,
+    "itemDeliveredIsQuantityUnitLowerThanRequestedAndConfirmedQty": m56,
     "itemDistributionByPerformance": MessageLookupByLibrary.simpleMessage(
       "Item distribution by performance",
     ),
@@ -2615,7 +2634,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Choose from the items listed below.",
     ),
     "itemName": MessageLookupByLibrary.simpleMessage("Item Name"),
-    "itemNameVariance": m62,
+    "itemNameVariance": m57,
     "itemRejected": MessageLookupByLibrary.simpleMessage("Item Rejected"),
     "itemRejectedDesc": MessageLookupByLibrary.simpleMessage(
       "You’ve successfully rejected item. Your reason has been shared with the requesting branch.",
@@ -2636,9 +2655,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "itemsAmountMustBeEqualToTotalAmount": MessageLookupByLibrary.simpleMessage(
       "Items amount must be equal to total amount",
     ),
-    "itemsAndQuantities": m63,
-    "itemsCount": m64,
-    "itemsReceivedCount": m65,
+    "itemsAndQuantities": m58,
+    "itemsCount": m59,
+    "itemsReceivedCount": m60,
     "itemsRequired": MessageLookupByLibrary.simpleMessage("Items Required"),
     "johnDoe": MessageLookupByLibrary.simpleMessage("John Doe"),
     "joinHandoverSession": MessageLookupByLibrary.simpleMessage(
@@ -2694,6 +2713,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "ledger": MessageLookupByLibrary.simpleMessage("Ledger"),
     "levelRatio": MessageLookupByLibrary.simpleMessage("Level Ratio"),
+    "lightMode": MessageLookupByLibrary.simpleMessage("Light"),
     "listBreakdown": MessageLookupByLibrary.simpleMessage("List Breakdown"),
     "liter": MessageLookupByLibrary.simpleMessage("Liter"),
     "location": MessageLookupByLibrary.simpleMessage("Location"),
@@ -2761,13 +2781,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "manager": MessageLookupByLibrary.simpleMessage("Manager"),
     "managerComment": MessageLookupByLibrary.simpleMessage("Manager’s Comment"),
-    "managerNameSubmittedThisItemReturnRequestForReviewAndApproval": m66,
-    "managerNameSubmittedThisOrderRequestForReviewAndApproval": m67,
-    "managerSubmittedDailyInventory": m68,
+    "managerNameSubmittedThisItemReturnRequestForReviewAndApproval": m61,
+    "managerNameSubmittedThisOrderRequestForReviewAndApproval": m62,
+    "managerSubmittedDailyInventory": m63,
     "managersCommentCorrectionRequest": MessageLookupByLibrary.simpleMessage(
       "Managers Comment (Correction Request)",
     ),
-    "managersHandover": m69,
+    "managersHandover": m64,
     "mandatoryAwareness": MessageLookupByLibrary.simpleMessage(
       "Mandatory Awareness",
     ),
@@ -2821,10 +2841,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "method": MessageLookupByLibrary.simpleMessage("Method"),
     "min": MessageLookupByLibrary.simpleMessage("Min"),
     "mins": MessageLookupByLibrary.simpleMessage("Mins"),
-    "minsAgo": m70,
+    "minsAgo": m65,
     "minute": MessageLookupByLibrary.simpleMessage("Minute"),
     "minutes": MessageLookupByLibrary.simpleMessage("minutes"),
-    "minutesRemaining": m71,
+    "minutesRemaining": m66,
     "missing": MessageLookupByLibrary.simpleMessage("Missing"),
     "missingDocuments": MessageLookupByLibrary.simpleMessage(
       "Missing Documents (Drafts missing info)",
@@ -2898,7 +2918,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "monthlyInventory": MessageLookupByLibrary.simpleMessage(
       "Monthly Inventory",
     ),
-    "monthlyInventoryCount": m72,
+    "monthlyInventoryCount": m67,
     "monthlyRegularInventory": MessageLookupByLibrary.simpleMessage(
       "Monthly Regular Inventory",
     ),
@@ -2913,7 +2933,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "morningBetween1200AM1159AM": MessageLookupByLibrary.simpleMessage(
       "Morning (between 12:00 AM – 11:59 AM)",
     ),
-    "movedTo": m73,
+    "movedTo": m68,
     "mozzarellaCheeseAlmarai": MessageLookupByLibrary.simpleMessage(
       "Mozzarella Cheese - Almarai",
     ),
@@ -2936,7 +2956,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "My shift & Handoff details (Branch Manager)",
     ),
     "myShifts": MessageLookupByLibrary.simpleMessage("My Shift\'s"),
-    "myWorkLists": m74,
+    "myWorkLists": m69,
     "nakheelMainBranchNorth": MessageLookupByLibrary.simpleMessage(
       "Nakheel Main Branch North",
     ),
@@ -2970,9 +2990,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "newAssignments": MessageLookupByLibrary.simpleMessage("New Assignments"),
     "newCasherTitle": MessageLookupByLibrary.simpleMessage("New Cashier:"),
     "newDate": MessageLookupByLibrary.simpleMessage("New Date"),
-    "newDateTimeExtensionApproved": m75,
-    "newDateTimeExtensionApprovedByBranchName": m76,
-    "newDateTimeExtensionRejected": m77,
+    "newDateTimeExtensionApproved": m70,
+    "newDateTimeExtensionApprovedByBranchName": m71,
+    "newDateTimeExtensionRejected": m72,
     "newDeliveryDate": MessageLookupByLibrary.simpleMessage(
       "New Delivery Date",
     ),
@@ -3010,12 +3030,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextOrderWeeklyRepeat": MessageLookupByLibrary.simpleMessage(
       "Next Order – Weekly Repeat",
     ),
-    "nextOrderWillBeGeneratedOn": m78,
+    "nextOrderWillBeGeneratedOn": m73,
     "nextReviewAssets": MessageLookupByLibrary.simpleMessage(
       "Next: Review Assets",
     ),
-    "nextSchedule": m79,
-    "nextScheduledRun": m80,
+    "nextSchedule": m74,
+    "nextScheduledRun": m75,
     "nextSteps": MessageLookupByLibrary.simpleMessage("Next Steps:"),
     "nextSupply": MessageLookupByLibrary.simpleMessage("Next Supply"),
     "next_cashier": MessageLookupByLibrary.simpleMessage("Next Cashier:"),
@@ -3104,6 +3124,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "No inventory items",
     ),
     "noItemsFound": MessageLookupByLibrary.simpleMessage("No Items Found"),
+    "noManagersFound": MessageLookupByLibrary.simpleMessage(
+      "No managers found",
+    ),
     "noOrdersAvailable": MessageLookupByLibrary.simpleMessage(
       "No Orders Available",
     ),
@@ -3215,12 +3238,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "no_cashiers_desc": MessageLookupByLibrary.simpleMessage(
       "To manage cashier shifts, you’ll need to add at least one cashier to this branch.\n\nOnce added, you can assign shifts, monitor handovers, and track daily sales activity.",
     ),
-    "no_inProgress_cashiers_desc": m81,
+    "no_inProgress_cashiers_desc": m76,
     "no_inProgress_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "No shifts are in progress",
     ),
     "no_name": MessageLookupByLibrary.simpleMessage("No Name"),
-    "no_pending_cashiers_desc": m82,
+    "no_pending_cashiers_desc": m77,
     "no_pending_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "No Pending Cashiers",
     ),
@@ -3289,7 +3312,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Obligations Not Yet Paid",
     ),
     "ofEveryMonth": MessageLookupByLibrary.simpleMessage("Of Every Month"),
-    "ofTotal": m83,
+    "ofTotal": m78,
     "officeEquipments": MessageLookupByLibrary.simpleMessage(
       "Office Equipments",
     ),
@@ -3399,8 +3422,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Order details have been finalized, and the delivery is currently en route.",
         ),
-    "orderFromSourceName": m84,
-    "orderFromSourcename": m85,
+    "orderFromSourceName": m79,
+    "orderFromSourcename": m80,
     "orderModifiedDesc": MessageLookupByLibrary.simpleMessage(
       "Order modified. Review the changes in “Details”",
     ),
@@ -3500,7 +3523,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "overallPerformance": MessageLookupByLibrary.simpleMessage(
       "Overall Performance:",
     ),
-    "overallPerformanceBreakdown": m86,
+    "overallPerformanceBreakdown": m81,
     "overviewMatrix": MessageLookupByLibrary.simpleMessage("Overview - Matrix"),
     "owner": MessageLookupByLibrary.simpleMessage("Owner"),
     "ownerPaymentForm": MessageLookupByLibrary.simpleMessage(
@@ -3554,9 +3577,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pause": MessageLookupByLibrary.simpleMessage("Pause"),
     "pauseSchedule": MessageLookupByLibrary.simpleMessage("Pause Schedule"),
     "paused": MessageLookupByLibrary.simpleMessage("Paused"),
-    "pausedSchedules": m87,
+    "pausedSchedules": m82,
     "payment": MessageLookupByLibrary.simpleMessage("Payment"),
-    "paymentAggregtors": m88,
+    "paymentAggregtors": m83,
     "paymentDetailsView": MessageLookupByLibrary.simpleMessage(
       "Payment Details View",
     ),
@@ -3575,7 +3598,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "paymentTerms": MessageLookupByLibrary.simpleMessage("Payment Terms"),
     "pending": MessageLookupByLibrary.simpleMessage("Pending"),
     "pendingApproval": MessageLookupByLibrary.simpleMessage("Pending Approval"),
-    "pendingApprovalFromSupplierYouWillBeNotifiedWhenTheyRespond": m89,
+    "pendingApprovalFromSupplierYouWillBeNotifiedWhenTheyRespond": m84,
     "pendingConfirmation": MessageLookupByLibrary.simpleMessage(
       "Pending Confirmation",
     ),
@@ -3591,7 +3614,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pendingOwnerApproval": MessageLookupByLibrary.simpleMessage(
       "Pending confirmation from Owner",
     ),
-    "pendingProducts": m90,
+    "pendingProducts": m85,
     "pendingResolution": MessageLookupByLibrary.simpleMessage(
       "Pending Resolution",
     ),
@@ -3801,7 +3824,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Productivity Per Employee",
     ),
     "products": MessageLookupByLibrary.simpleMessage("products"),
-    "productsCount": m91,
+    "productsCount": m86,
     "productsCountValue": MessageLookupByLibrary.simpleMessage(
       "1,247 products",
     ),
@@ -3823,7 +3846,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "productsRequiringClarification": MessageLookupByLibrary.simpleMessage(
       "Products requiring clarification",
     ),
-    "productsRequiringClarificationCount": m92,
+    "productsRequiringClarificationCount": m87,
     "productsThatCannotBeUsedDueTo": MessageLookupByLibrary.simpleMessage(
       "Products that cannot be used due to:",
     ),
@@ -3910,7 +3933,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Quantities accurate and reviewed",
     ),
     "quantity": MessageLookupByLibrary.simpleMessage("Quantity"),
-    "quantityVarianceCount": m93,
+    "quantityVarianceCount": m88,
     "quantityWasted": MessageLookupByLibrary.simpleMessage("Quantity wasted:"),
     "quarterlyReview": MessageLookupByLibrary.simpleMessage("Quarterly Review"),
     "quickAccessToProfileInfo": MessageLookupByLibrary.simpleMessage(
@@ -3924,7 +3947,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickCashExpenseDesc": MessageLookupByLibrary.simpleMessage(
       "(Small, fast expense ≤ 500 SAR e.g., taxi, staff meal)",
     ),
-    "quickExpenseForBranch": m3,
+    "quickExpenseForBranch": m89,
     "quickExpensesReportTitle": MessageLookupByLibrary.simpleMessage(
       "Quick Expenses Report",
     ),
@@ -3990,11 +4013,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Reassigned to you while the shift was active.",
     ),
     "reassigned_by": MessageLookupByLibrary.simpleMessage("Reassigned By:"),
-    "reassigned_by_another_cashier": m94,
+    "reassigned_by_another_cashier": m90,
     "reassigned_by_u": MessageLookupByLibrary.simpleMessage(
       "This shift has been reassigned to another staff by you.",
     ),
-    "reassigned_cashiers_desc": m95,
+    "reassigned_cashiers_desc": m91,
     "reassigned_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "No Reassigned shift",
     ),
@@ -4034,7 +4057,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "receiveOrderSummary": MessageLookupByLibrary.simpleMessage(
       "Receive Order Summary",
     ),
-    "receiveSuppliername": m96,
+    "receiveSuppliername": m92,
     "receiveThisOrder": MessageLookupByLibrary.simpleMessage(
       "Receive This Order",
     ),
@@ -4072,7 +4095,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "recipientIsHereInPerson": MessageLookupByLibrary.simpleMessage(
       "Recipient is here in person",
     ),
-    "recipientSignedHandover": m97,
+    "recipientSignedHandover": m93,
     "record": MessageLookupByLibrary.simpleMessage("Record"),
     "recordWasteDamage": MessageLookupByLibrary.simpleMessage(
       "Record Waste/Damage",
@@ -4094,7 +4117,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "❌ Recording \"staff consumption\" as waste or damage",
         ),
     "recordingTime": MessageLookupByLibrary.simpleMessage("Recording Time"),
-    "recordsCount": m4,
+    "recordsCount": m94,
     "recurringOrderScheduled": MessageLookupByLibrary.simpleMessage(
       "Recurring Order Scheduled",
     ),
@@ -4204,7 +4227,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Rejection escalated",
     ),
     "relatedOrder": MessageLookupByLibrary.simpleMessage("Related Order"),
-    "relocateWithin": m98,
+    "relocateWithin": m95,
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingBalanceAutoCalculated": MessageLookupByLibrary.simpleMessage(
       "Remaining Balance (Auto-calculated)",
@@ -4254,8 +4277,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Report sent to email successfully",
     ),
     "reportSubmitted": MessageLookupByLibrary.simpleMessage("Report Submitted"),
-    "reportSubmittedDesc": m99,
-    "reportSubmittedForReview": m100,
+    "reportSubmittedDesc": m96,
+    "reportSubmittedForReview": m97,
     "reportSummary": MessageLookupByLibrary.simpleMessage("Report Summary"),
     "reportType": MessageLookupByLibrary.simpleMessage("Report Type"),
     "reports": MessageLookupByLibrary.simpleMessage("Reports"),
@@ -4320,7 +4343,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "requestedBy": MessageLookupByLibrary.simpleMessage("Requested by"),
     "requestedQty": MessageLookupByLibrary.simpleMessage("Requested Qty"),
     "requests": MessageLookupByLibrary.simpleMessage("Requests"),
-    "requestsCount": m5,
+    "requestsCount": m98,
     "requiredAction": MessageLookupByLibrary.simpleMessage("Required Action"),
     "requiredActions": MessageLookupByLibrary.simpleMessage("Required Actions"),
     "requiredDelivery": MessageLookupByLibrary.simpleMessage(
@@ -4350,7 +4373,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "resolvedByBrandManager": MessageLookupByLibrary.simpleMessage(
       "Resolved by Brand Manager",
     ),
-    "resolvedOnDate": m101,
+    "resolvedOnDate": m99,
     "resolvedRefundReceived": MessageLookupByLibrary.simpleMessage(
       "Resolved – Refund Received",
     ),
@@ -4526,7 +4549,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reviewWillBeSentToManager": MessageLookupByLibrary.simpleMessage(
       "Will be sent to manager for approval",
     ),
-    "reviewZonesDesc": m102,
+    "reviewZonesDesc": m100,
     "risk": MessageLookupByLibrary.simpleMessage("Risk"),
     "riskAnalysisAndFinancialSafety": MessageLookupByLibrary.simpleMessage(
       "Risk Analysis and Financial Safety",
@@ -4563,7 +4586,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "salesPersintage": MessageLookupByLibrary.simpleMessage("Sales%"),
     "sar": MessageLookupByLibrary.simpleMessage("SAR"),
     "sara": MessageLookupByLibrary.simpleMessage("Sara"),
-    "saraIsHandlingIt": m103,
+    "saraIsHandlingIt": m101,
     "sat": MessageLookupByLibrary.simpleMessage("Sat"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "save600Sar3Sarkg": MessageLookupByLibrary.simpleMessage(
@@ -4588,11 +4611,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "savedScenarioResult": MessageLookupByLibrary.simpleMessage(
       "Saved Scenario Result",
     ),
-    "savedScenariosCount": m104,
+    "savedScenariosCount": m102,
     "savedTestResult": MessageLookupByLibrary.simpleMessage(
       "Saved Test Result",
     ),
-    "savedTestsCount": m105,
+    "savedTestsCount": m103,
     "savings": MessageLookupByLibrary.simpleMessage("Savings"),
     "scanCode": MessageLookupByLibrary.simpleMessage("Scan Code"),
     "scenarioAnalysisInteractiveChart": MessageLookupByLibrary.simpleMessage(
@@ -4684,7 +4707,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "See delivery details",
     ),
     "seeDetails": MessageLookupByLibrary.simpleMessage("See Details"),
-    "seeDetailsOfManagerHandover": m106,
+    "seeDetailsOfManagerHandover": m104,
     "seeDifferenceThisMonthVsLastMonthInventory":
         MessageLookupByLibrary.simpleMessage(
           "See the difference between this month\'s inventory against last month\'s inventory:",
@@ -4750,8 +4773,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectedAssetsAreAllReady": MessageLookupByLibrary.simpleMessage(
       "Selected assets are all ready for handover",
     ),
-    "selectedProductCount": m107,
-    "selectedProductsForTodaysInventory": m108,
+    "selectedProductCount": m105,
+    "selectedProductsForTodaysInventory": m106,
     "selection": MessageLookupByLibrary.simpleMessage("Selection"),
     "sell": MessageLookupByLibrary.simpleMessage("Sell"),
     "send": MessageLookupByLibrary.simpleMessage("Send"),
@@ -4817,11 +4840,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "shiftCompleted": MessageLookupByLibrary.simpleMessage("Shift Completed"),
     "shiftCounts": MessageLookupByLibrary.simpleMessage("Shift Counts"),
-    "shiftCountsDaily": m109,
+    "shiftCountsDaily": m107,
     "shiftDateTitle": MessageLookupByLibrary.simpleMessage("Shift Date:"),
     "shiftDetails": MessageLookupByLibrary.simpleMessage("Shift Details"),
     "shiftEnded": MessageLookupByLibrary.simpleMessage("Shift Ended"),
-    "shiftEndedDesc": m110,
+    "shiftEndedDesc": m108,
     "shiftEndedPendingHandover": MessageLookupByLibrary.simpleMessage(
       "Shift Ended, Pending Cash Handover",
     ),
@@ -4841,7 +4864,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "shifts": MessageLookupByLibrary.simpleMessage("Shifts"),
     "shopOwner": MessageLookupByLibrary.simpleMessage("Shop Owner"),
     "short": MessageLookupByLibrary.simpleMessage("Short"),
-    "shortQuantityValue": m111,
+    "shortQuantityValue": m109,
     "shortTextMessageQuickAlert": MessageLookupByLibrary.simpleMessage(
       "Short text message quick alert",
     ),
@@ -4859,7 +4882,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "shortageToAllocate": MessageLookupByLibrary.simpleMessage(
       "Shortage to Allocate:",
     ),
-    "showAllPhotos": m112,
+    "showAllPhotos": m110,
     "showBranchesWithAtLeast80OfRequestedItems":
         MessageLookupByLibrary.simpleMessage(
           "Show branches with at least 80% of requested items",
@@ -4922,7 +4945,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Skip confirmation, already agreed with receiver",
         ),
-    "slashWithTotalHrs": m113,
+    "slashWithTotalHrs": m111,
     "slideToPercentageOfPartialContainer": MessageLookupByLibrary.simpleMessage(
       "Slide to the percentage of the partial container",
     ),
@@ -5082,7 +5105,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "submitUpdate": MessageLookupByLibrary.simpleMessage("Submit Update"),
     "submitted": MessageLookupByLibrary.simpleMessage("Submitted"),
     "submittedByMe": MessageLookupByLibrary.simpleMessage("Submitted By Me"),
-    "submittedFromBranchName": m114,
+    "submittedFromBranchName": m112,
     "successfullyCompleted": MessageLookupByLibrary.simpleMessage(
       "Successfully completed",
     ),
@@ -5108,12 +5131,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "supplierAvgResponseTime": MessageLookupByLibrary.simpleMessage(
       "Supplier Avg Response Time",
     ),
-    "supplierCredit": m115,
+    "supplierCredit": m113,
     "supplierCredit2": MessageLookupByLibrary.simpleMessage("Supplier Credit/"),
     "supplierDeliveryIssue": MessageLookupByLibrary.simpleMessage(
       "Supplier/Delivery Issue",
     ),
-    "supplierHasRequestedADeliveryDateTimeExtensionPendingYourApproval": m116,
+    "supplierHasRequestedADeliveryDateTimeExtensionPendingYourApproval": m114,
     "supplierInvoices": MessageLookupByLibrary.simpleMessage(
       "Supplier invoices:",
     ),
@@ -5306,7 +5329,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "This could be the next Store Owner, Brand Manager or Branch Custody Balance.",
         ),
-    "thisCycleOrderCanceled": m117,
+    "thisCycleOrderCanceled": m115,
     "thisDecisionIsFinalAndCannotBeUndone":
         MessageLookupByLibrary.simpleMessage(
           "This decision is final and cannot be undone.",
@@ -5327,18 +5350,18 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "thisMeansThe": MessageLookupByLibrary.simpleMessage("This means the "),
     "thisMonth": MessageLookupByLibrary.simpleMessage("This Month"),
-    "thisMonthSoFarMonth": m118,
-    "thisMonthsAchievements": m119,
-    "thisOrderWillRepeatOnEvery": m120,
-    "thisOrderWillRepeatOnEveryOfEveryMonth": m121,
+    "thisMonthSoFarMonth": m116,
+    "thisMonthsAchievements": m117,
+    "thisOrderWillRepeatOnEvery": m118,
+    "thisOrderWillRepeatOnEveryOfEveryMonth": m119,
     "thisRequestWillBeRejectedWhenYouClickConfirm":
         MessageLookupByLibrary.simpleMessage(
           "This request will be rejected when you click ",
         ),
-    "thisWillSendTheHandoverBackToCashierBasedOnManagerFeedBack": m122,
+    "thisWillSendTheHandoverBackToCashierBasedOnManagerFeedBack": m120,
     "thu": MessageLookupByLibrary.simpleMessage("Thu"),
     "time": MessageLookupByLibrary.simpleMessage("Time"),
-    "timeDiscrepancyReport": m123,
+    "timeDiscrepancyReport": m121,
     "timeLimit24Hours": MessageLookupByLibrary.simpleMessage(
       "Time Limit: 24 hours",
     ),
@@ -5366,13 +5389,14 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "toStart": MessageLookupByLibrary.simpleMessage("(To Start)"),
     "today": MessageLookupByLibrary.simpleMessage("Today"),
-    "todayWithDate": m124,
+    "todayWithDate": m122,
     "todaysInventoryNotCompletedYet": MessageLookupByLibrary.simpleMessage(
       "Today\'s inventory not completed yet",
     ),
     "todaysReceipt": MessageLookupByLibrary.simpleMessage("Today’s Receipt"),
     "todaysSummary": MessageLookupByLibrary.simpleMessage("Today’s Summary"),
     "tools": MessageLookupByLibrary.simpleMessage("Tools"),
+    "toolsAndRecordsCount": m123,
     "top10RecentExpenses": MessageLookupByLibrary.simpleMessage(
       "Top 10 Recent Expenses",
     ),
@@ -5453,7 +5477,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalProfitability": MessageLookupByLibrary.simpleMessage(
       "Total Profitability",
     ),
-    "totalQuickExpenseCount": m6,
+    "totalQuickExpenseCount": m124,
     "totalQuickExpenseRequests": MessageLookupByLibrary.simpleMessage(
       "Total Quick Expense Requests",
     ),
@@ -5995,7 +6019,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "You can view the original request and the new modification by clicking the “Modifications & Tracking” button.",
         ),
-    "youCurrentlyHaveNZonesAdded": m7,
+    "youCurrentlyHaveNZonesAdded": m136,
     "youHaveApprovedThisHandover": MessageLookupByLibrary.simpleMessage(
       "You have approved this Handover",
     ),
@@ -6064,18 +6088,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "youRejectedResponsibility": MessageLookupByLibrary.simpleMessage(
       "You Rejected Responsibility",
     ),
-    "youRejectedThisHandover": m136,
-    "youRejectedYourPartAt": m137,
-    "youRequestedCashierToMakeCorrections": m138,
-    "youRequestedEmployeeToCorrect": m139,
+    "youRejectedThisHandover": m137,
+    "youRejectedYourPartAt": m138,
+    "youRequestedCashierToMakeCorrections": m139,
+    "youRequestedEmployeeToCorrect": m140,
     "youReviewAndConfirm": MessageLookupByLibrary.simpleMessage(
       "2. You review and confirm",
     ),
     "youSavedThisExpenseToDraftOn": MessageLookupByLibrary.simpleMessage(
       "You saved this expense to draft on:",
     ),
-    "youSavedThisRequestToDraftOn": m140,
-    "youSubmittedADeliveryDateTimeExtensionPendingApprovalFromBranchName": m141,
+    "youSavedThisRequestToDraftOn": m141,
+    "youSubmittedADeliveryDateTimeExtensionPendingApprovalFromBranchName": m142,
     "youSubmittedThisRequest": MessageLookupByLibrary.simpleMessage(
       "You submitted this request",
     ),
@@ -6095,7 +6119,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Your asset status update has been sent to the responsible party for review and action. You will receive a notification once they respond.",
     ),
     "yourComment": MessageLookupByLibrary.simpleMessage("Your Comment"),
-    "yourCorrectionRequestHasBeenSentToCashier": m142,
+    "yourCorrectionRequestHasBeenSentToCashier": m143,
     "yourCurrentCash": MessageLookupByLibrary.simpleMessage(
       "Your Current Cash",
     ),
@@ -6112,7 +6136,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "yourFinalHandoverHasBeenSubmitted": MessageLookupByLibrary.simpleMessage(
       "Your final handover has been submitted. You’ll be notified once the accountant reviews it, no further action needed for now.",
     ),
-    "yourFinalHandoverHasBeenSubmittedForReview": m143,
+    "yourFinalHandoverHasBeenSubmittedForReview": m144,
     "yourHandoverRequestHasBeenSent": MessageLookupByLibrary.simpleMessage(
       "Your handover request has been sent. You will be notified when they accept it.",
     ),
@@ -6172,7 +6196,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "You’ve successfully escalated the return rejection. The brand manager or finance team will review and get back to you.",
         ),
-    "youveSuccessfullyTransferredAmountToBranchCustody": m144,
+    "youveSuccessfullyTransferredAmountToBranchCustody": m145,
     "zakattaxes": MessageLookupByLibrary.simpleMessage("Zakat/Taxes:"),
     "zone": MessageLookupByLibrary.simpleMessage("Zone"),
     "zoneApproved": MessageLookupByLibrary.simpleMessage("Zone approved"),

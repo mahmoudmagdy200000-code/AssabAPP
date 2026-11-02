@@ -6203,6 +6203,111 @@ class S {
     return Intl.message('Theme', name: 'theme', desc: '', args: []);
   }
 
+  /// `Light`
+  String get lightMode {
+    return Intl.message('Light', name: 'lightMode', desc: '', args: []);
+  }
+
+  /// `Dark`
+  String get darkMode {
+    return Intl.message('Dark', name: 'darkMode', desc: '', args: []);
+  }
+
+  /// `Edit your personal and profile details.`
+  String get accountDetailsDescription {
+    return Intl.message(
+      'Edit your personal and profile details.',
+      name: 'accountDetailsDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `First Name`
+  String get accountFirstName {
+    return Intl.message(
+      'First Name',
+      name: 'accountFirstName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Name`
+  String get accountLastName {
+    return Intl.message(
+      'Last Name',
+      name: 'accountLastName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email address`
+  String get accountEmailAddress {
+    return Intl.message(
+      'Email address',
+      name: 'accountEmailAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Role`
+  String get accountRole {
+    return Intl.message('Role', name: 'accountRole', desc: '', args: []);
+  }
+
+  /// `Assigned to`
+  String get accountAssignedTo {
+    return Intl.message(
+      'Assigned to',
+      name: 'accountAssignedTo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Workdays`
+  String get accountWorkdays {
+    return Intl.message(
+      'Workdays',
+      name: 'accountWorkdays',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Work Shift`
+  String get accountWorkShift {
+    return Intl.message(
+      'Work Shift',
+      name: 'accountWorkShift',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only HR can make changes to this information. Please contact them for any updates.`
+  String get accountDetailsHrNotice {
+    return Intl.message(
+      'Only HR can make changes to this information. Please contact them for any updates.',
+      name: 'accountDetailsHrNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tools & Records ({count})`
+  String toolsAndRecordsCount(int count) {
+    return Intl.message(
+      'Tools & Records ($count)',
+      name: 'toolsAndRecordsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `New Purchase Order`
   String get newPurchaseOrder {
     return Intl.message(
@@ -24897,6 +25002,26 @@ class S {
     return Intl.message(
       'Remaining amount must be 0.00 SAR',
       name: 'allocationIncomplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No managers found`
+  String get noManagersFound {
+    return Intl.message(
+      'No managers found',
+      name: 'noManagersFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Go to petty cash`
+  String get goToPettyCash {
+    return Intl.message(
+      'Go to petty cash',
+      name: 'goToPettyCash',
       desc: '',
       args: [],
     );

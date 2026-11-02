@@ -14,10 +14,10 @@ class ThemeCubit extends SafeCubit<ThemeMode> {
     final stored = prefs.getTheme();
     if (stored == ThemeMode.dark.name) return ThemeMode.dark;
     if (stored == ThemeMode.light.name) return ThemeMode.light;
-    return ThemeMode.light;
+    return ThemeMode.system;
   }
 
-  void toggle(ThemeMode newTheme) async {
+  Future<void> toggle(ThemeMode newTheme) async {
     await _prefs.setTheme(newTheme.name);
     emit(newTheme);
   }

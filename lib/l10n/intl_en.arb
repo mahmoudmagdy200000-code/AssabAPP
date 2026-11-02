@@ -950,6 +950,21 @@
   "language": "Language",
   "systemPreference": "System Preference",
   "theme": "Theme",
+  "lightMode": "Light",
+  "darkMode": "Dark",
+  "accountDetailsDescription": "Edit your personal and profile details.",
+  "accountFirstName": "First Name",
+  "accountLastName": "Last Name",
+  "accountEmailAddress": "Email address",
+  "accountRole": "Role",
+  "accountAssignedTo": "Assigned to",
+  "accountWorkdays": "Workdays",
+  "accountWorkShift": "Work Shift",
+  "accountDetailsHrNotice": "Only HR can make changes to this information. Please contact them for any updates.",
+  "toolsAndRecordsCount": "Tools & Records ({count})",
+  "@toolsAndRecordsCount": {
+    "placeholders": {"count": {"type": "int", "example": "2"}}
+  },
   "newPurchaseOrder": "New Purchase Order",
   "chooseProductsOrderSources": "Choose products & Order Sources",
   "allItems": "All Items",
@@ -3397,5 +3412,7 @@
   "shortageAllocationDesc": "You must allocate the shortage amount across the responsible parties before closing the shift.",
   "shortageToAllocate": "Shortage to Allocate:",
   "remainingToAllocate": "Remaining to Allocate:",
-  "allocationIncomplete": "Remaining amount must be 0.00 SAR"
+  "allocationIncomplete": "Remaining amount must be 0.00 SAR",
+  "noManagersFound": "No managers found",
+  "goToPettyCash": "Go to petty cash"
 }

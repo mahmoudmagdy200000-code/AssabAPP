@@ -368,7 +368,7 @@ Widget openNextCashierSelector(BuildContext context) {
       }
 
       if (state is FetchManagerEmpty) {
-        return const Center(child: Text('No managers found'));
+        return Center(child: Text(context.tr.noManagersFound));
       }
 
       if (state is FetchManagerFailure) {

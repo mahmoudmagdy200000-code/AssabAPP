@@ -38,7 +38,7 @@ class CashierHomeBottomSection extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Tools & Records (2)',
+                  context.tr.toolsAndRecordsCount(2),
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),

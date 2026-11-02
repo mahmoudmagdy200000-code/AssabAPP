@@ -437,7 +437,7 @@ class _SalesBreakDownEndShiftWidget
                         ),
                       );
                     } else if (state is AggregatorEmpty) {
-                      return const Text('No Aggregators');
+                      return Text(context.tr.noAggregatorsFound);
                     }
                     return const SizedBox.shrink();
                   },

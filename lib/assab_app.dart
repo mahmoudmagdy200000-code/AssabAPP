@@ -1,4 +1,5 @@
 import 'package:assab/core/cubits/locale/locale_cubit.dart';
+import 'package:assab/core/cubits/theme/theme_cubit.dart';
 import 'package:assab/core/cubits/password/show_password_cubit.dart';
 import 'package:assab/core/routing/app_route_name.dart';
 import 'package:assab/core/services/auth_service.dart';
@@ -30,32 +31,37 @@ class AssabApp extends StatelessWidget {
           providers: [
             BlocProvider(create: (_) => getIt<ShowPasswordCubit>()),
             BlocProvider(create: (_) => getIt<LocaleCubit>()),
+            BlocProvider.value(value: getIt<ThemeCubit>()),
           ],
           child: BlocBuilder<LocaleCubit, Locale>(
             builder: (context, locale) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                theme: AppTheme.light,
-                locale: locale,
-                localizationsDelegates: const [
-                  S.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: S.delegate.supportedLocales,
-                navigatorObservers: [getIt<RequestRouteObserver>()],
-                navigatorKey: NavigationService.I.navigatorKey,
-                initialRoute: AppRouteName.start,
-                onGenerateRoute: AppRouter.generateRoute,
-                builder: (context, child) {
-                  return MediaQuery(
-                    data: MediaQuery.of(
-                      context,
-                    ).copyWith(textScaler: TextScaler.noScaling),
-                    child: child!,
-                  );
-                },
+              return BlocBuilder<ThemeCubit, ThemeMode>(
+                builder: (context, themeMode) => MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.light,
+                  darkTheme: AppTheme.dark,
+                  themeMode: themeMode,
+                  locale: locale,
+                  localizationsDelegates: const [
+                    S.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: S.delegate.supportedLocales,
+                  navigatorObservers: [getIt<RequestRouteObserver>()],
+                  navigatorKey: NavigationService.I.navigatorKey,
+                  initialRoute: AppRouteName.start,
+                  onGenerateRoute: AppRouter.generateRoute,
+                  builder: (context, child) {
+                    return MediaQuery(
+                      data: MediaQuery.of(
+                        context,
+                      ).copyWith(textScaler: TextScaler.noScaling),
+                      child: child!,
+                    );
+                  },
+                ),
               );
             },
           ),
