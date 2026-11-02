@@ -124,7 +124,7 @@ class _CashierMyInProgressShiftsDefaultCardState
               context: context,
               firstTitleSvgAsset: AppAssets.clockSvg,
               title: context.tr.end_time,
-              value: CashierShiftTimeFormatter.format(widget.shift.endTime),
+              value: CashierShiftTimeFormatter.formatForUi(context, widget.shift.endTime),
             ),
 
             12.verticalSpace,

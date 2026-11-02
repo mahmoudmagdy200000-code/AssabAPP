@@ -3419,5 +3419,6 @@
   "remainingToAllocate": "المتبقي للتوزيع:",
   "allocationIncomplete": "يجب أن يكون المبلغ المتبقي 0.00 ر.س",
   "noManagersFound": "لا يوجد مديرون",
-  "goToPettyCash": "الانتقال إلى المصروفات النثرية"
+  "goToPettyCash": "الانتقال إلى المصروفات النثرية",
+  "invalidShiftTime": "وقت الوردية غير صالح"
 }

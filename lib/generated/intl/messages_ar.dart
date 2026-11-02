@@ -2495,6 +2495,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "التحويل الداخلي (بدون تكلفة)",
     ),
     "invalidQr": MessageLookupByLibrary.simpleMessage("ريال قطري غير صالح"),
+    "invalidShiftTime": MessageLookupByLibrary.simpleMessage(
+      "وقت الوردية غير صالح",
+    ),
     "inventoriedProducts": m53,
     "inventory": MessageLookupByLibrary.simpleMessage("المخزون"),
     "inventoryActions": MessageLookupByLibrary.simpleMessage("إجراءات المخزون"),

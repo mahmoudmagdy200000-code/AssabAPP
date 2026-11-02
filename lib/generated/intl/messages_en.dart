@@ -2560,6 +2560,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Internal Transfer (No Cost)",
     ),
     "invalidQr": MessageLookupByLibrary.simpleMessage("Invalid Qr"),
+    "invalidShiftTime": MessageLookupByLibrary.simpleMessage(
+      "Invalid shift time",
+    ),
     "inventoriedProducts": m53,
     "inventory": MessageLookupByLibrary.simpleMessage("Inventory"),
     "inventoryActions": MessageLookupByLibrary.simpleMessage(

@@ -137,7 +137,8 @@ class _CashierMyPendingShiftsHasToStartCardState
                 return buildShiftCardRowWidget(
                   context: context,
                   title: context.tr.start_time,
-                  value: CashierShiftTimeFormatter.format(
+                  value: CashierShiftTimeFormatter.formatForUi(
+                    context,
                     widget.shift.startTime,
                   ),
                   firstTitleSvgAsset: AppAssets.clockSvg,

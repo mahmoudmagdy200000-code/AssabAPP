@@ -25026,6 +25026,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Invalid shift time`
+  String get invalidShiftTime {
+    return Intl.message(
+      'Invalid shift time',
+      name: 'invalidShiftTime',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

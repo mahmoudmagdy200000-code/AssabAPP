@@ -3414,5 +3414,6 @@
   "remainingToAllocate": "Remaining to Allocate:",
   "allocationIncomplete": "Remaining amount must be 0.00 SAR",
   "noManagersFound": "No managers found",
-  "goToPettyCash": "Go to petty cash"
+  "goToPettyCash": "Go to petty cash",
+  "invalidShiftTime": "Invalid shift time"
 }

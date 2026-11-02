@@ -1,3 +1,5 @@
+import 'package:assab/generated/l10n.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class CashierShiftTimeFormatter {
@@ -23,6 +25,12 @@ class CashierShiftTimeFormatter {
   static String format(String time) {
     final parsed = parseApiTime(time);
     if (parsed == null) return '—';
+    return DateFormat('hh:mm a').format(parsed);
+  }
+
+  static String formatForUi(BuildContext context, String time) {
+    final parsed = parseApiTime(time);
+    if (parsed == null) return S.of(context).invalidShiftTime;
     return DateFormat('hh:mm a').format(parsed);
   }
 }
