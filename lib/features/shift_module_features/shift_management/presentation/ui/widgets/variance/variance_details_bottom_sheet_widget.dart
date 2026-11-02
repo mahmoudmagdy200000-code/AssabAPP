@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/widgets/app_button.dart';
 import 'package:assab/core/utils/currency_normalizer.dart';
 import 'package:assab/core/widgets/app_failure_widget.dart';
@@ -70,7 +71,7 @@ class _VarianceDetailsBottomSheetWidgetState
           if (data == null) {
             return Center(
               child: Text(
-                'No variance details available',
+                S.current.followupNoVarianceDetailsAvailable,
                 style: AppStyles.s14W400.copyWith(
                   color: context.customColor.text1,
                 ),

@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -107,8 +108,8 @@ class PendingDailyInventoryStatusStrategy extends DailyInventoryStatusStrategy {
   }) {
     return BranchRequestsStatusWidget(
       status: details.isStaffInventored
-          ? 'Staff Assigned'
-          : 'Pending Staff Assignment',
+          ? S.current.followupStaffAssigned
+          : S.current.followupPendingStaffAssignment,
       textColor: AppColors.orange,
       borderColor: Colors.transparent,
       backgroundColor: context.customColor.reversedTextColor,
@@ -174,8 +175,8 @@ class PendingDailyInventoryStatusStrategy extends DailyInventoryStatusStrategy {
             children: [
               BranchRequestsStatusWidget(
                 status: details.isStaffInventored
-                    ? 'Staff Assigned'
-                    : 'Pending Staff Assignment',
+                    ? S.current.followupStaffAssigned
+                    : S.current.followupPendingStaffAssignment,
                 textColor: AppColors.darkOrange,
                 borderColor: Colors.transparent,
                 backgroundColor: context.customColor.reversedTextColor,
@@ -214,7 +215,7 @@ class PendingDailyInventoryStatusStrategy extends DailyInventoryStatusStrategy {
         if (state is InventoryApproveRejectStaffSubmitionSuccess) {
           NavigationService.I.pop();
 
-          AppSnackBar.showSuccess(context, 'Request submitted successfully');
+          AppSnackBar.showSuccess(context, S.current.followupRequestSubmittedSuccessfully);
         } else if (state is InventoryApproveRejectStaffSubmitionFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);
         }
@@ -237,7 +238,7 @@ class PendingDailyInventoryStatusStrategy extends DailyInventoryStatusStrategy {
                   AppBottomSheet.customPageRoute(
                     context,
                     (context) => InventoryConfirmStaffTaskBottomSheet(
-                      title: 'Daily Inventory',
+                      title: S.current.dailyInventoryAction,
                       description:
                           'Are you sure you want to submit a request to assign a staff member to inventory this session?',
                       items: details.items
@@ -294,7 +295,7 @@ class PendingDailyInventoryStatusStrategy extends DailyInventoryStatusStrategy {
         if (state is InventoryApproveRejectStaffSubmitionSuccess) {
           NavigationService.I.pop();
 
-          AppSnackBar.showSuccess(context, 'Request submitted successfully');
+          AppSnackBar.showSuccess(context, S.current.followupRequestSubmittedSuccessfully);
         } else if (state is InventoryApproveRejectStaffSubmitionFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);
         }
@@ -539,7 +540,7 @@ class RejectedDailyInventoryStatusStrategy
           ),
           5.verticalSpace,
           Text(
-            'Report Rejected',
+            S.current.followupReportRejected,
             style: AppStyles.s14W600.copyWith(color: context.customColor.text1),
             textAlign: TextAlign.center,
           ),
@@ -580,7 +581,7 @@ class RejectedDailyInventoryStatusStrategy
           ),
           5.verticalSpace,
           Text(
-            'Report Rejected',
+            S.current.followupReportRejected,
             style: AppStyles.s14W600.copyWith(color: context.customColor.text1),
             textAlign: TextAlign.center,
           ),

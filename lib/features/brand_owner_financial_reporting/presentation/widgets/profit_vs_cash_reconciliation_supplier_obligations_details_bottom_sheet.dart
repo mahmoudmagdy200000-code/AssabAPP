@@ -97,7 +97,7 @@ class ProfitVsCashReconciliationSupplierObligationsDetailsBottomSheet
                         ),
                         15.horizontalSpace,
                         Text(
-                          'Profit',
+                          S.current.followupProfit,
                           style: AppStyles.s13W400.copyWith(
                             color: context.customColor.text4,
                           ),

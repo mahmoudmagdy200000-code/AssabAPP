@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -72,7 +73,7 @@ class BranchManagerViewReportsPriceComparisonDetailsScreen
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Compare Prices',
+                          S.current.comparePrices,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
@@ -258,7 +259,7 @@ class BranchManagerViewReportsPriceComparisonDetailsScreen
             listener: (context, state) {
               if (state
                   is BranchManagerCreateOrderWithRecommendedSourceSuccess) {
-                AppSnackBar.showSuccess(context, 'Order created successfully');
+                AppSnackBar.showSuccess(context, S.current.followupOrderCreatedSuccessfully);
               } else if (state
                   is BranchManagerCreateOrderWithRecommendedSourceFailure) {
                 AppDialog.showErrorDialog(
@@ -278,7 +279,7 @@ class BranchManagerViewReportsPriceComparisonDetailsScreen
                       return const AppButtonLoading();
                     }
                     return CustomTextButton(
-                      text: 'Create Order with recommended source',
+                      text: S.current.followupCreateOrderWithRecommendedSource,
                       onTap: () {
                         context
                             .read<

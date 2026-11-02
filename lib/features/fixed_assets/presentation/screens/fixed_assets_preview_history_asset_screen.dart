@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/services/download_service.dart';
 import 'package:assab/core/utils/app_dialog.dart';
@@ -84,7 +85,7 @@ class _FixedAssetsPreviewHistoryAssetScreenState
 
     if (!result.success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage ?? 'Download failed')),
+        SnackBar(content: Text(result.errorMessage ?? S.current.followupDownloadFailed)),
       );
       return;
     }
@@ -428,7 +429,7 @@ class _HistoricalPhotosSection extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
-              'No historical photos available',
+              S.current.followupNoHistoricalPhotosAvailable,
               style: AppStyles.s12W400.copyWith(
                 color: context.customColor.text3,
               ),
@@ -583,7 +584,7 @@ class _StatusHistorySection extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
-              'No status history available',
+              S.current.followupNoStatusHistoryAvailable,
               style: AppStyles.s12W400.copyWith(
                 color: context.customColor.text3,
               ),
@@ -678,7 +679,7 @@ class _TransferHistorySection extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
-              'No transfer history available',
+              S.current.followupNoTransferHistoryAvailable,
               style: AppStyles.s12W400.copyWith(
                 color: context.customColor.text3,
               ),
@@ -752,7 +753,7 @@ class _CustodyHistorySection extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
-              'No custody history available',
+              S.current.followupNoCustodyHistoryAvailable,
               style: AppStyles.s12W400.copyWith(
                 color: context.customColor.text3,
               ),
@@ -841,7 +842,7 @@ class _FinancialSection extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
-              'No financial information available',
+              S.current.followupNoFinancialInformationAvailable,
               style: AppStyles.s12W400.copyWith(
                 color: context.customColor.text3,
               ),

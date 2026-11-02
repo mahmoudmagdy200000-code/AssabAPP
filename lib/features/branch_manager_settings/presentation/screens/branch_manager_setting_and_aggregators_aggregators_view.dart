@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/cubits/search/search_cubit.dart';
@@ -303,7 +304,7 @@ class _BranchManagerSettingAndAggregatorsAggregatorsViewState
           ),
         );
       },
-      label: 'Add New Aggregator',
+      label: S.current.followupAddNewAggregator,
       icon: AppSvg(
         assetName: AppAssets.add,
         width: 18.r,
@@ -360,7 +361,7 @@ class _BranchManagerSettingAndAggregatorsAggregatorsViewState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Why It Matters',
+                    S.current.followupWhyItMatters,
                     style: AppStyles.s20W500.copyWith(
                       color: context.customColor.text1,
                     ),

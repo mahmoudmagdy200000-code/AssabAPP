@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -272,7 +273,7 @@ class _FixedAssetsHandoverScannerScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Fixed Assets Scanner',
+                  S.current.followupFixedAssetsScanner,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.white,
@@ -282,7 +283,7 @@ class _FixedAssetsHandoverScannerScreenState
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'HANDOVER MODULE',
+                  S.current.followupHANDOVERMODULE,
                   style: TextStyle(
                     color: _cyan.withOpacity(0.7),
                     fontSize: 9,
@@ -311,7 +312,7 @@ class _FixedAssetsHandoverScannerScreenState
       child: Column(
         children: [
           Text(
-            'Scan Asset QR Code',
+            S.current.followupScanAssetQRCode,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
@@ -567,7 +568,7 @@ class _FixedAssetsHandoverScannerScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isSuccess ? 'QR Successfully Scanned' : 'Invalid QR Code',
+                      isSuccess ? S.current.followupQRSuccessfullyScanned : 'Invalid QR Code',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,
@@ -578,8 +579,8 @@ class _FixedAssetsHandoverScannerScreenState
                     const SizedBox(height: 2),
                     Text(
                       isSuccess
-                          ? 'Asset data retrieved'
-                          : 'Could not parse JSON data',
+                          ? S.current.followupAssetDataRetrieved
+                          : S.current.followupCouldNotParseJSONData,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.4),
                         fontSize: 12,
@@ -597,7 +598,7 @@ class _FixedAssetsHandoverScannerScreenState
           if (isSuccess)
             _buildSuccessSummary(_decodedData!)
           else
-            _buildErrorMessage(_errorMessage ?? 'Unknown error'),
+            _buildErrorMessage(_errorMessage ?? S.current.followupUnknownError),
 
           const SizedBox(height: 22),
 
@@ -606,7 +607,7 @@ class _FixedAssetsHandoverScannerScreenState
             children: [
               Expanded(
                 child: _ActionButton(
-                  label: 'Scan Again',
+                  label: S.current.followupScanAgain,
                   onPressed: _scanAgain,
                   variant: _ButtonVariant.outlined,
                 ),
@@ -614,7 +615,7 @@ class _FixedAssetsHandoverScannerScreenState
               const SizedBox(width: 12),
               Expanded(
                 child: _ActionButton(
-                  label: 'Continue',
+                  label: S.current.continue_c,
                   onPressed: () => Navigator.pop(context, _decodedData),
                   variant: _ButtonVariant.filled,
                 ),
@@ -645,7 +646,7 @@ class _FixedAssetsHandoverScannerScreenState
         children: [
           if (assetId != null) ...[
             Text(
-              'Asset ID',
+              S.current.followupAssetID,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.45),
                 fontSize: 11,

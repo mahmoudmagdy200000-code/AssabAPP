@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -150,7 +151,7 @@ class BranchManagerSettingAndAggregatorsDetailsView extends StatelessWidget {
                       10.horizontalSpace,
                       Flexible(
                         child: Text(
-                          'Branch Manager',
+                          S.current.branchManager,
                           style: AppStyles.s12W500.copyWith(
                             color: context.customColor.text1,
                           ),

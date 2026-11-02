@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -106,13 +107,13 @@ class _BrandOwnerSecuritySettingScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Security Settings',
+                          S.current.ownerSecuritySettings,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
                         ),
                         Text(
-                          'Owner Comprehensive Settings',
+                          S.current.followupOwnerComprehensiveSettings,
                           style: AppStyles.s12W400.copyWith(
                             color: context.customColor.text3,
                           ),
@@ -148,7 +149,7 @@ class _BrandOwnerSecuritySettingScreenState
                           AppOverlay.hideCustomOverlay();
                           AppSnackBar.showSuccess(
                             context,
-                            'Changes saved successfully',
+                            S.current.followupChangesSavedSuccessfully,
                           );
                         case BrandOwnerSettingsSaveStatus.failure:
                           AppOverlay.hideCustomOverlay();
@@ -204,7 +205,7 @@ class _BrandOwnerSecuritySettingScreenState
                                   8.verticalSpace,
                                   _buildSwitchCard(
                                     context: context,
-                                    title: 'Data Encryption',
+                                    title: S.current.followupDataEncryption,
                                     description:
                                         'All information is encrypted to protect against unauthorized access.',
                                     value: data.dataEncryption,
@@ -229,7 +230,7 @@ class _BrandOwnerSecuritySettingScreenState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Daily Backup',
+                                                S.current.followupDailyBackup,
                                                 style: AppStyles.s14W500
                                                     .copyWith(
                                                       color: context
@@ -285,7 +286,7 @@ class _BrandOwnerSecuritySettingScreenState
                                                               value,
                                                             ) => value != null
                                                             ? '$value Hours'
-                                                            : 'Select Interval',
+                                                            : S.current.followupSelectInterval,
                                                         borderRadius: 12.r,
                                                         itemBuilder: (context, item, isSelected) {
                                                           return Container(
@@ -335,7 +336,7 @@ class _BrandOwnerSecuritySettingScreenState
                                   8.verticalSpace,
                                   _buildSwitchCard(
                                     context: context,
-                                    title: 'Monthly Security Audit',
+                                    title: S.current.followupMonthlySecurityAudit,
                                     description:
                                         'A scheduled review ensures ongoing compliance and system integrity.',
                                     value: data.monthlySecurityAudit,
@@ -352,7 +353,7 @@ class _BrandOwnerSecuritySettingScreenState
                             children: [
                               Expanded(
                                 child: CustomTextButton(
-                                  text: 'Reset to Default',
+                                  text: S.current.followupResetToDefault,
                                   onTap: () => _cubit.resetToDefaults(),
                                   padding: EdgeInsets.symmetric(vertical: 14.r),
                                   backgroundColor: Colors.transparent,
@@ -362,7 +363,7 @@ class _BrandOwnerSecuritySettingScreenState
                               ),
                               Expanded(
                                 child: AppButton(
-                                  text: 'Save Changes',
+                                  text: S.current.followupSaveChanges,
                                   onClick: () => _cubit.save(),
                                   padding: EdgeInsets.symmetric(vertical: 14.r),
                                   borderRadius: BorderRadius.circular(15.r),

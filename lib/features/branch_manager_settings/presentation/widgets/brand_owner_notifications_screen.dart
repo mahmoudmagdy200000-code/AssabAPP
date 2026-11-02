@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -160,7 +161,7 @@ class _BrandOwnerNotificationsScreenState
                           AppOverlay.hideCustomOverlay();
                           AppSnackBar.showSuccess(
                             context,
-                            'Changes saved successfully',
+                            S.current.followupChangesSavedSuccessfully,
                           );
                         case BrandOwnerSettingsSaveStatus.failure:
                           AppOverlay.hideCustomOverlay();
@@ -202,9 +203,9 @@ class _BrandOwnerNotificationsScreenState
                                     children: [
                                       _buildNotificationCard(
                                         context,
-                                        title: 'Audit',
+                                        title: S.current.followupAudit,
                                         description:
-                                            'Get notified when there is a new audit',
+                                            S.current.followupGetNotifiedWhenThereIsANewAudit,
                                         value: _isEnabled(
                                           data.notifications,
                                           BrandOwnerNotificationSettingType
@@ -221,7 +222,7 @@ class _BrandOwnerNotificationsScreenState
                                       12.verticalSpace,
                                       _buildNotificationCard(
                                         context,
-                                        title: 'Transfer',
+                                        title: S.current.transfer,
                                         description:
                                             'Get notified when there is a new transfer request.',
                                         value: _isEnabled(
@@ -240,7 +241,7 @@ class _BrandOwnerNotificationsScreenState
                                       12.verticalSpace,
                                       _buildNotificationCard(
                                         context,
-                                        title: 'Status Modification',
+                                        title: S.current.followupStatusModification,
                                         description:
                                             'You’ll be alerted when an employee submits an asset status update.',
                                         value: _isEnabled(
@@ -259,7 +260,7 @@ class _BrandOwnerNotificationsScreenState
                                       12.verticalSpace,
                                       _buildNotificationCard(
                                         context,
-                                        title: 'Handover',
+                                        title: S.current.handover,
                                         description:
                                             'Get notified when there is a new handover request (E.g Cash, Assets ,Shifts, etc).',
                                         value: _isEnabled(
@@ -278,7 +279,7 @@ class _BrandOwnerNotificationsScreenState
                                       12.verticalSpace,
                                       _buildNotificationCard(
                                         context,
-                                        title: 'Major Discrepancies',
+                                        title: S.current.followupMajorDiscrepancies,
                                         description:
                                             'Get notified when there is a discrepancy in asset or cash handovers/transfers.',
                                         value: _isEnabled(
@@ -304,7 +305,7 @@ class _BrandOwnerNotificationsScreenState
                                 children: [
                                   Expanded(
                                     child: CustomTextButton(
-                                      text: 'Reset to Default',
+                                      text: S.current.followupResetToDefault,
                                       onTap: () => _cubit.resetToDefaults(),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 14.r,
@@ -316,7 +317,7 @@ class _BrandOwnerNotificationsScreenState
                                   ),
                                   Expanded(
                                     child: AppButton(
-                                      text: 'Save Changes',
+                                      text: S.current.followupSaveChanges,
                                       onClick: () => _cubit.save(),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 14.r,

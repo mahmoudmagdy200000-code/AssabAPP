@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 
 /// Compares two months with a single curved line.
 ///
@@ -43,23 +44,8 @@ class BrandOwnerCompareTwoMonthsChartWidget extends StatelessWidget {
     return '${(v / 1000).round()}K';
   }
 
-  String _monthLabel(DateTime d) {
-    const names = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${names[d.month - 1]} ${d.year}';
-  }
+  String _monthLabel(BuildContext context, DateTime date) =>
+      intl.DateFormat.yMMM(Localizations.localeOf(context).toString()).format(date);
 
   @override
   Widget build(BuildContext context) {
@@ -241,8 +227,8 @@ class BrandOwnerCompareTwoMonthsChartWidget extends StatelessWidget {
                 painter: _MonthLabelsPainter(
                   x1Frac: (_x1 - _minX) / (_maxX - _minX),
                   x2Frac: (_x2 - _minX) / (_maxX - _minX),
-                  label1: _monthLabel(currentMonth),
-                  label2: _monthLabel(comparedMonth),
+                  label1: _monthLabel(context, currentMonth),
+                  label2: _monthLabel(context, comparedMonth),
                   color1: currentColor,
                   color2: comparedColor.withValues(alpha: 0.75),
                   leftReserved: 8 + leftRes,

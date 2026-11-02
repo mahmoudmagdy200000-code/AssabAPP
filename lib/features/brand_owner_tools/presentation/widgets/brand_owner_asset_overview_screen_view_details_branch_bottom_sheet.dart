@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -103,7 +104,7 @@ class BrandOwnerAssetOverviewScreenViewDetailsBranchBottomSheet
             ),
             ButtonTextIcon(
               onTap: () => NavigationService.I.pop(),
-              label: 'Close',
+              label: S.current.close,
               icon: Icon(Icons.close, color: context.customColor.text4),
               textColor: context.customColor.text4,
               padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 8.r),
@@ -215,7 +216,7 @@ class BrandOwnerAssetOverviewScreenViewDetailsBranchBottomSheet
           10.horizontalSpace,
           Expanded(
             child: CustomTextField(
-              hintText: 'Search by name',
+              hintText: S.current.followupSearchByName,
               onChanged: (value) {
                 context.read<BrandOwnerAssetOverviewSearchCubit>().search(
                   value,
@@ -302,13 +303,13 @@ class BrandOwnerAssetOverviewScreenViewDetailsBranchBottomSheet
           10.verticalSpace,
           const CustomDivider(),
           10.verticalSpace,
-          _buildRow(context, 'Zone', asset.zoneName),
+          _buildRow(context, S.current.zone, asset.zoneName),
           10.verticalSpace,
           const CustomDivider(),
           10.verticalSpace,
           _buildRow(
             context,
-            'In custody',
+            S.current.followupInCustody,
             '${asset.custodianName} (${asset.custodyDuration})',
           ),
           10.verticalSpace,
@@ -318,15 +319,15 @@ class BrandOwnerAssetOverviewScreenViewDetailsBranchBottomSheet
           10.verticalSpace,
           const CustomDivider(),
           10.verticalSpace,
-          _buildRow(context, 'Photo', asset.photoDate),
+          _buildRow(context, S.current.followupPhoto, asset.photoDate),
           10.verticalSpace,
           const CustomDivider(),
           10.verticalSpace,
-          _buildRow(context, 'Transfers', '${asset.transfersCount}'),
+          _buildRow(context, S.current.transfers, '${asset.transfersCount}'),
           15.verticalSpace,
           ButtonTextIcon(
             onTap: () {},
-            label: 'View Full History',
+            label: S.current.followupViewFullHistory,
             reversed: true,
             spaceBetweenTextAndIcon: 7,
             icon: Icon(

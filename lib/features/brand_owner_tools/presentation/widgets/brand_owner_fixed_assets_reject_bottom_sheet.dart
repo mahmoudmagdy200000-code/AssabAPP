@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
@@ -70,7 +71,7 @@ class _BrandOwnerFixedAssetsRejectBottomSheetState
                     ),
                     10.verticalSpace,
                     Text(
-                      'Reject Asset',
+                      S.current.followupRejectAsset,
                       style: AppStyles.s20W500.copyWith(
                         color: context.customColor.text1,
                       ),
@@ -89,7 +90,7 @@ class _BrandOwnerFixedAssetsRejectBottomSheetState
                         horizontal: 15.r,
                         vertical: 10.r,
                       ),
-                      label: 'Reason for rejection',
+                      label: S.current.followupReasonForRejection,
                       child: CustomTextField(
                         controller: _reasonController,
                         hintText:

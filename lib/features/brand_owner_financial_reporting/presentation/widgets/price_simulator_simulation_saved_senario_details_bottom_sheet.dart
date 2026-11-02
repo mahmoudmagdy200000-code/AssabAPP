@@ -42,7 +42,7 @@ class PriceSimulatorSimulationSavedSenarioDetailsBottomSheet
     >(
       listener: (context, state) {
         if (state is PriceSimulatorScenarioDetailsExportSuccess) {
-          AppSnackBar.showSuccess(context, 'Report exported successfully');
+          AppSnackBar.showSuccess(context, S.current.followupReportExportedSuccessfully);
           getIt<DownloadService>().downloadFile(
             url: state.fileUrl,
             fileName: state.fileUrl.split('/').last,
@@ -54,7 +54,7 @@ class PriceSimulatorSimulationSavedSenarioDetailsBottomSheet
         if (state is PriceSimulatorScenarioDetailsEmailSuccess) {
           AppSnackBar.showSuccess(
             context,
-            'Report sent via email successfully',
+            S.current.followupReportSentViaEmailSuccessfully,
           );
         }
         if (state is PriceSimulatorScenarioDetailsEmailFailure) {

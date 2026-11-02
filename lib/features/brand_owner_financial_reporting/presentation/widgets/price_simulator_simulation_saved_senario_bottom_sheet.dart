@@ -137,7 +137,7 @@ class _PriceSimulatorSimulationSavedSenarioBottomSheetState
                                   child: Padding(
                                     padding: EdgeInsets.all(20.r),
                                     child: Text(
-                                      'No saved scenarios found',
+                                      S.current.followupNoSavedScenariosFound,
                                       style: AppStyles.s14W400.copyWith(
                                         color: context.customColor.text3,
                                       ),

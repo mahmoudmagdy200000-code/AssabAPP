@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/search/search_cubit.dart';
 import 'package:assab/core/cubits/search/search_state.dart';
 import 'package:assab/core/di/dependency_injection.dart';
@@ -297,7 +298,7 @@ class _BranchManagerViewReportsFilterPriceComparisonBottomSheetState
                                   10.horizontalSpace,
                                   Expanded(
                                     child: CustomTextField(
-                                      hintText: 'Search by item name',
+                                      hintText: S.current.followupSearchByItemName,
                                       onChanged: (value) {
                                         _itemSearchCubit.search(
                                           value,
@@ -461,7 +462,7 @@ class _BranchManagerViewReportsFilterPriceComparisonBottomSheetState
                                   10.horizontalSpace,
                                   Expanded(
                                     child: CustomTextField(
-                                      hintText: 'Search by supplier name',
+                                      hintText: S.current.followupSearchBySupplierName,
                                       onChanged: (value) {
                                         _supplierSearchCubit.search(
                                           value,

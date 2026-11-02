@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -192,7 +193,7 @@ class _BrandOwnerSettingApprovalScreenState
                   AppOverlay.hideCustomOverlay();
                   AppSnackBar.showSuccess(
                     context,
-                    'Changes saved successfully',
+                    S.current.followupChangesSavedSuccessfully,
                   );
                 case BrandOwnerSettingsSaveStatus.failure:
                   AppOverlay.hideCustomOverlay();
@@ -218,7 +219,7 @@ class _BrandOwnerSettingApprovalScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Approval Settings',
+                            S.current.ownerApprovalSettings,
                             style: AppStyles.s16W500.copyWith(
                               color: context.customColor.text1,
                             ),
@@ -299,7 +300,7 @@ class _BrandOwnerSettingApprovalScreenState
                                           ),
                                           20.verticalSpace,
                                           Text(
-                                            'Response Time',
+                                            S.current.responseTime,
                                             style: AppStyles.s16W500.copyWith(
                                               color: context.customColor.text1,
                                             ),
@@ -312,7 +313,7 @@ class _BrandOwnerSettingApprovalScreenState
                                             displayTextBuilder: (value) =>
                                                 value != null
                                                 ? '$value Hours'
-                                                : 'Select Response Time',
+                                                : S.current.followupSelectResponseTime,
                                             borderRadius: 15.r,
                                             itemBuilder:
                                                 (context, item, isSelected) {
@@ -345,7 +346,7 @@ class _BrandOwnerSettingApprovalScreenState
                                           ),
                                           10.verticalSpace,
                                           Text(
-                                            'Initial Audit',
+                                            S.current.initialAudit,
                                             style: AppStyles.s16W500.copyWith(
                                               color: context.customColor.text1,
                                             ),
@@ -418,7 +419,7 @@ class _BrandOwnerSettingApprovalScreenState
                                                       10.horizontalSpace,
                                                       Expanded(
                                                         child: Text(
-                                                          'Personal Approval for All New Branches',
+                                                          S.current.followupPersonalApprovalForAllNewBranches,
                                                           style: AppStyles
                                                               .s12W500
                                                               .copyWith(
@@ -512,7 +513,7 @@ class _BrandOwnerSettingApprovalScreenState
                                                       10.horizontalSpace,
                                                       Expanded(
                                                         child: Text(
-                                                          'Critical Assets Always Require Approval',
+                                                          S.current.followupCriticalAssetsAlwaysRequireApproval,
                                                           style: AppStyles
                                                               .s12W500
                                                               .copyWith(
@@ -538,7 +539,7 @@ class _BrandOwnerSettingApprovalScreenState
                                     children: [
                                       Expanded(
                                         child: CustomTextButton(
-                                          text: 'Reset to Default',
+                                          text: S.current.followupResetToDefault,
                                           onTap: () => _cubit.resetToDefaults(),
                                           padding: EdgeInsets.symmetric(
                                             vertical: 14.r,
@@ -550,7 +551,7 @@ class _BrandOwnerSettingApprovalScreenState
                                       ),
                                       Expanded(
                                         child: AppButton(
-                                          text: 'Save Changes',
+                                          text: S.current.followupSaveChanges,
                                           onClick: () => _cubit.save(),
                                           padding: EdgeInsets.symmetric(
                                             vertical: 14.r,

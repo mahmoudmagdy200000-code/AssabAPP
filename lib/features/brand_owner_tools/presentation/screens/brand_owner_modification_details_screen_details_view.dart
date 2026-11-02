@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -48,7 +49,7 @@ class BrandOwnerModificationDetailsScreenDetailsView extends StatelessWidget {
                 ),
                 10.verticalSpace,
                 Text(
-                  'Financial Impact Analysis',
+                  S.current.followupFinancialImpactAnalysis,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -64,7 +65,7 @@ class BrandOwnerModificationDetailsScreenDetailsView extends StatelessWidget {
                     children: [
                       _buildRow(
                         context,
-                        title: 'Financial Impact',
+                        title: S.current.followupFinancialImpact,
                         value: details.financialImpactAnalysis.financialImpact,
                         isCurrency: true,
                       ),
@@ -73,7 +74,7 @@ class BrandOwnerModificationDetailsScreenDetailsView extends StatelessWidget {
                       10.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Operational Impact',
+                        title: S.current.followupOperationalImpact,
                         value:
                             details.financialImpactAnalysis.operationalImpact,
                       ),
@@ -82,7 +83,7 @@ class BrandOwnerModificationDetailsScreenDetailsView extends StatelessWidget {
                       10.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Critical Assets',
+                        title: S.current.followupCriticalAssets,
                         value: details.financialImpactAnalysis.criticalAssets,
                       ),
                       10.verticalSpace,
@@ -90,7 +91,7 @@ class BrandOwnerModificationDetailsScreenDetailsView extends StatelessWidget {
                       10.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Brand Impact Level',
+                        title: S.current.followupBrandImpactLevel,
                         value: details.financialImpactAnalysis.brandImpactLevel,
                       ),
                     ],
@@ -98,7 +99,7 @@ class BrandOwnerModificationDetailsScreenDetailsView extends StatelessWidget {
                 ),
                 10.verticalSpace,
                 Text(
-                  'Asset Details',
+                  S.current.assetDetails,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -154,34 +155,34 @@ class BrandOwnerModificationDetailsScreenDetailsView extends StatelessWidget {
                       Divider(color: context.customColor.text2, height: 1),
                       _buildRow(
                         context,
-                        title: 'Branch',
+                        title: S.current.branch,
                         value: details.asset.branchName,
                       ),
                       _buildRow(
                         context,
-                        title: 'Manager',
+                        title: S.current.manager,
                         value: details.asset.managerName,
                       ),
                       _buildStatusRow(context),
                       _buildRow(
                         context,
-                        title: 'Reason',
+                        title: S.current.reason,
                         value: details.asset.reason,
                       ),
                       _buildRow(
                         context,
-                        title: 'Value',
+                        title: S.current.value,
                         value: details.asset.value,
                         isCurrency: true,
                       ),
                       _buildRow(
                         context,
-                        title: 'Critical Asset',
+                        title: S.current.followupCriticalAsset,
                         value: details.asset.criticalAsset ? 'Yes' : 'No',
                       ),
                       _buildRow(
                         context,
-                        title: 'Brand Impact',
+                        title: S.current.followupBrandImpact,
                         value: details.asset.brandImpact,
                       ),
                       20.verticalSpace,

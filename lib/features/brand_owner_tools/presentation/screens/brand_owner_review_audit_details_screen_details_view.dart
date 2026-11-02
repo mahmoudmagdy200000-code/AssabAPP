@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -48,7 +49,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                 ),
                 10.verticalSpace,
                 Text(
-                  'Comprehensive Summary',
+                  S.current.followupComprehensiveSummary,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -64,7 +65,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                     children: [
                       _buildRow(
                         context,
-                        title: 'Branch',
+                        title: S.current.branch,
                         value: details.branchName,
                       ),
                       8.verticalSpace,
@@ -72,7 +73,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       8.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Manager',
+                        title: S.current.manager,
                         value: details.summary.managerName,
                       ),
                       8.verticalSpace,
@@ -80,7 +81,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       8.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Zone',
+                        title: S.current.zone,
                         value: details.summary.zoneName,
                       ),
                       8.verticalSpace,
@@ -88,7 +89,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       8.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Value',
+                        title: S.current.value,
                         value: details.summary.value,
                         isCurrency: true,
                       ),
@@ -97,7 +98,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       8.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Total Assets',
+                        title: S.current.totalAssets,
                         value: details.summary.totalAssets,
                       ),
                       8.verticalSpace,
@@ -105,7 +106,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       8.verticalSpace,
                       _buildRow(
                         context,
-                        title: 'Audit Date',
+                        title: S.current.followupAuditDate,
                         value: details.summary.auditDate,
                       ),
                     ],
@@ -113,7 +114,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                 ),
                 10.verticalSpace,
                 Text(
-                  'Asset Details',
+                  S.current.assetDetails,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -169,12 +170,12 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       Divider(color: context.customColor.text2, height: 1),
                       _buildRow(
                         context,
-                        title: 'Type',
+                        title: S.current.type,
                         value: details.asset.type,
                       ),
                       _buildRow(
                         context,
-                        title: 'Zone',
+                        title: S.current.zone,
                         value: details.asset.zone,
                       ),
                       ...details.asset.conditions.expand((condition) {
@@ -219,7 +220,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       }),
                       _buildRow(
                         context,
-                        title: 'Value',
+                        title: S.current.value,
                         value: details.asset.value,
                         isCurrency: true,
                       ),
@@ -231,7 +232,7 @@ class BrandOwnerReviewAuditDetailsScreenDetailsView extends StatelessWidget {
                       Align(
                         alignment: AlignmentDirectional.topStart,
                         child: Text(
-                          'Additional Notes',
+                          S.current.additionalNotes,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),

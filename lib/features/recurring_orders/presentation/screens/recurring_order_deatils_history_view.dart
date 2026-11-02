@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/extensions/widget_extensions.dart';
@@ -49,7 +50,7 @@ class RecurringOrderDeatilsHistoryView extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Order Name',
+                                  S.current.orderName,
                                   style: AppStyles.s13W600.copyWith(
                                     color: context.customColor.text1,
                                   ),

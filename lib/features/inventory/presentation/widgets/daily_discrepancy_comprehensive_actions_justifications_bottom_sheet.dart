@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/extensions/widget_extensions.dart';
@@ -114,7 +115,7 @@ class DailyDiscrepancyComprehensiveActionsJustificationsBottomSheet
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Item Name',
+                                            S.current.itemName,
                                             style: AppStyles.s14W500.copyWith(
                                               color: context.customColor.text1,
                                             ),

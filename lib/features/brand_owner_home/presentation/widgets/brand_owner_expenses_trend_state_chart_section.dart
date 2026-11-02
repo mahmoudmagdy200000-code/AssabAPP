@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_colors.dart';
@@ -38,18 +39,18 @@ class BrandOwnerExpensesTrendStateChartSection extends StatelessWidget {
 
   List<String> _buildBottomLabels() {
     if (granularity == 'daily') {
-      return const ['Today'];
+      return [S.current.today];
     }
 
     if (granularity == 'weekly') {
-      return const [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
+      return [
+        S.current.followupSunday,
+        S.current.followupMonday,
+        S.current.followupTuesday,
+        S.current.followupWednesday,
+        S.current.followupThursday,
+        S.current.followupFriday,
+        S.current.followupSaturday,
       ];
     }
 

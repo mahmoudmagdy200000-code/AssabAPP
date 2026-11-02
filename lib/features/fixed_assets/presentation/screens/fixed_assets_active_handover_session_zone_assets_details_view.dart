@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/paging_cubit/paging_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -438,8 +439,8 @@ class FixedAssetsActiveHandoverSessionZoneAssetsDetailsView
                                               ],
                                             ),
                                             10.verticalSpace,
-                                            const LabelTextField(
-                                              text: 'Recipient Inspection',
+                                            LabelTextField(
+                                              text: S.current.followupRecipientInspection,
                                             ),
                                             Column(
                                               children: List.generate(conditions.length, (
@@ -510,8 +511,8 @@ class FixedAssetsActiveHandoverSessionZoneAssetsDetailsView
                                             ),
                                             if (showRecipientDetails) ...[
                                               10.verticalSpace,
-                                              const LabelTextField(
-                                                text: 'Recipient Notes',
+                                              LabelTextField(
+                                                text: S.current.followupRecipientNotes,
                                               ),
                                               ContainerCustomTextField(
                                                 child: CustomTextField(
@@ -535,12 +536,12 @@ class FixedAssetsActiveHandoverSessionZoneAssetsDetailsView
                                                         );
                                                   },
                                                   hintText:
-                                                      'Describe the issue you are reporting',
+                                                      S.current.followupDescribeTheIssueYouAreReporting,
                                                 ),
                                               ),
                                               10.verticalSpace,
                                               LabelTextField(
-                                                text: 'Photo Evidence',
+                                                text: S.current.followupPhotoEvidence,
                                                 isLabelOptional:
                                                     isPhotoOptional,
                                                 isLabelRequired:

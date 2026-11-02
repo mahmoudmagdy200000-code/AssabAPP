@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -73,17 +74,17 @@ class BrandOwnerDisposalAndExternalTransferDetailsScreenDetailsView
                     children: [
                       _buildDetailRow(
                         context,
-                        'Submitted By',
+                        S.current.followupSubmittedBy,
                         '${details.submittedByBranchName} - Manager: ${details.submittedByManagerName}',
                       ),
                       _buildDetailRow(
                         context,
-                        'Request Type',
+                        S.current.requestType,
                         details.type.strategy.labelText(context),
                       ),
                       _buildRow(
                         context,
-                        title: 'Submitted On',
+                        title: S.current.followupSubmittedOn,
                         value: details.submittedOn,
                       ),
                     ],
@@ -91,7 +92,7 @@ class BrandOwnerDisposalAndExternalTransferDetailsScreenDetailsView
                 ),
                 10.verticalSpace,
                 Text(
-                  'Asset Details',
+                  S.current.assetDetails,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -147,22 +148,22 @@ class BrandOwnerDisposalAndExternalTransferDetailsScreenDetailsView
                       Divider(color: context.customColor.text2, height: 1),
                       _buildRow(
                         context,
-                        title: 'Zone',
+                        title: S.current.zone,
                         value: details.asset.zoneName,
                       ),
                       _buildRow(
                         context,
-                        title: 'Condition',
+                        title: S.current.followupCondition,
                         value: details.asset.condition.condition.label(context),
                       ),
                       _buildRow(
                         context,
-                        title: 'Reason',
+                        title: S.current.reason,
                         value: details.asset.reasonForDisposal,
                       ),
                       2.verticalSpace,
                       Text(
-                        'Visual Evidence',
+                        S.current.followupVisualEvidence,
                         style: AppStyles.s13W400.copyWith(
                           color: context.customColor.text3,
                         ),

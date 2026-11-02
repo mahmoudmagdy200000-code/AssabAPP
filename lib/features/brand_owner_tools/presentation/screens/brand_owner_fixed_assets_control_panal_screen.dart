@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -55,7 +56,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Asab Owner Control Panel',
+                          S.current.followupAsabOwnerControlPanel,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
@@ -153,7 +154,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
                         ),
                         5.horizontalSpace,
                         Text(
-                          'All Store Branches',
+                          S.current.followupAllStoreBranches,
                           style: AppStyles.s12W400.copyWith(
                             color: context.customColor.text1,
                           ),
@@ -220,7 +221,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
             ),
             10.verticalSpace,
             Text(
-              'Quick Links',
+              S.current.quickLinks,
               style: AppStyles.s16W500.copyWith(
                 color: context.customColor.text1,
               ),
@@ -237,7 +238,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
                   Expanded(
                     child: _buildQuickActionItem(
                       context,
-                      'Asset Overview',
+                      S.current.followupAssetOverview,
                       AppAssets.search,
                       onTap: () {
                         AppBottomSheet.customPageRoute(
@@ -252,7 +253,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
                   Expanded(
                     child: _buildQuickActionItem(
                       context,
-                      'Modifications',
+                      S.current.followupModifications,
                       AppAssets.settings,
                       onTap: () {},
                     ),
@@ -261,7 +262,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
                   Expanded(
                     child: _buildQuickActionItem(
                       context,
-                      'Reports',
+                      S.current.reports,
                       AppAssets.chart,
                       onTap: () {},
                     ),
@@ -293,7 +294,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Strategic Overview',
+            S.current.followupStrategicOverview,
             style: AppStyles.s14W500.copyWith(
               color: context.customColor.text1,
             ),
@@ -303,7 +304,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
           10.verticalSpace,
           _buildDetailRow(
             context,
-            'Total Chain Assets',
+            S.current.followupTotalChainAssets,
             '${overview.totalChainAssets}',
           ),
           10.verticalSpace,
@@ -311,7 +312,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
           10.verticalSpace,
           _buildDetailRow(
             context,
-            'Excellent Status',
+            S.current.followupExcellentStatus,
             overview.excellentStatus,
             statusColor: AppColors.lightGreen,
           ),
@@ -320,7 +321,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
           10.verticalSpace,
           _buildDetailRow(
             context,
-            'Branches',
+            S.current.followupBranches,
             '${overview.branchesCount}',
             statusColor: AppColors.lightGreen,
           ),
@@ -329,7 +330,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
           10.verticalSpace,
           _buildDetailRow(
             context,
-            'Total Investment',
+            S.current.followupTotalInvestment,
             overview.totalInvestment,
             showCurrency: true,
             statusColor: AppColors.lightGreen,
@@ -342,7 +343,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
             children: [
               Flexible(
                 child: Text(
-                  'Critical Value Impact',
+                  S.current.followupCriticalValueImpact,
                   style: AppStyles.s12W400.copyWith(
                     color: context.customColor.text3,
                   ),
@@ -391,7 +392,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Strategic Branch Performance',
+            S.current.followupStrategicBranchPerformance,
             style: AppStyles.s14W500.copyWith(
               color: context.customColor.text1,
             ),
@@ -429,7 +430,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Executive Summary',
+            S.current.executiveSummary,
             style: AppStyles.s14W500.copyWith(
               color: context.customColor.text1,
             ),
@@ -449,7 +450,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
           20.verticalSpace,
           ButtonTextIcon(
             onTap: () {},
-            label: 'Detailed Analytics',
+            label: S.current.followupDetailedAnalytics,
             icon: AppSvg(
               assetName: AppAssets.viewReports,
               width: 15.r,
@@ -483,7 +484,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Executive Summary',
+            S.current.executiveSummary,
             style: AppStyles.s14W500.copyWith(
               color: context.customColor.text1,
             ),
@@ -503,7 +504,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
           20.verticalSpace,
           ButtonTextIcon(
             onTap: () {},
-            label: 'Detailed Analytics',
+            label: S.current.followupDetailedAnalytics,
             icon: AppSvg(
               assetName: AppAssets.viewReports,
               width: 15.r,
@@ -618,20 +619,20 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
   }
 }
 
-const _monthNames = [
+List<String> get _monthNames => [
   '',
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  S.current.followupJanuary,
+  S.current.followupFebruary,
+  S.current.followupMarch,
+  S.current.followupApril,
+  S.current.followupMay,
+  S.current.followupJune,
+  S.current.followupJuly,
+  S.current.followupAugust,
+  S.current.followupSeptember,
+  S.current.followupOctober,
+  S.current.followupNovember,
+  S.current.followupDecember,
 ];
 
 String _monthName(int month) {

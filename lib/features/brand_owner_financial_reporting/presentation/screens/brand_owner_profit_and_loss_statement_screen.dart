@@ -224,18 +224,18 @@ class _BrandOwnerProfitAndLossStatementScreenState
     ];
 
     final monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      S.current.followupJanuary,
+      S.current.followupFebruary,
+      S.current.followupMarch,
+      S.current.followupApril,
+      S.current.followupMay,
+      S.current.followupJune,
+      S.current.followupJuly,
+      S.current.followupAugust,
+      S.current.followupSeptember,
+      S.current.followupOctober,
+      S.current.followupNovember,
+      S.current.followupDecember,
     ];
     final monthLabel = monthNames[month - 1];
 
@@ -485,7 +485,7 @@ class _BrandOwnerProfitAndLossStatementScreenState
             } else if (state is ExportProfitAndLossStatementEmailSuccess) {
               AppSnackBar.showSuccess(
                 context,
-                'Report sent to email successfully',
+                S.current.reportSentToEmailSuccessfully,
               );
             } else if (state is ExportProfitAndLossStatementFailure) {
               AppDialog.showErrorDialog(

@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/enums/time_keys.dart';
@@ -77,7 +78,7 @@ class BranchManagerViewReportsPriceComparisonView extends StatelessWidget {
                   ),
                 );
               },
-              label: 'Filter data',
+              label: S.current.followupFilterData,
               icon: AppSvg(
                 assetName: AppAssets.filter,
                 colorFilter: ColorFilter.mode(
@@ -213,18 +214,18 @@ class BranchManagerViewReportsPriceComparisonView extends StatelessWidget {
     try {
       final date = DateTime.parse(dateStr);
       final months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
+        S.current.followupJanuary,
+        S.current.followupFebruary,
+        S.current.followupMarch,
+        S.current.followupApril,
+        S.current.followupMay,
+        S.current.followupJune,
+        S.current.followupJuly,
+        S.current.followupAugust,
+        S.current.followupSeptember,
+        S.current.followupOctober,
+        S.current.followupNovember,
+        S.current.followupDecember,
       ];
       return '${months[date.month - 1]} ${date.day}, ${date.year}';
     } catch (_) {

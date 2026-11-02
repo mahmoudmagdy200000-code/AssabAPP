@@ -344,7 +344,7 @@ class _BrandOwnerOperationalProfitabilityScreenState
               10.verticalSpace,
               _buildRow(
                 context: context,
-                title: 'Space efficiency',
+                title: S.current.followupSpaceEfficiency,
                 value:
                     '${NumberFormat('#,###').format(efficiency.spaceEfficiency)} ${efficiency.spaceEfficiencyUnit}',
                 icon: AppAssets.direction,
@@ -522,7 +522,7 @@ class _BrandOwnerOperationalProfitabilityScreenState
         } else if (state is ExportOperationalProfitabilityEmailSuccess) {
           AppSnackBar.showSuccess(
             context,
-            'Report sent successfully to your email',
+            S.current.followupReportSentSuccessfullyToYourEmail,
           );
         } else if (state is ExportOperationalProfitabilityEmailFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);

@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 enum BrandOwnerReportSettingMonthlyReportEnum {
   assetStatus('asset_status'),
   branchPerformance('branch_performance'),
@@ -12,11 +13,11 @@ enum BrandOwnerReportSettingMonthlyReportEnum {
   String get label {
     switch (this) {
       case BrandOwnerReportSettingMonthlyReportEnum.assetStatus:
-        return 'Asset Status';
+        return S.current.followupAssetStatus;
       case BrandOwnerReportSettingMonthlyReportEnum.branchPerformance:
-        return 'Branch Performance';
+        return S.current.followupBranchPerformance;
       case BrandOwnerReportSettingMonthlyReportEnum.overallInvestment:
-        return 'Overall Investment';
+        return S.current.followupOverallInvestment;
     }
   }
 

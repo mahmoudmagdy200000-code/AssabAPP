@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_colors.dart';
@@ -59,7 +60,7 @@ class GroupedInvoicesWidgetTopSection extends StatelessWidget {
                                 state.fieldsValue['invoiceNumber_$id'],
                             builder: (context, state) {
                               return Text(
-                                state ?? 'Invoice Number',
+                                state ?? S.current.invoiceNumber,
                                 style: AppStyles.s14W600.copyWith(
                                   color: context.customColor.text1,
                                 ),

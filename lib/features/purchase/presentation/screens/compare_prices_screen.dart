@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/enums/purchase_sources_types.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -104,7 +105,7 @@ class _ComparePricesScreenState extends State<ComparePricesScreen> {
               current is SaveComparePriceFailure,
           listener: (context, state) {
             if (state is SaveComparePriceSuccess) {
-              AppSnackBar.showSuccess(context, 'Comparison saved successfully');
+              AppSnackBar.showSuccess(context, S.current.followupComparisonSavedSuccessfully);
               NavigationService.I.pop();
             } else if (state is SaveComparePriceFailure) {
               AppDialog.showErrorDialog(

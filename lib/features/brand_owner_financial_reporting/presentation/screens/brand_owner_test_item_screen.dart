@@ -632,7 +632,7 @@ class _BrandOwnerTestItemScreenState extends State<BrandOwnerTestItemScreen> {
                                               5.horizontalSpace,
                                               Flexible(
                                                 child: Text(
-                                                  'Pieces',
+                                                  S.current.followupPieces,
                                                   style: AppStyles.s12W400
                                                       .copyWith(
                                                         color: context

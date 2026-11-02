@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/end_shift_aggregator_entity.dart';
@@ -202,7 +203,7 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
               SummarizeCardWidget(
                 children: [
                   Text(
-                    'Cash Reconciliation',
+                    S.current.followupCashReconciliation,
                     style: AppStyles.s14W500.copyWith(
                       color: context.customColor.text1,
                     ),
@@ -212,7 +213,7 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
                     buildShiftCardRowWidget(
                       context: context,
                       firstTitleSvgAsset: AppAssets.cash,
-                      title: 'Expected Cash',
+                      title: S.current.followupExpectedCash,
                       value: context
                           .watch<EndShiftCubit>()
                           .expectedCash!

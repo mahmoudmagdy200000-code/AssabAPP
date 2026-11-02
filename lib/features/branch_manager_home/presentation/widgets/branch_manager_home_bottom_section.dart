@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/routing/app_route_name.dart';
@@ -121,7 +122,7 @@ class BranchManagerHomeBottomSection extends StatelessWidget {
                 onTap: () {
                   AppSnackBar.showError(
                     context,
-                    'My Ledger feature is coming soon',
+                    S.current.followupMyLedgerFeatureIsComingSoon,
                   );
                 },
               ),

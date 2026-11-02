@@ -39,7 +39,7 @@ class ItemTestSavedTestDetailsBottomSheet extends StatelessWidget {
       listener: (context, state) {
         switch (state) {
           case ItemTestSavedTestDetailsExportSuccess():
-            AppSnackBar.showSuccess(context, 'Test exported successfully');
+            AppSnackBar.showSuccess(context, S.current.followupTestExportedSuccessfully);
             getIt<DownloadService>().downloadFile(
               url: state.url,
               fileName: state.url.split('/').last,

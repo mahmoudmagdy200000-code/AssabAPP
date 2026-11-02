@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'dart:io';
 
 import 'package:assab/core/errors/api_error_model.dart';
@@ -220,7 +221,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       emit(
         EndShiftPreviewFailure(
           _createValidationFailure(
-            'Counted cash is required for reconciliation preview',
+            S().followupCountedCashIsRequiredForReconciliationPreview,
           ),
         ),
       );
@@ -404,7 +405,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     if (_countedCash == null) {
       emit(
         EndShiftFailure(
-          _createValidationFailure('Counted cash is required before ending shift'),
+          _createValidationFailure(S().followupCountedCashIsRequiredBeforeEndingShift),
         ),
       );
       return;
@@ -495,7 +496,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     if (_countedCash == null) {
       emit(
         EndShiftFailure(
-          _createValidationFailure('Counted cash is required before ending shift'),
+          _createValidationFailure(S().followupCountedCashIsRequiredBeforeEndingShift),
         ),
       );
       return;

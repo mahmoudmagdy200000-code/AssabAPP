@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -69,7 +70,7 @@ class _BrandOwnerAssetOverviewScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Comprehensive Asset Overview',
+                          S.current.followupComprehensiveAssetOverview,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
@@ -200,7 +201,7 @@ class _BrandOwnerAssetOverviewScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Network Statistics',
+                          S.current.followupNetworkStatistics,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
@@ -241,7 +242,7 @@ class _BrandOwnerAssetOverviewScreenState
         _buildSearchField(context, overview),
         10.verticalSpace,
         Text(
-          'Branch Audit Summary',
+          S.current.followupBranchAuditSummary,
           style: AppStyles.s16W500.copyWith(color: context.customColor.text1),
         ),
         5.verticalSpace,
@@ -283,7 +284,7 @@ class _BrandOwnerAssetOverviewScreenState
               10.horizontalSpace,
               Expanded(
                 child: CustomTextField(
-                  hintText: 'Search by name',
+                  hintText: S.current.followupSearchByName,
                   onChanged: (value) {
                     searchCubit.search(value);
                   },
@@ -378,7 +379,7 @@ class _BrandOwnerAssetOverviewScreenState
             children: [
               Flexible(
                 child: Text(
-                  'Manager',
+                  S.current.manager,
                   style: AppStyles.s14W400.copyWith(
                     color: context.customColor.text3,
                   ),
@@ -429,7 +430,7 @@ class _BrandOwnerAssetOverviewScreenState
                       ),
                     );
                   },
-                  label: 'Report',
+                  label: S.current.followupReport,
                   icon: AppSvg(
                     assetName: AppAssets.chart,
                     colorFilter: ColorFilter.mode(
@@ -457,7 +458,7 @@ class _BrandOwnerAssetOverviewScreenState
                           ),
                     );
                   },
-                  label: 'View details',
+                  label: S.current.followupViewDetails,
                   icon: AppSvg(
                     assetName: AppAssets.eye,
                     colorFilter: ColorFilter.mode(
@@ -649,7 +650,7 @@ class _BrandOwnerAssetOverviewScreenState
                       const BrandOwnerAssetOverviewScreenPerformanceSummaryBottomSheet(),
                 );
               },
-              label: 'Performance Summary',
+              label: S.current.followupPerformanceSummary,
               icon: AppSvg(
                 assetName: AppAssets.viewReports,
                 colorFilter: ColorFilter.mode(
@@ -666,7 +667,7 @@ class _BrandOwnerAssetOverviewScreenState
           Expanded(
             child: ButtonTextIcon(
               onTap: () {},
-              label: 'Send',
+              label: S.current.send,
               icon: AppSvg(
                 assetName: AppAssets.shareSvg,
                 colorFilter: ColorFilter.mode(

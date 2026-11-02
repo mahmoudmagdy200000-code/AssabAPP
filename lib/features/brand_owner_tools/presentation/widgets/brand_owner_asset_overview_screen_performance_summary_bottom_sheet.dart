@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -75,7 +76,7 @@ class BrandOwnerAssetOverviewScreenPerformanceSummaryBottomSheet
         ),
         10.verticalSpace,
         Text(
-          'Performance Summary',
+          S.current.followupPerformanceSummary,
           style: AppStyles.s16W500.copyWith(color: context.customColor.text1),
         ),
         5.verticalSpace,
@@ -135,7 +136,7 @@ class BrandOwnerAssetOverviewScreenPerformanceSummaryBottomSheet
               ),
               RichText(
                 text: TextSpan(
-                  text: 'Average resolution time for discrepancies ',
+                  text: S.current.followupAverageResolutionTimeForDiscrepancies,
                   style: AppStyles.s14W400.copyWith(
                     color: context.customColor.text3,
                   ),
@@ -151,7 +152,7 @@ class BrandOwnerAssetOverviewScreenPerformanceSummaryBottomSheet
               ),
               RichText(
                 text: TextSpan(
-                  text: 'Last audit score ',
+                  text: S.current.followupLastAuditScore,
                   style: AppStyles.s14W400.copyWith(
                     color: context.customColor.text3,
                   ),
@@ -173,7 +174,7 @@ class BrandOwnerAssetOverviewScreenPerformanceSummaryBottomSheet
               ),
               RichText(
                 text: TextSpan(
-                  text: 'Missed deadlines or failed handovers ',
+                  text: S.current.followupMissedDeadlinesOrFailedHandovers,
                   style: AppStyles.s14W400.copyWith(
                     color: context.customColor.text3,
                   ),

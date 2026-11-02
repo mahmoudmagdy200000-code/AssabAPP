@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
 import 'package:assab/core/cubits/validation/validation_state.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -29,7 +30,7 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Form Fill',
+                      S.current.followupFormFill,
                       style: AppStyles.s20W600.copyWith(
                         color: context.customColor.text1,
                       ),
@@ -64,7 +65,7 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                     12.verticalSpace,
                     ContainerCustomTextField(
                       label: 'Delivery Reference No.',
-                      customTextOption: 'If Available',
+                      customTextOption: S.current.followupIfAvailable,
                       isLabelRequired: false,
                       isLabelOptional: true,
                       child: CustomTextField(
@@ -74,12 +75,12 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                     ),
                     12.verticalSpace,
                     ContainerCustomTextField(
-                      label: 'Product Name',
+                      label: S.current.followupProductName,
                       child: Row(
                         children: [
                           Expanded(
                             child: Text(
-                              'Multiple product names not allowed',
+                              S.current.followupMultipleProductNamesNotAllowed,
                               style: AppStyles.s14W400.copyWith(
                                 color: context.customColor.text3,
                               ),
@@ -95,12 +96,12 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                     ),
                     12.verticalSpace,
                     ContainerCustomTextField(
-                      label: 'Unit Of Measurement',
+                      label: S.current.followupUnitOfMeasurement,
                       child: Row(
                         children: [
                           Expanded(
                             child: Text(
-                              'Choose unit',
+                              S.current.followupChooseUnit,
                               style: AppStyles.s14W400.copyWith(
                                 color: context.customColor.text3,
                               ),
@@ -116,7 +117,7 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                     ),
                     12.verticalSpace,
                     ContainerCustomTextField(
-                      label: 'Quantity Received',
+                      label: S.current.followupQuantityReceived,
                       child: Row(
                         children: [
                           Expanded(
@@ -127,7 +128,7 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                           ),
                           5.horizontalSpace,
                           Text(
-                            'Unit',
+                            S.current.unit,
                             style: AppStyles.s14W500.copyWith(
                               color: context.customColor.text4,
                             ),
@@ -137,7 +138,7 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                     ),
                     12.verticalSpace,
                     ContainerCustomTextField(
-                      label: 'Price Per Unit',
+                      label: S.current.followupPricePerUnit,
                       child: Row(
                         children: [
                           Expanded(
@@ -173,8 +174,8 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
                       ),
                     ),
                     12.verticalSpace,
-                    const LabelTextField(
-                      text: 'Upload Invoice or Delivery Note',
+                    LabelTextField(
+                      text: S.current.followupUploadInvoiceOrDeliveryNote,
                     ),
                     const UploadExpenseInvoiceReceipt(),
                     12.verticalSpace,
@@ -199,7 +200,7 @@ class ReceiveWithoutPriorOrderScreen extends StatelessWidget {
               builder: (context, state) {
                 return AppButton(
                   onClick: () {},
-                  text: 'Continue To Inspection Details',
+                  text: S.current.followupContinueToInspectionDetails,
                   enabled: state,
                   borderRadius: BorderRadius.circular(15.r),
                 );

@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_colors.dart';
@@ -163,7 +164,7 @@ class EndShiftSummaryWidget extends StatelessWidget {
                   SummarizeCardWidget(
                     children: [
                       Text(
-                        'Cash Reconciliation',
+                        S.current.followupCashReconciliation,
                         style: AppStyles.s14W500.copyWith(
                           color: context.customColor.text1,
                         ),
@@ -173,7 +174,7 @@ class EndShiftSummaryWidget extends StatelessWidget {
                         buildShiftCardRowWidget(
                           context: context,
                           firstTitleSvgAsset: AppAssets.cash,
-                          title: 'Expected Cash',
+                          title: S.current.followupExpectedCash,
                           value: context
                               .read<EndShiftCubit>()
                               .expectedCash!

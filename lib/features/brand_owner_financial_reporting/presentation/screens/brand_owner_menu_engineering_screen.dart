@@ -480,7 +480,7 @@ class _BrandOwnerMenuEngineeringScreenState
             fileName: state.fileUrl.split('/').last,
           );
         } else if (state is ExportMenuEngineeringEmailSuccess) {
-          AppSnackBar.showSuccess(context, 'Report sent to email successfully');
+          AppSnackBar.showSuccess(context, S.current.reportSentToEmailSuccessfully);
         } else if (state is ExportMenuEngineeringFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);
         } else if (state is ExportMenuEngineeringEmailFailure) {

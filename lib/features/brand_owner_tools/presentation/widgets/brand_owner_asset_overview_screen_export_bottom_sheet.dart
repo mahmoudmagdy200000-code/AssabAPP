@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -53,7 +54,7 @@ class _BrandOwnerAssetOverviewScreenExportBottomSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Export Report',
+                      S.current.exportReport,
                       style: AppStyles.s20W500.copyWith(
                         color: context.customColor.text1,
                       ),
@@ -124,7 +125,7 @@ class _BrandOwnerAssetOverviewScreenExportBottomSheetState
                   if (state is BrandOwnerAssetOverviewExportSuccess) {
                     AppSnackBar.showSuccess(
                       context,
-                      'Report exported successfully',
+                      S.current.followupReportExportedSuccessfully,
                     );
 
                     // getIt<DownloadService>().downloadFile(url: state.response., fileName: fileName)
@@ -156,7 +157,7 @@ class _BrandOwnerAssetOverviewScreenExportBottomSheetState
                                   format: _selectedFormat!,
                                 );
                           },
-                          text: 'Export Report',
+                          text: S.current.exportReport,
                           enabled: _selectedFormat != null,
                         );
                       },

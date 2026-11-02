@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/manager_shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/progress_entity.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,7 @@ class ManagerMainScreenShiftDetailsTabWidget
           ShiftDetailsRowWidget(
             iconSVGAsset: AppAssets.personSvg,
             title: context.tr.finalApprovalBy,
-            value: 'Name',
+            value: S.current.name,
           ),
         ],
       ),

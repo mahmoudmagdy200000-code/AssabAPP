@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -55,7 +56,7 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                 ),
                 10.verticalSpace,
                 Text(
-                  'Request Details',
+                  S.current.followupRequestDetails,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -72,33 +73,33 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                     children: [
                       _buildRow(
                         context,
-                        title: 'Request ID',
+                        title: S.current.followupRequestID,
                         value: details.routeDetails.requestId,
                       ),
                       _buildRow(
                         context,
-                        title: 'Session Code',
+                        title: S.current.sessionCode,
                         value: details.routeDetails.sessionCode,
                       ),
                       _buildDestinationRow(context),
                       _buildRow(
                         context,
-                        title: 'Success rate',
+                        title: S.current.followupSuccessRate,
                         value: details.routeDetails.successRate,
                       ),
                       _buildRow(
                         context,
-                        title: 'Discrepancies',
+                        title: S.current.followupDiscrepancies,
                         value: details.routeDetails.discrepancies,
                       ),
                       _buildRow(
                         context,
-                        title: 'Handover Date',
+                        title: S.current.handoverDate,
                         value: details.routeDetails.handoverDate,
                       ),
                       _buildRow(
                         context,
-                        title: 'Session Duration',
+                        title: S.current.followupSessionDuration,
                         value: details.routeDetails.sessionDuration,
                       ),
                     ],
@@ -106,7 +107,7 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                 ),
                 10.verticalSpace,
                 Text(
-                  'Asset Details',
+                  S.current.assetDetails,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -169,7 +170,7 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                           Divider(color: context.customColor.text2, height: 1),
                           _buildRow(
                             context,
-                            title: 'Affected Value',
+                            title: S.current.followupAffectedValue,
                             value: asset.affectedValue,
                             isCurrency: true,
                           ),
@@ -225,7 +226,7 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                 ),
                 10.verticalSpace,
                 Text(
-                  'Financial Analysis',
+                  S.current.followupFinancialAnalysis,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -242,13 +243,13 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                     children: [
                       _buildRow(
                         context,
-                        title: 'Total Affected Value',
+                        title: S.current.followupTotalAffectedValue,
                         value: details.financialAnalysis.totalAffectedValue,
                         isCurrency: true,
                       ),
                       _buildRow(
                         context,
-                        title: 'Impact Ratio',
+                        title: S.current.followupImpactRatio,
                         value: details.financialAnalysis.impactRatio,
                       ),
                       _buildRow(
@@ -273,7 +274,7 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                   children: [
                     Expanded(
                       child: CustomTextButton(
-                        text: 'Written Warning',
+                        text: S.current.followupWrittenWarning,
                         onTap: () {
                           AppBottomSheet.customPageRoute(
                             context,
@@ -293,7 +294,7 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
                     ),
                     Expanded(
                       child: CustomTextButton(
-                        text: 'Salary Deduction',
+                        text: S.current.followupSalaryDeduction,
                         onTap: () {
                           AppBottomSheet.customPageRoute(
                             context,
@@ -420,7 +421,7 @@ class BrandOwnerHandoverDetailsDetailsScreenDetailsView
       children: [
         Flexible(
           child: Text(
-            'Destination',
+            S.current.followupDestination,
             style: AppStyles.s12W400.copyWith(color: context.customColor.text3),
           ),
         ),

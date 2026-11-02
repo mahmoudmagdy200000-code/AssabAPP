@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
 import 'package:assab/core/cubits/validation/validation_state.dart';
 import 'package:assab/core/enums/custody_preferred_receipt_method.dart';
@@ -442,7 +443,7 @@ class _BrandOwnerFilterExpenseReportBottomSheetState
                               Expanded(
                                 child: CustomTextField(
                                   controller: _searchController,
-                                  hintText: 'Search by branch name',
+                                  hintText: S.current.followupSearchByBranchName,
                                   onChanged: (value) {
                                     context
                                         .read<

@@ -240,7 +240,7 @@ class _BrandOwnerProfitVsCashReconciliationScreenState
         children: [
           _buildRowOverview(
             context,
-            title: 'Your Monthly Profits',
+            title: S.current.yourMonthlyProfits,
             amount: data.monthlyProfits.toStringAsFixed(0),
           ),
           5.verticalSpace,
@@ -248,7 +248,7 @@ class _BrandOwnerProfitVsCashReconciliationScreenState
           5.verticalSpace,
           _buildRowOverview(
             context,
-            title: 'Your Current Cash',
+            title: S.current.yourCurrentCash,
             amount: data.currentCash.toStringAsFixed(0),
           ),
           5.verticalSpace,
@@ -929,7 +929,7 @@ class _BrandOwnerProfitVsCashReconciliationScreenState
         } else if (state is ExportProfitVsCashReconciliationFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);
         } else if (state is ExportProfitVsCashReconciliationEmailSuccess) {
-          AppSnackBar.showSuccess(context, 'Report sent to email successfully');
+          AppSnackBar.showSuccess(context, S.current.reportSentToEmailSuccessfully);
         } else if (state is ExportProfitVsCashReconciliationEmailFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);
         }

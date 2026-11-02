@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -123,7 +124,7 @@ class _BrandOwnerReportSettingsScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Report Settings',
+                          S.current.ownerReportSettings,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
@@ -165,7 +166,7 @@ class _BrandOwnerReportSettingsScreenState
                           AppOverlay.hideCustomOverlay();
                           AppSnackBar.showSuccess(
                             context,
-                            'Changes saved successfully',
+                            S.current.followupChangesSavedSuccessfully,
                           );
                         case BrandOwnerSettingsSaveStatus.failure:
                           AppOverlay.hideCustomOverlay();
@@ -254,7 +255,7 @@ class _BrandOwnerReportSettingsScreenState
                                 children: [
                                   Expanded(
                                     child: CustomTextButton(
-                                      text: 'Reset to Default',
+                                      text: S.current.followupResetToDefault,
                                       onTap: () => _cubit.resetToDefaults(),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 14.r,
@@ -266,7 +267,7 @@ class _BrandOwnerReportSettingsScreenState
                                   ),
                                   Expanded(
                                       child: AppButton(
-                                      text: 'Save Changes',
+                                      text: S.current.followupSaveChanges,
                                       onClick: () => _cubit.save(),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 14.r,

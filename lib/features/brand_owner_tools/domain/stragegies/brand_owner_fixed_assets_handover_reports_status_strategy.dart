@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -175,7 +176,7 @@ class BrandOwnerFixedAssetsHandoverReportsApprovedStatusStrategy
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Warning Note',
+                  S.current.followupWarningNote,
                   style: AppStyles.s12W400.copyWith(
                     color: context.customColor.text3,
                   ),
@@ -201,7 +202,7 @@ class BrandOwnerFixedAssetsHandoverReportsSalaryDeductedStatusStrategy
   @override
   Widget buildStatusWidget(BuildContext context) {
     return BranchRequestsStatusWidget(
-      status: 'Salary Deducted',
+      status: S.current.followupSalaryDeducted,
       textColor: context.theme.primaryColor,
       borderColor: Colors.transparent,
       backgroundColor: context.theme.primaryColor.withValues(alpha: 0.1),
@@ -237,7 +238,7 @@ class BrandOwnerFixedAssetsHandoverReportsSalaryDeductedStatusStrategy
               border: Border.all(color: context.customColor.border),
             ),
             child: Text(
-              'Salary Deducted',
+              S.current.followupSalaryDeducted,
               style: AppStyles.s10W500.copyWith(
                 color: context.theme.primaryColor,
               ),
@@ -266,7 +267,7 @@ class BrandOwnerFixedAssetsHandoverReportsSalaryDeductedStatusStrategy
               children: [
                 Flexible(
                   child: Text(
-                    'Amount',
+                    S.current.amount,
                     style: AppStyles.s12W400.copyWith(
                       color: context.customColor.text3,
                     ),
@@ -303,7 +304,7 @@ class BrandOwnerFixedAssetsHandoverReportsSalaryDeductedStatusStrategy
               children: [
                 Flexible(
                   child: Text(
-                    'Reason',
+                    S.current.reason,
                     style: AppStyles.s12W400.copyWith(
                       color: context.customColor.text3,
                     ),

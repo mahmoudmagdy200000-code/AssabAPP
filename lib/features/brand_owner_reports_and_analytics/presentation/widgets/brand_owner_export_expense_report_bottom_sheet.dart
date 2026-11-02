@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -68,7 +69,7 @@ class BrandOwnerExportExpenseReportBottomSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Export Expense Report',
+                    S.current.followupExportExpenseReport,
                     style: AppStyles.s20W500.copyWith(
                       color: context.customColor.text1,
                     ),
@@ -84,7 +85,7 @@ class BrandOwnerExportExpenseReportBottomSheet extends StatelessWidget {
                   const CustomDivider(),
                   10.verticalSpace,
                   Text(
-                    'Expense Type',
+                    S.current.followupExpenseType,
                     style: AppStyles.s14W500.copyWith(
                       color: context.customColor.text3,
                     ),
@@ -208,7 +209,7 @@ class BrandOwnerExportExpenseReportBottomSheet extends StatelessWidget {
                   ),
                   10.verticalSpace,
                   Text(
-                    'Export Format',
+                    S.current.exportFormat,
                     style: AppStyles.s14W500.copyWith(
                       color: context.customColor.text3,
                     ),
