@@ -6,6 +6,7 @@ import 'package:assab/core/services/auth_service.dart';
 import 'package:assab/core/services/token_storage_service.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/utils/app_dialog.dart';
+import 'package:assab/core/utils/app_reg_exp.dart';
 import 'package:assab/core/widgets/app_button.dart';
 import 'package:assab/core/widgets/app_button_loading.dart';
 import 'package:assab/core/widgets/app_gesture_detector_button.dart';
@@ -46,14 +47,6 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
   late final TextEditingController _identifierController;
   late final TextEditingController _passwordController;
 
-  String _normalizeLocalPhone(String raw) {
-    final trimmed = raw.trim();
-    if (trimmed.startsWith('+966')) {
-      return trimmed.substring(4);
-    }
-    return trimmed;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -66,7 +59,7 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
     final savedIdentifier = rawSaved == null
         ? null
         : (widget.identifierType == LoginIdentifierType.phone
-              ? _normalizeLocalPhone(rawSaved)
+              ? (AppRegExp.normalizeSaudiPhone(rawSaved) ?? rawSaved.trim())
               : rawSaved.trim());
 
     _identifierController = TextEditingController(text: savedIdentifier ?? '');
@@ -86,9 +79,21 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
   void _login() {
     final formState = context.read<LoginFormCubit>().state;
     final trimmedInput = _identifierController.text.trim();
-    final identifier = widget.identifierType == LoginIdentifierType.phone
-        ? (trimmedInput.startsWith('+') ? trimmedInput : '+966$trimmedInput')
-        : trimmedInput;
+
+    String identifier;
+    if (widget.identifierType == LoginIdentifierType.phone) {
+      final normalized =
+          AppRegExp.normalizeSaudiPhone(_identifierController.text);
+      if (normalized == null) {
+        context
+            .read<LoginFormCubit>()
+            .setIdentifierError('Invalid email or phone');
+        return;
+      }
+      identifier = normalized;
+    } else {
+      identifier = trimmedInput;
+    }
 
     if (UserTypeService.selectedUserTypeStrategy == null) {
       UserTypeService.restoreSavedUserType();
@@ -122,9 +127,9 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
               ? (entity.email.isNotEmpty
                     ? entity.email
                     : _identifierController.text.trim())
-              : _normalizeLocalPhone(
-                  entity.phone ?? _identifierController.text.trim(),
-                ),
+              : (AppRegExp.normalizeSaudiPhone(entity.phone ?? '') ??
+                  AppRegExp.normalizeSaudiPhone(_identifierController.text) ??
+                  _identifierController.text.trim()),
         ),
       getIt<SharedPreferencesHelper>().storeString('u_name', entity.name),
       getIt<SharedPreferencesHelper>().storeString('u_id', entity.id),
@@ -180,6 +185,8 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
                   label: context.tr.password,
                   hint: context.tr.passwordHint,
                   textFormType: TextFormType.password,
+                  autocorrect: false,
+                  enableSuggestions: false,
                   onChanged: (value) =>
                       context.read<LoginFormCubit>().updatePassword(value),
                   error: error,
