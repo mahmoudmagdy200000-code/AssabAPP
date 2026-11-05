@@ -67,7 +67,7 @@ android {
             isDebuggable = true
         }
         getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (keyPropertiesFile.exists()) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -87,7 +87,7 @@ android {
         create("development") {
             dimension = "env"
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Assap Dev")
+            resValue("string", "app_name", "Assab Dev")
         }
         create("production") {
             dimension = "env"
