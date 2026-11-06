@@ -163,15 +163,15 @@ class ReassignShiftCubit extends SafeCubit<ReassignShiftState>
   }
 
   String calculateNetSales(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
-    // Example: subtract 15% VAT or any other calculation
+    final sanitized = totalSalesText.replaceAll(',', '').trim();
+    final totalSales = double.tryParse(sanitized) ?? 0.0;
     final netSales = totalSales / 1.15;
     return netSales.toStringAsFixed(2);
   }
 
   String calculateNetVal(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
-
+    final sanitized = totalSalesText.replaceAll(',', '').trim();
+    final totalSales = double.tryParse(sanitized) ?? 0.0;
     final netVal = totalSales - (totalSales / 1.15);
     return netVal.toStringAsFixed(2);
   }

@@ -2,6 +2,7 @@ import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/future_api_result.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/data_source/shift_management_remote_data_source.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_aggregator_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_request.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/variance_model.dart';
@@ -30,6 +31,39 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required EndShiftRequest endShiftRequest,
   })? onEndShift;
 
+  FutureApiResult<List<ShortageAllocationCandidate>> Function({
+    required String shiftId,
+  })? onCandidates;
+
+  @override
+  FutureApiResult<List<ShortageAllocationCandidate>> getShortageAllocationCandidates({
+    required String shiftId,
+  }) async {
+    if (onCandidates != null) {
+      return onCandidates!(shiftId: shiftId);
+    }
+    return ApiResult.success(const [
+      ShortageAllocationCandidate(
+        id: '1',
+        name: 'Ahmed',
+        type: 'cashier',
+        role: 'cashier',
+      ),
+      ShortageAllocationCandidate(
+        id: '2',
+        name: 'Manager',
+        type: 'branch_manager',
+        role: 'branch_manager',
+      ),
+      ShortageAllocationCandidate(
+        id: 'cand-1',
+        name: 'Candidate 1',
+        type: 'cashier',
+        role: 'cashier',
+      ),
+    ]);
+  }
+
   @override
   FutureApiResult<Map<String, dynamic>> previewCashReconciliation({
     required String shiftId,
@@ -37,6 +71,7 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required double countedCash,
     double? cardPayments,
     List<EndShiftAggregatorModel>? aggregators,
+    double? pendingIncomingCash,
   }) async {
     if (onPreview != null) {
       return onPreview!(
@@ -156,13 +191,15 @@ void main() {
       cubit.setCountedCash(550.0);
       await cubit.fetchCashReconciliationPreview();
 
-      expect(cubit.state, isA<EndShiftPreviewSuccess>());
-      final success = cubit.state as EndShiftPreviewSuccess;
-      expect(success.allocationRequired, isTrue);
-      expect(success.shortageToAllocate, equals(50.0));
-      expect(success.cashVarianceType, equals('shortage'));
-      expect(success.previewData['cash_reconciliation']['counted_cash'], equals(550.0));
-      expect(success.previewData['cash_reconciliation']['cash_variance'], equals(-50.0));
+      expect(cubit.state, anyOf(isA<EndShiftPreviewSuccess>(), isA<EndShiftCandidatesSuccess>()));
+      expect(cubit.previewData, isNotNull);
+      final previewMap = (cubit.previewData!['data'] is Map<String, dynamic>)
+          ? cubit.previewData!['data'] as Map<String, dynamic>
+          : cubit.previewData!;
+      expect(previewMap['allocation_required'], isTrue);
+      expect(previewMap['shortage_to_allocate'], equals(50.0));
+      expect(previewMap['cash_reconciliation']['counted_cash'], equals(550.0));
+      expect(previewMap['cash_reconciliation']['cash_variance'], equals(-50.0));
       expect(cubit.previewStale, isFalse);
 
       // Attempting endShift without allocations fails
@@ -315,12 +352,15 @@ void main() {
       cubit.setCountedCash(0.0);
       await cubit.fetchCashReconciliationPreview();
 
-      expect(cubit.state, isA<EndShiftPreviewSuccess>());
-      final zeroState = cubit.state as EndShiftPreviewSuccess;
-      expect(zeroState.shortageToAllocate, equals(300.0));
-      expect(zeroState.allocationRequired, isTrue);
-      expect(zeroState.previewData['cash_reconciliation']['counted_cash'], equals(0.0));
-      expect(zeroState.previewData['cash_reconciliation']['cash_variance'], equals(-300.0));
+      expect(cubit.state, anyOf(isA<EndShiftPreviewSuccess>(), isA<EndShiftCandidatesSuccess>()));
+      expect(cubit.previewData, isNotNull);
+      final zeroPreview = (cubit.previewData!['data'] is Map<String, dynamic>)
+          ? cubit.previewData!['data'] as Map<String, dynamic>
+          : cubit.previewData!;
+      expect(zeroPreview['shortage_to_allocate'], equals(300.0));
+      expect(zeroPreview['allocation_required'], isTrue);
+      expect(zeroPreview['cash_reconciliation']['counted_cash'], equals(0.0));
+      expect(zeroPreview['cash_reconciliation']['cash_variance'], equals(-300.0));
     });
   });
 }

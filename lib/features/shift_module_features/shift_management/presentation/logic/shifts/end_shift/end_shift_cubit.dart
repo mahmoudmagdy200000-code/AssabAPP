@@ -122,6 +122,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   bool _isLoadingCandidates = false;
   String? _candidatesError;
   int _candidateRequestId = 0;
+  double _pendingIncomingCash = 0.0;
+
+  double get pendingIncomingCash => _pendingIncomingCash;
+  void updatePendingIncomingCash(double value) {
+    _pendingIncomingCash = value >= 0 ? value : 0.0;
+    _previewStale = true;
+  }
 
   double? get countedCash => _countedCash;
   Map<String, dynamic>? get previewData => _previewData;
@@ -143,7 +150,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
             .map((a) => '${a.aggregatorId}:${a.amount.toStringAsFixed(2)}')
             .toList()
           ..sort();
-    return '$_countedCash:${_totalSales.toStringAsFixed(2)}:${_cardPayments.toStringAsFixed(2)}:${aggList.join(',')}';
+    return '$_countedCash:${_pendingIncomingCash.toStringAsFixed(2)}:${_totalSales.toStringAsFixed(2)}:${_cardPayments.toStringAsFixed(2)}:${aggList.join(',')}';
   }
 
   bool get canProceedToEndShift {
@@ -360,6 +367,8 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       totalSales: _totalSales,
       countedCash: _countedCash!,
       cardPayments: _cardPayments,
+      pendingIncomingCash:
+          _pendingIncomingCash > 0 ? _pendingIncomingCash : null,
       aggregators: _aggregators
           .map((a) => EndShiftAggregatorModel.fromEntity(a))
           .toList(),
@@ -470,13 +479,15 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   }
 
   String calculateNetSales(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
+    final sanitized = totalSalesText.replaceAll(',', '').trim();
+    final totalSales = double.tryParse(sanitized) ?? 0.0;
     final netSales = totalSales / 1.15;
     return netSales.toStringAsFixed(2);
   }
 
   String calculateNetVal(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
+    final sanitized = totalSalesText.replaceAll(',', '').trim();
+    final totalSales = double.tryParse(sanitized) ?? 0.0;
     final netVal = totalSales - (totalSales / 1.15);
     return netVal.toStringAsFixed(2);
   }
@@ -598,6 +609,8 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       cashCollected: _cashCollected,
       cardPayments: _cardPayments,
       countedCash: _countedCash!,
+      pendingIncomingCash:
+          _pendingIncomingCash > 0 ? _pendingIncomingCash : null,
       shortageAllocations: _shortageAllocations,
       allocationReason: _allocationReason,
       aggregators: _aggregators

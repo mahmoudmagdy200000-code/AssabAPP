@@ -22,6 +22,7 @@ class EndShiftRequestWithHandOver {
   final double? countedCash;
   final List<CashShortageAllocation>? shortageAllocations;
   final String? allocationReason;
+  final double? pendingIncomingCash;
 
   EndShiftRequestWithHandOver({
     required this.totalSales,
@@ -38,6 +39,7 @@ class EndShiftRequestWithHandOver {
     this.countedCash,
     this.shortageAllocations,
     this.allocationReason,
+    this.pendingIncomingCash,
   });
 
   Future<FormData> toFormData() async {
@@ -112,6 +114,10 @@ class EndShiftRequestWithHandOver {
 
     if (countedCash != null) {
       formMap['counted_cash'] = countedCash!.toStringAsFixed(2);
+    }
+
+    if (pendingIncomingCash != null && pendingIncomingCash! > 0) {
+      formMap['pending_incoming_cash'] = pendingIncomingCash!.toStringAsFixed(2);
     }
 
     if (shortageAllocations != null && shortageAllocations!.isNotEmpty) {

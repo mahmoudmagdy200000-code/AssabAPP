@@ -54,16 +54,16 @@ class _UpdateManagerFinalDailyCloseScreenState
     final agreed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('إرسال اليومية نهائياً'),
-        content: const Text('هل تريد إرسال اليومية النهائية للمراجعة؟'),
+        title: Text(context.tr.submitDailyCloseFinal),
+        content: Text(context.tr.submitDailyCloseFinalConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('إلغاء'),
+            child: Text(context.tr.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('إرسال'),
+            child: Text(context.tr.send),
           ),
         ],
       ),
@@ -109,13 +109,13 @@ class _UpdateManagerFinalDailyCloseScreenState
     if (!mounted) return;
     setState(() => _submittingFinal = false);
     final message = confirmed
-        ? 'تم إرسال اليومية النهائية للمراجعة.'
+        ? context.tr.dailyCloseSubmittedForReviewSuccess
         : error is DioException
         ? (error.response?.data is Map
               ? (error.response?.data['message']?.toString() ??
-                    'تعذر تأكيد النتيجة. حدّث اليومية قبل المحاولة مجدداً.')
-              : 'تعذر تأكيد النتيجة. حدّث اليومية قبل المحاولة مجدداً.')
-        : 'لم يتم تأكيد الإرسال من السيرفر. حدّث اليومية قبل المحاولة مجدداً.';
+                    context.tr.couldNotConfirmResultRefresh)
+              : context.tr.couldNotConfirmResultRefresh)
+        : context.tr.submissionNotConfirmedByServer;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
@@ -146,8 +146,8 @@ class _UpdateManagerFinalDailyCloseScreenState
       SnackBar(
         content: Text(
           confirmed
-              ? 'تم التحقق من إرسال اليومية للمراجعة.'
-              : 'النتيجة غير مؤكدة. تواصل مع المحاسب أو مسؤول النظام قبل أي إجراء آخر.',
+              ? context.tr.dailyCloseSubmissionVerified
+              : context.tr.resultUnconfirmedContactAccountant,
         ),
       ),
     );
@@ -366,9 +366,9 @@ class _UpdateManagerFinalDailyCloseScreenState
                                           value: cubit,
                                           child:
                                               EndAndUpdateManagerSuccessScreen(
-                                                title: 'تم حفظ التعديلات',
+                                                title: context.tr.changesSaved,
                                                 subTitle:
-                                                    'تم حفظ تعديلات اليومية.',
+                                                    context.tr.dailyCloseModificationsSaved,
                                                 managerShift: managerShiftState
                                                     .managerShift,
                                               ),
@@ -490,7 +490,7 @@ class _UpdateManagerFinalDailyCloseScreenState
                                               .toggleSubmitted();
                                         },
                                         enabled: true,
-                                        text: 'تعديل اليومية',
+                                        text: context.tr.editDailyClose,
                                       );
                                     },
                                   );
@@ -512,7 +512,7 @@ class _UpdateManagerFinalDailyCloseScreenState
                                 state.managerId == null ||
                                 state.branchId == null ||
                                 state.managerWorkdayId == null) {
-                              return const Text('تعذر التحقق من هوية اليومية.');
+                              return Text(context.tr.couldNotVerifyWorkdayIdentity);
                             }
                             final action = DailyCloseSubmission(
                               getIt<Dio>(),
@@ -524,26 +524,26 @@ class _UpdateManagerFinalDailyCloseScreenState
                               state.managerWorkdayId!,
                             );
                             if (!action.hasCurrentActor) {
-                              return const Text('تعذر التحقق من حساب المدير.');
+                              return Text(context.tr.couldNotVerifyManagerAccount);
                             }
                             if (unresolved) {
                               return Column(
                                 children: [
-                                  const Text(
-                                    'نتيجة الإرسال السابق معلّقة. حدّث الحالة، وإن لم تتأكد تواصل مع المحاسب أو مسؤول النظام.',
+                                  Text(
+                                    context.tr.previousSubmissionPendingContactAdmin,
                                   ),
                                   TextButton(
                                     onPressed: _submittingFinal
                                         ? null
                                         : () => _reconcileFinal(state, action),
-                                    child: const Text('تحديث حالة اليومية'),
+                                    child: Text(context.tr.refreshDailyCloseStatus),
                                   ),
                                 ],
                               );
                             }
                             if (state.serverSubmitted == true) {
-                              return const Text(
-                                'تم إرسال اليومية النهائية للمراجعة',
+                              return Text(
+                                context.tr.dailyCloseFinalSubmitted,
                               );
                             }
                             return AppButton(
@@ -553,8 +553,8 @@ class _UpdateManagerFinalDailyCloseScreenState
                                   !state.isSubmitted &&
                                   !_submittingFinal,
                               text: _submittingFinal
-                                  ? 'جارٍ إرسال اليومية...'
-                                  : 'إرسال اليومية نهائياً',
+                                  ? context.tr.submittingDailyClose
+                                  : context.tr.submitDailyCloseFinal,
                             );
                           },
                         );

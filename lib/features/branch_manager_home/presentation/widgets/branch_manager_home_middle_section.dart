@@ -10,6 +10,8 @@ import '../../../../core/styles/app_styles.dart';
 import '../../../../core/widgets/app_gesture_detector_button.dart';
 import '../../../../core/widgets/app_svg.dart';
 import '../../../../core/widgets/custom_divider.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/utils/app_snack_bar.dart';
 import 'branch_manager_action_button.dart';
 
 class BranchManagerHomeMiddleSection extends StatelessWidget {
@@ -40,7 +42,7 @@ class BranchManagerHomeMiddleSection extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Monday jun 16, 2025',
+                      DateFormat('EEEE MMM d, yyyy', Localizations.localeOf(context).languageCode).format(DateTime.now()),
                       style: AppStyles.s12W400.copyWith(
                         color: context.customColor.text1,
                       ),
@@ -53,17 +55,17 @@ class BranchManagerHomeMiddleSection extends StatelessWidget {
                 TodaySummaryRow(
                   assetName: AppAssets.box,
                   title: context.tr.ordersInProgress,
-                  value: '5',
+                  value: '—',
                 ),
                 10.verticalSpace,
                 TodaySummaryRow(
                   assetName: AppAssets.receipt,
                   title: context.tr.todaysReceipt,
-                  value: '2',
+                  value: '—',
                 ),
                 32.verticalSpace,
                 AppGestureDetectorButton(
-                  onTap: () {},
+                  onTap: () => NavigationService.I.pushNamed(AppRouteName.inventoryScreen),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.transparent,
@@ -119,7 +121,7 @@ class BranchManagerHomeMiddleSection extends StatelessWidget {
                 BranchManagerActionButton(
                   assetName: AppAssets.transfer,
                   label: context.tr.transfershandover,
-                  onTap: () {},
+                  onTap: () => AppSnackBar.showError(context, context.tr.followupTransfersHandoverFeatureIsComingSoon),
                 ),
                 BranchManagerActionButton(
                   assetName: AppAssets.box,
@@ -142,7 +144,7 @@ class BranchManagerHomeMiddleSection extends StatelessWidget {
                 BranchManagerActionButton(
                   assetName: AppAssets.more,
                   label: context.tr.moreActions,
-                  onTap: () {},
+                  onTap: () => AppSnackBar.showError(context, context.tr.followupFeatureComingSoon),
                 ),
               ],
             ),

@@ -7,6 +7,7 @@ import 'package:assab/core/widgets/upload_expense_invoice_receipt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/receive_goods_local_item_model.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/cubits/media/media_cubit.dart';
 import '../../../../core/cubits/media/media_state.dart';
@@ -302,17 +303,24 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                       BlocSelector<
                         ValidationCubit,
                         ValidationState,
-                        List<dynamic>
+                        List<ReceiveGoodsLocalItemModel>
                       >(
                         selector: (state) =>
-                            state.getListValue('receiveGoodsItems') ?? [],
+                            state.getListValue<ReceiveGoodsLocalItemModel>(
+                              'receiveGoodsItems',
+                            ) ??
+                            [],
                         builder: (context, items) {
                           final totalBeforeTax = items.fold<double>(
                             0,
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final vatAmount = totalBeforeTax * 0.15;
+                          final vatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
+                              (items.isNotEmpty && items.first.vatRate != null
+                                  ? items.first.vatRate!
+                                  : 0.15);
+                          final vatAmount = totalBeforeTax * vatRate;
                           final totalWithVat = totalBeforeTax + vatAmount;
                           String formatAmount(double value) =>
                               '${value.toStringAsFixed(2)} SAR';
@@ -327,7 +335,7 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                               10.verticalSpace,
                               _buildRowWidget(
                                 context: context,
-                                title: context.tr.vat15Percent,
+                                title: vatRate == 0 ? context.tr.vat0Percent : context.tr.vat15Percent,
                                 value: formatAmount(vatAmount),
                               ),
                               10.verticalSpace,

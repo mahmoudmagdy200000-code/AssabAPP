@@ -38,6 +38,15 @@ class EndManagerShiftScreen extends StatefulWidget {
     required this.managerName,
   });
 
+  static bool canProceedFromHandovers(List<HandoverDetailsEntity> handovers) {
+    if (handovers.isEmpty) {
+      return true;
+    }
+    return handovers.every(
+      (handover) => handover.handoverStatus == HandoverStatus.accepted,
+    );
+  }
+
   @override
   State<EndManagerShiftScreen> createState() => _EndManagerShiftScreenState();
 }
@@ -184,16 +193,9 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
                               child: BlocSelector<ValidationCubit, ValidationState, bool>(
                                 selector: (state) {
                                   if (currentIndex == 0) {
-                                    final areAllHandoversCompleted =
-                                        widget.handovers.isEmpty
-                                        ? false
-                                        : widget.handovers.every(
-                                            (handover) =>
-                                                handover.handoverStatus ==
-                                                HandoverStatus.accepted,
-                                          );
-
-                                    return areAllHandoversCompleted;
+                                    return EndManagerShiftScreen.canProceedFromHandovers(
+                                      widget.handovers,
+                                    );
                                   } else if (currentIndex == 1) {
                                     return context
                                             .read<ValidationCubit>()

@@ -27,6 +27,8 @@ class EndShiftRequest {
 
   final String? allocationReason;
 
+  final double? pendingIncomingCash;
+
   EndShiftRequest({
     required this.totalSales,
     required this.cashCollected,
@@ -38,6 +40,7 @@ class EndShiftRequest {
     this.countedCash,
     this.shortageAllocations,
     this.allocationReason,
+    this.pendingIncomingCash,
   });
 
   Future<FormData> toFormData() async {
@@ -102,6 +105,10 @@ class EndShiftRequest {
 
     if (countedCash != null) {
       formMap['counted_cash'] = countedCash!.toStringAsFixed(2);
+    }
+
+    if (pendingIncomingCash != null && pendingIncomingCash! > 0) {
+      formMap['pending_incoming_cash'] = pendingIncomingCash!.toStringAsFixed(2);
     }
 
     if (shortageAllocations != null && shortageAllocations!.isNotEmpty) {

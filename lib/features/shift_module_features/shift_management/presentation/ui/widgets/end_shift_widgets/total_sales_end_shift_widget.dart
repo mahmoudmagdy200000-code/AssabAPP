@@ -86,7 +86,7 @@ class _SalesBreakDownEndShiftWidget
                         child: CustomTextField(
                           controller: widget.totalSaleSController,
                           hintText: context.tr.totalSalesHintText,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           maxLength: 30,
                           onChanged: (value) {
                             context.read<ValidationCubit>().validateField(
@@ -207,7 +207,7 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.cashController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -234,7 +234,7 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.madaController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -257,12 +257,12 @@ class _SalesBreakDownEndShiftWidget
                 10.verticalSpace,
 
                 Text(
-                  'النقد الفعلي المعدود (جرد الصندوق)',
+                  context.tr.actualCountedCashCashDrawer,
                   style: AppStyles.s15W500,
                 ),
                 2.verticalSpace,
                 Text(
-                  'أدخل المبلغ الفعلي الموجود في الدرج بشكل مستقل عن المبيعات',
+                  context.tr.enterActualCashInDrawerIndependent,
                   style: AppStyles.s13W500.copyWith(
                     color: context.customColor.text3,
                   ),
@@ -270,7 +270,7 @@ class _SalesBreakDownEndShiftWidget
                 10.verticalSpace,
 
                 ContainerCustomTextField(
-                  label: 'النقد الفعلي المعدود',
+                  label: context.tr.actualCountedCash,
                   isLabelRequired: true,
                   pngAssetName: AppAssets.cashPng,
                   child: Row(
@@ -413,7 +413,7 @@ class _SalesBreakDownEndShiftWidget
                                           (aggregator.totalAmount ?? 0)
                                               .toString(),
                                       maxLength: 30,
-                                      keyboardType: TextInputType.number,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       onChanged: (value) {
                                         context
                                                 .read<AggregatorCubit>()

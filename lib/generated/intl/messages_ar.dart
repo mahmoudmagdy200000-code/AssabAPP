@@ -477,6 +477,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "activeLocations": MessageLookupByLibrary.simpleMessage("المواقع النشطة"),
     "actualBalance": MessageLookupByLibrary.simpleMessage("الرصيد الفعلي"),
+    "actualCountedCash": MessageLookupByLibrary.simpleMessage(
+      "النقد الفعلي المعدود",
+    ),
+    "actualCountedCashCashDrawer": MessageLookupByLibrary.simpleMessage(
+      "النقد الفعلي المعدود (جرد الصندوق)",
+    ),
     "actualFromInventory": MessageLookupByLibrary.simpleMessage(
       "الفعلي من المخزون:",
     ),
@@ -1100,6 +1106,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeRecipient": MessageLookupByLibrary.simpleMessage("تغيير المستلم"),
     "changeShift": MessageLookupByLibrary.simpleMessage("تغيير الوردية"),
     "changeYourMind": MessageLookupByLibrary.simpleMessage("غيرت رأيك؟"),
+    "changesSaved": MessageLookupByLibrary.simpleMessage("تم حفظ التعديلات"),
     "choose": MessageLookupByLibrary.simpleMessage("اختر"),
     "chooseAProductToStartTheInventoryCount":
         MessageLookupByLibrary.simpleMessage("اختر منتجًا لبدء جرد المخزون"),
@@ -1400,6 +1407,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "الأمثلة الصحيحة للنفايات:",
     ),
     "costPrice": MessageLookupByLibrary.simpleMessage("سعر التكلفة"),
+    "couldNotConfirmResultRefresh": MessageLookupByLibrary.simpleMessage(
+      "تعذر تأكيد النتيجة. حدّث اليومية قبل المحاولة مجدداً.",
+    ),
+    "couldNotVerifyManagerAccount": MessageLookupByLibrary.simpleMessage(
+      "تعذر التحقق من حساب المدير.",
+    ),
+    "couldNotVerifyWorkdayIdentity": MessageLookupByLibrary.simpleMessage(
+      "تعذر التحقق من هوية اليومية.",
+    ),
     "count": MessageLookupByLibrary.simpleMessage("عد"),
     "countAssets": MessageLookupByLibrary.simpleMessage("عد الأصول"),
     "countCompleted": MessageLookupByLibrary.simpleMessage("اكتمل العد!"),
@@ -1503,6 +1519,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "custom": MessageLookupByLibrary.simpleMessage("مخصص"),
     "customFilter": MessageLookupByLibrary.simpleMessage("مخصص"),
     "daily": MessageLookupByLibrary.simpleMessage("يوميًا"),
+    "dailyCloseFinalSubmitted": MessageLookupByLibrary.simpleMessage(
+      "تم إرسال اليومية النهائية للمراجعة",
+    ),
+    "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
+      "تم حفظ تعديلات اليومية.",
+    ),
+    "dailyCloseSubmissionVerified": MessageLookupByLibrary.simpleMessage(
+      "تم التحقق من إرسال اليومية للمراجعة.",
+    ),
+    "dailyCloseSubmittedForReviewSuccess": MessageLookupByLibrary.simpleMessage(
+      "تم إرسال اليومية النهائية للمراجعة.",
+    ),
     "dailyFilter": MessageLookupByLibrary.simpleMessage("يومي"),
     "dailyInventory": m32,
     "dailyInventoryAction": MessageLookupByLibrary.simpleMessage(
@@ -1754,6 +1782,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "economy": MessageLookupByLibrary.simpleMessage("الاقتصاد"),
     "edit": MessageLookupByLibrary.simpleMessage("تحرير"),
+    "editDailyClose": MessageLookupByLibrary.simpleMessage("تعديل اليومية"),
     "editFinalSubmission": MessageLookupByLibrary.simpleMessage(
       "تحرير التقديم النهائي",
     ),
@@ -1874,6 +1903,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "end_shift": MessageLookupByLibrary.simpleMessage("إنهاء الوردية"),
     "end_time": MessageLookupByLibrary.simpleMessage("وقت الانتهاء:"),
+    "enterActualCashInDrawerIndependent": MessageLookupByLibrary.simpleMessage(
+      "أدخل المبلغ الفعلي الموجود في الدرج بشكل مستقل عن المبيعات",
+    ),
     "enterAnEmailAddressAndWellSendThisSmartBranch":
         MessageLookupByLibrary.simpleMessage(
           "أدخل عنوان بريد إلكتروني، وسنرسل إليه هذا الفرع الذكي من المستوى 2.",
@@ -2338,6 +2370,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "تصدير بيانات مقارنة الأسعار",
     ),
     "followupFast": MessageLookupByLibrary.simpleMessage("سريع"),
+    "followupFeatureComingSoon": MessageLookupByLibrary.simpleMessage(
+      "هذه الميزة ستتوفر قريباً",
+    ),
     "followupFebruary": MessageLookupByLibrary.simpleMessage("فبراير"),
     "followupFilterData": MessageLookupByLibrary.simpleMessage(
       "تصفية البيانات",
@@ -2633,6 +2668,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "followupTransferRequests": MessageLookupByLibrary.simpleMessage(
       "طلبات النقل",
     ),
+    "followupTransfersHandoverFeatureIsComingSoon":
+        MessageLookupByLibrary.simpleMessage(
+          "ميزة التحويلات والتسليم ستتوفر قريباً",
+        ),
     "followupTuesday": MessageLookupByLibrary.simpleMessage("الثلاثاء"),
     "followupUnitOfMeasurement": MessageLookupByLibrary.simpleMessage(
       "وحدة القياس",
@@ -4051,7 +4090,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "partyConfirmations": MessageLookupByLibrary.simpleMessage("تأكيدات الحزب"),
     "password": MessageLookupByLibrary.simpleMessage("كلمة المرور"),
-    "passwordHint": MessageLookupByLibrary.simpleMessage("1pP10@Zx"),
+    "passwordHint": MessageLookupByLibrary.simpleMessage("••••••••"),
     "passwordIsOk": MessageLookupByLibrary.simpleMessage(
       "كلمة المرور على ما يرام",
     ),
@@ -4273,6 +4312,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "تسوية النفقات السابقة:",
     ),
     "previousMonth": MessageLookupByLibrary.simpleMessage("الشهر السابق"),
+    "previousSubmissionPendingContactAdmin": MessageLookupByLibrary.simpleMessage(
+      "نتيجة الإرسال السابق معلّقة. حدّث الحالة، وإن لم تتأكد تواصل مع المحاسب أو مسؤول النظام.",
+    ),
     "price": MessageLookupByLibrary.simpleMessage("السعر"),
     "priceComparison": MessageLookupByLibrary.simpleMessage("مقارنة الأسعار"),
     "pricePerUnit": MessageLookupByLibrary.simpleMessage("سعر الوحدة:"),
@@ -4591,6 +4633,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "recurringOrdersSubtitle": MessageLookupByLibrary.simpleMessage(
       "عرض الجداول الزمنية أو تعديلها أو إيقافها مؤقتًا أو حذفها",
     ),
+    "refreshDailyCloseStatus": MessageLookupByLibrary.simpleMessage(
+      "تحديث حالة اليومية",
+    ),
     "refrigerationFailure": MessageLookupByLibrary.simpleMessage("فشل التبريد"),
     "registerWasteDamageYourselfAsBranchManager":
         MessageLookupByLibrary.simpleMessage(
@@ -4857,6 +4902,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "restock": MessageLookupByLibrary.simpleMessage("إعادة تخزين"),
     "resubmitted": MessageLookupByLibrary.simpleMessage("إعادة الإرسال"),
     "resultSummary": MessageLookupByLibrary.simpleMessage("ملخص النتيجة"),
+    "resultUnconfirmedContactAccountant": MessageLookupByLibrary.simpleMessage(
+      "النتيجة غير مؤكدة. تواصل مع المحاسب أو مسؤول النظام قبل أي إجراء آخر.",
+    ),
     "resultsWillIncludeItemListAssociatedToTheSelectedSupplier":
         MessageLookupByLibrary.simpleMessage(
           "ستتضمن النتائج قائمة العناصر المرتبطة بالمورد المحدد",
@@ -5543,6 +5591,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "لوحة تحكم مالك المتجر",
     ),
     "submissionDate": MessageLookupByLibrary.simpleMessage("تاريخ التقديم"),
+    "submissionNotConfirmedByServer": MessageLookupByLibrary.simpleMessage(
+      "لم يتم تأكيد الإرسال من السيرفر. حدّث اليومية قبل المحاولة مجدداً.",
+    ),
     "submissionSuccessful": MessageLookupByLibrary.simpleMessage(
       "تم التقديم بنجاح",
     ),
@@ -5551,6 +5602,12 @@ class MessageLookup extends MessageLookupByLibrary {
           "تقديم طلب مصاريف يتطلب موافقة إدارية مسبقة",
         ),
     "submitChanges": MessageLookupByLibrary.simpleMessage("إرسال التغييرات"),
+    "submitDailyCloseFinal": MessageLookupByLibrary.simpleMessage(
+      "إرسال اليومية نهائياً",
+    ),
+    "submitDailyCloseFinalConfirm": MessageLookupByLibrary.simpleMessage(
+      "هل تريد إرسال اليومية النهائية للمراجعة؟",
+    ),
     "submitDailyReport": MessageLookupByLibrary.simpleMessage(
       "تقديم التقرير اليومي",
     ),
@@ -5563,6 +5620,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "submitted": MessageLookupByLibrary.simpleMessage("تم الإرسال"),
     "submittedByMe": MessageLookupByLibrary.simpleMessage("مقدم مني"),
     "submittedFromBranchName": m113,
+    "submittingDailyClose": MessageLookupByLibrary.simpleMessage(
+      "جارٍ إرسال اليومية...",
+    ),
     "successfullyCompleted": MessageLookupByLibrary.simpleMessage(
       "تم الانتهاء بنجاح",
     ),
@@ -6182,6 +6242,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "variance_v": MessageLookupByLibrary.simpleMessage("التباين"),
     "varianced": MessageLookupByLibrary.simpleMessage("متنوع"),
     "variances": MessageLookupByLibrary.simpleMessage("الفروق"),
+    "vat0Percent": MessageLookupByLibrary.simpleMessage(
+      "ضريبة القيمة المضافة (0%)",
+    ),
     "vat15Percent": MessageLookupByLibrary.simpleMessage(
       "ضريبة القيمة المضافة (15%)",
     ),

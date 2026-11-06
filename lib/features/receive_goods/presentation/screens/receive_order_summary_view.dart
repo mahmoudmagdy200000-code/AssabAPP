@@ -179,7 +179,11 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final vatAmount = totalBeforeTax * 0.15;
+                          final vatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
+                              (items.isNotEmpty && items.first.vatRate != null
+                                  ? items.first.vatRate!
+                                  : 0.15);
+                          final vatAmount = totalBeforeTax * vatRate;
                           final totalWithVat = totalBeforeTax + vatAmount;
 
                           String formatAmount(double value) =>
@@ -623,7 +627,11 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final vatAmount = totalBeforeTax * 0.15;
+                          final vatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
+                              (items.isNotEmpty && items.first.vatRate != null
+                                  ? items.first.vatRate!
+                                  : 0.15);
+                          final vatAmount = totalBeforeTax * vatRate;
                           final totalWithVat = totalBeforeTax + vatAmount;
 
                           String formatAmount(double value) =>
@@ -691,7 +699,7 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                                     10.verticalSpace,
                                     _buildRowWidget(
                                       context: context,
-                                      title: context.tr.vat15Percent,
+                                      title: vatRate == 0 ? context.tr.vat0Percent : context.tr.vat15Percent,
                                       value: formatAmount(vatAmount),
                                     ),
                                     10.verticalSpace,

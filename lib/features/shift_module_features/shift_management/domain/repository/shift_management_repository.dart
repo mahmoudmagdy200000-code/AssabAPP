@@ -9,6 +9,7 @@ abstract class ShiftManagementRepository {
     required double countedCash,
     double? cardPayments,
     List<EndShiftAggregatorModel>? aggregators,
+    double? pendingIncomingCash,
   });
 
   FutureApiResult<List<ShortageAllocationCandidate>> getShortageAllocationCandidates({

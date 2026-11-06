@@ -487,6 +487,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "activeLocations": MessageLookupByLibrary.simpleMessage("Active Locations"),
     "actualBalance": MessageLookupByLibrary.simpleMessage("Actual Balance"),
+    "actualCountedCash": MessageLookupByLibrary.simpleMessage(
+      "Actual Counted Cash",
+    ),
+    "actualCountedCashCashDrawer": MessageLookupByLibrary.simpleMessage(
+      "Actual Counted Cash (Cash Drawer Inventory)",
+    ),
     "actualFromInventory": MessageLookupByLibrary.simpleMessage(
       "Actual from inventory:",
     ),
@@ -1108,6 +1114,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeYourMind": MessageLookupByLibrary.simpleMessage(
       "Changed your mind?",
     ),
+    "changesSaved": MessageLookupByLibrary.simpleMessage("Changes Saved"),
     "choose": MessageLookupByLibrary.simpleMessage("Choose"),
     "chooseAProductToStartTheInventoryCount":
         MessageLookupByLibrary.simpleMessage(
@@ -1432,6 +1439,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Correct examples of waste:",
     ),
     "costPrice": MessageLookupByLibrary.simpleMessage("Cost Price"),
+    "couldNotConfirmResultRefresh": MessageLookupByLibrary.simpleMessage(
+      "Could not confirm the result. Refresh the workday before trying again.",
+    ),
+    "couldNotVerifyManagerAccount": MessageLookupByLibrary.simpleMessage(
+      "Could not verify manager account.",
+    ),
+    "couldNotVerifyWorkdayIdentity": MessageLookupByLibrary.simpleMessage(
+      "Could not verify workday identity.",
+    ),
     "count": MessageLookupByLibrary.simpleMessage("Count"),
     "countAssets": MessageLookupByLibrary.simpleMessage("Count Assets"),
     "countCompleted": MessageLookupByLibrary.simpleMessage("Count Completed!"),
@@ -1541,6 +1557,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customFilter": MessageLookupByLibrary.simpleMessage("Custom"),
     "daily": MessageLookupByLibrary.simpleMessage("Daily"),
+    "dailyCloseFinalSubmitted": MessageLookupByLibrary.simpleMessage(
+      "Final daily close submitted for review",
+    ),
+    "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
+      "Daily close modifications have been saved.",
+    ),
+    "dailyCloseSubmissionVerified": MessageLookupByLibrary.simpleMessage(
+      "Daily close submission for review has been verified.",
+    ),
+    "dailyCloseSubmittedForReviewSuccess": MessageLookupByLibrary.simpleMessage(
+      "The final daily close was submitted for review.",
+    ),
     "dailyFilter": MessageLookupByLibrary.simpleMessage("Daily"),
     "dailyInventory": m32,
     "dailyInventoryAction": MessageLookupByLibrary.simpleMessage(
@@ -1795,6 +1823,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ebitda": MessageLookupByLibrary.simpleMessage("EBITDA"),
     "economy": MessageLookupByLibrary.simpleMessage("Economy"),
     "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+    "editDailyClose": MessageLookupByLibrary.simpleMessage("Edit Daily Close"),
     "editFinalSubmission": MessageLookupByLibrary.simpleMessage(
       "Edit Final Submission",
     ),
@@ -1905,6 +1934,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "end_shift": MessageLookupByLibrary.simpleMessage("End Shift"),
     "end_time": MessageLookupByLibrary.simpleMessage("End time:"),
+    "enterActualCashInDrawerIndependent": MessageLookupByLibrary.simpleMessage(
+      "Enter the actual amount in the drawer independently of sales",
+    ),
     "enterAnEmailAddressAndWellSendThisSmartBranch":
         MessageLookupByLibrary.simpleMessage(
           "Enter an email address, and we’ll send this Smart Branch Level 2 to it.",
@@ -2391,6 +2423,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Export Price comparison data",
     ),
     "followupFast": MessageLookupByLibrary.simpleMessage("Fast"),
+    "followupFeatureComingSoon": MessageLookupByLibrary.simpleMessage(
+      "This feature is coming soon",
+    ),
     "followupFebruary": MessageLookupByLibrary.simpleMessage("February"),
     "followupFilterData": MessageLookupByLibrary.simpleMessage("Filter data"),
     "followupFinancialAnalysis": MessageLookupByLibrary.simpleMessage(
@@ -2680,6 +2715,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "followupTransferRequests": MessageLookupByLibrary.simpleMessage(
       "Transfer Requests",
     ),
+    "followupTransfersHandoverFeatureIsComingSoon":
+        MessageLookupByLibrary.simpleMessage(
+          "Transfers & Handover feature is coming soon",
+        ),
     "followupTuesday": MessageLookupByLibrary.simpleMessage("Tuesday"),
     "followupUnitOfMeasurement": MessageLookupByLibrary.simpleMessage(
       "Unit Of Measurement",
@@ -4118,7 +4157,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Party Confirmations",
     ),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
-    "passwordHint": MessageLookupByLibrary.simpleMessage("1pP10@Zx"),
+    "passwordHint": MessageLookupByLibrary.simpleMessage("••••••••"),
     "passwordIsOk": MessageLookupByLibrary.simpleMessage("Password is Ok"),
     "passwordIsPerfect": MessageLookupByLibrary.simpleMessage(
       "Password is Perfect",
@@ -4356,6 +4395,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Previous expense reconciliation:",
     ),
     "previousMonth": MessageLookupByLibrary.simpleMessage("Previous Month"),
+    "previousSubmissionPendingContactAdmin": MessageLookupByLibrary.simpleMessage(
+      "The outcome of the previous submission is pending. Refresh the status, and if not confirmed contact the accountant or system administrator.",
+    ),
     "price": MessageLookupByLibrary.simpleMessage("Price"),
     "priceComparison": MessageLookupByLibrary.simpleMessage("Price Comparison"),
     "pricePerUnit": MessageLookupByLibrary.simpleMessage("Price per unit:"),
@@ -4696,6 +4738,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "recurringOrdersSubtitle": MessageLookupByLibrary.simpleMessage(
       "View, edit, pause, or delete schedules",
     ),
+    "refreshDailyCloseStatus": MessageLookupByLibrary.simpleMessage(
+      "Refresh Daily Close Status",
+    ),
     "refrigerationFailure": MessageLookupByLibrary.simpleMessage(
       "Refrigeration failure",
     ),
@@ -4968,6 +5013,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "restock": MessageLookupByLibrary.simpleMessage("Restock"),
     "resubmitted": MessageLookupByLibrary.simpleMessage("Resubmitted"),
     "resultSummary": MessageLookupByLibrary.simpleMessage("Result Summary"),
+    "resultUnconfirmedContactAccountant": MessageLookupByLibrary.simpleMessage(
+      "Result is unconfirmed. Contact the accountant or system administrator before taking any further action.",
+    ),
     "resultsWillIncludeItemListAssociatedToTheSelectedSupplier":
         MessageLookupByLibrary.simpleMessage(
           "Results will include Item list associated to the selected supplier",
@@ -5668,6 +5716,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Store Owner Dashboard",
     ),
     "submissionDate": MessageLookupByLibrary.simpleMessage("Submission Date"),
+    "submissionNotConfirmedByServer": MessageLookupByLibrary.simpleMessage(
+      "Submission was not confirmed by the server. Refresh the workday before trying again.",
+    ),
     "submissionSuccessful": MessageLookupByLibrary.simpleMessage(
       "Submission Successful",
     ),
@@ -5676,6 +5727,12 @@ class MessageLookup extends MessageLookupByLibrary {
           "Submit an expense request requiring prior administrative approval",
         ),
     "submitChanges": MessageLookupByLibrary.simpleMessage("submit Changes"),
+    "submitDailyCloseFinal": MessageLookupByLibrary.simpleMessage(
+      "Final Daily Close Submission",
+    ),
+    "submitDailyCloseFinalConfirm": MessageLookupByLibrary.simpleMessage(
+      "Do you want to submit the final daily close for review?",
+    ),
     "submitDailyReport": MessageLookupByLibrary.simpleMessage(
       "Submit daily Report",
     ),
@@ -5688,6 +5745,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "submitted": MessageLookupByLibrary.simpleMessage("Submitted"),
     "submittedByMe": MessageLookupByLibrary.simpleMessage("Submitted By Me"),
     "submittedFromBranchName": m113,
+    "submittingDailyClose": MessageLookupByLibrary.simpleMessage(
+      "Submitting daily close...",
+    ),
     "successfullyCompleted": MessageLookupByLibrary.simpleMessage(
       "Successfully completed",
     ),
@@ -6333,6 +6393,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "variance_v": MessageLookupByLibrary.simpleMessage("Variance"),
     "varianced": MessageLookupByLibrary.simpleMessage("Varianced"),
     "variances": MessageLookupByLibrary.simpleMessage("Variances"),
+    "vat0Percent": MessageLookupByLibrary.simpleMessage("VAT (0%)"),
     "vat15Percent": MessageLookupByLibrary.simpleMessage("VAT (15%)"),
     "vatAmount": MessageLookupByLibrary.simpleMessage("VAT Amount"),
     "vatDesc": MessageLookupByLibrary.simpleMessage(

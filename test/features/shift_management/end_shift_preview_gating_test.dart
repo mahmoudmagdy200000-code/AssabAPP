@@ -61,6 +61,7 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required double countedCash,
     double? cardPayments,
     List<EndShiftAggregatorModel>? aggregators,
+    double? pendingIncomingCash,
   }) async {
     if (onPreview != null) {
       return onPreview!(

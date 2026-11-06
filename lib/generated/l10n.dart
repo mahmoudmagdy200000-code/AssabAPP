@@ -334,9 +334,9 @@ class S {
     );
   }
 
-  /// `1pP10@Zx`
+  /// `••••••••`
   String get passwordHint {
-    return Intl.message('1pP10@Zx', name: 'passwordHint', desc: '', args: []);
+    return Intl.message('••••••••', name: 'passwordHint', desc: '', args: []);
   }
 
   /// `The password you entered does not match the one above.`
@@ -27297,6 +27297,221 @@ class S {
     return Intl.message(
       'This responsible person has already been added',
       name: 'duplicateResponsibleAdded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Actual Counted Cash (Cash Drawer Inventory)`
+  String get actualCountedCashCashDrawer {
+    return Intl.message(
+      'Actual Counted Cash (Cash Drawer Inventory)',
+      name: 'actualCountedCashCashDrawer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the actual amount in the drawer independently of sales`
+  String get enterActualCashInDrawerIndependent {
+    return Intl.message(
+      'Enter the actual amount in the drawer independently of sales',
+      name: 'enterActualCashInDrawerIndependent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Actual Counted Cash`
+  String get actualCountedCash {
+    return Intl.message(
+      'Actual Counted Cash',
+      name: 'actualCountedCash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VAT (0%)`
+  String get vat0Percent {
+    return Intl.message('VAT (0%)', name: 'vat0Percent', desc: '', args: []);
+  }
+
+  /// `Transfers & Handover feature is coming soon`
+  String get followupTransfersHandoverFeatureIsComingSoon {
+    return Intl.message(
+      'Transfers & Handover feature is coming soon',
+      name: 'followupTransfersHandoverFeatureIsComingSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This feature is coming soon`
+  String get followupFeatureComingSoon {
+    return Intl.message(
+      'This feature is coming soon',
+      name: 'followupFeatureComingSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Final Daily Close Submission`
+  String get submitDailyCloseFinal {
+    return Intl.message(
+      'Final Daily Close Submission',
+      name: 'submitDailyCloseFinal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to submit the final daily close for review?`
+  String get submitDailyCloseFinalConfirm {
+    return Intl.message(
+      'Do you want to submit the final daily close for review?',
+      name: 'submitDailyCloseFinalConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The final daily close was submitted for review.`
+  String get dailyCloseSubmittedForReviewSuccess {
+    return Intl.message(
+      'The final daily close was submitted for review.',
+      name: 'dailyCloseSubmittedForReviewSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not confirm the result. Refresh the workday before trying again.`
+  String get couldNotConfirmResultRefresh {
+    return Intl.message(
+      'Could not confirm the result. Refresh the workday before trying again.',
+      name: 'couldNotConfirmResultRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Submission was not confirmed by the server. Refresh the workday before trying again.`
+  String get submissionNotConfirmedByServer {
+    return Intl.message(
+      'Submission was not confirmed by the server. Refresh the workday before trying again.',
+      name: 'submissionNotConfirmedByServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Daily close submission for review has been verified.`
+  String get dailyCloseSubmissionVerified {
+    return Intl.message(
+      'Daily close submission for review has been verified.',
+      name: 'dailyCloseSubmissionVerified',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Result is unconfirmed. Contact the accountant or system administrator before taking any further action.`
+  String get resultUnconfirmedContactAccountant {
+    return Intl.message(
+      'Result is unconfirmed. Contact the accountant or system administrator before taking any further action.',
+      name: 'resultUnconfirmedContactAccountant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changes Saved`
+  String get changesSaved {
+    return Intl.message(
+      'Changes Saved',
+      name: 'changesSaved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Daily close modifications have been saved.`
+  String get dailyCloseModificationsSaved {
+    return Intl.message(
+      'Daily close modifications have been saved.',
+      name: 'dailyCloseModificationsSaved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit Daily Close`
+  String get editDailyClose {
+    return Intl.message(
+      'Edit Daily Close',
+      name: 'editDailyClose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not verify workday identity.`
+  String get couldNotVerifyWorkdayIdentity {
+    return Intl.message(
+      'Could not verify workday identity.',
+      name: 'couldNotVerifyWorkdayIdentity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not verify manager account.`
+  String get couldNotVerifyManagerAccount {
+    return Intl.message(
+      'Could not verify manager account.',
+      name: 'couldNotVerifyManagerAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The outcome of the previous submission is pending. Refresh the status, and if not confirmed contact the accountant or system administrator.`
+  String get previousSubmissionPendingContactAdmin {
+    return Intl.message(
+      'The outcome of the previous submission is pending. Refresh the status, and if not confirmed contact the accountant or system administrator.',
+      name: 'previousSubmissionPendingContactAdmin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh Daily Close Status`
+  String get refreshDailyCloseStatus {
+    return Intl.message(
+      'Refresh Daily Close Status',
+      name: 'refreshDailyCloseStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Final daily close submitted for review`
+  String get dailyCloseFinalSubmitted {
+    return Intl.message(
+      'Final daily close submitted for review',
+      name: 'dailyCloseFinalSubmitted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Submitting daily close...`
+  String get submittingDailyClose {
+    return Intl.message(
+      'Submitting daily close...',
+      name: 'submittingDailyClose',
       desc: '',
       args: [],
     );

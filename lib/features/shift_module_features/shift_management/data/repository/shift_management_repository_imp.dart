@@ -591,6 +591,7 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     required double countedCash,
     double? cardPayments,
     List<EndShiftAggregatorModel>? aggregators,
+    double? pendingIncomingCash,
   }) async {
     return execute(() async {
       final body = <String, dynamic>{
@@ -598,6 +599,8 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         'counted_cash': countedCash.toStringAsFixed(2),
         if (cardPayments != null)
           'card_payments': cardPayments.toStringAsFixed(2),
+        if (pendingIncomingCash != null && pendingIncomingCash > 0)
+          'pending_incoming_cash': pendingIncomingCash.toStringAsFixed(2),
         if (aggregators != null && aggregators.isNotEmpty)
           'aggregators': aggregators
               .map(
@@ -647,28 +650,9 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
                 item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map)))
             .where((candidate) => candidate.isValid)
             .toList();
-      } on DioException catch (dioErr) {
-        // Fallback: If shortage-allocation-candidates route is 404 (due to backend commit
-        // awaiting deployment on the target staging environment), query the active,
-        // deployed available-recipients route to load real branch candidates.
-        if (dioErr.response?.statusCode == 404) {
-          try {
-            final fallbackResponse = await _remoteDataSource.getAvailableRecipients(
-              shiftId: shiftId,
-            );
-            return fallbackResponse.data.recipients
-                .where((r) => r.isAvailable && !r.disabled && (r.type == 'cashier' || r.type == 'branch_manager'))
-                .map((r) => ShortageAllocationCandidate(
-                      id: r.id,
-                      name: r.name,
-                      type: r.type,
-                      role: r.type,
-                    ))
-                .toList();
-          } catch (_) {
-            rethrow;
-          }
-        }
+      } on DioException {
+        // Handover recipient eligibility is fundamentally different from cash shortage liability.
+        // If the candidates endpoint fails or returns 404, fail closed.
         rethrow;
       }
     });

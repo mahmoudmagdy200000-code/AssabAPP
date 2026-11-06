@@ -77,7 +77,7 @@ class _SalesBreakDownWidget extends State<SalesBreakDownWidget> {
                         child: CustomTextField(
                           controller: widget.totalSaleSController,
                           hintText: context.tr.totalSalesHintText,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           maxLength: 30,
                           onChanged: (value) {
                             context.read<ValidationCubit>().validateField(
@@ -176,7 +176,7 @@ class _SalesBreakDownWidget extends State<SalesBreakDownWidget> {
                         child: CustomTextField(
                           controller: widget.totalHandoverController,
                           hintText: context.tr.handoverAmountHintText,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           maxLength: 30,
                           onChanged: (value) {
                             context.read<ValidationCubit>().validateField(
@@ -226,7 +226,7 @@ class _SalesBreakDownWidget extends State<SalesBreakDownWidget> {
                                 child: CustomTextField(
                                   controller: widget.cashController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -253,7 +253,7 @@ class _SalesBreakDownWidget extends State<SalesBreakDownWidget> {
                                 child: CustomTextField(
                                   controller: widget.madaController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -365,7 +365,7 @@ class _SalesBreakDownWidget extends State<SalesBreakDownWidget> {
                                           (aggregator.totalAmount ?? 0)
                                               .toString(),
                                       maxLength: 30,
-                                      keyboardType: TextInputType.number,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       onChanged: (value) {
                                         context
                                                 .read<AggregatorCubit>()
