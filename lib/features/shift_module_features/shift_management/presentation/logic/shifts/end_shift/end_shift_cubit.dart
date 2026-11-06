@@ -41,11 +41,11 @@ class EndShiftPreviewSuccess extends EndShiftState {
 
   @override
   List<Object?> get props => [
-        previewData,
-        shortageToAllocate,
-        allocationRequired,
-        cashVarianceType,
-      ];
+    previewData,
+    shortageToAllocate,
+    allocationRequired,
+    cashVarianceType,
+  ];
 }
 
 class EndShiftPreviewFailure extends EndShiftState {
@@ -131,16 +131,18 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   List<CashShortageAllocation> get shortageAllocations => _shortageAllocations;
   String? get allocationReason => _allocationReason;
   bool get isSubmitting => _isSubmitting;
-  List<ShortageAllocationCandidate> get shortageCandidates => _shortageCandidates;
+  List<ShortageAllocationCandidate> get shortageCandidates =>
+      _shortageCandidates;
   bool get isLoadingCandidates => _isLoadingCandidates;
   String? get candidatesError => _candidatesError;
   int get candidateRequestId => _candidateRequestId;
 
   String _computeInputFingerprint() {
-    final aggList = _aggregators
-        .map((a) => '${a.aggregatorId}:${a.amount.toStringAsFixed(2)}')
-        .toList()
-      ..sort();
+    final aggList =
+        _aggregators
+            .map((a) => '${a.aggregatorId}:${a.amount.toStringAsFixed(2)}')
+            .toList()
+          ..sort();
     return '$_countedCash:${_totalSales.toStringAsFixed(2)}:${_cardPayments.toStringAsFixed(2)}:${aggList.join(',')}';
   }
 
@@ -160,13 +162,22 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       if (_shortageAllocations.isEmpty) {
         return false;
       }
-      final allocatedSum =
-          _shortageAllocations.fold<double>(0.0, (sum, a) => sum + a.amount);
-      if ((allocatedSum - shortageToAllocate).abs() > 0.01) {
+      final shortageHalalas = (shortageToAllocate * 100).round();
+      final allocatedHalalas = _shortageAllocations.fold<int>(
+        0,
+        (sum, a) => sum + (a.amount * 100).round(),
+      );
+      if (allocatedHalalas != shortageHalalas) {
         return false;
       }
       for (final a in _shortageAllocations) {
-        if (a.responsibleId.trim().isEmpty || a.amount <= 0) {
+        if (a.responsibleId.trim().isEmpty || (a.amount * 100).round() <= 0) {
+          return false;
+        }
+        if (_shortageCandidates.isNotEmpty &&
+            !_shortageCandidates.any(
+              (c) => c.type == a.responsibleType && c.id == a.responsibleId,
+            )) {
           return false;
         }
       }
@@ -288,7 +299,8 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     );
 
     // Drop out-of-order, stale, or invalidated responses
-    if (currentCandidateId != _candidateRequestId || currentShiftId != shiftId) {
+    if (currentCandidateId != _candidateRequestId ||
+        currentShiftId != shiftId) {
       _isLoadingCandidates = false;
       return;
     }
@@ -313,6 +325,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       failure: (failure) {
         _shortageCandidates = [];
         _candidatesError = failure.error.message;
+        _pruneStaleAllocations();
         emit(
           EndShiftCandidatesFailure(
             failure,
@@ -373,8 +386,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
         final shortageToAllocate = (previewMap['shortage_to_allocate'] is num)
             ? (previewMap['shortage_to_allocate'] as num).toDouble()
             : double.tryParse(
-                    previewMap['shortage_to_allocate']?.toString() ?? '0') ??
-                0.0;
+                    previewMap['shortage_to_allocate']?.toString() ?? '0',
+                  ) ??
+                  0.0;
         final allocationRequired = previewMap['allocation_required'] == true;
         final recon =
             previewMap['cash_reconciliation'] as Map<String, dynamic>? ?? {};
@@ -521,7 +535,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     if (_countedCash == null) {
       emit(
         EndShiftFailure(
-          _createValidationFailure(S().followupCountedCashIsRequiredBeforeEndingShift),
+          _createValidationFailure(
+            S().followupCountedCashIsRequiredBeforeEndingShift,
+          ),
         ),
       );
       return;
@@ -546,9 +562,12 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
         (previewMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
 
     if (allocationRequired) {
-      final allocatedSum =
-          _shortageAllocations.fold<double>(0.0, (sum, a) => sum + a.amount);
-      if ((allocatedSum - shortageToAllocate).abs() > 0.01) {
+      final shortageHalalas = (shortageToAllocate * 100).round();
+      final allocatedHalalas = _shortageAllocations.fold<int>(
+        0,
+        (sum, a) => sum + (a.amount * 100).round(),
+      );
+      if (allocatedHalalas != shortageHalalas) {
         emit(
           EndShiftFailure(
             _createValidationFailure(
@@ -562,7 +581,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       if (_shortageAllocations.isNotEmpty) {
         emit(
           EndShiftFailure(
-            _createValidationFailure('Allocations are only accepted for a shortage.'),
+            _createValidationFailure(
+              'Allocations are only accepted for a shortage.',
+            ),
           ),
         );
         return;
@@ -594,9 +615,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
 
     _isSubmitting = false;
     if (result == null) {
-      emit(EndShiftFailure(_createValidationFailure(
-        'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
-      )));
+      emit(
+        EndShiftFailure(
+          _createValidationFailure(
+            'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
+          ),
+        ),
+      );
       return;
     }
     handle(
@@ -612,7 +637,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     if (_countedCash == null) {
       emit(
         EndShiftFailure(
-          _createValidationFailure(S().followupCountedCashIsRequiredBeforeEndingShift),
+          _createValidationFailure(
+            S().followupCountedCashIsRequiredBeforeEndingShift,
+          ),
         ),
       );
       return;
@@ -637,9 +664,12 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
         (previewMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
 
     if (allocationRequired) {
-      final allocatedSum =
-          _shortageAllocations.fold<double>(0.0, (sum, a) => sum + a.amount);
-      if ((allocatedSum - shortageToAllocate).abs() > 0.01) {
+      final shortageHalalas = (shortageToAllocate * 100).round();
+      final allocatedHalalas = _shortageAllocations.fold<int>(
+        0,
+        (sum, a) => sum + (a.amount * 100).round(),
+      );
+      if (allocatedHalalas != shortageHalalas) {
         emit(
           EndShiftFailure(
             _createValidationFailure(
@@ -653,7 +683,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       if (_shortageAllocations.isNotEmpty) {
         emit(
           EndShiftFailure(
-            _createValidationFailure('Allocations are only accepted for a shortage.'),
+            _createValidationFailure(
+              'Allocations are only accepted for a shortage.',
+            ),
           ),
         );
         return;
@@ -688,9 +720,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
 
     _isSubmitting = false;
     if (result == null) {
-      emit(EndShiftFailure(_createValidationFailure(
-        'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
-      )));
+      emit(
+        EndShiftFailure(
+          _createValidationFailure(
+            'The previous submission has an unknown outcome. Refresh and verify its status before submitting again.',
+          ),
+        ),
+      );
       return;
     }
     handle(

@@ -1,5 +1,6 @@
 enum ErrorMessageKey {
   noInternet,
+  serverUnreachable,
   timeout,
   invalidFormat,
   badRequest,
@@ -16,11 +17,16 @@ enum ErrorMessageKey {
 
 class ErrorMessages {
   const ErrorMessages._();
-
   static const Map<ErrorMessageKey, Map<String, String>> _messages = {
     ErrorMessageKey.noInternet: {
       'en': 'No internet connection. Please check your network and try again.',
       'ar': 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مجدداً.',
+    },
+    ErrorMessageKey.serverUnreachable: {
+      'en':
+          'Could not connect to the server. Please check your connection or try again later.',
+      'ar':
+          'تعذّر الاتصال بالخادم. يرجى التحقق من توفر الخدمة والمحاولة لاحقاً.',
     },
     ErrorMessageKey.timeout: {
       'en': 'The request took too long. Please try again.',

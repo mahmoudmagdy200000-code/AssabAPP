@@ -58,9 +58,11 @@ class _CashShortageAllocationWidgetState
     super.didUpdateWidget(oldWidget);
     if (widget.candidates != oldWidget.candidates) {
       if (_selectedCandidate != null &&
-          !widget.candidates.any((c) =>
-              c.id == _selectedCandidate!.id &&
-              c.type == _selectedCandidate!.type)) {
+          !widget.candidates.any(
+            (c) =>
+                c.id == _selectedCandidate!.id &&
+                c.type == _selectedCandidate!.type,
+          )) {
         setState(() {
           _selectedCandidate = null;
         });
@@ -89,15 +91,16 @@ class _CashShortageAllocationWidgetState
     super.dispose();
   }
 
-  double get _allocatedTotal =>
-      _allocations.fold<double>(0.0, (sum, a) => sum + a.amount);
+  int get _shortageHalalas => (widget.shortageAmount * 100).round();
+  int get _allocatedHalalas =>
+      _allocations.fold<int>(0, (sum, a) => sum + (a.amount * 100).round());
+  int get _remainingHalalas => _shortageHalalas - _allocatedHalalas;
 
-  double get _remainingAmount {
-    final rem = widget.shortageAmount - _allocatedTotal;
-    return rem.abs() < 0.001 ? 0.0 : rem;
-  }
+  double get _allocatedTotal => _allocatedHalalas / 100.0;
+  double get _remainingAmount =>
+      _remainingHalalas <= 0 ? 0.0 : (_remainingHalalas / 100.0);
 
-  bool get isComplete => _remainingAmount.abs() < 0.01 && _allocations.isNotEmpty;
+  bool get isComplete => _remainingHalalas == 0 && _allocations.isNotEmpty;
 
   List<ShortageAllocationCandidate> get _filteredCandidates {
     return widget.candidates
@@ -108,9 +111,9 @@ class _CashShortageAllocationWidgetState
   void _addAllocation() {
     final tr = context.tr;
     if (_selectedCandidate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr.pleaseSelectResponsible)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(tr.pleaseSelectResponsible)));
       return;
     }
 
@@ -119,16 +122,17 @@ class _CashShortageAllocationWidgetState
     final amount = double.tryParse(_amountController.text.trim());
 
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr.pleaseEnterValidAmount)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(tr.pleaseEnterValidAmount)));
       return;
     }
 
-    if (amount > _remainingAmount + 0.001) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr.allocationExceedsRemaining)),
-      );
+    final amountHalalas = (amount * 100).round();
+    if (amountHalalas > _remainingHalalas) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(tr.allocationExceedsRemaining)));
       return;
     }
 
@@ -137,9 +141,9 @@ class _CashShortageAllocationWidgetState
       (a) => a.responsibleType == _selectedType && a.responsibleId == id,
     );
     if (duplicate) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr.duplicateResponsibleAdded)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(tr.duplicateResponsibleAdded)));
       return;
     }
 
@@ -210,7 +214,10 @@ class _CashShortageAllocationWidgetState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(tr.cashShortageAllocation, style: AppStyles.s16W500),
+                child: Text(
+                  tr.cashShortageAllocation,
+                  style: AppStyles.s16W500,
+                ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
@@ -235,7 +242,8 @@ class _CashShortageAllocationWidgetState
               Expanded(
                 child: _buildMetricCard(
                   title: tr.totalShortage,
-                  value: '${widget.shortageAmount.toStringAsFixed(2)} $currency',
+                  value:
+                      '${widget.shortageAmount.toStringAsFixed(2)} $currency',
                   color: Colors.red[700]!,
                 ),
               ),
@@ -252,7 +260,9 @@ class _CashShortageAllocationWidgetState
                 child: _buildMetricCard(
                   title: tr.remainingAmount,
                   value: '${_remainingAmount.toStringAsFixed(2)} $currency',
-                  color: _remainingAmount == 0 ? Colors.green : Colors.orange[800]!,
+                  color: _remainingHalalas == 0
+                      ? Colors.green
+                      : Colors.orange[800]!,
                 ),
               ),
             ],
@@ -283,7 +293,11 @@ class _CashShortageAllocationWidgetState
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 18, color: Colors.red),
+                      icon: const Icon(
+                        Icons.close,
+                        size: 18,
+                        color: Colors.red,
+                      ),
                       onPressed: () => _removeAllocation(index),
                       visualDensity: VisualDensity.compact,
                     ),
@@ -303,12 +317,20 @@ class _CashShortageAllocationWidgetState
               initialValue: _selectedType,
               decoration: InputDecoration(
                 labelText: tr.responsibleType,
-                contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 10.h,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
               ),
               items: [
                 DropdownMenuItem(value: 'cashier', child: Text(tr.cashier)),
-                DropdownMenuItem(value: 'branch_manager', child: Text(tr.branchManager)),
+                DropdownMenuItem(
+                  value: 'branch_manager',
+                  child: Text(tr.branchManager),
+                ),
                 DropdownMenuItem(value: 'employee', child: Text(tr.employee)),
               ],
               onChanged: (val) {
@@ -329,7 +351,9 @@ class _CashShortageAllocationWidgetState
                   child: CustomTextField(
                     controller: _amountController,
                     hintText: tr.allocatedAmountSar,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     maxLength: 20,
                   ),
                 ),
@@ -337,8 +361,13 @@ class _CashShortageAllocationWidgetState
                 ElevatedButton(
                   onPressed: _addAllocation,
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 14.h,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                   ),
                   child: Text(tr.add),
                 ),
@@ -353,7 +382,9 @@ class _CashShortageAllocationWidgetState
             hintText: tr.shortageReasonOptional,
             maxLength: 500,
             onChanged: (val) {
-              widget.onReasonChanged?.call(val.trim().isEmpty ? null : val.trim());
+              widget.onReasonChanged?.call(
+                val.trim().isEmpty ? null : val.trim(),
+              );
             },
           ),
         ],
@@ -445,7 +476,9 @@ class _CashShortageAllocationWidgetState
       );
     }
 
-    final currentVal = filtered.contains(_selectedCandidate) ? _selectedCandidate : null;
+    final currentVal = filtered.contains(_selectedCandidate)
+        ? _selectedCandidate
+        : null;
 
     return DropdownButtonFormField<ShortageAllocationCandidate>(
       key: ValueKey('candidate_${_selectedType}_${_selectedCandidate?.id}'),
@@ -489,7 +522,10 @@ class _CashShortageAllocationWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppStyles.s11W400.copyWith(color: context.customColor.text3)),
+          Text(
+            title,
+            style: AppStyles.s11W400.copyWith(color: context.customColor.text3),
+          ),
           4.verticalSpace,
           Text(value, style: AppStyles.s13W500.copyWith(color: color)),
         ],
