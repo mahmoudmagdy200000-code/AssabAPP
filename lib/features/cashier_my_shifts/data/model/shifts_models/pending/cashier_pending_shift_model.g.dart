@@ -9,34 +9,31 @@ part of 'cashier_pending_shift_model.dart';
 CashierPendingShiftModel _$CashierPendingShiftModelFromJson(
   Map<String, dynamic> json,
 ) => CashierPendingShiftModel(
-  id: json['id'] as String,
-  date: json['date'] as String,
-  status: $enumDecode(_$MyShiftStatusTypeEnumMap, json['status']),
-  statusLabel: json['status_label'] as String,
-  startTime: json['start_time'] as String,
-  endTime: json['end_time'] as String,
-  openingBalance: (json['opening_balance'] as num).toInt(),
-  cashGiven: (json['cash_given'] as num).toInt(),
-  variance: (json['variance'] as num).toInt(),
-  cashFrom: json['cash_from'] == null
-      ? null
-      : CashierShiftUserModel.fromJson(
-          json['cash_from'] as Map<String, dynamic>,
+  id: (json['id'] ?? '').toString(),
+  date: (json['date'] as String?) ?? '',
+  status: MyShiftStatusType.fromJson(json['status']),
+  statusLabel: (json['status_label'] as String?) ?? '',
+  startTime: (json['start_time'] as String?) ?? '',
+  endTime: (json['end_time'] as String?) ?? '',
+  openingBalance: (json['opening_balance'] as num?)?.toInt() ?? 0,
+  cashGiven: (json['cash_given'] as num?)?.toInt() ?? 0,
+  variance: (json['variance'] as num?)?.toInt() ?? 0,
+  cashFrom: CashierShiftUserModel.tryFromJson(json['cash_from']),
+  handoverTo: CashierShiftUserModel.tryFromJson(json['handover_to']),
+  assignedTo: (json['assigned_to'] as String?) ?? 'N/A',
+  nextCashier: MyShiftStatusType.extractUserName(json['next_cashier']),
+  assignedBy: (json['assigned_by'] as String?) ?? 'Branch Manager',
+  assignedByUserType: (json['assigned_by_user_type'] as String?) ?? '',
+  isNextShift: json['is_next_shift'] as bool? ?? false,
+  canStart: json['can_start'] as bool? ?? false,
+  actions: json['actions'] is Map<String, dynamic>
+      ? CashierPendingShiftActionsModel.fromJson(
+          json['actions'] as Map<String, dynamic>,
+        )
+      : const CashierPendingShiftActionsModel(
+          viewDetails: false,
+          reassignShift: false,
         ),
-  handoverTo: json['handover_to'] == null
-      ? null
-      : CashierShiftUserModel.fromJson(
-          json['handover_to'] as Map<String, dynamic>,
-        ),
-  assignedTo: json['assigned_to'] as String,
-  nextCashier: json['next_cashier'] as String,
-  assignedBy: json['assigned_by'] as String,
-  assignedByUserType: json['assigned_by_user_type'] as String,
-  isNextShift: json['is_next_shift'] as bool,
-  canStart: json['can_start'] as bool,
-  actions: CashierPendingShiftActionsModel.fromJson(
-    json['actions'] as Map<String, dynamic>,
-  ),
 );
 
 Map<String, dynamic> _$CashierPendingShiftModelToJson(

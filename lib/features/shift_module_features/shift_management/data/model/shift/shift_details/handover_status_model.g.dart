@@ -8,7 +8,7 @@ part of 'handover_status_model.dart';
 
 HandoverStatusModel _$HandoverStatusModelFromJson(Map<String, dynamic> json) =>
     HandoverStatusModel(
-      id: json['id'] as String,
+      id: (json['id'] ?? '').toString(),
       status: handoverStatusFromJson(json['status'] as String?),
       reviewedBy: json['reviewed_by'] as String?,
     );

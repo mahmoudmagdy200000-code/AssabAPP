@@ -9,19 +9,19 @@ part of 'cashier_in_progress_shift_model.dart';
 CashierInProgressShiftModel _$CashierInProgressShiftModelFromJson(
   Map<String, dynamic> json,
 ) => CashierInProgressShiftModel(
-  id: json['id'] as String,
-  date: json['date'] as String,
-  status: $enumDecode(_$MyShiftStatusTypeEnumMap, json['status']),
-  startTime: json['start_time'] as String,
-  endTime: json['end_time'] as String,
+  id: (json['id'] ?? '').toString(),
+  date: (json['date'] as String?) ?? '',
+  status: MyShiftStatusType.fromJson(json['status']),
+  startTime: (json['start_time'] as String?) ?? '',
+  endTime: (json['end_time'] as String?) ?? '',
   actualStartTime: json['actual_start_time'] as String?,
   openingBalance: openingBalanceFromJson(json['opening_balance']),
-  closingBalance: (json['closing_balance'] as num).toInt(),
-  assignedTo: json['assigned_to'] as String,
-  nextCashier: json['next_cashier'] as String?,
-  assignedBy: json['assigned_by'] as String,
+  closingBalance: (json['closing_balance'] as num?)?.toInt() ?? 0,
+  assignedTo: (json['assigned_to'] as String?) ?? 'N/A',
+  nextCashier: MyShiftStatusType.extractUserName(json['next_cashier']),
+  assignedBy: (json['assigned_by'] as String?) ?? 'Branch Manager',
   assignedByUserType: UserType.fromJson(
-    json['assigned_by_user_type'] as String?,
+    (json['assigned_by_user_type'] ?? json['type'])?.toString(),
   ),
 );
 

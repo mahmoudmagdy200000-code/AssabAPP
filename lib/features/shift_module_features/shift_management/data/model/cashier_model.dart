@@ -48,6 +48,16 @@ class CashierModel {
     this.workingShifts,
   });
 
+  static CashierModel? tryFromJson(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    final id = raw['id']?.toString().trim();
+    final name = raw['name']?.toString().trim();
+    if ((id == null || id.isEmpty) && (name == null || name.isEmpty)) {
+      return null;
+    }
+    return CashierModel.fromJson(raw);
+  }
+
   factory CashierModel.fromJson(Map<String, dynamic> json) =>
       _$CashierModelFromJson(json);
 

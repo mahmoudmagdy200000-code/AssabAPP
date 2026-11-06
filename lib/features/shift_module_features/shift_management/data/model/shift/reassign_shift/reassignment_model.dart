@@ -6,13 +6,13 @@ part 'reassignment_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class ReassignmentModel {
-  @JsonKey(name: 'reassigned_from')
+  @JsonKey(name: 'reassigned_from', fromJson: CashierModel.tryFromJson)
   final CashierModel? reassignedFrom;
 
-  @JsonKey(name: 'reassigned_by')
+  @JsonKey(name: 'reassigned_by', fromJson: CashierModel.tryFromJson)
   final CashierModel? reassignedBy;
 
-  @JsonKey(name: 'reassigned_to')
+  @JsonKey(name: 'reassigned_to', fromJson: CashierModel.tryFromJson)
   final CashierModel? reassignedTo;
 
   ReassignmentModel({

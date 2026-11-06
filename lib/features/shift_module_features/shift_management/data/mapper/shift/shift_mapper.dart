@@ -92,6 +92,10 @@ extension ShiftDetailsModelMapper on ShiftDetailsModel {
 String formattedDate(String shiftDate, [String locale = 'en']) {
   final parsedDate = DateTime.tryParse(shiftDate);
   if (parsedDate == null) return shiftDate;
-  final formatter = DateFormat('d MMM, yyyy', locale);
-  return formatter.format(parsedDate);
+  try {
+    final formatter = DateFormat('d MMM, yyyy', locale);
+    return formatter.format(parsedDate);
+  } catch (_) {
+    return '${parsedDate.day}/${parsedDate.month}/${parsedDate.year}';
+  }
 }

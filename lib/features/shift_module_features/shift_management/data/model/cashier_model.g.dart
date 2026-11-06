@@ -7,8 +7,8 @@ part of 'cashier_model.dart';
 // **************************************************************************
 
 CashierModel _$CashierModelFromJson(Map<String, dynamic> json) => CashierModel(
-  id: json['id'] as String,
-  name: json['name'] as String,
+  id: (json['id'] ?? '').toString(),
+  name: (json['name'] as String?) ?? 'N/A',
   email: json['email'] as String?,
   phone: json['phone'] as String?,
   branchName: json['store_branch_name'] as String?,

@@ -23,7 +23,7 @@ class ShiftInfoDetailsModel {
   @JsonKey(name: 'end_time')
   final String endTime;
 
-  @JsonKey(name: 'assigned_by')
+  @JsonKey(name: 'assigned_by', fromJson: AssignedByModel.tryFromJson)
   final AssignedByModel? assignedBy;
 
   ShiftInfoDetailsModel({

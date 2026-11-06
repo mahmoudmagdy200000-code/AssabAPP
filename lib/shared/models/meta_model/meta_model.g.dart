@@ -7,9 +7,11 @@ part of 'meta_model.dart';
 // **************************************************************************
 
 MetaModel _$MetaModelFromJson(Map<String, dynamic> json) => MetaModel(
-  currentPage: (json['current_page'] as num).toInt(),
-  lastPage: (json['last_page'] as num).toInt(),
-  total: (json['total'] as num).toInt(),
+  currentPage: (json['current_page'] as num?)?.toInt() ?? 1,
+  lastPage: (json['last_page'] as num?)?.toInt() ??
+      (json['total_pages'] as num?)?.toInt() ??
+      1,
+  total: (json['total'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$MetaModelToJson(MetaModel instance) => <String, dynamic>{

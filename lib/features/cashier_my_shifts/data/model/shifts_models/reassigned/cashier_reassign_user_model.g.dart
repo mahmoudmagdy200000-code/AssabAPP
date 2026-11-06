@@ -9,9 +9,9 @@ part of 'cashier_reassign_user_model.dart';
 CashierReassignUserModel _$CashierReassignUserModelFromJson(
   Map<String, dynamic> json,
 ) => CashierReassignUserModel(
-  id: json['id'] as String,
-  name: json['name'] as String,
-  userType: UserType.fromJson(json['user_type'] as String?),
+  id: (json['id'] ?? '').toString(),
+  name: (json['name'] as String?) ?? 'N/A',
+  userType: UserType.fromJson((json['user_type'] ?? json['type'])?.toString()),
 );
 
 Map<String, dynamic> _$CashierReassignUserModelToJson(

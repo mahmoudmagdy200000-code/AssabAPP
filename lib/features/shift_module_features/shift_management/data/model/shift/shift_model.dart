@@ -67,9 +67,11 @@ class ShiftModel {
 
   factory ShiftModel.fromJson(Map<String, dynamic> json) {
     return ShiftModel(
-      id: json['id'] as String,
-      shiftDate: json['shift_date'] as String,
-      status: ShiftStatusType.fromString(json['status'] as String),
+      id: (json['id'] ?? '').toString(),
+      shiftDate: (json['shift_date'] as String?) ?? '',
+      status: ShiftStatusType.fromString(
+        (json['status'] as String?) ?? 'not_started',
+      ),
       cashier: CashierModel.fromJson(json['cashier'] as Map<String, dynamic>),
       shift: ShiftInfoDetailsModel.fromJson(
         json['shift'] as Map<String, dynamic>,
@@ -88,14 +90,12 @@ class ShiftModel {
       actualEndTime: json['actual_end_time'] as String?,
       handedOverAt: json['handed_over_at'] as String?,
       handoverNotes: json['handover_notes'] as String?,
-      nextCashier: json['next_cashier'] == null
-          ? null
-          : CashierModel.fromJson(json['next_cashier'] as Map<String, dynamic>),
-      reassignment: json['reassignment'] == null
-          ? null
-          : ReassignmentModel.fromJson(
+      nextCashier: CashierModel.tryFromJson(json['next_cashier']),
+      reassignment: json['reassignment'] is Map<String, dynamic>
+          ? ReassignmentModel.fromJson(
               json['reassignment'] as Map<String, dynamic>,
-            ),
+            )
+          : null,
     );
   }
 

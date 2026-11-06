@@ -35,13 +35,13 @@ class CashierReassignedShiftModel {
   final int cashGiven;
 
   @JsonKey(name: 'reassigned_to')
-  final CashierReassignUserModel reassignedTo;
+  final CashierReassignUserModel? reassignedTo;
 
   @JsonKey(name: 'reassigned_from')
-  final CashierReassignUserModel reassignedFrom;
+  final CashierReassignUserModel? reassignedFrom;
 
   @JsonKey(name: 'reassigned_by')
-  final CashierReassignUserModel reassignedBy;
+  final CashierReassignUserModel? reassignedBy;
 
   @JsonKey(name: 'next_cashier')
   final String? nextCashier;
@@ -72,9 +72,9 @@ class CashierReassignedShiftModel {
     required this.closingBalance,
     required this.variance,
     required this.cashGiven,
-    required this.reassignedTo,
-    required this.reassignedFrom,
-    required this.reassignedBy,
+    this.reassignedTo,
+    this.reassignedFrom,
+    this.reassignedBy,
     required this.startTime,
     required this.endTime,
     this.nextCashier,

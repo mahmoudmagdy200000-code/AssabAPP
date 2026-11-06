@@ -51,21 +51,21 @@ class VarianceItem {
 
   factory VarianceItem.fromJson(Map<String, dynamic> json) {
     return VarianceItem(
-      id: json['id'],
-      shiftDate: json['shift_date'],
-      shiftDateIso: json['shift_date_iso'],
-      status: json['status'],
+      id: (json['id'] ?? '').toString(),
+      shiftDate: (json['shift_date'] as String?) ?? '',
+      shiftDateIso: (json['shift_date_iso'] as String?) ?? '',
+      status: (json['status'] as String?) ?? '',
       responsibilityStatus: ResponsibilityStatusX.fromJson(
         json['responsibility_status'],
       ),
-      handOverFrom: json['hand_over_from'],
-      handOverTo: json['hand_over_to'],
-      cashHandoverAmount: json['cash_handover_amount'],
-      varianceAmount: json['variance_amount'],
-      varianceType: json['variance_type'],
-      reasonForVariance: json['reason_for_variance'],
-      acceptanceMessage: json['acceptance_message'],
-      responsibilityReviewedAt: json['responsibility_reviewed_at'],
+      handOverFrom: (json['hand_over_from'] ?? 'N/A').toString(),
+      handOverTo: json['hand_over_to']?.toString(),
+      cashHandoverAmount: (json['cash_handover_amount'] as num?) ?? 0,
+      varianceAmount: (json['variance_amount'] as num?) ?? 0,
+      varianceType: (json['variance_type'] as String?) ?? 'None',
+      reasonForVariance: json['reason_for_variance'] as String?,
+      acceptanceMessage: json['acceptance_message'] as String?,
+      responsibilityReviewedAt: json['responsibility_reviewed_at'] as String?,
     );
   }
 }

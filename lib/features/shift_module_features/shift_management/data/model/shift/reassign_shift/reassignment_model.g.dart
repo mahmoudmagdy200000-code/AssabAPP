@@ -9,15 +9,9 @@ part of 'reassignment_model.dart';
 ReassignmentModel _$ReassignmentModelFromJson(
   Map<String, dynamic> json,
 ) => ReassignmentModel(
-  reassignedFrom: json['reassigned_from'] == null
-      ? null
-      : CashierModel.fromJson(json['reassigned_from'] as Map<String, dynamic>),
-  reassignedBy: json['reassigned_by'] == null
-      ? null
-      : CashierModel.fromJson(json['reassigned_by'] as Map<String, dynamic>),
-  reassignedTo: json['reassigned_to'] == null
-      ? null
-      : CashierModel.fromJson(json['reassigned_to'] as Map<String, dynamic>),
+  reassignedFrom: CashierModel.tryFromJson(json['reassigned_from']),
+  reassignedBy: CashierModel.tryFromJson(json['reassigned_by']),
+  reassignedTo: CashierModel.tryFromJson(json['reassigned_to']),
 );
 
 Map<String, dynamic> _$ReassignmentModelToJson(ReassignmentModel instance) =>
