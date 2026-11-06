@@ -1,5 +1,6 @@
 import '../../../../../core/utils/future_api_result.dart';
 import '../../data/model/shift/end_shift_aggregator_model.dart';
+import '../../data/model/shift/shortage_allocation_candidate.dart';
 
 abstract class ShiftManagementRepository {
   FutureApiResult<Map<String, dynamic>> previewCashReconciliation({
@@ -8,5 +9,9 @@ abstract class ShiftManagementRepository {
     required double countedCash,
     double? cardPayments,
     List<EndShiftAggregatorModel>? aggregators,
+  });
+
+  FutureApiResult<List<ShortageAllocationCandidate>> getShortageAllocationCandidates({
+    required String shiftId,
   });
 }

@@ -5,6 +5,7 @@ import 'package:assab/core/styles/app_styles.dart';
 import 'package:assab/core/widgets/custom_divider.dart';
 import 'package:assab/core/widgets/custom_text_field.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:flutter/material.dart';
 
 class CashShortageAllocationWidget extends StatefulWidget {
@@ -13,6 +14,10 @@ class CashShortageAllocationWidget extends StatefulWidget {
   final ValueChanged<List<CashShortageAllocation>> onAllocationsChanged;
   final String? initialReason;
   final ValueChanged<String?>? onReasonChanged;
+  final List<ShortageAllocationCandidate> candidates;
+  final bool isLoadingCandidates;
+  final String? candidatesError;
+  final VoidCallback? onRetryCandidates;
 
   const CashShortageAllocationWidget({
     super.key,
@@ -21,6 +26,10 @@ class CashShortageAllocationWidget extends StatefulWidget {
     required this.onAllocationsChanged,
     this.initialReason,
     this.onReasonChanged,
+    this.candidates = const [],
+    this.isLoadingCandidates = false,
+    this.candidatesError,
+    this.onRetryCandidates,
   });
 
   @override
@@ -31,26 +40,21 @@ class CashShortageAllocationWidget extends StatefulWidget {
 class _CashShortageAllocationWidgetState
     extends State<CashShortageAllocationWidget> {
   late List<CashShortageAllocation> _allocations;
-  late final TextEditingController _idController;
-  late final TextEditingController _nameController;
   late final TextEditingController _amountController;
   late final TextEditingController _reasonController;
   String _selectedType = 'cashier';
+  ShortageAllocationCandidate? _selectedCandidate;
 
   @override
   void initState() {
     super.initState();
     _allocations = List.from(widget.initialAllocations);
-    _idController = TextEditingController();
-    _nameController = TextEditingController();
     _amountController = TextEditingController();
     _reasonController = TextEditingController(text: widget.initialReason ?? '');
   }
 
   @override
   void dispose() {
-    _idController.dispose();
-    _nameController.dispose();
     _amountController.dispose();
     _reasonController.dispose();
     super.dispose();
@@ -66,17 +70,23 @@ class _CashShortageAllocationWidgetState
 
   bool get isComplete => _remainingAmount.abs() < 0.01 && _allocations.isNotEmpty;
 
-  void _addAllocation() {
-    final id = _idController.text.trim();
-    final name = _nameController.text.trim();
-    final amount = double.tryParse(_amountController.text.trim());
+  List<ShortageAllocationCandidate> get _filteredCandidates {
+    return widget.candidates
+        .where((c) => c.type == _selectedType)
+        .toList();
+  }
 
-    if (id.isEmpty) {
+  void _addAllocation() {
+    if (_selectedCandidate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال معرّف المسؤول')),
+        const SnackBar(content: Text('يرجى اختيار المسؤول من القائمة')),
       );
       return;
     }
+
+    final id = _selectedCandidate!.id;
+    final name = _selectedCandidate!.name;
+    final amount = double.tryParse(_amountController.text.trim());
 
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -112,8 +122,7 @@ class _CashShortageAllocationWidgetState
           name: name.isNotEmpty ? name : null,
         ),
       );
-      _idController.clear();
-      _nameController.clear();
+      _selectedCandidate = null;
       _amountController.clear();
     });
 
@@ -256,52 +265,37 @@ class _CashShortageAllocationWidgetState
           if (!isComplete) ...[
             Text('إضافة مسؤول عن جزء من العجز:', style: AppStyles.s13W500),
             8.verticalSpace,
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedType,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'cashier', child: Text('كاشير')),
-                      DropdownMenuItem(value: 'branch_manager', child: Text('مدير فرع')),
-                      DropdownMenuItem(value: 'employee', child: Text('موظف')),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) setState(() => _selectedType = val);
-                    },
-                  ),
-                ),
-                8.horizontalSpace,
-                Expanded(
-                  child: CustomTextField(
-                    controller: _idController,
-                    hintText: 'معرف المسؤول (ID)',
-                    keyboardType: TextInputType.text,
-                    maxLength: 64,
-                  ),
-                ),
+            DropdownButtonFormField<String>(
+              key: ValueKey('type_$_selectedType'),
+              initialValue: _selectedType,
+              decoration: InputDecoration(
+                labelText: 'نوع المسؤول',
+                contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'cashier', child: Text('كاشير')),
+                DropdownMenuItem(value: 'branch_manager', child: Text('مدير فرع')),
+                DropdownMenuItem(value: 'employee', child: Text('موظف')),
               ],
+              onChanged: (val) {
+                if (val != null && val != _selectedType) {
+                  setState(() {
+                    _selectedType = val;
+                    _selectedCandidate = null;
+                  });
+                }
+              },
             ),
+            8.verticalSpace,
+            _buildCandidateSelector(),
             8.verticalSpace,
             Row(
               children: [
                 Expanded(
                   child: CustomTextField(
-                    controller: _nameController,
-                    hintText: 'الاسم (اختياري للعرض)',
-                    keyboardType: TextInputType.name,
-                    maxLength: 64,
-                  ),
-                ),
-                8.horizontalSpace,
-                Expanded(
-                  child: CustomTextField(
                     controller: _amountController,
-                    hintText: 'المبلغ (ر.س)',
+                    hintText: 'المبلغ المخصص (ر.س)',
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     maxLength: 20,
                   ),
@@ -310,7 +304,7 @@ class _CashShortageAllocationWidgetState
                 ElevatedButton(
                   onPressed: _addAllocation,
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                   ),
                   child: const Text('إضافة'),
@@ -331,6 +325,118 @@ class _CashShortageAllocationWidgetState
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCandidateSelector() {
+    if (widget.isLoadingCandidates) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.blue.withAlpha(15),
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: Colors.blue.withAlpha(40)),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 16.w,
+              height: 16.w,
+              child: const CircularProgressIndicator(strokeWidth: 2),
+            ),
+            10.horizontalSpace,
+            Text(
+              'جاري تحميل قائمة المسؤولين...',
+              style: AppStyles.s12W400.copyWith(color: Colors.blue[900]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (widget.candidatesError != null) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: Colors.red.withAlpha(15),
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: Colors.red.withAlpha(50)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 20),
+            8.horizontalSpace,
+            Expanded(
+              child: Text(
+                widget.candidatesError ?? 'تعذر تحميل المسؤولين',
+                style: AppStyles.s12W400.copyWith(color: Colors.red[800]),
+              ),
+            ),
+            if (widget.onRetryCandidates != null)
+              TextButton(
+                onPressed: widget.onRetryCandidates,
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                ),
+                child: const Text('إعادة المحاولة'),
+              ),
+          ],
+        ),
+      );
+    }
+
+    final filtered = _filteredCandidates;
+    if (filtered.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.orange.withAlpha(15),
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: Colors.orange.withAlpha(60)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.orange[800], size: 18),
+            8.horizontalSpace,
+            Expanded(
+              child: Text(
+                'لا يوجد ${_typeLabel(_selectedType)} متاح في هذا الفرع.',
+                style: AppStyles.s12W400.copyWith(color: Colors.orange[900]),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final currentVal = filtered.contains(_selectedCandidate) ? _selectedCandidate : null;
+
+    return DropdownButtonFormField<ShortageAllocationCandidate>(
+      key: ValueKey('candidate_${_selectedType}_${_selectedCandidate?.id}'),
+      initialValue: currentVal,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: 'اختر المسؤول (الاسم ومعرف النظام)',
+        contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+      ),
+      items: filtered.map((candidate) {
+        final label = '${candidate.name} (ID: ${candidate.id})';
+        return DropdownMenuItem<ShortageAllocationCandidate>(
+          value: candidate,
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: AppStyles.s13W400,
+          ),
+        );
+      }).toList(),
+      onChanged: (candidate) {
+        setState(() {
+          _selectedCandidate = candidate;
+        });
+      },
     );
   }
 

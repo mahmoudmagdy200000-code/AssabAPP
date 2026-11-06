@@ -235,6 +235,13 @@ class _EndShiftWithHandoverScreenState
                                         shortageAmount: shortage,
                                         initialAllocations:
                                             cubit.shortageAllocations,
+                                        candidates: cubit.shortageCandidates,
+                                        isLoadingCandidates:
+                                            cubit.isLoadingCandidates,
+                                        candidatesError:
+                                            cubit.candidatesError,
+                                        onRetryCandidates:
+                                            cubit.fetchShortageCandidates,
                                         onAllocationsChanged: (allocs) {
                                           cubit.updateShortageAllocations(allocs);
                                           setState(() {});

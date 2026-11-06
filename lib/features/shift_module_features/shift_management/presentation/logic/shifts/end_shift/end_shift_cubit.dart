@@ -5,6 +5,7 @@ import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_request_with_variance.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/end_shift_aggregator_entity.dart';
@@ -65,6 +66,26 @@ class EndShiftAllocationsUpdated extends EndShiftState {
   List<Object?> get props => [allocations];
 }
 
+class EndShiftCandidatesLoading extends EndShiftState {
+  const EndShiftCandidatesLoading({super.varianceStrategy});
+}
+
+class EndShiftCandidatesSuccess extends EndShiftState {
+  final List<ShortageAllocationCandidate> candidates;
+  const EndShiftCandidatesSuccess(this.candidates, {super.varianceStrategy});
+
+  @override
+  List<Object?> get props => [candidates, varianceStrategy];
+}
+
+class EndShiftCandidatesFailure extends EndShiftState {
+  final ApiFailure failure;
+  const EndShiftCandidatesFailure(this.failure, {super.varianceStrategy});
+
+  @override
+  List<Object?> get props => [failure, varianceStrategy];
+}
+
 @injectable
 class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   final ShiftManagementRepositoryImp _repository;
@@ -97,6 +118,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   List<CashShortageAllocation> _shortageAllocations = [];
   String? _allocationReason;
   bool _isSubmitting = false;
+  List<ShortageAllocationCandidate> _shortageCandidates = [];
+  bool _isLoadingCandidates = false;
+  String? _candidatesError;
 
   double? get countedCash => _countedCash;
   Map<String, dynamic>? get previewData => _previewData;
@@ -106,6 +130,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   List<CashShortageAllocation> get shortageAllocations => _shortageAllocations;
   String? get allocationReason => _allocationReason;
   bool get isSubmitting => _isSubmitting;
+  List<ShortageAllocationCandidate> get shortageCandidates => _shortageCandidates;
+  bool get isLoadingCandidates => _isLoadingCandidates;
+  String? get candidatesError => _candidatesError;
 
   String _computeInputFingerprint() {
     final aggList = _aggregators
@@ -128,10 +155,18 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
         (previewMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
 
     if (allocationRequired && shortageToAllocate > 0) {
+      if (_shortageAllocations.isEmpty) {
+        return false;
+      }
       final allocatedSum =
           _shortageAllocations.fold<double>(0.0, (sum, a) => sum + a.amount);
       if ((allocatedSum - shortageToAllocate).abs() > 0.01) {
         return false;
+      }
+      for (final a in _shortageAllocations) {
+        if (a.responsibleId.trim().isEmpty || a.amount <= 0) {
+          return false;
+        }
       }
     } else {
       if (_shortageAllocations.isNotEmpty) {
@@ -204,6 +239,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     _previewStale = true;
     _isPreviewLoading = false;
     _shortageAllocations = [];
+    _shortageCandidates = [];
+    _isLoadingCandidates = false;
+    _candidatesError = null;
     emit(EndShiftPreviewInvalidated());
   }
 
@@ -214,6 +252,42 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     _shortageAllocations = allocations;
     if (reason != null) _allocationReason = reason;
     emit(EndShiftAllocationsUpdated(allocations: _shortageAllocations));
+  }
+
+  Future<void> fetchShortageCandidates() async {
+    _isLoadingCandidates = true;
+    _candidatesError = null;
+    emit(EndShiftCandidatesLoading(varianceStrategy: state.varianceStrategy));
+
+    final result = await _repository.getShortageAllocationCandidates(
+      shiftId: shiftId,
+    );
+
+    _isLoadingCandidates = false;
+
+    handle(
+      result,
+      success: (candidates) {
+        _shortageCandidates = candidates;
+        _candidatesError = null;
+        emit(
+          EndShiftCandidatesSuccess(
+            candidates,
+            varianceStrategy: state.varianceStrategy,
+          ),
+        );
+      },
+      failure: (failure) {
+        _shortageCandidates = [];
+        _candidatesError = failure.error.message;
+        emit(
+          EndShiftCandidatesFailure(
+            failure,
+            varianceStrategy: state.varianceStrategy,
+          ),
+        );
+      },
+    );
   }
 
   Future<bool> fetchCashReconciliationPreview() async {
@@ -253,6 +327,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
 
     _isPreviewLoading = false;
     bool isSuccess = false;
+    bool shouldFetchCandidates = false;
 
     handle(
       result,
@@ -282,6 +357,10 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
           ),
         );
         isSuccess = true;
+
+        if (allocationRequired && shortageToAllocate > 0) {
+          shouldFetchCandidates = true;
+        }
       },
       failure: (f) {
         _previewData = null;
@@ -290,6 +369,10 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
         isSuccess = false;
       },
     );
+
+    if (shouldFetchCandidates) {
+      await fetchShortageCandidates();
+    }
 
     return isSuccess;
   }

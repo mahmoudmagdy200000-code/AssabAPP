@@ -1,3 +1,4 @@
+import '../model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/cashier_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/check_email_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/shift/shift_mapper.dart';
@@ -618,6 +619,31 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         return Map<String, dynamic>.from(response);
       }
       return <String, dynamic>{};
+    });
+  }
+
+  @override
+  FutureApiResult<List<ShortageAllocationCandidate>> getShortageAllocationCandidates({
+    required String shiftId,
+  }) async {
+    return execute(() async {
+      final response = await _remoteDataSource.getShortageAllocationCandidates(
+        shiftId: shiftId,
+      );
+
+      final List<dynamic> list;
+      if (response is Map && response['data'] is List) {
+        list = response['data'] as List;
+      } else if (response is List) {
+        list = response;
+      } else {
+        list = [];
+      }
+
+      return list
+          .map((item) => ShortageAllocationCandidate.fromJson(
+              item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map)))
+          .toList();
     });
   }
 }
