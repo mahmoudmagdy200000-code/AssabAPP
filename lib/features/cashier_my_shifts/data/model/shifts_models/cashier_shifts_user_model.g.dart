@@ -9,10 +9,10 @@ part of 'cashier_shifts_user_model.dart';
 CashierShiftUserModel _$CashierShiftUserModelFromJson(
   Map<String, dynamic> json,
 ) => CashierShiftUserModel(
-  id: json['id'] as String?,
-  name: json['name'] as String,
-  userType: UserType.fromJson(json['user_type'] as String?),
-  type: UserType.fromJson(json['type'] as String?),
+  id: json['id']?.toString(),
+  name: (json['name'] as String?) ?? '-',
+  userType: UserType.fromJson((json['user_type'] ?? json['type'])?.toString()),
+  type: UserType.fromJson((json['type'] ?? json['user_type'])?.toString()),
 );
 
 Map<String, dynamic> _$CashierShiftUserModelToJson(

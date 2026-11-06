@@ -9,8 +9,8 @@ part of 'shift_details_model.dart';
 CashierExtendedModel _$CashierExtendedModelFromJson(
   Map<String, dynamic> json,
 ) => CashierExtendedModel(
-  id: json['id'] as String,
-  name: json['name'] as String,
+  id: (json['id'] ?? '').toString(),
+  name: (json['name'] as String?) ?? 'N/A',
   email: json['email'] as String?,
   phone: json['phone'] as String?,
 );
@@ -27,11 +27,11 @@ Map<String, dynamic> _$CashierExtendedModelToJson(
 HandoverApprovalModel _$HandoverApprovalModelFromJson(
   Map<String, dynamic> json,
 ) => HandoverApprovalModel(
-  id: json['id'] as String,
-  name: json['name'] as String,
-  userType: UserType.fromJson(json['user_type'] as String?),
-  action: json['action'] as String,
-  reviewedAt: json['reviewed_at'] as String,
+  id: (json['id'] ?? '').toString(),
+  name: (json['name'] as String?) ?? 'N/A',
+  userType: UserType.fromJson((json['user_type'] ?? json['type'])?.toString()),
+  action: (json['action'] as String?) ?? 'pending',
+  reviewedAt: (json['reviewed_at'] as String?) ?? '',
 );
 
 Map<String, dynamic> _$HandoverApprovalModelToJson(
@@ -53,15 +53,13 @@ HandoverDetailsModel _$HandoverDetailsModelFromJson(
   Map<String, dynamic> json,
 ) => HandoverDetailsModel(
   handoverFrom: json['handover_from'] as String?,
-  handoverFromId: json['handover_from_id'] as String?,
+  handoverFromId: json['handover_from_id']?.toString(),
   handoverTo: json['handover_to'] as String?,
-  handoverToId: json['handover_to_id'] as String?,
+  handoverToId: json['handover_to_id']?.toString(),
   handoverToType: json['handover_to_type'] as String?,
   handoverDate: json['handover_date'] as String?,
   handoverTime: json['handover_time'] as String?,
-  actionedBy: json['actioned_by'] == null
-      ? null
-      : AssignedByModel.fromJson(json['actioned_by'] as Map<String, dynamic>),
+  actionedBy: AssignedByModel.tryFromJson(json['actioned_by']),
 );
 
 Map<String, dynamic> _$HandoverDetailsModelToJson(
@@ -99,8 +97,9 @@ Map<String, dynamic> _$VarianceDetailsModelToJson(
 
 SalesBreakDownModel _$SalesBreakDownModelFromJson(Map<String, dynamic> json) =>
     SalesBreakDownModel(
-      id: json['id'] as String,
-      aggregator: json['aggregator'] as String,
+      id: (json['id'] ?? '').toString(),
+      aggregator: (json['aggregator'] ?? json['aggregator_name'] ?? 'Unknown')
+          .toString(),
       amount: JsonValueParser.toInt(json['amount']),
     );
 
@@ -114,10 +113,10 @@ Map<String, dynamic> _$SalesBreakDownModelToJson(
 
 HandoverToModel _$HandoverToModelFromJson(Map<String, dynamic> json) =>
     HandoverToModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: json['type'] as String,
-      email: json['email'] as String,
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] as String?) ?? 'N/A',
+      type: (json['type'] ?? json['user_type'] ?? 'cashier').toString(),
+      email: (json['email'] as String?) ?? '',
     );
 
 Map<String, dynamic> _$HandoverToModelToJson(HandoverToModel instance) =>
@@ -130,9 +129,11 @@ Map<String, dynamic> _$HandoverToModelToJson(HandoverToModel instance) =>
 
 AssignedByModel _$AssignedByModelFromJson(Map<String, dynamic> json) =>
     AssignedByModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      userType: UserType.fromJson(json['user_type'] as String?),
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] as String?) ?? 'N/A',
+      userType: UserType.fromJson(
+        (json['user_type'] ?? json['type'])?.toString(),
+      ),
     );
 
 Map<String, dynamic> _$AssignedByModelToJson(AssignedByModel instance) =>

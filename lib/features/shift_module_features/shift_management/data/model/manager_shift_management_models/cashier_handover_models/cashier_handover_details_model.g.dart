@@ -35,50 +35,51 @@ Map<String, dynamic> _$CashierHandoverDataToJson(
 
 CashierHandover _$CashierHandoverFromJson(Map<String, dynamic> json) =>
     CashierHandover(
-      handoverId: json['handover_id'] as String,
-      cashierShiftId: json['cashier_shift_id'] as String,
-      cashierName: json['cashier_name'] as String,
-      cashierId: json['cashier_id'] as String,
-      shiftTime: json['shift_time'] as String,
-      shiftId: json['shift_id'] as String,
-      handoverAmount: (json['handover_amount'] as num).toDouble(),
-      totalSales: (json['total_sales'] as num).toDouble(),
-      netSales: (json['net_sales'] as num).toDouble(),
-      vatAmount: (json['vat_amount'] as num).toDouble(),
-      cashCollected: (json['cash_collected'] as num).toDouble(),
-      cardPayments: (json['card_payments'] as num).toDouble(),
-      deliveryAppPayments: (json['delivery_app_payments'] as num).toDouble(),
-      varianceAmount: (json['variance_amount'] as num).toDouble(),
-      varianceType: $enumDecode(_$VarianceTypeEnumMap, json['variance_type']),
+      handoverId: (json['handover_id'] ?? '').toString(),
+      cashierShiftId: (json['cashier_shift_id'] ?? '').toString(),
+      cashierName: (json['cashier_name'] as String?) ?? 'N/A',
+      cashierId: (json['cashier_id'] ?? '').toString(),
+      shiftTime: (json['shift_time'] as String?) ?? '',
+      shiftId: (json['shift_id'] ?? '').toString(),
+      handoverAmount: (json['handover_amount'] as num?)?.toDouble() ?? 0.0,
+      totalSales: (json['total_sales'] as num?)?.toDouble() ?? 0.0,
+      netSales: (json['net_sales'] as num?)?.toDouble() ?? 0.0,
+      vatAmount: (json['vat_amount'] as num?)?.toDouble() ?? 0.0,
+      cashCollected: (json['cash_collected'] as num?)?.toDouble() ?? 0.0,
+      cardPayments: (json['card_payments'] as num?)?.toDouble() ?? 0.0,
+      deliveryAppPayments: (json['delivery_app_payments'] as num?)?.toDouble() ?? 0.0,
+      varianceAmount: (json['variance_amount'] as num?)?.toDouble() ?? 0.0,
+      varianceType: $enumDecodeNullable(_$VarianceTypeEnumMap, json['variance_type']) ?? VarianceType.none,
       varianceReason: json['variance_reason'] as String?,
-      attachedFiles: (json['attached_files'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      attachedFiles: (json['attached_files'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       status: handoverStatusFromJson(json['status'] as String?),
       rejectionReason: json['rejection_reason'] as String?,
-      rejectionCount: (json['rejection_count'] as num).toInt(),
+      rejectionCount: (json['rejection_count'] as num?)?.toInt() ?? 0,
       handedOverAt: json['handed_over_at'] as String?,
       approvedAt: json['approved_at'],
       approvedBy: json['approved_by'] as String?,
-      approvedById: json['approved_by_id'] as String?,
-      canApprove: json['can_approve'] as bool,
-      canReject: json['can_reject'] as bool,
-      varianceDetails: json['variance_details'] == null
-          ? null
-          : VarianceDetailsModel.fromJson(
+      approvedById: json['approved_by_id']?.toString(),
+      canApprove: json['can_approve'] as bool? ?? false,
+      canReject: json['can_reject'] as bool? ?? false,
+      varianceDetails: json['variance_details'] is Map<String, dynamic>
+          ? VarianceDetailsModel.fromJson(
               json['variance_details'] as Map<String, dynamic>,
-            ),
-      handoverToType: json['handover_to_type'] as String,
-      handoverTo: json['handover_to'] as String,
-      handoverToId: json['handover_to_id'] as String,
-      handoverDate: json['handover_date'] as String,
-      handoverTime: json['handover_time'] as String,
+            )
+          : null,
+      handoverToType: (json['handover_to_type'] as String?) ?? 'cashier',
+      handoverTo: (json['handover_to'] as String?) ?? 'N/A',
+      handoverToId: (json['handover_to_id'] ?? '').toString(),
+      handoverDate: (json['handover_date'] as String?) ?? '',
+      handoverTime: (json['handover_time'] as String?) ?? '',
       handoverNotes: json['handover_notes'] as String?,
-      correctionDetails: json['correction_details'] == null
-          ? null
-          : CorrectionDetailsModel.fromJson(
+      correctionDetails: json['correction_details'] is Map<String, dynamic>
+          ? CorrectionDetailsModel.fromJson(
               json['correction_details'] as Map<String, dynamic>,
-            ),
+            )
+          : null,
     );
 
 Map<String, dynamic> _$CashierHandoverToJson(CashierHandover instance) =>

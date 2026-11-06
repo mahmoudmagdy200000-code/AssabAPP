@@ -28,11 +28,11 @@ Map<String, dynamic> _$AvailableCashiersResponseToJson(
 
 AvailableCashier _$AvailableCashierFromJson(Map<String, dynamic> json) =>
     AvailableCashier(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] as String?) ?? 'N/A',
+      email: (json['email'] as String?) ?? '',
       image: json['image'] as String?,
-      isAvailable: json['is_available'] as bool,
+      isAvailable: json['is_available'] as bool? ?? false,
       reasonDisabled: json['reason_disabled'] as String?,
     );
 

@@ -38,7 +38,7 @@ class CashierPendingShiftModel {
   final String assignedTo;
 
   @JsonKey(name: 'next_cashier')
-  final String nextCashier;
+  final String? nextCashier;
 
   @JsonKey(name: 'assigned_by')
   final String assignedBy;
@@ -67,7 +67,7 @@ class CashierPendingShiftModel {
     this.cashFrom,
     this.handoverTo,
     required this.assignedTo,
-    required this.nextCashier,
+    this.nextCashier,
     required this.assignedBy,
     required this.assignedByUserType,
     required this.isNextShift,

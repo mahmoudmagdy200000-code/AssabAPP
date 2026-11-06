@@ -24,20 +24,22 @@ class CashierInfoResponse {
   });
 
   factory CashierInfoResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['data'];
+    final data = json['data'] as Map<String, dynamic>? ?? json;
     return CashierInfoResponse(
-      id: data['id'],
-      name: data['name'],
-      email: data['email'],
-      phone: data['phone'],
-      image: data['image'],
-      role: data['role'],
-      status: data['status'],
-      statusLabel: data['status_label'],
-      activity: data['activity'],
-      shiftDetails: data['shift_details'] == null
-          ? null
-          : CashierInfoShiftDetails.fromJson(data['shift_details']),
+      id: (data['id'] ?? '').toString(),
+      name: (data['name'] as String?) ?? 'N/A',
+      email: (data['email'] as String?) ?? '',
+      phone: data['phone'] as String?,
+      image: data['image'] as String?,
+      role: (data['role'] as String?) ?? 'Cashier',
+      status: (data['status'] as String?) ?? '',
+      statusLabel: (data['status_label'] as String?) ?? '',
+      activity: (data['activity'] as String?) ?? '',
+      shiftDetails: data['shift_details'] is Map<String, dynamic>
+          ? CashierInfoShiftDetails.fromJson(
+              data['shift_details'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 }
@@ -69,16 +71,20 @@ class CashierInfoShiftDetails {
 
   factory CashierInfoShiftDetails.fromJson(Map<String, dynamic> json) =>
       CashierInfoShiftDetails(
-        id: json['id'],
-        storeBranch: json['store_branch'],
-        shiftName: json['shift_name'],
-        startTime: json['start_time'],
-        endTime: json['end_time'],
-        shiftDate: json['shift_date'],
-        status: json['status'],
-        statusLabel: json['status_label'],
-        workdays: json['workdays'],
-        handsOverTo: CashierInfoHandsOverTo.fromJson(json['hands_over_to']),
+        id: json['id']?.toString(),
+        storeBranch: (json['store_branch'] as String?) ?? '-',
+        shiftName: (json['shift_name'] as String?) ?? '-',
+        startTime: (json['start_time'] as String?) ?? '',
+        endTime: (json['end_time'] as String?) ?? '',
+        shiftDate: json['shift_date'] as String?,
+        status: json['status'] as String?,
+        statusLabel: json['status_label'] as String?,
+        workdays: (json['workdays'] as String?) ?? '-',
+        handsOverTo: json['hands_over_to'] is Map<String, dynamic>
+            ? CashierInfoHandsOverTo.fromJson(
+                json['hands_over_to'] as Map<String, dynamic>,
+              )
+            : CashierInfoHandsOverTo(id: '', name: '-', role: '-'),
       );
 }
 
@@ -95,8 +101,8 @@ class CashierInfoHandsOverTo {
 
   factory CashierInfoHandsOverTo.fromJson(Map<String, dynamic> json) =>
       CashierInfoHandsOverTo(
-        id: json['id'],
-        name: json['name'],
-        role: json['role'],
+        id: (json['id'] ?? '').toString(),
+        name: (json['name'] as String?) ?? '-',
+        role: (json['role'] as String?) ?? 'Cashier',
       );
 }

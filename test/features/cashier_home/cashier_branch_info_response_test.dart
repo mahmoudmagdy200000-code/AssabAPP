@@ -47,4 +47,18 @@ void main() {
     expect(response.image, isNull);
     expect(response.branchManager, isNull);
   });
+
+  test('accepts flat branch data without inventing missing coordinates', () {
+    final response = CashierBranchInfoResponse.fromJson({
+      'id': 12,
+      'name': null,
+      'branch_manager': {'id': null, 'name': null},
+    });
+
+    expect(response.id, '12');
+    expect(response.name, '-');
+    expect(response.lat, isNull);
+    expect(response.lng, isNull);
+    expect(response.branchManager?.name, '-');
+  });
 }

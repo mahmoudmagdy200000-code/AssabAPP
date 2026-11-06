@@ -18,6 +18,16 @@ class CashierReassignUserModel {
     this.userType,
   });
 
+  static CashierReassignUserModel? tryFromJson(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    final id = raw['id']?.toString().trim();
+    final name = raw['name']?.toString().trim();
+    if ((id == null || id.isEmpty) && (name == null || name.isEmpty)) {
+      return null;
+    }
+    return CashierReassignUserModel.fromJson(raw);
+  }
+
   factory CashierReassignUserModel.fromJson(Map<String, dynamic> json) =>
       _$CashierReassignUserModelFromJson(json);
 

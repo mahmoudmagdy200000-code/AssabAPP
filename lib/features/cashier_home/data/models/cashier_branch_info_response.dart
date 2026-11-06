@@ -24,10 +24,11 @@ class CashierBranchInfoResponse {
   });
 
   factory CashierBranchInfoResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] as Map<String, dynamic>;
+    final data = json['data'] as Map<String, dynamic>? ?? json;
+    final manager = data['branch_manager'];
     return CashierBranchInfoResponse(
-      id: data['id'] as String,
-      name: data['name'] as String,
+      id: (data['id'] ?? '').toString(),
+      name: (data['name'] as String?) ?? '-',
       image: data['image'] as String?,
       location: data['location'] as String?,
       lat: (data['lat'] as num?)?.toDouble(),
@@ -35,11 +36,9 @@ class CashierBranchInfoResponse {
       openingHours: data['opening_hours'] as String?,
       closingHours: data['closing_hours'] as String?,
       googleMapsUrl: data['google_maps_url'] as String?,
-      branchManager: data['branch_manager'] == null
-          ? null
-          : CashierBranchInfoBranchManager.fromJson(
-              data['branch_manager'] as Map<String, dynamic>,
-            ),
+      branchManager: manager is Map<String, dynamic>
+          ? CashierBranchInfoBranchManager.fromJson(manager)
+          : null,
     );
   }
 }
@@ -57,8 +56,8 @@ class CashierBranchInfoBranchManager {
 
   factory CashierBranchInfoBranchManager.fromJson(Map<String, dynamic> json) =>
       CashierBranchInfoBranchManager(
-        id: json['id'] as String,
-        name: json['name'] as String,
+        id: (json['id'] ?? '').toString(),
+        name: (json['name'] as String?) ?? '-',
         image: json['image'] as String?,
       );
 }

@@ -5,6 +5,7 @@ import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
 import 'package:assab/core/widgets/app_svg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/widgets/app_gesture_detector_button.dart';
@@ -20,6 +21,9 @@ class AppTextFormField extends StatelessWidget {
   final TextFormType textFormType;
   final Widget? prefixIcon;
   final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool? autocorrect;
+  final bool? enableSuggestions;
   final void Function(String value)? onChanged;
 
   const AppTextFormField({
@@ -34,6 +38,9 @@ class AppTextFormField extends StatelessWidget {
     this.prefixIcon,
     this.label,
     this.maxLength,
+    this.inputFormatters,
+    this.autocorrect,
+    this.enableSuggestions,
   });
 
   @override
@@ -59,7 +66,21 @@ class AppTextFormField extends StatelessWidget {
               obscureText: textFormType == TextFormType.password
                   ? state
                   : false,
-              maxLength: textFormType == TextFormType.phone ? 9 : maxLength,
+              autocorrect: autocorrect ?? (textFormType != TextFormType.password),
+              enableSuggestions:
+                  enableSuggestions ?? (textFormType != TextFormType.password),
+              maxLength: maxLength,
+              inputFormatters: [
+                if (textFormType == TextFormType.phone)
+                  TextInputFormatter.withFunction((oldValue, newValue) {
+                    final text = newValue.text;
+                    if (RegExp(r'^\+?[\d\s\-]*$').hasMatch(text)) {
+                      return newValue;
+                    }
+                    return oldValue;
+                  }),
+                ...?inputFormatters,
+              ],
               obscuringCharacter: '*',
               style: AppStyles.s14W400.copyWith(
                 color: context.customColor.text1,
