@@ -45,7 +45,7 @@ class ChooseUserTypeScreen extends StatelessWidget {
             ),
             30.verticalSpace,
             UserTypeButton(
-              title: 'Branch Manager',
+              title: context.tr.branchManager,
               userTypeStrategy: getIt<UserTypeStrategy>(
                 instanceName: UserType.branchManager.value,
               ),
@@ -61,7 +61,7 @@ class ChooseUserTypeScreen extends StatelessWidget {
             ),
             10.verticalSpace,
             UserTypeButton(
-              title: 'Cashier',
+              title: context.tr.cashier,
               userTypeStrategy: getIt<UserTypeStrategy>(
                 instanceName: UserType.cashier.value,
               ),
@@ -77,7 +77,7 @@ class ChooseUserTypeScreen extends StatelessWidget {
             ),
             10.verticalSpace,
             UserTypeButton(
-              title: 'Supplier',
+              title: context.tr.supplier,
               userTypeStrategy: getIt<UserTypeStrategy>(
                 instanceName: UserType.supplier.value,
               ),
@@ -93,7 +93,7 @@ class ChooseUserTypeScreen extends StatelessWidget {
             ),
             10.verticalSpace,
             UserTypeButton(
-              title: 'Brand Owner',
+              title: context.tr.brandOwner,
               userTypeStrategy: getIt<UserTypeStrategy>(
                 instanceName: UserType.brandOwner.value,
               ),

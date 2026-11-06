@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -45,7 +46,7 @@ class BrandOwnerHandoverReportsDetailsScreen extends StatelessWidget {
         if (state is BrandOwnerHandoverReportsDetailsActionSuccess) {
           AppSnackBar.showSuccess(
             context,
-            state.isSalaryDeduction ? 'Salary Deducted' : context.tr.approved,
+            state.isSalaryDeduction ? S.current.followupSalaryDeducted : context.tr.approved,
           );
           context
               .read<BrandOwnerFixedAssetsRequestsCubit>()
@@ -108,7 +109,7 @@ class BrandOwnerHandoverReportsDetailsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Review Major Discrepancies',
+                            S.current.followupReviewMajorDiscrepancies,
                             style: AppStyles.s16W500.copyWith(
                               color: context.customColor.text1,
                             ),

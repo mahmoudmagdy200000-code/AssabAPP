@@ -399,7 +399,7 @@ class _BrandOwnerSalesChannelAnalysisScreenState
         } else if (state is ExportSalesChannelAnalysisFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);
         } else if (state is ExportSalesChannelAnalysisEmailSuccess) {
-          AppSnackBar.showSuccess(context, 'Report sent to email successfully');
+          AppSnackBar.showSuccess(context, S.current.reportSentToEmailSuccessfully);
         } else if (state is ExportSalesChannelAnalysisEmailFailure) {
           AppDialog.showErrorDialog(context: context, failure: state.failure);
         }
@@ -536,19 +536,19 @@ class _BrandOwnerSalesChannelAnalysisScreenState
   }
 
   String _monthName(int month) {
-    const names = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+    final names = [
+      S.current.followupJanuary,
+      S.current.followupFebruary,
+      S.current.followupMarch,
+      S.current.followupApril,
+      S.current.followupMay,
+      S.current.followupJune,
+      S.current.followupJuly,
+      S.current.followupAugust,
+      S.current.followupSeptember,
+      S.current.followupOctober,
+      S.current.followupNovember,
+      S.current.followupDecember,
     ];
 
     return names[month - 1];

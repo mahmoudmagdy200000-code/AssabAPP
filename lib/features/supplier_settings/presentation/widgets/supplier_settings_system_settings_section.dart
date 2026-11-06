@@ -5,12 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/cubits/locale/locale_cubit.dart';
+import '../../../../core/cubits/theme/theme_cubit.dart';
 import '../../../../core/styles/app_styles.dart';
 import '../../../../core/utils/app_bottom_sheet.dart';
 import '../../../../core/widgets/app_logout_button.dart';
 import '../../../../core/widgets/app_svg.dart';
 import '../../../../core/widgets/change_language_bottom_sheet_widget.dart';
 import '../../../../core/widgets/custom_divider.dart';
+import '../../../../core/widgets/theme_preference_bottom_sheet_widget.dart';
 import 'supplier_settings_system_settings_item_widget.dart';
 
 class SupplierSettingsSystemSettingsSection extends StatelessWidget {
@@ -62,10 +64,21 @@ class SupplierSettingsSystemSettingsSection extends StatelessWidget {
               );
             },
           ),
-          SupplierSettingsSystemSettingsItemWidget(
-            onTap: () {},
-            title: context.tr.theme,
-            assetName: AppAssets.theme,
+          BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, mode) =>
+                SupplierSettingsSystemSettingsItemWidget(
+                  onTap: () => AppBottomSheet.showModal(
+                    context,
+                    (_) => const ThemePreferenceBottomSheetWidget(),
+                  ),
+                  title: context.tr.theme,
+                  assetName: AppAssets.theme,
+                  selectedValue: switch (mode) {
+                    ThemeMode.system => context.tr.systemPreference,
+                    ThemeMode.light => context.tr.lightMode,
+                    ThemeMode.dark => context.tr.darkMode,
+                  },
+                ),
           ),
           16.verticalSpace,
           const AppLogoutButton(),

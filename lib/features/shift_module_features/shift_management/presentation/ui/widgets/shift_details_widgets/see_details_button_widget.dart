@@ -36,6 +36,7 @@ class SeeDetailsButtonWidget extends StatelessWidget {
         );
       },
       text: context.tr.seeDetails,
+      isFlexible: true,
     );
   }
 }

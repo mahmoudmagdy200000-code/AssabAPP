@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -42,7 +43,7 @@ class BranchManagerSettingAndAggregatorsNotificationsView
           children: [
             _buildNotificationItem(
               context,
-              title: 'Shift Variance Alerts',
+              title: S.current.followupShiftVarianceAlerts,
               description:
                   'Get notified whenever a handover report shows sales or payment discrepancies.',
               value: notifications
@@ -62,7 +63,7 @@ class BranchManagerSettingAndAggregatorsNotificationsView
             ),
             _buildNotificationItem(
               context,
-              title: 'Daily Inventory Reminders',
+              title: S.current.followupDailyInventoryReminders,
               description:
                   'Send push/email reminders to me & staff to start or complete daily inventory tasks.',
               value: notifications
@@ -82,7 +83,7 @@ class BranchManagerSettingAndAggregatorsNotificationsView
             ),
             _buildNotificationItem(
               context,
-              title: 'Approved Aggregators Only',
+              title: S.current.followupApprovedAggregatorsOnly,
               description:
                   'Only allow payment platforms you’ve approved, unauthorized ones won’t show up.',
               value: notifications
@@ -102,7 +103,7 @@ class BranchManagerSettingAndAggregatorsNotificationsView
             ),
             _buildNotificationItem(
               context,
-              title: 'Asset Transfer Requests',
+              title: S.current.followupAssetTransferRequests,
               description:
                   'Get notified instantly when assets are being transferred in or out of your branch.',
               value: notifications
@@ -122,7 +123,7 @@ class BranchManagerSettingAndAggregatorsNotificationsView
             ),
             _buildNotificationItem(
               context,
-              title: 'Allow Split Shift Handovers',
+              title: S.current.followupAllowSplitShiftHandovers,
               description:
                   'Enable cashiers to hand over in segments (e.g., lunch shift vs. dinner shift).',
               value: notifications

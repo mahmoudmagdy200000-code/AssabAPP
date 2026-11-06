@@ -80,33 +80,33 @@ class _BrandOwnerFinancialReportingChooseDateBottomSheetState
 
   List<BrandOwnerFinancialReportingChooseDateMonthModel> get _months => [
     BrandOwnerFinancialReportingChooseDateMonthModel(
-      title: 'January',
+      title: S.current.followupJanuary,
       value: 1,
     ),
     BrandOwnerFinancialReportingChooseDateMonthModel(
-      title: 'February',
+      title: S.current.followupFebruary,
       value: 2,
     ),
-    BrandOwnerFinancialReportingChooseDateMonthModel(title: 'March', value: 3),
-    BrandOwnerFinancialReportingChooseDateMonthModel(title: 'April', value: 4),
-    BrandOwnerFinancialReportingChooseDateMonthModel(title: 'May', value: 5),
-    BrandOwnerFinancialReportingChooseDateMonthModel(title: 'June', value: 6),
-    BrandOwnerFinancialReportingChooseDateMonthModel(title: 'July', value: 7),
-    BrandOwnerFinancialReportingChooseDateMonthModel(title: 'August', value: 8),
+    BrandOwnerFinancialReportingChooseDateMonthModel(title: S.current.followupMarch, value: 3),
+    BrandOwnerFinancialReportingChooseDateMonthModel(title: S.current.followupApril, value: 4),
+    BrandOwnerFinancialReportingChooseDateMonthModel(title: S.current.followupMay, value: 5),
+    BrandOwnerFinancialReportingChooseDateMonthModel(title: S.current.followupJune, value: 6),
+    BrandOwnerFinancialReportingChooseDateMonthModel(title: S.current.followupJuly, value: 7),
+    BrandOwnerFinancialReportingChooseDateMonthModel(title: S.current.followupAugust, value: 8),
     BrandOwnerFinancialReportingChooseDateMonthModel(
-      title: 'September',
+      title: S.current.followupSeptember,
       value: 9,
     ),
     BrandOwnerFinancialReportingChooseDateMonthModel(
-      title: 'October',
+      title: S.current.followupOctober,
       value: 10,
     ),
     BrandOwnerFinancialReportingChooseDateMonthModel(
-      title: 'November',
+      title: S.current.followupNovember,
       value: 11,
     ),
     BrandOwnerFinancialReportingChooseDateMonthModel(
-      title: 'December',
+      title: S.current.followupDecember,
       value: 12,
     ),
   ];
@@ -308,6 +308,7 @@ class _BrandOwnerFinancialReportingChooseDateBottomSheetState
                 Expanded(
                   child: AppButton(
                     text: S.of(context).applyFilter,
+                    isFlexible: true,
                     onClick: () {
                       if (_selectedMonth != null && _selectedYear != null) {
                         widget.onApply(_selectedMonth!, _selectedYear!);

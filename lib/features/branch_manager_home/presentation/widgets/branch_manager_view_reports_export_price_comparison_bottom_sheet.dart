@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/enums/time_keys.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -60,7 +61,7 @@ class BranchManagerViewReportsExportPriceComparisonBottomSheet
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Export Price comparison data',
+                      S.current.followupExportPriceComparisonData,
                       style: AppStyles.s20W500.copyWith(
                         color: context.customColor.text1,
                       ),
@@ -95,7 +96,7 @@ class BranchManagerViewReportsExportPriceComparisonBottomSheet
                       ),
                     ),
                     Text(
-                      'Export Format',
+                      S.current.exportFormat,
                       style: AppStyles.s14W500.copyWith(
                         color: context.customColor.text3,
                       ),
@@ -201,7 +202,7 @@ class BranchManagerViewReportsExportPriceComparisonBottomSheet
                           return AppButton(
                             onClick: () => _export(context),
                             enabled: isValid,
-                            text: 'Export Data',
+                            text: S.current.followupExportData,
                           );
                         },
                       );

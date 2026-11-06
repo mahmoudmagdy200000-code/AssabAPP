@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -40,7 +41,7 @@ class FixedAssetsRequestsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Asset Records',
+                      S.current.followupAssetRecords,
                       style: AppStyles.s20W500.copyWith(
                         color: context.customColor.text1,
                       ),

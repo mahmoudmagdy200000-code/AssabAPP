@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -105,7 +106,7 @@ class BrandOwnerModificationDetailsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Approve Critical Changes',
+                            S.current.followupApproveCriticalChanges,
                             style: AppStyles.s16W500.copyWith(
                               color: context.customColor.text1,
                             ),

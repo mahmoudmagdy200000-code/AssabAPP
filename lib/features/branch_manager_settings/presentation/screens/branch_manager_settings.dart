@@ -44,7 +44,7 @@ class BranchManagerSettings extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Approvals, Reports, Security & Retention',
+                        context.tr.ownerSettingsSummary,
                         style: AppStyles.s14W500.copyWith(
                           color: context.customColor.text1,
                         ),
@@ -61,7 +61,7 @@ class BranchManagerSettings extends StatelessWidget {
                           );
                         },
                         iconAssetName: AppAssets.approvalSettingsSvg,
-                        title: 'Approval Settings',
+                        title: context.tr.ownerApprovalSettings,
                         iconColor: ColorFilter.mode(
                           context.theme.primaryColor,
                           BlendMode.srcIn,
@@ -75,7 +75,7 @@ class BranchManagerSettings extends StatelessWidget {
                           );
                         },
                         iconAssetName: AppAssets.viewReports,
-                        title: 'Report Settings',
+                        title: context.tr.ownerReportSettings,
                         iconColor: ColorFilter.mode(
                           context.theme.primaryColor,
                           BlendMode.srcIn,
@@ -90,7 +90,7 @@ class BranchManagerSettings extends StatelessWidget {
                           );
                         },
                         iconAssetName: AppAssets.securitySettingsSvg,
-                        title: 'Security Settings',
+                        title: context.tr.ownerSecuritySettings,
                         iconColor: ColorFilter.mode(
                           context.theme.primaryColor,
                           BlendMode.srcIn,
@@ -105,7 +105,7 @@ class BranchManagerSettings extends StatelessWidget {
                           );
                         },
                         iconAssetName: AppAssets.retentionSettingsSvg,
-                        title: 'Retention Settings',
+                        title: context.tr.ownerRetentionSettings,
                         iconColor: ColorFilter.mode(
                           context.theme.primaryColor,
                           BlendMode.srcIn,

@@ -80,7 +80,7 @@ class CashierMyPendingShiftsWithHandoverCard extends StatelessWidget {
               context: context,
               firstTitleSvgAsset: AppAssets.clockSvg,
               title: context.tr.startTime,
-              value: CashierShiftTimeFormatter.format(shift.startTime),
+              value: CashierShiftTimeFormatter.formatForUi(context, shift.startTime),
             ),
 
             12.verticalSpace,

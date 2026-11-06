@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../../core/enums/custody_export_account_statement_export_format_enum.dart';
@@ -10,19 +11,19 @@ class SelectFilterAccountStatementCubit
   SelectFilterAccountStatementCubit()
     : super(
         SelectFilterAccountStatementState(
-          months: const [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
+          months: [
+            S.current.followupJanuary,
+            S.current.followupFebruary,
+            S.current.followupMarch,
+            S.current.followupApril,
+            S.current.followupMay,
+            S.current.followupJune,
+            S.current.followupJuly,
+            S.current.followupAugust,
+            S.current.followupSeptember,
+            S.current.followupOctober,
+            S.current.followupNovember,
+            S.current.followupDecember,
           ],
           years: List.generate(
             DateTime.now().year - 2000 + 1,

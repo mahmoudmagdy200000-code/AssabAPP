@@ -310,7 +310,7 @@ void main() {
       final branch = CashierBranchInfoResponse.fromJson(branchJson);
       expect(branch.id, 'b-1');
       expect(branch.name, 'فرع الملقا – الرياض');
-      expect(branch.branchManager.name, '-');
+      expect(branch.branchManager, isNull);
     });
 
     test('Handover and Variance models handle null fields gracefully', () {

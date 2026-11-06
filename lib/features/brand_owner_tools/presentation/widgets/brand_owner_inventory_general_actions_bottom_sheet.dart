@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -185,7 +186,7 @@ class BrandOwnerInventoryGeneralActionsBottomSheet extends StatelessWidget {
                   const AppSvg(assetName: AppAssets.receipt),
                   Flexible(
                     child: Text(
-                      'Request clarification from branch manager',
+                      S.current.followupRequestClarificationFromBranchManager,
                       style: AppStyles.s13W400.copyWith(
                         color: context.customColor.text1,
                       ),

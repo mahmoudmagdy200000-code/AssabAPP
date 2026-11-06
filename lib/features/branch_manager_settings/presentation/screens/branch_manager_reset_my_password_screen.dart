@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -162,7 +163,7 @@ class _BranchManagerResetMyPasswordScreenState
     AppOverlay.hideCustomOverlay();
 
     if (state is BranchManagerResetMyPasswordSuccess) {
-      AppSnackBar.showSuccess(context, 'Password reset successfully');
+      AppSnackBar.showSuccess(context, S.current.followupPasswordResetSuccessfully);
       NavigationService.I.pop();
     } else if (state is BranchManagerResetMyPasswordFailure) {
       AppDialog.showErrorDialog(context: context, failure: state.failure);
@@ -197,7 +198,7 @@ class _BranchManagerResetMyPasswordScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Reset my password',
+                                S.current.resetMyPassword,
                                 style: AppStyles.s16W500.copyWith(
                                   color: context.customColor.text1,
                                 ),
@@ -235,7 +236,7 @@ class _BranchManagerResetMyPasswordScreenState
                             ),
                             10.verticalSpace,
                             Text(
-                              'Create new password',
+                              S.current.followupCreateNewPassword,
                               style: AppStyles.s20W500.copyWith(
                                 color: context.customColor.text1,
                               ),

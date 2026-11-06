@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -87,7 +88,7 @@ class _BrandOwnerFixedAssetsDeductionAmountBottomSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Deduction Amount',
+                      S.current.followupDeductionAmount,
                       style: AppStyles.s20W500.copyWith(
                         color: context.customColor.text1,
                       ),
@@ -122,7 +123,7 @@ class _BrandOwnerFixedAssetsDeductionAmountBottomSheetState
                                   ),
                                 ),
                                 Text(
-                                  'Responsible for discrepancy',
+                                  S.current.followupResponsibleForDiscrepancy,
                                   style: AppStyles.s12W400.copyWith(
                                     color: context.customColor.text3,
                                   ),
@@ -141,7 +142,7 @@ class _BrandOwnerFixedAssetsDeductionAmountBottomSheetState
                         horizontal: 15.r,
                         vertical: 10.r,
                       ),
-                      label: 'Deduction Amount',
+                      label: S.current.followupDeductionAmount,
                       borderRadius: BorderRadius.circular(10.r),
                       child: Row(
                         children: [
@@ -163,7 +164,7 @@ class _BrandOwnerFixedAssetsDeductionAmountBottomSheetState
                         horizontal: 15.r,
                         vertical: 10.r,
                       ),
-                      label: 'Short Reason',
+                      label: S.current.followupShortReason,
                       borderRadius: BorderRadius.circular(10.r),
                       child: CustomTextField(
                         controller: _reasonController,
@@ -195,7 +196,7 @@ class _BrandOwnerFixedAssetsDeductionAmountBottomSheetState
                 ),
                 Expanded(
                   child: AppButton(
-                    text: 'Apply Decision',
+                    text: S.current.followupApplyDecision,
                     onClick: () {
                       widget.onDeduction(
                         _amountController.text,

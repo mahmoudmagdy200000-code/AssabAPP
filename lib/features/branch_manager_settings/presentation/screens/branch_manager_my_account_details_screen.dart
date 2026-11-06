@@ -53,9 +53,17 @@ class _BranchManagerMyAccountDetailsScreenState
       borderRadius: BorderRadius.circular(12.r),
       child: Row(
         children: [
-          Text(
-            value,
-            style: AppStyles.s14W500.copyWith(color: context.customColor.text1),
+          Expanded(
+            child: Text(
+              value,
+              textDirection: label == context.tr.accountEmailAddress
+                  ? TextDirection.ltr
+                  : null,
+              softWrap: true,
+              style: AppStyles.s14W500.copyWith(
+                color: context.customColor.text1,
+              ),
+            ),
           ),
         ],
       ),
@@ -81,13 +89,13 @@ class _BranchManagerMyAccountDetailsScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'My account details',
+                          context.tr.myAccountDetails,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
                         ),
                         Text(
-                          'Edit your personal and profile details.',
+                          context.tr.accountDetailsDescription,
                           style: AppStyles.s12W400.copyWith(
                             color: context.customColor.text3,
                           ),
@@ -138,7 +146,7 @@ class _BranchManagerMyAccountDetailsScreenState
                                       Expanded(
                                         child: _buildField(
                                           context,
-                                          label: 'First Name',
+                                          label: context.tr.accountFirstName,
                                           value: data.firstName,
                                         ),
                                       ),
@@ -146,7 +154,7 @@ class _BranchManagerMyAccountDetailsScreenState
                                       Expanded(
                                         child: _buildField(
                                           context,
-                                          label: 'Last Name',
+                                          label: context.tr.accountLastName,
                                           value: data.lastName,
                                         ),
                                       ),
@@ -155,31 +163,31 @@ class _BranchManagerMyAccountDetailsScreenState
                                   10.verticalSpace,
                                   _buildField(
                                     context,
-                                    label: 'Email address',
+                                    label: context.tr.accountEmailAddress,
                                     value: data.emailAddress,
                                   ),
                                   10.verticalSpace,
                                   _buildField(
                                     context,
-                                    label: 'Role',
+                                    label: context.tr.accountRole,
                                     value: data.role,
                                   ),
                                   10.verticalSpace,
                                   _buildField(
                                     context,
-                                    label: 'Assigned to',
+                                    label: context.tr.accountAssignedTo,
                                     value: data.assignedTo,
                                   ),
                                   10.verticalSpace,
                                   _buildField(
                                     context,
-                                    label: 'Wrokday\'s',
+                                    label: context.tr.accountWorkdays,
                                     value: data.weekdays,
                                   ),
                                   10.verticalSpace,
                                   _buildField(
                                     context,
-                                    label: 'Work Shift',
+                                    label: context.tr.accountWorkShift,
                                     value: data.workShift,
                                   ),
                                   20.verticalSpace,
@@ -194,7 +202,7 @@ class _BranchManagerMyAccountDetailsScreenState
                                       10.horizontalSpace,
                                       Expanded(
                                         child: Text(
-                                          'Only HR can make changes to this information. Please contact them for any updates.',
+                                          context.tr.accountDetailsHrNotice,
                                           style: AppStyles.s14W400.copyWith(
                                             color: context.customColor.text4,
                                           ),

@@ -36,10 +36,15 @@ class CashierMyPendingShiftsDefaultCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  CashierShiftDateFormatter.format(shift.date),
-                  style: AppStyles.s15W600,
+                Expanded(
+                  child: Text(
+                    CashierShiftDateFormatter.format(shift.date),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppStyles.s15W600,
+                  ),
                 ),
+                8.horizontalSpace,
                 CardLabelWidget(title: context.tr.not_started),
               ],
             ),
@@ -52,7 +57,7 @@ class CashierMyPendingShiftsDefaultCard extends StatelessWidget {
               context: context,
               firstTitleSvgAsset: AppAssets.clockSvg,
               title: context.tr.startTime,
-              value: CashierShiftTimeFormatter.format(shift.startTime),
+              value: CashierShiftTimeFormatter.formatForUi(context, shift.startTime),
             ),
 
             12.verticalSpace,
@@ -98,6 +103,7 @@ class CashierMyPendingShiftsDefaultCard extends StatelessWidget {
                       // );
                     },
                     text: context.tr.start_shift,
+                    isFlexible: true,
                     isTransparent: true,
                     borderColor: context.customColor.border,
                     enabled: false,

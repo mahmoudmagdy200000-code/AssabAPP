@@ -1,14 +1,14 @@
 class CashierBranchInfoResponse {
   final String id;
   final String name;
-  final String image;
-  final String location;
-  final double lat;
-  final double lng;
-  final String openingHours;
-  final String closingHours;
-  final String googleMapsUrl;
-  final CashierBranchInfoBranchManager branchManager;
+  final String? image;
+  final String? location;
+  final double? lat;
+  final double? lng;
+  final String? openingHours;
+  final String? closingHours;
+  final String? googleMapsUrl;
+  final CashierBranchInfoBranchManager? branchManager;
 
   CashierBranchInfoResponse({
     required this.id,
@@ -25,21 +25,20 @@ class CashierBranchInfoResponse {
 
   factory CashierBranchInfoResponse.fromJson(Map<String, dynamic> json) {
     final data = json['data'] as Map<String, dynamic>? ?? json;
+    final manager = data['branch_manager'];
     return CashierBranchInfoResponse(
       id: (data['id'] ?? '').toString(),
       name: (data['name'] as String?) ?? '-',
-      image: (data['image'] as String?) ?? '',
-      location: (data['location'] as String?) ?? '-',
-      lat: (data['lat'] as num?)?.toDouble() ?? 0.0,
-      lng: (data['lng'] as num?)?.toDouble() ?? 0.0,
-      openingHours: (data['opening_hours'] as String?) ?? '-',
-      closingHours: (data['closing_hours'] as String?) ?? '-',
-      googleMapsUrl: (data['google_maps_url'] as String?) ?? '',
-      branchManager: data['branch_manager'] is Map<String, dynamic>
-          ? CashierBranchInfoBranchManager.fromJson(
-              data['branch_manager'] as Map<String, dynamic>,
-            )
-          : CashierBranchInfoBranchManager(id: '', name: '-', image: null),
+      image: data['image'] as String?,
+      location: data['location'] as String?,
+      lat: (data['lat'] as num?)?.toDouble(),
+      lng: (data['lng'] as num?)?.toDouble(),
+      openingHours: data['opening_hours'] as String?,
+      closingHours: data['closing_hours'] as String?,
+      googleMapsUrl: data['google_maps_url'] as String?,
+      branchManager: manager is Map<String, dynamic>
+          ? CashierBranchInfoBranchManager.fromJson(manager)
+          : null,
     );
   }
 }

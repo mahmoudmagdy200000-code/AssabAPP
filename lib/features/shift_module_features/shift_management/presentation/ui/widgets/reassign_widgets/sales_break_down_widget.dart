@@ -389,7 +389,7 @@ class _SalesBreakDownWidget extends State<SalesBreakDownWidget> {
                         ),
                       );
                     } else if (state is AggregatorEmpty) {
-                      return const Text('No Aggregators');
+                      return Text(context.tr.noAggregatorsFound);
                     }
                     return const SizedBox.shrink();
                   },

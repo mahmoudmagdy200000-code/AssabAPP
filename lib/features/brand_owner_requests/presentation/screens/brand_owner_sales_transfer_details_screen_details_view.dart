@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
@@ -151,7 +152,7 @@ class BrandOwnerSalesTransferDetailsScreenDetailsView extends StatelessWidget {
                       Align(
                         alignment: AlignmentDirectional.topStart,
                         child: Text(
-                          'Sender Details',
+                          S.current.followupSenderDetails,
                           style: AppStyles.s16W600.copyWith(
                             color: context.customColor.text1,
                           ),

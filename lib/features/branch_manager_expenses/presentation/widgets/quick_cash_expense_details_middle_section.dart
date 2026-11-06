@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/utils/date_formatter.dart';
@@ -41,7 +42,7 @@ class QuickCashExpenseDetailsMiddleSection extends StatelessWidget {
                 DateFormatter.formatDateMDY(
                   DateTime.tryParse(quickCashExpenseData.expenseDate),
                 ) ??
-                'No Date',
+                S.current.followupNoDate,
             showAmountIcon: false,
           ),
           10.verticalSpace,

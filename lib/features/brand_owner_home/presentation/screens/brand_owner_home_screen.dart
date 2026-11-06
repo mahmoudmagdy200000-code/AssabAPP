@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/cubits/paging_cubit/paging_cubit.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -744,20 +745,20 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
   }
 }
 
-const _monthNames = [
+List<String> get _monthNames => [
   '',
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  S.current.followupJanuary,
+  S.current.followupFebruary,
+  S.current.followupMarch,
+  S.current.followupApril,
+  S.current.followupMay,
+  S.current.followupJune,
+  S.current.followupJuly,
+  S.current.followupAugust,
+  S.current.followupSeptember,
+  S.current.followupOctober,
+  S.current.followupNovember,
+  S.current.followupDecember,
 ];
 
 String _monthName(int month) {

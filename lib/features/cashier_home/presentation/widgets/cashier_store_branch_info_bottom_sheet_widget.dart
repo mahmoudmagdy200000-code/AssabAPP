@@ -99,84 +99,110 @@ class CashierStoreBranchInfoBottomSheetWidget extends StatelessWidget {
                               children: [
                                 Stack(
                                   children: [
-                                    AppNetworkImage(
-                                      image: branch.image,
-                                      height: 230.h,
-                                      borderRadius: BorderRadius.circular(20.r),
-                                    ),
-                                    PositionedDirectional(
-                                      bottom: 0,
-                                      start: 0,
-                                      child: Container(
-                                        width: 250.w,
-                                        decoration: BoxDecoration(
-                                          color: context
-                                              .customColor
-                                              .reversedTextColor,
-                                          borderRadius:
-                                              BorderRadiusDirectional.only(
-                                                bottomStart: Radius.circular(
-                                                  20.r,
-                                                ),
-                                              ),
+                                    if (branch.image?.isNotEmpty == true)
+                                      AppNetworkImage(
+                                        image: branch.image!,
+                                        height: 230.h,
+                                        borderRadius: BorderRadius.circular(
+                                          20.r,
                                         ),
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: 10.r,
-                                          horizontal: 12.r,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            AppSvg(
-                                              assetName: AppAssets.branch,
-                                              width: 16.r,
-                                            ),
-                                            8.horizontalSpace,
-                                            Expanded(
-                                              child: Text(
-                                                '${branch.openingHours} - ${branch.closingHours}',
-                                                style: AppStyles.s12W400
-                                                    .copyWith(
-                                                      color: context
-                                                          .customColor
-                                                          .text1,
-                                                    ),
-                                              ),
-                                            ),
-                                          ],
+                                      )
+                                    else
+                                      Container(
+                                        height: 230.h,
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.storefront_outlined,
+                                          size: 48.r,
+                                          color: context.customColor.text3,
                                         ),
                                       ),
-                                    ),
+                                    if (branch.openingHours?.isNotEmpty ==
+                                            true ||
+                                        branch.closingHours?.isNotEmpty == true)
+                                      PositionedDirectional(
+                                        bottom: 0,
+                                        start: 0,
+                                        child: Container(
+                                          width: 250.w,
+                                          decoration: BoxDecoration(
+                                            color: context
+                                                .customColor
+                                                .reversedTextColor,
+                                            borderRadius:
+                                                BorderRadiusDirectional.only(
+                                                  bottomStart: Radius.circular(
+                                                    20.r,
+                                                  ),
+                                                ),
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 10.r,
+                                            horizontal: 12.r,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              AppSvg(
+                                                assetName: AppAssets.branch,
+                                                width: 16.r,
+                                              ),
+                                              8.horizontalSpace,
+                                              Expanded(
+                                                child: Text(
+                                                  [
+                                                        branch.openingHours,
+                                                        branch.closingHours,
+                                                      ]
+                                                      .whereType<String>()
+                                                      .where(
+                                                        (s) => s.isNotEmpty,
+                                                      )
+                                                      .join(' - '),
+                                                  style: AppStyles.s12W400
+                                                      .copyWith(
+                                                        color: context
+                                                            .customColor
+                                                            .text1,
+                                                      ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                   ],
                                 ),
                                 12.verticalSpace,
-                                ProfileImageWidget(
-                                  image: branch.branchManager.image,
-                                ),
-                                10.verticalSpace,
-                                Text(
-                                  branch.branchManager.name,
-                                  style: AppStyles.s14W500.copyWith(
-                                    color: context.customColor.text1,
+                                if (branch.branchManager != null) ...[
+                                  ProfileImageWidget(
+                                    image: branch.branchManager!.image,
                                   ),
-                                ),
-                                20.verticalSpace,
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    AppSvg(
-                                      assetName: AppAssets.checkWithContainer,
-                                      width: 16.r,
+                                  10.verticalSpace,
+                                  Text(
+                                    branch.branchManager!.name,
+                                    style: AppStyles.s14W500.copyWith(
+                                      color: context.customColor.text1,
                                     ),
-                                    8.horizontalSpace,
-                                    Text(
-                                      context.tr.branchManager,
-                                      style: AppStyles.s12W500.copyWith(
-                                        color: context.customColor.text1,
+                                  ),
+                                  20.verticalSpace,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      AppSvg(
+                                        assetName: AppAssets.checkWithContainer,
+                                        width: 16.r,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                25.verticalSpace,
+                                      8.horizontalSpace,
+                                      Text(
+                                        context.tr.branchManager,
+                                        style: AppStyles.s12W500.copyWith(
+                                          color: context.customColor.text1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  25.verticalSpace,
+                                ],
                               ],
                             ),
                           ),

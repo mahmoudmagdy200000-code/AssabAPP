@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -81,7 +82,7 @@ class ExcellentConditionStrategy extends FixedAssetsConditionStrategy {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Fully Agree',
+                    S.current.followupFullyAgree,
                     style: AppStyles.s14W500.copyWith(
                       color: context.customColor.text1,
                     ),
@@ -150,7 +151,7 @@ class NeedAttentionConditionStrategy extends FixedAssetsConditionStrategy {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Minor Notes',
+                    S.current.followupMinorNotes,
                     style: AppStyles.s14W500.copyWith(
                       color: context.customColor.text1,
                     ),
@@ -218,7 +219,7 @@ class ProblemConditionStrategy extends FixedAssetsConditionStrategy {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Major Issue',
+                    S.current.followupMajorIssue,
                     style: AppStyles.s14W500.copyWith(
                       color: context.customColor.text1,
                     ),

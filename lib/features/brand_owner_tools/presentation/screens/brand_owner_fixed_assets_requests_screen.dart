@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -21,11 +22,11 @@ class BrandOwnerFixedAssetsRequestsScreen extends StatelessWidget {
   const BrandOwnerFixedAssetsRequestsScreen({super.key});
 
   List<String> texts(BuildContext context) => [
-    'Review Audit',
-    'Asset Modifications',
-    'Handover Reports',
-    'Disposal Requests',
-    'Transfer Requests',
+    S.current.followupReviewAudit,
+    S.current.followupAssetModifications,
+    S.current.followupHandoverReports,
+    S.current.followupDisposalRequests,
+    S.current.followupTransferRequests,
   ];
 
   @override
@@ -46,7 +47,7 @@ class BrandOwnerFixedAssetsRequestsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Asset Records',
+                        S.current.followupAssetRecords,
                         style: AppStyles.s20W500.copyWith(
                           color: context.customColor.text1,
                         ),

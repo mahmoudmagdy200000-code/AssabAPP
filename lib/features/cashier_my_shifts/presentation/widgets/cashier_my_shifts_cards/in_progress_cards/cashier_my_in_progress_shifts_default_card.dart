@@ -50,17 +50,18 @@ class _CashierMyInProgressShiftsDefaultCardState
   void _calculateRemaining() {
     final now = DateTime.now();
 
-    final timeParts = widget.shift.endTime.split(':');
-
-    final hour = int.parse(timeParts[0]);
-    final minute = int.parse(timeParts[1]);
+    final parsed = CashierShiftTimeFormatter.parseApiTime(widget.shift.endTime);
+    if (parsed == null) {
+      remaining = Duration.zero;
+      return;
+    }
 
     final shiftStart = DateTime(
       widget.shift.date.year,
       widget.shift.date.month,
       widget.shift.date.day,
-      hour,
-      minute,
+      parsed.hour,
+      parsed.minute,
     );
 
     remaining = shiftStart.difference(now);
@@ -123,7 +124,7 @@ class _CashierMyInProgressShiftsDefaultCardState
               context: context,
               firstTitleSvgAsset: AppAssets.clockSvg,
               title: context.tr.end_time,
-              value: CashierShiftTimeFormatter.format(widget.shift.endTime),
+              value: CashierShiftTimeFormatter.formatForUi(context, widget.shift.endTime),
             ),
 
             12.verticalSpace,

@@ -33,11 +33,17 @@ class SupplierSettingsSystemSettingsItemWidget extends StatelessWidget {
         children: [
           AppSvg(assetName: assetName, width: 20.r, height: 20.r),
           12.horizontalSpace,
-          Text(
-            title,
-            style: AppStyles.s14W400.copyWith(color: context.customColor.text3),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppStyles.s14W400.copyWith(
+                color: context.customColor.text3,
+              ),
+            ),
           ),
-          const Spacer(),
+          8.horizontalSpace,
           AppGestureDetectorButton(
             onTap: onTap,
             child: Container(

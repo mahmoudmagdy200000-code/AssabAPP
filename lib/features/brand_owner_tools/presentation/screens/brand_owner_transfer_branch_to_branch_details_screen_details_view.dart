@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -70,14 +71,14 @@ class BrandOwnerTransferBranchToBranchDetailsScreenDetailsView
                   child: Column(
                     spacing: 12.h,
                     children: [
-                      _buildDetailRow(context, 'Request ID', details.id),
+                      _buildDetailRow(context, S.current.followupRequestID, details.id),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Flexible(
                             child: Text(
-                              'Destination',
+                              S.current.followupDestination,
                               style: AppStyles.s12W400.copyWith(
                                 color: context.customColor.text3,
                               ),
@@ -135,22 +136,22 @@ class BrandOwnerTransferBranchToBranchDetailsScreenDetailsView
                       ),
                       _buildRow(
                         context,
-                        title: 'Requested by',
+                        title: S.current.requestedBy,
                         value: details.submittedByManagerName,
                       ),
                       _buildRow(
                         context,
-                        title: 'Supported by',
+                        title: S.current.followupSupportedBy,
                         value: details.supportedByManagerName,
                       ),
                       _buildRow(
                         context,
-                        title: 'Request Date',
+                        title: S.current.requestDate,
                         value: details.submittedOn,
                       ),
                       _buildRow(
                         context,
-                        title: 'Asset Value',
+                        title: S.current.followupAssetValue,
                         value: details.asset.affectedValue,
                         isCurrency: true,
                       ),
@@ -159,7 +160,7 @@ class BrandOwnerTransferBranchToBranchDetailsScreenDetailsView
                 ),
                 10.verticalSpace,
                 Text(
-                  'Asset Details',
+                  S.current.assetDetails,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -215,22 +216,22 @@ class BrandOwnerTransferBranchToBranchDetailsScreenDetailsView
                       Divider(color: context.customColor.text2, height: 1),
                       _buildRow(
                         context,
-                        title: 'Brand Standard',
+                        title: S.current.followupBrandStandard,
                         value: details.asset.brandStandard,
                       ),
                       _buildRow(
                         context,
-                        title: 'Status',
+                        title: S.current.status,
                         value: details.asset.condition.label(context),
                       ),
                       _buildRow(
                         context,
-                        title: 'Critical Asset',
+                        title: S.current.followupCriticalAsset,
                         value: details.asset.isCritical ? 'Yes' : 'No',
                       ),
                       _buildRow(
                         context,
-                        title: 'Last Service',
+                        title: S.current.followupLastService,
                         value: details.asset.lastService,
                       ),
                     ],
@@ -238,7 +239,7 @@ class BrandOwnerTransferBranchToBranchDetailsScreenDetailsView
                 ),
                 10.verticalSpace,
                 Text(
-                  'Business Justification',
+                  S.current.followupBusinessJustification,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -265,20 +266,20 @@ class BrandOwnerTransferBranchToBranchDetailsScreenDetailsView
                       ),
                       _buildRow(
                         context,
-                        title: 'Strategic Impacty',
-                        value: 'Optimal resource allocation',
+                        title: S.current.followupStrategicImpacty,
+                        value: S.current.followupOptimalResourceAllocation,
                       ),
                       _buildRow(
                         context,
-                        title: 'Brand Standards',
-                        value: 'Maintained at both locations',
+                        title: S.current.followupBrandStandards,
+                        value: S.current.followupMaintainedAtBothLocations,
                       ),
                     ],
                   ),
                 ),
                 10.verticalSpace,
                 Text(
-                  'Brand Impact Analysis',
+                  S.current.followupBrandImpactAnalysis,
                   style: AppStyles.s16W500.copyWith(
                     color: context.customColor.text1,
                   ),
@@ -296,17 +297,17 @@ class BrandOwnerTransferBranchToBranchDetailsScreenDetailsView
                       _buildDetailRow(
                         context,
                         'Customer Experience:',
-                        'Enhanced',
+                        S.current.followupEnhanced,
                       ),
                       _buildRow(
                         context,
                         title: 'Brand Consistency:',
-                        value: 'Maintained',
+                        value: S.current.followupMaintained,
                       ),
                       _buildRow(
                         context,
                         title: 'Operational Efficiency:',
-                        value: 'Improved',
+                        value: S.current.followupImproved,
                       ),
                       _buildRow(
                         context,

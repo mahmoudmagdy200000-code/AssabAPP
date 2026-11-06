@@ -56,9 +56,9 @@ class CashierMyReassignedShiftsDefaultCard extends StatelessWidget {
               firstTitleSvgAsset: AppAssets.clockSvg,
               title: context.tr.startTime,
               hasTwoRows: true,
-              value: CashierShiftTimeFormatter.format(shift.startTime),
+              value: CashierShiftTimeFormatter.formatForUi(context, shift.startTime),
               secondTitle: context.tr.end_time,
-              secondValue: CashierShiftTimeFormatter.format(shift.endTime),
+              secondValue: CashierShiftTimeFormatter.formatForUi(context, shift.endTime),
             ),
 
             12.verticalSpace,

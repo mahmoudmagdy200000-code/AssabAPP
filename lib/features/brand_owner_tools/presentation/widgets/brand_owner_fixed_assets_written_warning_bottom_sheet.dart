@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -73,7 +74,7 @@ class _BrandOwnerFixedAssetsWrittenWarningBottomSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Written Warning',
+                      S.current.followupWrittenWarning,
                       style: AppStyles.s20W500.copyWith(
                         color: context.customColor.text1,
                       ),
@@ -108,7 +109,7 @@ class _BrandOwnerFixedAssetsWrittenWarningBottomSheetState
                                   ),
                                 ),
                                 Text(
-                                  'Responsible for discrepancy',
+                                  S.current.followupResponsibleForDiscrepancy,
                                   style: AppStyles.s12W400.copyWith(
                                     color: context.customColor.text3,
                                   ),
@@ -127,7 +128,7 @@ class _BrandOwnerFixedAssetsWrittenWarningBottomSheetState
                         horizontal: 15.r,
                         vertical: 10.r,
                       ),
-                      label: 'Warning Message',
+                      label: S.current.followupWarningMessage,
                       borderRadius: BorderRadius.circular(10.r),
                       child: CustomTextField(
                         controller: _reasonController,
@@ -159,7 +160,7 @@ class _BrandOwnerFixedAssetsWrittenWarningBottomSheetState
                 ),
                 Expanded(
                   child: AppButton(
-                    text: 'Apply Decision',
+                    text: S.current.followupApplyDecision,
                     onClick: () {
                       widget.onWarning(_reasonController.text);
                       NavigationService.I.pop();

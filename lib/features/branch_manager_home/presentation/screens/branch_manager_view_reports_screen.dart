@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_styles.dart';
@@ -78,8 +79,8 @@ class BranchManagerViewReportsScreen extends StatelessWidget {
                             },
                             builder: (context, state) {
                               final texts = [
-                                'Monthly Reports',
-                                'Price Comparison',
+                                S.current.followupMonthlyReports,
+                                S.current.priceComparison,
                               ];
                               return CustomTextButton(
                                 text: texts[index],

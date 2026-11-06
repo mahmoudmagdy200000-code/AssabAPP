@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/helpers/safe_cubit.dart';
 import 'package:assab/core/utils/app_reg_exp.dart';
 
@@ -12,7 +13,7 @@ class LoginFormCubit extends SafeCubit<LoginFormState> {
         AppRegExp.emailValidator(trimmed) || AppRegExp.phoneValidator(trimmed);
     final error = trimmed.isEmpty
         ? null
-        : (isValid ? null : 'Invalid email or phone');
+        : (isValid ? null : S.current.followupInvalidEmailOrPhone);
 
     emit(
       state.copyWith(

@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/cubits/search/search_cubit.dart';
@@ -88,7 +89,7 @@ class _BranchManagerSettingAndAggregatorsAddNewAggregatorBottomSheetState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Add New Aggregator',
+                S.current.followupAddNewAggregator,
                 style: AppStyles.s20W500.copyWith(
                   color: context.customColor.text1,
                 ),
@@ -222,7 +223,7 @@ class _BranchManagerSettingAndAggregatorsAddNewAggregatorBottomSheetState
                       .addAggregator(aggregatorId: selectedAggregator.id);
                   NavigationService.I.pop();
                 },
-                text: 'Activate Selected Aggregator',
+                text: S.current.followupActivateSelectedAggregator,
                 enabled: _selectedAggregatorId != null,
                 padding: EdgeInsets.symmetric(vertical: 14.r),
               ),

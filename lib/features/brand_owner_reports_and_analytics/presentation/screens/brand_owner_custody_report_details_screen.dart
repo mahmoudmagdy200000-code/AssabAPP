@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/styles/app_colors.dart';
@@ -58,7 +59,7 @@ class BrandOwnerCustodyReportDetailsScreen extends StatelessWidget {
                       final periodLabel =
                           state is BrandOwnerCustodyReportDetailsSuccess
                           ? state.data.periodLabel
-                          : 'June Custody Summary';
+                          : S.current.followupJuneCustodySummary;
                       return Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,7 +272,7 @@ class BrandOwnerCustodyReportDetailsScreen extends StatelessWidget {
                           ),
                           20.verticalSpace,
                           Text(
-                            'Current Custody Balance',
+                            S.current.followupCurrentCustodyBalance,
                             style: AppStyles.s14W400.copyWith(
                               color: context.customColor.text3,
                             ),

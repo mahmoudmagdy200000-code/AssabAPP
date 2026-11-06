@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -34,7 +35,7 @@ class BrandOwnerChoosBranchBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Dashboard Data',
+              S.current.followupDashboardData,
               style: AppStyles.s20W500.copyWith(
                 color: context.customColor.text1,
               ),
@@ -73,7 +74,7 @@ class BrandOwnerChoosBranchBottomSheet extends StatelessWidget {
                                 ),
                                 16.verticalSpace,
                                 Text(
-                                  'No branches found',
+                                  S.current.followupNoBranchesFound,
                                   style: AppStyles.s16W500.copyWith(
                                     color: context.customColor.text3,
                                   ),
@@ -270,7 +271,7 @@ class BrandOwnerChoosBranchBottomSheet extends StatelessWidget {
                       ),
                     );
                   },
-                  text: 'Sort Data',
+                  text: S.current.followupSortData,
                   borderRadius: BorderRadius.circular(15.r),
                   padding: EdgeInsets.symmetric(vertical: 16.r),
                   enabled: state,

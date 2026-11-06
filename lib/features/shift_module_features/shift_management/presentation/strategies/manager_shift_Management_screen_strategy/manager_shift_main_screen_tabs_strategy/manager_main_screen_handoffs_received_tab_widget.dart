@@ -101,7 +101,7 @@ class ManagerMainScreenHandoffsReceivedTabWidget
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text('Go To Petty Cash'),
+                      Text(context.tr.goToPettyCash),
 
                       5.horizontalSpace,
                       AppSvg(

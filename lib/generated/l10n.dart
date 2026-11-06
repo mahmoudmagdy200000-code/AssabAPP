@@ -6203,6 +6203,111 @@ class S {
     return Intl.message('Theme', name: 'theme', desc: '', args: []);
   }
 
+  /// `Light`
+  String get lightMode {
+    return Intl.message('Light', name: 'lightMode', desc: '', args: []);
+  }
+
+  /// `Dark`
+  String get darkMode {
+    return Intl.message('Dark', name: 'darkMode', desc: '', args: []);
+  }
+
+  /// `Edit your personal and profile details.`
+  String get accountDetailsDescription {
+    return Intl.message(
+      'Edit your personal and profile details.',
+      name: 'accountDetailsDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `First Name`
+  String get accountFirstName {
+    return Intl.message(
+      'First Name',
+      name: 'accountFirstName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Name`
+  String get accountLastName {
+    return Intl.message(
+      'Last Name',
+      name: 'accountLastName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email address`
+  String get accountEmailAddress {
+    return Intl.message(
+      'Email address',
+      name: 'accountEmailAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Role`
+  String get accountRole {
+    return Intl.message('Role', name: 'accountRole', desc: '', args: []);
+  }
+
+  /// `Assigned to`
+  String get accountAssignedTo {
+    return Intl.message(
+      'Assigned to',
+      name: 'accountAssignedTo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Workdays`
+  String get accountWorkdays {
+    return Intl.message(
+      'Workdays',
+      name: 'accountWorkdays',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Work Shift`
+  String get accountWorkShift {
+    return Intl.message(
+      'Work Shift',
+      name: 'accountWorkShift',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only HR can make changes to this information. Please contact them for any updates.`
+  String get accountDetailsHrNotice {
+    return Intl.message(
+      'Only HR can make changes to this information. Please contact them for any updates.',
+      name: 'accountDetailsHrNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tools & Records ({count})`
+  String toolsAndRecordsCount(int count) {
+    return Intl.message(
+      'Tools & Records ($count)',
+      name: 'toolsAndRecordsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `New Purchase Order`
   String get newPurchaseOrder {
     return Intl.message(
@@ -24897,6 +25002,2111 @@ class S {
     return Intl.message(
       'Remaining amount must be 0.00 SAR',
       name: 'allocationIncomplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No managers found`
+  String get noManagersFound {
+    return Intl.message(
+      'No managers found',
+      name: 'noManagersFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Go to petty cash`
+  String get goToPettyCash {
+    return Intl.message(
+      'Go to petty cash',
+      name: 'goToPettyCash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid shift time`
+  String get invalidShiftTime {
+    return Intl.message(
+      'Invalid shift time',
+      name: 'invalidShiftTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approvals, Reports, Security & Retention`
+  String get ownerSettingsSummary {
+    return Intl.message(
+      'Approvals, Reports, Security & Retention',
+      name: 'ownerSettingsSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approval Settings`
+  String get ownerApprovalSettings {
+    return Intl.message(
+      'Approval Settings',
+      name: 'ownerApprovalSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report Settings`
+  String get ownerReportSettings {
+    return Intl.message(
+      'Report Settings',
+      name: 'ownerReportSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Security Settings`
+  String get ownerSecuritySettings {
+    return Intl.message(
+      'Security Settings',
+      name: 'ownerSecuritySettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retention Settings`
+  String get ownerRetentionSettings {
+    return Intl.message(
+      'Retention Settings',
+      name: 'ownerRetentionSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by item name`
+  String get followupSearchByItemName {
+    return Intl.message(
+      'Search by item name',
+      name: 'followupSearchByItemName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by supplier name`
+  String get followupSearchBySupplierName {
+    return Intl.message(
+      'Search by supplier name',
+      name: 'followupSearchBySupplierName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export Price comparison data`
+  String get followupExportPriceComparisonData {
+    return Intl.message(
+      'Export Price comparison data',
+      name: 'followupExportPriceComparisonData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export Data`
+  String get followupExportData {
+    return Intl.message(
+      'Export Data',
+      name: 'followupExportData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changes saved successfully`
+  String get followupChangesSavedSuccessfully {
+    return Intl.message(
+      'Changes saved successfully',
+      name: 'followupChangesSavedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Response Time`
+  String get followupSelectResponseTime {
+    return Intl.message(
+      'Select Response Time',
+      name: 'followupSelectResponseTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Personal Approval for All New Branches`
+  String get followupPersonalApprovalForAllNewBranches {
+    return Intl.message(
+      'Personal Approval for All New Branches',
+      name: 'followupPersonalApprovalForAllNewBranches',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Critical Assets Always Require Approval`
+  String get followupCriticalAssetsAlwaysRequireApproval {
+    return Intl.message(
+      'Critical Assets Always Require Approval',
+      name: 'followupCriticalAssetsAlwaysRequireApproval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset to Default`
+  String get followupResetToDefault {
+    return Intl.message(
+      'Reset to Default',
+      name: 'followupResetToDefault',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save Changes`
+  String get followupSaveChanges {
+    return Intl.message(
+      'Save Changes',
+      name: 'followupSaveChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Owner Comprehensive Settings`
+  String get followupOwnerComprehensiveSettings {
+    return Intl.message(
+      'Owner Comprehensive Settings',
+      name: 'followupOwnerComprehensiveSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Data Encryption`
+  String get followupDataEncryption {
+    return Intl.message(
+      'Data Encryption',
+      name: 'followupDataEncryption',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Daily Backup`
+  String get followupDailyBackup {
+    return Intl.message(
+      'Daily Backup',
+      name: 'followupDailyBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Interval`
+  String get followupSelectInterval {
+    return Intl.message(
+      'Select Interval',
+      name: 'followupSelectInterval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly Security Audit`
+  String get followupMonthlySecurityAudit {
+    return Intl.message(
+      'Monthly Security Audit',
+      name: 'followupMonthlySecurityAudit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `My Ledger feature is coming soon`
+  String get followupMyLedgerFeatureIsComingSoon {
+    return Intl.message(
+      'My Ledger feature is coming soon',
+      name: 'followupMyLedgerFeatureIsComingSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Audit`
+  String get followupAudit {
+    return Intl.message('Audit', name: 'followupAudit', desc: '', args: []);
+  }
+
+  /// `Get notified when there is a new audit`
+  String get followupGetNotifiedWhenThereIsANewAudit {
+    return Intl.message(
+      'Get notified when there is a new audit',
+      name: 'followupGetNotifiedWhenThereIsANewAudit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Status Modification`
+  String get followupStatusModification {
+    return Intl.message(
+      'Status Modification',
+      name: 'followupStatusModification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Major Discrepancies`
+  String get followupMajorDiscrepancies {
+    return Intl.message(
+      'Major Discrepancies',
+      name: 'followupMajorDiscrepancies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add New Aggregator`
+  String get followupAddNewAggregator {
+    return Intl.message(
+      'Add New Aggregator',
+      name: 'followupAddNewAggregator',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Activate Selected Aggregator`
+  String get followupActivateSelectedAggregator {
+    return Intl.message(
+      'Activate Selected Aggregator',
+      name: 'followupActivateSelectedAggregator',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly Reports`
+  String get followupMonthlyReports {
+    return Intl.message(
+      'Monthly Reports',
+      name: 'followupMonthlyReports',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Filter data`
+  String get followupFilterData {
+    return Intl.message(
+      'Filter data',
+      name: 'followupFilterData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `January`
+  String get followupJanuary {
+    return Intl.message('January', name: 'followupJanuary', desc: '', args: []);
+  }
+
+  /// `February`
+  String get followupFebruary {
+    return Intl.message(
+      'February',
+      name: 'followupFebruary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `March`
+  String get followupMarch {
+    return Intl.message('March', name: 'followupMarch', desc: '', args: []);
+  }
+
+  /// `April`
+  String get followupApril {
+    return Intl.message('April', name: 'followupApril', desc: '', args: []);
+  }
+
+  /// `June`
+  String get followupJune {
+    return Intl.message('June', name: 'followupJune', desc: '', args: []);
+  }
+
+  /// `July`
+  String get followupJuly {
+    return Intl.message('July', name: 'followupJuly', desc: '', args: []);
+  }
+
+  /// `August`
+  String get followupAugust {
+    return Intl.message('August', name: 'followupAugust', desc: '', args: []);
+  }
+
+  /// `September`
+  String get followupSeptember {
+    return Intl.message(
+      'September',
+      name: 'followupSeptember',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `October`
+  String get followupOctober {
+    return Intl.message('October', name: 'followupOctober', desc: '', args: []);
+  }
+
+  /// `November`
+  String get followupNovember {
+    return Intl.message(
+      'November',
+      name: 'followupNovember',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `December`
+  String get followupDecember {
+    return Intl.message(
+      'December',
+      name: 'followupDecember',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Order created successfully`
+  String get followupOrderCreatedSuccessfully {
+    return Intl.message(
+      'Order created successfully',
+      name: 'followupOrderCreatedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create Order with recommended source`
+  String get followupCreateOrderWithRecommendedSource {
+    return Intl.message(
+      'Create Order with recommended source',
+      name: 'followupCreateOrderWithRecommendedSource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View details or manage Branch Aggregators`
+  String get followupViewDetailsOrManageBranchAggregators {
+    return Intl.message(
+      'View details or manage Branch Aggregators',
+      name: 'followupViewDetailsOrManageBranchAggregators',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shift Variance Alerts`
+  String get followupShiftVarianceAlerts {
+    return Intl.message(
+      'Shift Variance Alerts',
+      name: 'followupShiftVarianceAlerts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Daily Inventory Reminders`
+  String get followupDailyInventoryReminders {
+    return Intl.message(
+      'Daily Inventory Reminders',
+      name: 'followupDailyInventoryReminders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approved Aggregators Only`
+  String get followupApprovedAggregatorsOnly {
+    return Intl.message(
+      'Approved Aggregators Only',
+      name: 'followupApprovedAggregatorsOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset Transfer Requests`
+  String get followupAssetTransferRequests {
+    return Intl.message(
+      'Asset Transfer Requests',
+      name: 'followupAssetTransferRequests',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow Split Shift Handovers`
+  String get followupAllowSplitShiftHandovers {
+    return Intl.message(
+      'Allow Split Shift Handovers',
+      name: 'followupAllowSplitShiftHandovers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profit`
+  String get followupProfit {
+    return Intl.message('Profit', name: 'followupProfit', desc: '', args: []);
+  }
+
+  /// `Why It Matters`
+  String get followupWhyItMatters {
+    return Intl.message(
+      'Why It Matters',
+      name: 'followupWhyItMatters',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password reset successfully`
+  String get followupPasswordResetSuccessfully {
+    return Intl.message(
+      'Password reset successfully',
+      name: 'followupPasswordResetSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create new password`
+  String get followupCreateNewPassword {
+    return Intl.message(
+      'Create new password',
+      name: 'followupCreateNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report exported successfully`
+  String get followupReportExportedSuccessfully {
+    return Intl.message(
+      'Report exported successfully',
+      name: 'followupReportExportedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report sent via email successfully`
+  String get followupReportSentViaEmailSuccessfully {
+    return Intl.message(
+      'Report sent via email successfully',
+      name: 'followupReportSentViaEmailSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No saved scenarios found`
+  String get followupNoSavedScenariosFound {
+    return Intl.message(
+      'No saved scenarios found',
+      name: 'followupNoSavedScenariosFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test exported successfully`
+  String get followupTestExportedSuccessfully {
+    return Intl.message(
+      'Test exported successfully',
+      name: 'followupTestExportedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Caution`
+  String get followupCaution {
+    return Intl.message('Caution', name: 'followupCaution', desc: '', args: []);
+  }
+
+  /// `Very Safe`
+  String get followupVerySafe {
+    return Intl.message(
+      'Very Safe',
+      name: 'followupVerySafe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset Status`
+  String get followupAssetStatus {
+    return Intl.message(
+      'Asset Status',
+      name: 'followupAssetStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Branch Performance`
+  String get followupBranchPerformance {
+    return Intl.message(
+      'Branch Performance',
+      name: 'followupBranchPerformance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Overall Investment`
+  String get followupOverallInvestment {
+    return Intl.message(
+      'Overall Investment',
+      name: 'followupOverallInvestment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pieces`
+  String get followupPieces {
+    return Intl.message('Pieces', name: 'followupPieces', desc: '', args: []);
+  }
+
+  /// `Space efficiency`
+  String get followupSpaceEfficiency {
+    return Intl.message(
+      'Space efficiency',
+      name: 'followupSpaceEfficiency',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report sent successfully to your email`
+  String get followupReportSentSuccessfullyToYourEmail {
+    return Intl.message(
+      'Report sent successfully to your email',
+      name: 'followupReportSentSuccessfullyToYourEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Date`
+  String get followupNoDate {
+    return Intl.message('No Date', name: 'followupNoDate', desc: '', args: []);
+  }
+
+  /// `Search by branch name`
+  String get followupSearchByBranchName {
+    return Intl.message(
+      'Search by branch name',
+      name: 'followupSearchByBranchName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sunday`
+  String get followupSunday {
+    return Intl.message('Sunday', name: 'followupSunday', desc: '', args: []);
+  }
+
+  /// `Monday`
+  String get followupMonday {
+    return Intl.message('Monday', name: 'followupMonday', desc: '', args: []);
+  }
+
+  /// `Tuesday`
+  String get followupTuesday {
+    return Intl.message('Tuesday', name: 'followupTuesday', desc: '', args: []);
+  }
+
+  /// `Wednesday`
+  String get followupWednesday {
+    return Intl.message(
+      'Wednesday',
+      name: 'followupWednesday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Thursday`
+  String get followupThursday {
+    return Intl.message(
+      'Thursday',
+      name: 'followupThursday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Friday`
+  String get followupFriday {
+    return Intl.message('Friday', name: 'followupFriday', desc: '', args: []);
+  }
+
+  /// `Saturday`
+  String get followupSaturday {
+    return Intl.message(
+      'Saturday',
+      name: 'followupSaturday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard Data`
+  String get followupDashboardData {
+    return Intl.message(
+      'Dashboard Data',
+      name: 'followupDashboardData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No branches found`
+  String get followupNoBranchesFound {
+    return Intl.message(
+      'No branches found',
+      name: 'followupNoBranchesFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sort Data`
+  String get followupSortData {
+    return Intl.message(
+      'Sort Data',
+      name: 'followupSortData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard Summary`
+  String get followupDashboardSummary {
+    return Intl.message(
+      'Dashboard Summary',
+      name: 'followupDashboardSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Month`
+  String get followupMonth {
+    return Intl.message('Month', name: 'followupMonth', desc: '', args: []);
+  }
+
+  /// `Year`
+  String get followupYear {
+    return Intl.message('Year', name: 'followupYear', desc: '', args: []);
+  }
+
+  /// `Sender Details`
+  String get followupSenderDetails {
+    return Intl.message(
+      'Sender Details',
+      name: 'followupSenderDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Supplier Name`
+  String get followupNoSupplierName {
+    return Intl.message(
+      'No Supplier Name',
+      name: 'followupNoSupplierName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export Expense Report`
+  String get followupExportExpenseReport {
+    return Intl.message(
+      'Export Expense Report',
+      name: 'followupExportExpenseReport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expense Type`
+  String get followupExpenseType {
+    return Intl.message(
+      'Expense Type',
+      name: 'followupExpenseType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export Custody Report`
+  String get followupExportCustodyReport {
+    return Intl.message(
+      'Export Custody Report',
+      name: 'followupExportCustodyReport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cash vs Custody vs Supplier`
+  String get followupCashVsCustodyVsSupplier {
+    return Intl.message(
+      'Cash vs Custody vs Supplier',
+      name: 'followupCashVsCustodyVsSupplier',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `June Custody Summary`
+  String get followupJuneCustodySummary {
+    return Intl.message(
+      'June Custody Summary',
+      name: 'followupJuneCustodySummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current Custody Balance`
+  String get followupCurrentCustodyBalance {
+    return Intl.message(
+      'Current Custody Balance',
+      name: 'followupCurrentCustodyBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fast`
+  String get followupFast {
+    return Intl.message('Fast', name: 'followupFast', desc: '', args: []);
+  }
+
+  /// `Slow`
+  String get followupSlow {
+    return Intl.message('Slow', name: 'followupSlow', desc: '', args: []);
+  }
+
+  /// `No variance details available`
+  String get followupNoVarianceDetailsAvailable {
+    return Intl.message(
+      'No variance details available',
+      name: 'followupNoVarianceDetailsAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Comparison saved successfully`
+  String get followupComparisonSavedSuccessfully {
+    return Intl.message(
+      'Comparison saved successfully',
+      name: 'followupComparisonSavedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid email or phone`
+  String get followupInvalidEmailOrPhone {
+    return Intl.message(
+      'Invalid email or phone',
+      name: 'followupInvalidEmailOrPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request clarification from branch manager`
+  String get followupRequestClarificationFromBranchManager {
+    return Intl.message(
+      'Request clarification from branch manager',
+      name: 'followupRequestClarificationFromBranchManager',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Written Warning`
+  String get followupWrittenWarning {
+    return Intl.message(
+      'Written Warning',
+      name: 'followupWrittenWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Responsible for discrepancy`
+  String get followupResponsibleForDiscrepancy {
+    return Intl.message(
+      'Responsible for discrepancy',
+      name: 'followupResponsibleForDiscrepancy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Warning Message`
+  String get followupWarningMessage {
+    return Intl.message(
+      'Warning Message',
+      name: 'followupWarningMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply Decision`
+  String get followupApplyDecision {
+    return Intl.message(
+      'Apply Decision',
+      name: 'followupApplyDecision',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reject Asset`
+  String get followupRejectAsset {
+    return Intl.message(
+      'Reject Asset',
+      name: 'followupRejectAsset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reason for rejection`
+  String get followupReasonForRejection {
+    return Intl.message(
+      'Reason for rejection',
+      name: 'followupReasonForRejection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deduction Amount`
+  String get followupDeductionAmount {
+    return Intl.message(
+      'Deduction Amount',
+      name: 'followupDeductionAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Short Reason`
+  String get followupShortReason {
+    return Intl.message(
+      'Short Reason',
+      name: 'followupShortReason',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by name`
+  String get followupSearchByName {
+    return Intl.message(
+      'Search by name',
+      name: 'followupSearchByName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In custody`
+  String get followupInCustody {
+    return Intl.message(
+      'In custody',
+      name: 'followupInCustody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photo`
+  String get followupPhoto {
+    return Intl.message('Photo', name: 'followupPhoto', desc: '', args: []);
+  }
+
+  /// `View Full History`
+  String get followupViewFullHistory {
+    return Intl.message(
+      'View Full History',
+      name: 'followupViewFullHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Performance Summary`
+  String get followupPerformanceSummary {
+    return Intl.message(
+      'Performance Summary',
+      name: 'followupPerformanceSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Average resolution time for discrepancies `
+  String get followupAverageResolutionTimeForDiscrepancies {
+    return Intl.message(
+      'Average resolution time for discrepancies ',
+      name: 'followupAverageResolutionTimeForDiscrepancies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last audit score `
+  String get followupLastAuditScore {
+    return Intl.message(
+      'Last audit score ',
+      name: 'followupLastAuditScore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Missed deadlines or failed handovers `
+  String get followupMissedDeadlinesOrFailedHandovers {
+    return Intl.message(
+      'Missed deadlines or failed handovers ',
+      name: 'followupMissedDeadlinesOrFailedHandovers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request ID`
+  String get followupRequestID {
+    return Intl.message(
+      'Request ID',
+      name: 'followupRequestID',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Destination`
+  String get followupDestination {
+    return Intl.message(
+      'Destination',
+      name: 'followupDestination',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Supported by`
+  String get followupSupportedBy {
+    return Intl.message(
+      'Supported by',
+      name: 'followupSupportedBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset Value`
+  String get followupAssetValue {
+    return Intl.message(
+      'Asset Value',
+      name: 'followupAssetValue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brand Standard`
+  String get followupBrandStandard {
+    return Intl.message(
+      'Brand Standard',
+      name: 'followupBrandStandard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Critical Asset`
+  String get followupCriticalAsset {
+    return Intl.message(
+      'Critical Asset',
+      name: 'followupCriticalAsset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Service`
+  String get followupLastService {
+    return Intl.message(
+      'Last Service',
+      name: 'followupLastService',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Business Justification`
+  String get followupBusinessJustification {
+    return Intl.message(
+      'Business Justification',
+      name: 'followupBusinessJustification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strategic Impacty`
+  String get followupStrategicImpacty {
+    return Intl.message(
+      'Strategic Impacty',
+      name: 'followupStrategicImpacty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Optimal resource allocation`
+  String get followupOptimalResourceAllocation {
+    return Intl.message(
+      'Optimal resource allocation',
+      name: 'followupOptimalResourceAllocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brand Standards`
+  String get followupBrandStandards {
+    return Intl.message(
+      'Brand Standards',
+      name: 'followupBrandStandards',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Maintained at both locations`
+  String get followupMaintainedAtBothLocations {
+    return Intl.message(
+      'Maintained at both locations',
+      name: 'followupMaintainedAtBothLocations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brand Impact Analysis`
+  String get followupBrandImpactAnalysis {
+    return Intl.message(
+      'Brand Impact Analysis',
+      name: 'followupBrandImpactAnalysis',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enhanced`
+  String get followupEnhanced {
+    return Intl.message(
+      'Enhanced',
+      name: 'followupEnhanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Maintained`
+  String get followupMaintained {
+    return Intl.message(
+      'Maintained',
+      name: 'followupMaintained',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Improved`
+  String get followupImproved {
+    return Intl.message(
+      'Improved',
+      name: 'followupImproved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Comprehensive Summary`
+  String get followupComprehensiveSummary {
+    return Intl.message(
+      'Comprehensive Summary',
+      name: 'followupComprehensiveSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Audit Date`
+  String get followupAuditDate {
+    return Intl.message(
+      'Audit Date',
+      name: 'followupAuditDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Audit Approval`
+  String get followupAuditApproval {
+    return Intl.message(
+      'Audit Approval',
+      name: 'followupAuditApproval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Financial Impact Analysis`
+  String get followupFinancialImpactAnalysis {
+    return Intl.message(
+      'Financial Impact Analysis',
+      name: 'followupFinancialImpactAnalysis',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Financial Impact`
+  String get followupFinancialImpact {
+    return Intl.message(
+      'Financial Impact',
+      name: 'followupFinancialImpact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Operational Impact`
+  String get followupOperationalImpact {
+    return Intl.message(
+      'Operational Impact',
+      name: 'followupOperationalImpact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Critical Assets`
+  String get followupCriticalAssets {
+    return Intl.message(
+      'Critical Assets',
+      name: 'followupCriticalAssets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brand Impact Level`
+  String get followupBrandImpactLevel {
+    return Intl.message(
+      'Brand Impact Level',
+      name: 'followupBrandImpactLevel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brand Impact`
+  String get followupBrandImpact {
+    return Intl.message(
+      'Brand Impact',
+      name: 'followupBrandImpact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approve Critical Changes`
+  String get followupApproveCriticalChanges {
+    return Intl.message(
+      'Approve Critical Changes',
+      name: 'followupApproveCriticalChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Salary Deducted`
+  String get followupSalaryDeducted {
+    return Intl.message(
+      'Salary Deducted',
+      name: 'followupSalaryDeducted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review Major Discrepancies`
+  String get followupReviewMajorDiscrepancies {
+    return Intl.message(
+      'Review Major Discrepancies',
+      name: 'followupReviewMajorDiscrepancies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request Details`
+  String get followupRequestDetails {
+    return Intl.message(
+      'Request Details',
+      name: 'followupRequestDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Success rate`
+  String get followupSuccessRate {
+    return Intl.message(
+      'Success rate',
+      name: 'followupSuccessRate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discrepancies`
+  String get followupDiscrepancies {
+    return Intl.message(
+      'Discrepancies',
+      name: 'followupDiscrepancies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session Duration`
+  String get followupSessionDuration {
+    return Intl.message(
+      'Session Duration',
+      name: 'followupSessionDuration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Affected Value`
+  String get followupAffectedValue {
+    return Intl.message(
+      'Affected Value',
+      name: 'followupAffectedValue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Financial Analysis`
+  String get followupFinancialAnalysis {
+    return Intl.message(
+      'Financial Analysis',
+      name: 'followupFinancialAnalysis',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total Affected Value`
+  String get followupTotalAffectedValue {
+    return Intl.message(
+      'Total Affected Value',
+      name: 'followupTotalAffectedValue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Impact Ratio`
+  String get followupImpactRatio {
+    return Intl.message(
+      'Impact Ratio',
+      name: 'followupImpactRatio',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Salary Deduction`
+  String get followupSalaryDeduction {
+    return Intl.message(
+      'Salary Deduction',
+      name: 'followupSalaryDeduction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review Audit`
+  String get followupReviewAudit {
+    return Intl.message(
+      'Review Audit',
+      name: 'followupReviewAudit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset Modifications`
+  String get followupAssetModifications {
+    return Intl.message(
+      'Asset Modifications',
+      name: 'followupAssetModifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Handover Reports`
+  String get followupHandoverReports {
+    return Intl.message(
+      'Handover Reports',
+      name: 'followupHandoverReports',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disposal Requests`
+  String get followupDisposalRequests {
+    return Intl.message(
+      'Disposal Requests',
+      name: 'followupDisposalRequests',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transfer Requests`
+  String get followupTransferRequests {
+    return Intl.message(
+      'Transfer Requests',
+      name: 'followupTransferRequests',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset Records`
+  String get followupAssetRecords {
+    return Intl.message(
+      'Asset Records',
+      name: 'followupAssetRecords',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asab Owner Control Panel`
+  String get followupAsabOwnerControlPanel {
+    return Intl.message(
+      'Asab Owner Control Panel',
+      name: 'followupAsabOwnerControlPanel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All Store Branches`
+  String get followupAllStoreBranches {
+    return Intl.message(
+      'All Store Branches',
+      name: 'followupAllStoreBranches',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset Overview`
+  String get followupAssetOverview {
+    return Intl.message(
+      'Asset Overview',
+      name: 'followupAssetOverview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Modifications`
+  String get followupModifications {
+    return Intl.message(
+      'Modifications',
+      name: 'followupModifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strategic Overview`
+  String get followupStrategicOverview {
+    return Intl.message(
+      'Strategic Overview',
+      name: 'followupStrategicOverview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total Chain Assets`
+  String get followupTotalChainAssets {
+    return Intl.message(
+      'Total Chain Assets',
+      name: 'followupTotalChainAssets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excellent Status`
+  String get followupExcellentStatus {
+    return Intl.message(
+      'Excellent Status',
+      name: 'followupExcellentStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Branches`
+  String get followupBranches {
+    return Intl.message(
+      'Branches',
+      name: 'followupBranches',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total Investment`
+  String get followupTotalInvestment {
+    return Intl.message(
+      'Total Investment',
+      name: 'followupTotalInvestment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Critical Value Impact`
+  String get followupCriticalValueImpact {
+    return Intl.message(
+      'Critical Value Impact',
+      name: 'followupCriticalValueImpact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strategic Branch Performance`
+  String get followupStrategicBranchPerformance {
+    return Intl.message(
+      'Strategic Branch Performance',
+      name: 'followupStrategicBranchPerformance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detailed Analytics`
+  String get followupDetailedAnalytics {
+    return Intl.message(
+      'Detailed Analytics',
+      name: 'followupDetailedAnalytics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Submitted By`
+  String get followupSubmittedBy {
+    return Intl.message(
+      'Submitted By',
+      name: 'followupSubmittedBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Submitted On`
+  String get followupSubmittedOn {
+    return Intl.message(
+      'Submitted On',
+      name: 'followupSubmittedOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Condition`
+  String get followupCondition {
+    return Intl.message(
+      'Condition',
+      name: 'followupCondition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Visual Evidence`
+  String get followupVisualEvidence {
+    return Intl.message(
+      'Visual Evidence',
+      name: 'followupVisualEvidence',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Comprehensive Asset Overview`
+  String get followupComprehensiveAssetOverview {
+    return Intl.message(
+      'Comprehensive Asset Overview',
+      name: 'followupComprehensiveAssetOverview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network Statistics`
+  String get followupNetworkStatistics {
+    return Intl.message(
+      'Network Statistics',
+      name: 'followupNetworkStatistics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Branch Audit Summary`
+  String get followupBranchAuditSummary {
+    return Intl.message(
+      'Branch Audit Summary',
+      name: 'followupBranchAuditSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report`
+  String get followupReport {
+    return Intl.message('Report', name: 'followupReport', desc: '', args: []);
+  }
+
+  /// `View details`
+  String get followupViewDetails {
+    return Intl.message(
+      'View details',
+      name: 'followupViewDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cash Reconciliation`
+  String get followupCashReconciliation {
+    return Intl.message(
+      'Cash Reconciliation',
+      name: 'followupCashReconciliation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expected Cash`
+  String get followupExpectedCash {
+    return Intl.message(
+      'Expected Cash',
+      name: 'followupExpectedCash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Warning Note`
+  String get followupWarningNote {
+    return Intl.message(
+      'Warning Note',
+      name: 'followupWarningNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Staff Assigned`
+  String get followupStaffAssigned {
+    return Intl.message(
+      'Staff Assigned',
+      name: 'followupStaffAssigned',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending Staff Assignment`
+  String get followupPendingStaffAssignment {
+    return Intl.message(
+      'Pending Staff Assignment',
+      name: 'followupPendingStaffAssignment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request submitted successfully`
+  String get followupRequestSubmittedSuccessfully {
+    return Intl.message(
+      'Request submitted successfully',
+      name: 'followupRequestSubmittedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report Rejected`
+  String get followupReportRejected {
+    return Intl.message(
+      'Report Rejected',
+      name: 'followupReportRejected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Counted cash is required for reconciliation preview`
+  String get followupCountedCashIsRequiredForReconciliationPreview {
+    return Intl.message(
+      'Counted cash is required for reconciliation preview',
+      name: 'followupCountedCashIsRequiredForReconciliationPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Counted cash is required before ending shift`
+  String get followupCountedCashIsRequiredBeforeEndingShift {
+    return Intl.message(
+      'Counted cash is required before ending shift',
+      name: 'followupCountedCashIsRequiredBeforeEndingShift',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Modification Rejected`
+  String get followupModificationRejected {
+    return Intl.message(
+      'Modification Rejected',
+      name: 'followupModificationRejected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request Rejected`
+  String get followupRequestRejected {
+    return Intl.message(
+      'Request Rejected',
+      name: 'followupRequestRejected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fully Agree`
+  String get followupFullyAgree {
+    return Intl.message(
+      'Fully Agree',
+      name: 'followupFullyAgree',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minor Notes`
+  String get followupMinorNotes {
+    return Intl.message(
+      'Minor Notes',
+      name: 'followupMinorNotes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Major Issue`
+  String get followupMajorIssue {
+    return Intl.message(
+      'Major Issue',
+      name: 'followupMajorIssue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recipient Inspection`
+  String get followupRecipientInspection {
+    return Intl.message(
+      'Recipient Inspection',
+      name: 'followupRecipientInspection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recipient Notes`
+  String get followupRecipientNotes {
+    return Intl.message(
+      'Recipient Notes',
+      name: 'followupRecipientNotes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Describe the issue you are reporting`
+  String get followupDescribeTheIssueYouAreReporting {
+    return Intl.message(
+      'Describe the issue you are reporting',
+      name: 'followupDescribeTheIssueYouAreReporting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photo Evidence`
+  String get followupPhotoEvidence {
+    return Intl.message(
+      'Photo Evidence',
+      name: 'followupPhotoEvidence',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fixed Assets Scanner`
+  String get followupFixedAssetsScanner {
+    return Intl.message(
+      'Fixed Assets Scanner',
+      name: 'followupFixedAssetsScanner',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `HANDOVER MODULE`
+  String get followupHANDOVERMODULE {
+    return Intl.message(
+      'HANDOVER MODULE',
+      name: 'followupHANDOVERMODULE',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan Asset QR Code`
+  String get followupScanAssetQRCode {
+    return Intl.message(
+      'Scan Asset QR Code',
+      name: 'followupScanAssetQRCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `QR Successfully Scanned`
+  String get followupQRSuccessfullyScanned {
+    return Intl.message(
+      'QR Successfully Scanned',
+      name: 'followupQRSuccessfullyScanned',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset data retrieved`
+  String get followupAssetDataRetrieved {
+    return Intl.message(
+      'Asset data retrieved',
+      name: 'followupAssetDataRetrieved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not parse JSON data`
+  String get followupCouldNotParseJSONData {
+    return Intl.message(
+      'Could not parse JSON data',
+      name: 'followupCouldNotParseJSONData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown error`
+  String get followupUnknownError {
+    return Intl.message(
+      'Unknown error',
+      name: 'followupUnknownError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan Again`
+  String get followupScanAgain {
+    return Intl.message(
+      'Scan Again',
+      name: 'followupScanAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset ID`
+  String get followupAssetID {
+    return Intl.message(
+      'Asset ID',
+      name: 'followupAssetID',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download failed`
+  String get followupDownloadFailed {
+    return Intl.message(
+      'Download failed',
+      name: 'followupDownloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No historical photos available`
+  String get followupNoHistoricalPhotosAvailable {
+    return Intl.message(
+      'No historical photos available',
+      name: 'followupNoHistoricalPhotosAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No status history available`
+  String get followupNoStatusHistoryAvailable {
+    return Intl.message(
+      'No status history available',
+      name: 'followupNoStatusHistoryAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No transfer history available`
+  String get followupNoTransferHistoryAvailable {
+    return Intl.message(
+      'No transfer history available',
+      name: 'followupNoTransferHistoryAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No custody history available`
+  String get followupNoCustodyHistoryAvailable {
+    return Intl.message(
+      'No custody history available',
+      name: 'followupNoCustodyHistoryAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No financial information available`
+  String get followupNoFinancialInformationAvailable {
+    return Intl.message(
+      'No financial information available',
+      name: 'followupNoFinancialInformationAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Form Fill`
+  String get followupFormFill {
+    return Intl.message(
+      'Form Fill',
+      name: 'followupFormFill',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If Available`
+  String get followupIfAvailable {
+    return Intl.message(
+      'If Available',
+      name: 'followupIfAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Product Name`
+  String get followupProductName {
+    return Intl.message(
+      'Product Name',
+      name: 'followupProductName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Multiple product names not allowed`
+  String get followupMultipleProductNamesNotAllowed {
+    return Intl.message(
+      'Multiple product names not allowed',
+      name: 'followupMultipleProductNamesNotAllowed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unit Of Measurement`
+  String get followupUnitOfMeasurement {
+    return Intl.message(
+      'Unit Of Measurement',
+      name: 'followupUnitOfMeasurement',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose unit`
+  String get followupChooseUnit {
+    return Intl.message(
+      'Choose unit',
+      name: 'followupChooseUnit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quantity Received`
+  String get followupQuantityReceived {
+    return Intl.message(
+      'Quantity Received',
+      name: 'followupQuantityReceived',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price Per Unit`
+  String get followupPricePerUnit {
+    return Intl.message(
+      'Price Per Unit',
+      name: 'followupPricePerUnit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upload Invoice or Delivery Note`
+  String get followupUploadInvoiceOrDeliveryNote {
+    return Intl.message(
+      'Upload Invoice or Delivery Note',
+      name: 'followupUploadInvoiceOrDeliveryNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue To Inspection Details`
+  String get followupContinueToInspectionDetails {
+    return Intl.message(
+      'Continue To Inspection Details',
+      name: 'followupContinueToInspectionDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `May`
+  String get followupMay {
+    return Intl.message('May', name: 'followupMay', desc: '', args: []);
+  }
+
+  /// `{count} Years`
+  String followupYears(int count) {
+    return Intl.message(
+      '$count Years',
+      name: 'followupYears',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Select value`
+  String get followupSelectValue {
+    return Intl.message(
+      'Select value',
+      name: 'followupSelectValue',
       desc: '',
       args: [],
     );

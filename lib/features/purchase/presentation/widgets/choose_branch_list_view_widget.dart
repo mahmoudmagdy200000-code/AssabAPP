@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/choose_item/choose_item_cubit.dart';
 import 'package:assab/core/cubits/choose_item/choose_item_state.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
@@ -42,14 +43,14 @@ class ChooseBranchListViewWidget extends StatelessWidget {
   });
 
   String _getPercentageText(double percentage) {
-    String text = 'Fast';
+    String text = S.current.followupFast;
 
     if (percentage >= 75) {
-      text = 'Fast';
+      text = S.current.followupFast;
     } else if (percentage >= 50) {
-      text = 'Normal';
+      text = S.current.normal;
     } else if (percentage >= 25) {
-      text = 'Slow';
+      text = S.current.followupSlow;
     }
 
     return text;

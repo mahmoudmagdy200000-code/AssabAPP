@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/cubits/add_item/add_item_cubit.dart';
 import 'package:assab/core/cubits/switch_button/switch_button_cubit.dart';
@@ -83,7 +84,7 @@ class SingleExpenseSummeryView extends StatelessWidget {
                           DateFormatter.formatDateMDY(
                             DateTime.tryParse(state ?? ''),
                           ) ??
-                          'No Date',
+                          S.current.followupNoDate,
                       showAmountIcon: false,
                     );
                   },
@@ -115,7 +116,7 @@ class SingleExpenseSummeryView extends StatelessWidget {
                   builder: (context, state) {
                     return ExpenseSummaryRowWidget(
                       title: context.tr.supplierName,
-                      value: state ?? 'No Supplier Name',
+                      value: state ?? S.current.followupNoSupplierName,
                       showAmountIcon: false,
                     );
                   },

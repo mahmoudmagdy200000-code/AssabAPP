@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 // ignore_for_file: deprecated_member_use
 import 'dart:math' as math;
 
@@ -14,15 +15,15 @@ extension BranchStatusExtension on BranchStatus {
   String get label {
     switch (this) {
       case BranchStatus.highRisk:
-        return 'High Risk';
+        return S.current.highRisk;
       case BranchStatus.risk:
-        return 'Risk';
+        return S.current.risk;
       case BranchStatus.caution:
-        return 'Caution';
+        return S.current.followupCaution;
       case BranchStatus.safe:
-        return 'Safe';
+        return S.current.safe;
       case BranchStatus.verySafe:
-        return 'Very Safe';
+        return S.current.followupVerySafe;
     }
   }
 
@@ -1164,7 +1165,7 @@ class BreakEvenChartPainter extends CustomPainter {
         canvas,
         px,
         py,
-        'Current',
+        S.current.currentCustody,
         data.currentPointY.toInt(),
         dotColor,
         opacity,

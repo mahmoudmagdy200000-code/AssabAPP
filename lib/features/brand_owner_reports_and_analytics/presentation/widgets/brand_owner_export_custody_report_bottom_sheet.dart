@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -55,7 +56,7 @@ class BrandOwnerExportCustodyReportBottomSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Export Custody Report',
+                    S.current.followupExportCustodyReport,
                     style: AppStyles.s20W500.copyWith(
                       color: context.customColor.text1,
                     ),
@@ -139,7 +140,7 @@ class BrandOwnerExportCustodyReportBottomSheet extends StatelessWidget {
                   ),
                   10.verticalSpace,
                   Text(
-                    'Export Format',
+                    S.current.exportFormat,
                     style: AppStyles.s14W500.copyWith(
                       color: context.customColor.text3,
                     ),

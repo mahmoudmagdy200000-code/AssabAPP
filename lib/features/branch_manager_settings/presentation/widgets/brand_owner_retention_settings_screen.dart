@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -65,14 +66,15 @@ class _BrandOwnerRetentionSettingsScreenState
         CustomDropdown<int>(
           items: List.generate(10, (index) => index + 1),
           initialValue: value,
-          displayTextBuilder: (selected) =>
-              selected != null ? '$selected Years' : 'Select value',
+          displayTextBuilder: (selected) => selected != null
+              ? S.current.followupYears(selected)
+              : S.current.followupSelectValue,
           borderRadius: 15.r,
           itemBuilder: (context, item, isSelected) {
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 10.r),
               child: Text(
-                '$item Years',
+                S.current.followupYears(item),
                 style: AppStyles.s14W500.copyWith(
                   color: isSelected
                       ? context.theme.primaryColor
@@ -106,7 +108,7 @@ class _BrandOwnerRetentionSettingsScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Retention Settings',
+                          S.current.ownerRetentionSettings,
                           style: AppStyles.s16W500.copyWith(
                             color: context.customColor.text1,
                           ),
@@ -148,7 +150,7 @@ class _BrandOwnerRetentionSettingsScreenState
                           AppOverlay.hideCustomOverlay();
                           AppSnackBar.showSuccess(
                             context,
-                            'Changes saved successfully',
+                            S.current.followupChangesSavedSuccessfully,
                           );
                         case BrandOwnerSettingsSaveStatus.failure:
                           AppOverlay.hideCustomOverlay();
@@ -237,7 +239,7 @@ class _BrandOwnerRetentionSettingsScreenState
                                 children: [
                                   Expanded(
                                     child: CustomTextButton(
-                                      text: 'Reset to Default',
+                                      text: S.current.followupResetToDefault,
                                       onTap: () => _cubit.resetToDefaults(),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 14.r,
@@ -249,7 +251,7 @@ class _BrandOwnerRetentionSettingsScreenState
                                   ),
                                   Expanded(
                                     child: AppButton(
-                                      text: 'Save Changes',
+                                      text: S.current.followupSaveChanges,
                                       onClick: () => _cubit.save(),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 14.r,

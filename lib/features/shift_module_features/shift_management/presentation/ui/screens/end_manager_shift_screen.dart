@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/choose_item/choose_item_cubit.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -229,7 +230,7 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
                                                     .businessDateClosed,
                                                 subTitle: context.tr
                                                     .yourFinalHandoverHasBeenSubmittedForReview(
-                                                      'Accountant Name',
+                                                      S.current.accountantName,
                                                     ),
                                                 managerShift: managerShiftState
                                                     .managerShift,

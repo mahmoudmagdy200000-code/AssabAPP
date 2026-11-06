@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/media/media_cubit.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -434,7 +435,7 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
                         AppBottomSheet.customPageRoute(
                           context,
                           (context) => FixedAssetsSuccessScreen(
-                            title: 'Cash Handover Recorded',
+                            title: S.current.cashHandoverRecorded,
                             message:
                                 '${validationState.getFieldValue('handoverAmount')} SAR has been added to the branch manager’s custody balance and logged in your payment history.',
                           ),

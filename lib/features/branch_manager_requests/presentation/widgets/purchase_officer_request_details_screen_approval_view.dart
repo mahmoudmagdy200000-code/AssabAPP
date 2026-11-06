@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -70,7 +71,7 @@ class PurchaseOfficerRequestDetailsScreenApprovalView extends StatelessWidget {
                   ),
                   12.verticalSpace,
                   Text(
-                    'Name',
+                    S.current.name,
                     style: AppStyles.s13W500.copyWith(
                       color: context.customColor.text3,
                     ),

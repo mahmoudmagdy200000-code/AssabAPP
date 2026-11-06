@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'dart:math';
 
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
@@ -546,7 +547,7 @@ class _BrandOwnerExpenseReportDetailsScreenState
   }
 
   String _periodLabel(ExpenseReportDateFilterEntity? date) {
-    if (date == null) return 'Monthly';
+    if (date == null) return S.current.monthly;
 
     final monthName = DateFormatter.getMonthName(date.month);
     return '$monthName ${date.year}';
@@ -869,7 +870,7 @@ class _BrandOwnerExpenseReportDetailsScreenState
                     ),
                   )
                   .toList(),
-              centerTitle: 'Cash vs Custody vs Supplier',
+              centerTitle: S.current.followupCashVsCustodyVsSupplier,
               centerSubtitle: context.tr.recordsCount(totalCount),
               titleColor: context.customColor.text1,
               subtitleColor: context.customColor.text3,

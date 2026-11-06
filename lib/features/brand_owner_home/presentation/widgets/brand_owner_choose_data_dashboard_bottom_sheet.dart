@@ -1,3 +1,4 @@
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -28,7 +29,7 @@ class BrandOwnerChooseDataDashboardBottomSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Dashboard Summary',
+                    S.current.followupDashboardSummary,
                     style: AppStyles.s20W500.copyWith(
                       color: context.customColor.text1,
                     ),
@@ -46,7 +47,7 @@ class BrandOwnerChooseDataDashboardBottomSheet extends StatelessWidget {
                       Expanded(
                         child: Column(
                           children: [
-                            const LabelTextField(text: 'Month'),
+                            LabelTextField(text: S.current.followupMonth),
                             CustomDropdown<int>(
                               items: const [
                                 1,
@@ -63,7 +64,7 @@ class BrandOwnerChooseDataDashboardBottomSheet extends StatelessWidget {
                                 12,
                               ],
                               displayTextBuilder: (value) => value == null
-                                  ? 'Select Month'
+                                  ? S.current.selectMonth
                                   : value.toString(),
                               backgroundColor: context.customColor.text2,
                               borderRadius: 18.r,
@@ -97,14 +98,14 @@ class BrandOwnerChooseDataDashboardBottomSheet extends StatelessWidget {
                       Expanded(
                         child: Column(
                           children: [
-                            const LabelTextField(text: 'Year'),
+                            LabelTextField(text: S.current.followupYear),
                             CustomDropdown<int>(
                               items: List.generate(
                                 10,
                                 (index) => DateTime.now().year - index,
                               ),
                               displayTextBuilder: (value) => value == null
-                                  ? 'Select Year'
+                                  ? S.current.selectYear
                                   : value.toString(),
                               backgroundColor: context.customColor.text2,
                               borderRadius: 18.r,
@@ -161,7 +162,7 @@ class BrandOwnerChooseDataDashboardBottomSheet extends StatelessWidget {
                       ),
                     );
                   },
-                  text: 'Sort Data',
+                  text: S.current.followupSortData,
                   enabled: state,
                   borderRadius: BorderRadius.circular(18.r),
                   padding: EdgeInsets.symmetric(vertical: 14.r),
