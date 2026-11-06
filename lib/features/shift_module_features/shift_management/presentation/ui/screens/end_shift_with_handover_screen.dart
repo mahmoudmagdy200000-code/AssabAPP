@@ -59,6 +59,7 @@ class _EndShiftWithHandoverScreenState
   late final TextEditingController _countedCashController;
   late final TextEditingController _handoverAmountController;
   late final TextEditingController _handoverNoteController;
+  late final TextEditingController _pendingIncomingCashController;
 
   @override
   void initState() {
@@ -70,6 +71,7 @@ class _EndShiftWithHandoverScreenState
     _countedCashController = TextEditingController();
     _handoverAmountController = TextEditingController();
     _handoverNoteController = TextEditingController();
+    _pendingIncomingCashController = TextEditingController();
   }
 
   @override
@@ -81,6 +83,7 @@ class _EndShiftWithHandoverScreenState
     _countedCashController.dispose();
     _handoverAmountController.dispose();
     _handoverNoteController.dispose();
+    _pendingIncomingCashController.dispose();
     super.dispose();
   }
 
@@ -166,6 +169,8 @@ class _EndShiftWithHandoverScreenState
                                 madaController: _madaSController,
                                 cashController: _cashController,
                                 countedCashController: _countedCashController,
+                                pendingIncomingCashController:
+                                    _pendingIncomingCashController,
                                 viewUpload: true,
                               ),
                             ),

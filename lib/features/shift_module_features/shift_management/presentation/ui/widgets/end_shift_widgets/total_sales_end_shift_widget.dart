@@ -34,6 +34,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
   final TextEditingController madaController;
   final TextEditingController cashController;
   final TextEditingController countedCashController;
+  final TextEditingController? pendingIncomingCashController;
 
   final bool viewUpload;
   const SalesBreakDownEndShiftWidget({
@@ -43,6 +44,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
     required this.madaController,
     required this.cashController,
     required this.countedCashController,
+    this.pendingIncomingCashController,
     required this.viewUpload,
   });
 
@@ -308,6 +310,56 @@ class _SalesBreakDownEndShiftWidget
                                     .validateField('countedCash', false);
                               }
                             }
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                      AppSvg(
+                        assetName: AppAssets.saudiRiyal,
+                        width: 20.w,
+                        height: 20.h,
+                      ),
+                    ],
+                  ),
+                ),
+
+                10.verticalSpace,
+                const CustomDivider(),
+                10.verticalSpace,
+
+                Text(
+                  context.tr.pendingIncomingCash,
+                  style: AppStyles.s15W500,
+                ),
+                2.verticalSpace,
+                Text(
+                  context.tr.pendingIncomingCashDesc,
+                  style: AppStyles.s13W500.copyWith(
+                    color: context.customColor.text3,
+                  ),
+                ),
+                10.verticalSpace,
+
+                ContainerCustomTextField(
+                  label: context.tr.pendingIncomingCash,
+                  isLabelRequired: false,
+                  pngAssetName: AppAssets.cashPng,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          controller: widget.pendingIncomingCashController,
+                          hintText: '0.00',
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          maxLength: 30,
+                          onChanged: (value) {
+                            final trimmed = value.trim();
+                            final parsed = double.tryParse(trimmed) ?? 0.0;
+                            context
+                                .read<EndShiftCubit>()
+                                .updatePendingIncomingCash(parsed);
                             setState(() {});
                           },
                         ),

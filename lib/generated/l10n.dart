@@ -27516,6 +27516,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Pending Incoming Cash`
+  String get pendingIncomingCash {
+    return Intl.message(
+      'Pending Incoming Cash',
+      name: 'pendingIncomingCash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cash from transfers or receipts not yet counted in drawer`
+  String get pendingIncomingCashDesc {
+    return Intl.message(
+      'Cash from transfers or receipts not yet counted in drawer',
+      name: 'pendingIncomingCashDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VAT (Unspecified / N/A)`
+  String get vatNotSpecified {
+    return Intl.message(
+      'VAT (Unspecified / N/A)',
+      name: 'vatNotSpecified',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

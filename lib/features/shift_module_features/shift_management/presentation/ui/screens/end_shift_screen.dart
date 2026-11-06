@@ -51,6 +51,7 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
   late final TextEditingController _madaSController;
   late final TextEditingController _cashController;
   late final TextEditingController _countedCashController;
+  late final TextEditingController _pendingIncomingCashController;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
     _madaSController = TextEditingController();
     _cashController = TextEditingController();
     _countedCashController = TextEditingController();
+    _pendingIncomingCashController = TextEditingController();
   }
 
   @override
@@ -69,6 +71,7 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
     _madaSController.dispose();
     _cashController.dispose();
     _countedCashController.dispose();
+    _pendingIncomingCashController.dispose();
     super.dispose();
   }
 
@@ -147,6 +150,8 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                 madaController: _madaSController,
                                 cashController: _cashController,
                                 countedCashController: _countedCashController,
+                                pendingIncomingCashController:
+                                    _pendingIncomingCashController,
                                 viewUpload: false,
                               ),
                             ),

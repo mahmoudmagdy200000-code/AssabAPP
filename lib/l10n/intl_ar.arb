@@ -3681,5 +3681,8 @@
   "previousSubmissionPendingContactAdmin": "نتيجة الإرسال السابق معلّقة. حدّث الحالة، وإن لم تتأكد تواصل مع المحاسب أو مسؤول النظام.",
   "refreshDailyCloseStatus": "تحديث حالة اليومية",
   "dailyCloseFinalSubmitted": "تم إرسال اليومية النهائية للمراجعة",
-  "submittingDailyClose": "جارٍ إرسال اليومية..."
+  "submittingDailyClose": "جارٍ إرسال اليومية...",
+  "pendingIncomingCash": "النقد الوارد المعلق",
+  "pendingIncomingCashDesc": "نقد من تحويلات أو استلامات لم يُعد بعد في الدرج",
+  "vatNotSpecified": "ضريبة القيمة المضافة (غير محددة)"
 }

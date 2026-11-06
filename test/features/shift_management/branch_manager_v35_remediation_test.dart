@@ -112,10 +112,34 @@ void main() {
       expect(result, isTrue);
     });
 
-    test('canProceedFromHandovers returns false when any handover is pending', () {
+    test('canProceedFromHandovers returns true when pending handover is fully documented under DAY-03', () {
       final handovers = [
         _createHandover(HandoverStatus.accepted),
         _createHandover(HandoverStatus.pending),
+      ];
+      final result = EndManagerShiftScreen.canProceedFromHandovers(handovers);
+      expect(result, isTrue);
+    });
+
+    test('canProceedFromHandovers returns false when pending handover is undocumented (0 amount) under AC-35', () {
+      final undocumented = HandoverDetailsEntity(
+        handoverId: 'ho-2',
+        cashierShiftId: 'cs-2',
+        cashierName: 'Ali Cashier',
+        handoverAmount: 0.0,
+        handoverDate: '2026-11-06',
+        approvedAt: '2026-11-06',
+        handoverTime: '12:00:00',
+        handoverFrom: 'Ali',
+        handoverTo: 'Manager',
+        varianceAmount: 0.0,
+        totalSales: 500.0,
+        handoverNotes: null,
+        handoverStatus: HandoverStatus.pending,
+      );
+      final handovers = [
+        _createHandover(HandoverStatus.accepted),
+        undocumented,
       ];
       final result = EndManagerShiftScreen.canProceedFromHandovers(handovers);
       expect(result, isFalse);
@@ -327,6 +351,32 @@ void main() {
       final totalWithVat15 = totalBeforeTax15 + vatAmount15; // 575.0
       expect(vatAmount15, equals(75.0));
       expect(totalWithVat15, equals(575.0));
+    });
+
+    test('ReceiveGoodsLocalItemModel handles null vatRate without blind 15% fallback', () {
+      final unspecItem = ReceiveGoodsLocalItemModel(
+        itemId: 'item-3',
+        productName: 'Raw Ingredient',
+        itemLogo: null,
+        qtyOrdered: 10,
+        qtyReceived: 10,
+        unitPrice: 50.0,
+        quality: ReceiveGoodsQualityEnum.normal,
+        termperature: 20,
+        unit: 'KG',
+        isVariance: false,
+        expirationDate: '2027-12-31',
+        vatRate: null,
+      );
+
+      final totalBeforeTax = unspecItem.unitPrice * unspecItem.qtyReceived;
+      final double? rawVatRate = unspecItem.vatRate;
+      final vatAmount = rawVatRate != null ? totalBeforeTax * rawVatRate : 0.0;
+      final totalWithVat = totalBeforeTax + vatAmount;
+
+      expect(rawVatRate, isNull);
+      expect(vatAmount, equals(0.0));
+      expect(totalWithVat, equals(500.0));
     });
   });
 }

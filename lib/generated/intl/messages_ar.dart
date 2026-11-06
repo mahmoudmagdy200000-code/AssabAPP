@@ -4149,6 +4149,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "pendingHandover": MessageLookupByLibrary.simpleMessage(
       "في انتظار التسليم",
     ),
+    "pendingIncomingCash": MessageLookupByLibrary.simpleMessage(
+      "النقد الوارد المعلق",
+    ),
+    "pendingIncomingCashDesc": MessageLookupByLibrary.simpleMessage(
+      "نقد من تحويلات أو استلامات لم يُعد بعد في الدرج",
+    ),
     "pendingInvoice": MessageLookupByLibrary.simpleMessage("فاتورة معلقة"),
     "pendingNotStarted": MessageLookupByLibrary.simpleMessage("معلق (لم يبدأ)"),
     "pendingOrders": MessageLookupByLibrary.simpleMessage("الأوامر المعلقة"),
@@ -6253,6 +6259,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vatDesc": MessageLookupByLibrary.simpleMessage(
       "لمتابعة حساب ضريبة القيمة المضافة، قم بتقديم تفاصيل الفاتورة عن طريق المسح الضوئي أو الإدخال اليدوي.",
+    ),
+    "vatNotSpecified": MessageLookupByLibrary.simpleMessage(
+      "ضريبة القيمة المضافة (غير محددة)",
     ),
     "vehicle": MessageLookupByLibrary.simpleMessage("مركبة"),
     "vehicleInformation": MessageLookupByLibrary.simpleMessage(

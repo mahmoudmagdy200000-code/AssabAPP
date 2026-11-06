@@ -3676,5 +3676,8 @@
   "previousSubmissionPendingContactAdmin": "The outcome of the previous submission is pending. Refresh the status, and if not confirmed contact the accountant or system administrator.",
   "refreshDailyCloseStatus": "Refresh Daily Close Status",
   "dailyCloseFinalSubmitted": "Final daily close submitted for review",
-  "submittingDailyClose": "Submitting daily close..."
+  "submittingDailyClose": "Submitting daily close...",
+  "pendingIncomingCash": "Pending Incoming Cash",
+  "pendingIncomingCashDesc": "Cash from transfers or receipts not yet counted in drawer",
+  "vatNotSpecified": "VAT (Unspecified / N/A)"
 }

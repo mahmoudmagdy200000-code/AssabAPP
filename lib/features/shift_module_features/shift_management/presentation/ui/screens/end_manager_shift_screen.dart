@@ -43,7 +43,10 @@ class EndManagerShiftScreen extends StatefulWidget {
       return true;
     }
     return handovers.every(
-      (handover) => handover.handoverStatus == HandoverStatus.accepted,
+      (handover) =>
+          handover.handoverStatus == HandoverStatus.accepted ||
+          (handover.handoverStatus == HandoverStatus.pending &&
+              handover.isDocumentedPending),
     );
   }
 

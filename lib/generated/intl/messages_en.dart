@@ -4210,6 +4210,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Pending Final Review",
     ),
     "pendingHandover": MessageLookupByLibrary.simpleMessage("Pending Handover"),
+    "pendingIncomingCash": MessageLookupByLibrary.simpleMessage(
+      "Pending Incoming Cash",
+    ),
+    "pendingIncomingCashDesc": MessageLookupByLibrary.simpleMessage(
+      "Cash from transfers or receipts not yet counted in drawer",
+    ),
     "pendingInvoice": MessageLookupByLibrary.simpleMessage("Pending Invoice"),
     "pendingNotStarted": MessageLookupByLibrary.simpleMessage(
       "Pending (not started)",
@@ -6398,6 +6404,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "vatAmount": MessageLookupByLibrary.simpleMessage("VAT Amount"),
     "vatDesc": MessageLookupByLibrary.simpleMessage(
       "To proceed with a VAT expense, provide the invoice details by scanning or manual input.",
+    ),
+    "vatNotSpecified": MessageLookupByLibrary.simpleMessage(
+      "VAT (Unspecified / N/A)",
     ),
     "vehicle": MessageLookupByLibrary.simpleMessage("Vehicle"),
     "vehicleInformation": MessageLookupByLibrary.simpleMessage(

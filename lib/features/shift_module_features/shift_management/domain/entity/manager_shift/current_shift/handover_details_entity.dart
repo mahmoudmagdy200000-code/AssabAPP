@@ -37,6 +37,15 @@ class HandoverDetailsEntity {
     required this.handoverStatus,
   });
 
+  /// Under DAY-03 / AC-34: A pending cashier handover does not block workday closure
+  /// if it is fully documented (positive amount, sender cashier known, recipient identified).
+  bool get isDocumentedPending =>
+      handoverStatus == HandoverStatus.pending &&
+      handoverAmount > 0 &&
+      cashierShiftId.isNotEmpty &&
+      cashierName.isNotEmpty &&
+      handoverTo.isNotEmpty;
+
   String get formattedHandoverDateTime {
     try {
       final dateTime = DateTime.parse(approvedAt);

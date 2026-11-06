@@ -316,11 +316,9 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final vatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
-                              (items.isNotEmpty && items.first.vatRate != null
-                                  ? items.first.vatRate!
-                                  : 0.15);
-                          final vatAmount = totalBeforeTax * vatRate;
+                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
+                              (items.isNotEmpty ? items.first.vatRate : null);
+                          final vatAmount = rawVatRate != null ? totalBeforeTax * rawVatRate : 0.0;
                           final totalWithVat = totalBeforeTax + vatAmount;
                           String formatAmount(double value) =>
                               '${value.toStringAsFixed(2)} SAR';
@@ -335,8 +333,10 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                               10.verticalSpace,
                               _buildRowWidget(
                                 context: context,
-                                title: vatRate == 0 ? context.tr.vat0Percent : context.tr.vat15Percent,
-                                value: formatAmount(vatAmount),
+                                title: rawVatRate == null
+                                    ? context.tr.vatNotSpecified
+                                    : (rawVatRate == 0 ? context.tr.vat0Percent : (rawVatRate == 0.15 ? context.tr.vat15Percent : 'VAT (${(rawVatRate * 100).toStringAsFixed(0)}%)')),
+                                value: rawVatRate == null ? '-' : formatAmount(vatAmount),
                               ),
                               10.verticalSpace,
                               _buildRowWidget(
