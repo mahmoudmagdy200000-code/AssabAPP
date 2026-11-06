@@ -137,6 +137,12 @@ abstract class RequestsRemoteDataSource {
   @POST('${ApiEndpoint.cashierShifts}/{shift}/reassign/accept')
   Future acceptReassignedShift({@Path('shift') required String shiftId});
 
+  @POST('${ApiEndpoint.cashierShifts}/{shift}/reassign/reject')
+  Future rejectReassignedShift({
+    @Path('shift') required String shiftId,
+    @Body() ResponsibilityRejectBodyRequest? responsibilityRejectBodyRequest,
+  });
+
   @GET('${ApiEndpoint.branchManagerShifts}/{shift}/responsibility/details')
   Future<ResponsibilityDetailsResponseModel> getResponsibilityDetails(
     @Path('shift') String shiftId,

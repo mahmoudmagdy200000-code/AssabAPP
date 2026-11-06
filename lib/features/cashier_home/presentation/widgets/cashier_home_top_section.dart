@@ -14,6 +14,7 @@ import '../../../../core/widgets/app_padding_widget.dart';
 import '../../../../core/widgets/app_svg_button.dart';
 import '../cubit/get_branch_info/get_branch_info_cubit.dart';
 import 'cashier_store_branch_info_bottom_sheet_widget.dart';
+import '../../../../core/utils/app_snack_bar.dart';
 
 class CashierHomeTopSection extends StatelessWidget {
   const CashierHomeTopSection({super.key});
@@ -94,7 +95,12 @@ class CashierHomeTopSection extends StatelessWidget {
             10.horizontalSpace,
             AppSvgButton(
               assetName: AppAssets.notification,
-              onTap: () {},
+              onTap: () {
+                AppSnackBar.showError(
+                  context,
+                  '${context.tr.notificationsAlerts}: ${context.tr.notAvailable}',
+                );
+              },
               iconColor: context.customColor.text3,
             ),
           ],

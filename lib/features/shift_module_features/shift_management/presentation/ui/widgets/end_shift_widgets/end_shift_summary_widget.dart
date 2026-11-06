@@ -228,6 +228,19 @@ class EndShiftSummaryWidget extends StatelessWidget {
                           firstValueSvgAsset: AppAssets.saudiRiyal,
                           hasSpaceBetweenTitleAndValue: true,
                         ),
+                      if (context.read<EndShiftCubit>().pendingIncomingCash != null &&
+                          context.read<EndShiftCubit>().pendingIncomingCash! > 0)
+                        buildShiftCardRowWidget(
+                          context: context,
+                          firstTitleSvgAsset: AppAssets.cash,
+                          title: context.tr.totalPendingAmounts,
+                          value: context
+                              .read<EndShiftCubit>()
+                              .pendingIncomingCash!
+                              .toStringAsFixed(2),
+                          firstValueSvgAsset: AppAssets.saudiRiyal,
+                          hasSpaceBetweenTitleAndValue: true,
+                        ),
                     ],
                   ),
                 ],

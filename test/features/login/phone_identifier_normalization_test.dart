@@ -1,8 +1,13 @@
+import 'dart:ui';
+import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/utils/app_reg_exp.dart';
 import 'package:assab/features/login/presentation/cubits/login_form/login_form_cubit.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUpAll(() async {
+    await S.load(const Locale('en'));
+  });
   group('Step 1 — Saudi Phone Normalization Pure Function (AppRegExp.normalizeSaudiPhone)', () {
     const expectedCanonical = '+966512345678';
 

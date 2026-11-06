@@ -9,7 +9,6 @@ import 'package:assab/features/shift_module_features/shift_management/domain/ent
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_cashier_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
 import 'package:injectable/injectable.dart';
-import 'package:meta/meta.dart';
 
 import '../../../../../../../core/helpers/paginator.dart';
 import '../../../../../../../core/helpers/safe_cubit.dart';
@@ -162,16 +161,33 @@ class ReassignShiftCubit extends SafeCubit<ReassignShiftState>
     );
   }
 
+  static double _parseFinancialAmount(String text) {
+    if (text.isEmpty) return 0.0;
+    final sanitized = text
+        .replaceAll('٠', '0')
+        .replaceAll('١', '1')
+        .replaceAll('٢', '2')
+        .replaceAll('٣', '3')
+        .replaceAll('٤', '4')
+        .replaceAll('٥', '5')
+        .replaceAll('٦', '6')
+        .replaceAll('٧', '7')
+        .replaceAll('٨', '8')
+        .replaceAll('٩', '9')
+        .replaceAll('٫', '.')
+        .replaceAll(',', '')
+        .trim();
+    return double.tryParse(sanitized) ?? 0.0;
+  }
+
   String calculateNetSales(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
-    // Example: subtract 15% VAT or any other calculation
+    final totalSales = _parseFinancialAmount(totalSalesText);
     final netSales = totalSales / 1.15;
     return netSales.toStringAsFixed(2);
   }
 
   String calculateNetVal(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
-
+    final totalSales = _parseFinancialAmount(totalSalesText);
     final netVal = totalSales - (totalSales / 1.15);
     return netVal.toStringAsFixed(2);
   }

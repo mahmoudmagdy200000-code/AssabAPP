@@ -15,6 +15,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/cubits/choose_item/choose_item_cubit.dart';
 import '../../../custody/presentation/cubit/create_handover_to_cashier/create_handover_to_cashier_cubit.dart';
 import '../../../custody/presentation/screens/custody_handover_to_cashier_screen.dart';
+import '../../../custody/presentation/cubit/export_personal_balance_as_pdf/export_personal_balance_as_pdf_cubit.dart';
+import '../../../custody/presentation/cubit/select_export_account_statement_as_pdf/select_export_account_statement_as_pdf_cubit.dart';
+import '../../../custody/presentation/widgets/custody_export_as_pdf_bottom_sheet_widget.dart';
 
 class CashierAccountStatementMoreOptionsBottomSheetWidget
     extends StatelessWidget {
@@ -81,7 +84,25 @@ class CashierAccountStatementMoreOptionsBottomSheetWidget
             desc: context
                 .tr
                 .exportYourAccountStatementInYourPreferredFileFormatAndTimeframe,
-            onTap: () {},
+            onTap: () {
+              NavigationService.I.pop();
+              AppBottomSheet.pageRoute(
+                context,
+                (context) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (context) =>
+                          getIt<SelectExportAccountStatementAsPdfCubit>(),
+                    ),
+                    BlocProvider(
+                      create: (context) =>
+                          getIt<ExportPersonalBalanceAsPdfCubit>(),
+                    ),
+                  ],
+                  child: const CustodyExportAsPdfBottomSheetWidget(),
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -86,7 +86,7 @@ class _SalesBreakDownEndShiftWidget
                         child: CustomTextField(
                           controller: widget.totalSaleSController,
                           hintText: context.tr.totalSalesHintText,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           maxLength: 30,
                           onChanged: (value) {
                             context.read<ValidationCubit>().validateField(
@@ -207,7 +207,7 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.cashController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -234,7 +234,7 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.madaController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -413,7 +413,7 @@ class _SalesBreakDownEndShiftWidget
                                           (aggregator.totalAmount ?? 0)
                                               .toString(),
                                       maxLength: 30,
-                                      keyboardType: TextInputType.number,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       onChanged: (value) {
                                         context
                                                 .read<AggregatorCubit>()

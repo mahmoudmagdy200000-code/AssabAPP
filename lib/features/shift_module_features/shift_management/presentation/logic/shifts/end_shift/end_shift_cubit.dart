@@ -230,6 +230,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     return null;
   }
 
+  double? get pendingIncomingCash {
+    final val = cashReconciliation?['pending_incoming_cash'];
+    if (val is num) return val.toDouble();
+    if (val != null) return double.tryParse(val.toString());
+    return null;
+  }
+
   static ApiFailure _createValidationFailure(String message) {
     return ValidationFailure(
       error: LocalErrorModel(message: message, errors: null),
@@ -469,14 +476,33 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     emit(state.copyWith(varianceStrategy: strategy));
   }
 
+  static double _parseFinancialAmount(String text) {
+    if (text.isEmpty) return 0.0;
+    final sanitized = text
+        .replaceAll('٠', '0')
+        .replaceAll('١', '1')
+        .replaceAll('٢', '2')
+        .replaceAll('٣', '3')
+        .replaceAll('٤', '4')
+        .replaceAll('٥', '5')
+        .replaceAll('٦', '6')
+        .replaceAll('٧', '7')
+        .replaceAll('٨', '8')
+        .replaceAll('٩', '9')
+        .replaceAll('٫', '.')
+        .replaceAll(',', '')
+        .trim();
+    return double.tryParse(sanitized) ?? 0.0;
+  }
+
   String calculateNetSales(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
+    final totalSales = _parseFinancialAmount(totalSalesText);
     final netSales = totalSales / 1.15;
     return netSales.toStringAsFixed(2);
   }
 
   String calculateNetVal(String totalSalesText) {
-    final totalSales = int.tryParse(totalSalesText) ?? 0;
+    final totalSales = _parseFinancialAmount(totalSalesText);
     final netVal = totalSales - (totalSales / 1.15);
     return netVal.toStringAsFixed(2);
   }

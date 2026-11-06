@@ -4,7 +4,6 @@ import 'package:assab/core/utils/shift_time_formatter.dart';
 import 'package:assab/core/widgets/app_responsive_builder.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/data_source/shift_management_remote_data_source.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/available_recipients_response_model.dart';
-import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/shift_details_widgets/shift_progress_indicator_widget.dart';
 import 'package:assab/generated/l10n.dart';
@@ -300,32 +299,23 @@ void main() {
     });
   });
 
-  group('Shortage Candidates 404 Resilient Fallback tests', () {
-    test('when shortage-allocation-candidates is 404, repository falls back to available-recipients and returns real active candidates', () async {
+  group('Shortage Candidates 404 Fail-Closed Security tests', () {
+    test('when shortage-allocation-candidates is 404, repository fails closed without falling back to available-recipients', () async {
       final mockDataSource = MockRemoteDataSourceWithFallback();
       final repository = ShiftManagementRepositoryImp(mockDataSource);
 
       final result = await repository.getShortageAllocationCandidates(shiftId: 'shift-123');
 
       expect(mockDataSource.getCandidatesCalled, isTrue);
-      expect(mockDataSource.getRecipientsCalled, isTrue);
+      expect(mockDataSource.getRecipientsCalled, isFalse);
 
-      List<ShortageAllocationCandidate>? candidates;
+      bool hasFailed = false;
       result.when(
-        failure: (f) => fail('Expected success but got failure: ${f.error.message}'),
-        success: (data) => candidates = data,
+        failure: (f) => hasFailed = true,
+        success: (data) => fail('Expected failure but got success'),
       );
 
-      expect(candidates, isNotNull);
-      // Inactive candidate must be filtered out
-      expect(candidates!.length, equals(2));
-      expect(candidates![0].id, equals('cashier-uuid-1'));
-      expect(candidates![0].name, equals('Ahmed Cashier'));
-      expect(candidates![0].type, equals('cashier'));
-
-      expect(candidates![1].id, equals('manager-uuid-1'));
-      expect(candidates![1].name, equals('Youssef Manager (Branch Manager)'));
-      expect(candidates![1].type, equals('branch_manager'));
+      expect(hasFailed, isTrue);
     });
   });
 }

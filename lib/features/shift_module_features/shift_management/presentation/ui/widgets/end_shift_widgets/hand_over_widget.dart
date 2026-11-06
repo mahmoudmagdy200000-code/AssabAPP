@@ -143,7 +143,7 @@ class HandOverWidget extends StatelessWidget {
                     child: CustomTextField(
                       controller: handOverAmountController,
                       hintText: context.tr.amount,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       maxLength: 30,
                       onChanged: (value) {
                         context
