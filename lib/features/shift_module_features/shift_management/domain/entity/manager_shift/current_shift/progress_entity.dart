@@ -1,3 +1,4 @@
+import 'package:assab/core/utils/shift_time_formatter.dart';
 import 'package:intl/intl.dart';
 
 class ProgressEntity {
@@ -31,7 +32,8 @@ class ProgressEntity {
       if (shiftDateObj.isAfter(now)) return false;
 
       // If shift is today, check end time
-      final end = DateFormat('HH:mm').parse(endTime!);
+      final end = ShiftTimeFormatter.parseApiTime(endTime!);
+      if (end == null) return false;
       final endDateTime = DateTime(
         now.year,
         now.month,
@@ -46,18 +48,11 @@ class ProgressEntity {
   }
 }
 
-extension ShiftTimeFormatter on ProgressEntity {
+extension ProgressShiftTimeFormatter on ProgressEntity {
   String? get formattedStartTime =>
       startTime != null ? _formatTime(startTime!) : null;
   String? get formattedEndTime =>
       endTime != null ? _formatTime(endTime!) : null;
 
-  static String _formatTime(String time) {
-    try {
-      final date = DateFormat('HH:mm').parse(time);
-      return DateFormat('hh:mm a').format(date);
-    } catch (_) {
-      return time;
-    }
-  }
+  static String _formatTime(String time) => ShiftTimeFormatter.format(time, fallback: time);
 }

@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'package:assab/core/utils/shift_time_formatter.dart';
 
 class WorkingShiftEntity {
   final String id;
@@ -14,8 +14,8 @@ class WorkingShiftEntity {
   });
 
   String get startTimeAmPm =>
-      DateFormat('hh:mm a').format(DateFormat('HH:mm').parse(startTime));
+      ShiftTimeFormatter.format(startTime, fallback: startTime);
 
   String get endTimeAmPm =>
-      DateFormat('hh:mm a').format(DateFormat('HH:mm').parse(endTime));
+      ShiftTimeFormatter.format(endTime, fallback: endTime);
 }

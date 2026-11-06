@@ -1,3 +1,4 @@
+import 'package:assab/core/utils/shift_time_formatter.dart';
 import 'package:assab/core/enums/shift_status/shift_status_type.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_to_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_cashier_entity.dart';
@@ -117,7 +118,8 @@ class ShiftEntity {
       if (shiftDateObj.isBefore(now)) return true;
 
       // If shift is today, check start time
-      final start = DateFormat('HH:mm').parse(shiftTimeDetails.startTime);
+      final start = ShiftTimeFormatter.parseApiTime(shiftTimeDetails.startTime);
+      if (start == null) return false;
       final startDateTime = DateTime(
         now.year,
         now.month,
@@ -145,7 +147,8 @@ class ShiftEntity {
       if (shiftDateObj.isAfter(now)) return false;
 
       // If shift is today, check end time
-      final end = DateFormat('HH:mm').parse(shiftTimeDetails.endTime);
+      final end = ShiftTimeFormatter.parseApiTime(shiftTimeDetails.endTime);
+      if (end == null) return false;
       final endDateTime = DateTime(
         now.year,
         now.month,

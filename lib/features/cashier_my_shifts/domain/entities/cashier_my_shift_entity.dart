@@ -1,3 +1,4 @@
+import 'package:assab/core/utils/shift_time_formatter.dart';
 import 'package:assab/features/cashier_my_shifts/domain/entities/cashier_handover_status_entity.dart';
 import 'package:intl/intl.dart';
 
@@ -65,7 +66,8 @@ class CashierShiftEntity {
       if (shiftDateObj.isAfter(now)) return false;
 
       // If shift is today, check end time
-      final end = DateFormat('HH:mm').parse(endTime);
+      final end = ShiftTimeFormatter.parseApiTime(endTime);
+      if (end == null) return false;
       final endDateTime = DateTime(
         now.year,
         now.month,
