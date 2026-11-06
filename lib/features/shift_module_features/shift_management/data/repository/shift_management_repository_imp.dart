@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import '../model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/cashier_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/check_email_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/shift/shift_mapper.dart';
@@ -618,6 +620,57 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         return Map<String, dynamic>.from(response);
       }
       return <String, dynamic>{};
+    });
+  }
+
+  @override
+  FutureApiResult<List<ShortageAllocationCandidate>> getShortageAllocationCandidates({
+    required String shiftId,
+  }) async {
+    return execute(() async {
+      try {
+        final response = await _remoteDataSource.getShortageAllocationCandidates(
+          shiftId: shiftId,
+        );
+
+        final List<dynamic> list;
+        if (response is Map && response['data'] is List) {
+          list = response['data'] as List;
+        } else if (response is List) {
+          list = response;
+        } else {
+          list = [];
+        }
+
+        return list
+            .map((item) => ShortageAllocationCandidate.fromJson(
+                item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map)))
+            .where((candidate) => candidate.isValid)
+            .toList();
+      } on DioException catch (dioErr) {
+        // Fallback: If shortage-allocation-candidates route is 404 (due to backend commit
+        // awaiting deployment on the target staging environment), query the active,
+        // deployed available-recipients route to load real branch candidates.
+        if (dioErr.response?.statusCode == 404) {
+          try {
+            final fallbackResponse = await _remoteDataSource.getAvailableRecipients(
+              shiftId: shiftId,
+            );
+            return fallbackResponse.data.recipients
+                .where((r) => r.isAvailable && !r.disabled && (r.type == 'cashier' || r.type == 'branch_manager'))
+                .map((r) => ShortageAllocationCandidate(
+                      id: r.id,
+                      name: r.name,
+                      type: r.type,
+                      role: r.type,
+                    ))
+                .toList();
+          } catch (_) {
+            rethrow;
+          }
+        }
+        rethrow;
+      }
     });
   }
 }

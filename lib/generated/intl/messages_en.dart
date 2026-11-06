@@ -104,7 +104,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m37(date, time) =>
       "Final disposal request confirmed for proposed ${date} & ${time}";
 
-  static String m38(int count) => "${count} Years";
+  static String m38(count) => "${count} Years";
 
   static String m39(name) =>
       "Generated order is currently being Confirmation from ${name}.";
@@ -527,6 +527,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "addNewZone": MessageLookupByLibrary.simpleMessage("Add New Zone"),
     "addNote": MessageLookupByLibrary.simpleMessage("Add Note"),
     "addPhotoOfItem": MessageLookupByLibrary.simpleMessage("Add Photo of item"),
+    "addResponsibleForShortage": MessageLookupByLibrary.simpleMessage(
+      "Add responsible for part of the shortage:",
+    ),
     "addStaffForThisMonthsInventoryCount": MessageLookupByLibrary.simpleMessage(
       "Add staff\'s for this month\'s inventory count.",
     ),
@@ -616,6 +619,13 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "allShifts": MessageLookupByLibrary.simpleMessage("All Shifts"),
     "allSuppliers": MessageLookupByLibrary.simpleMessage("All Suppliers"),
+    "allocatedAmount": MessageLookupByLibrary.simpleMessage("Allocated"),
+    "allocatedAmountSar": MessageLookupByLibrary.simpleMessage(
+      "Allocated Amount (SAR)",
+    ),
+    "allocationExceedsRemaining": MessageLookupByLibrary.simpleMessage(
+      "Allocation amount exceeds remaining shortage",
+    ),
     "allocationIncomplete": MessageLookupByLibrary.simpleMessage(
       "Remaining amount must be 0.00 SAR",
     ),
@@ -1032,6 +1042,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cashSalesTransfers": MessageLookupByLibrary.simpleMessage(
       "Cash Sales Transfers",
+    ),
+    "cashShortageAllocation": MessageLookupByLibrary.simpleMessage(
+      "Cash Shortage Allocation",
     ),
     "cashTransferAndOwnerPaymentLog": MessageLookupByLibrary.simpleMessage(
       "Cash Transfer And Owner Payment Log.",
@@ -1769,6 +1782,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "duplicateAndChangeSource": MessageLookupByLibrary.simpleMessage(
       "Duplicate & Change Source",
     ),
+    "duplicateResponsibleAdded": MessageLookupByLibrary.simpleMessage(
+      "This responsible person has already been added",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Duration"),
     "eGMinorIssues": MessageLookupByLibrary.simpleMessage(
       "E.g. Minor issues, requires inspection.",
@@ -2060,6 +2076,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "externalTransfer": MessageLookupByLibrary.simpleMessage(
       "External Transfer",
+    ),
+    "failedToLoadCandidates": MessageLookupByLibrary.simpleMessage(
+      "Failed to load candidates",
     ),
     "fast80100": MessageLookupByLibrary.simpleMessage("Fast (80% – 100%)"),
     "fastDeliveryLimitedQuantities": MessageLookupByLibrary.simpleMessage(
@@ -2735,6 +2754,9 @@ class MessageLookup extends MessageLookupByLibrary {
           "Fulfilling this request will drop available stock below the minimum safe level of 75 kg.",
         ),
     "full": MessageLookupByLibrary.simpleMessage("Full"),
+    "fullAllocationRequired": MessageLookupByLibrary.simpleMessage(
+      "Full allocation required",
+    ),
     "fullAssetHistoryView": MessageLookupByLibrary.simpleMessage(
       "Full Asset History View",
     ),
@@ -3235,6 +3257,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "lightMode": MessageLookupByLibrary.simpleMessage("Light"),
     "listBreakdown": MessageLookupByLibrary.simpleMessage("List Breakdown"),
     "liter": MessageLookupByLibrary.simpleMessage("Liter"),
+    "loadingEligibleCandidates": MessageLookupByLibrary.simpleMessage(
+      "Loading eligible candidates...",
+    ),
     "location": MessageLookupByLibrary.simpleMessage("Location"),
     "locationHistoryMap": MessageLookupByLibrary.simpleMessage(
       "Location History Map",
@@ -3591,6 +3616,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noAvailableCashiers": MessageLookupByLibrary.simpleMessage(
       "No Available Cashiers",
     ),
+    "noCandidatesAvailableForRole": MessageLookupByLibrary.simpleMessage(
+      "No candidates available for this role in this branch.",
+    ),
     "noCashiersAreAvailable": MessageLookupByLibrary.simpleMessage(
       "No Cashiers Are available",
     ),
@@ -3724,6 +3752,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noShiftsInProgress": MessageLookupByLibrary.simpleMessage(
       "No Shifts In Progress",
+    ),
+    "noShortageRequiringAllocation": MessageLookupByLibrary.simpleMessage(
+      "No cash shortage requiring responsibility allocation.",
     ),
     "noSingleInvoicesDesc": MessageLookupByLibrary.simpleMessage(
       "No single invoices uploaded. Add an invoice to see it listed here.",
@@ -4259,6 +4290,9 @@ class MessageLookup extends MessageLookupByLibrary {
           "Please Complete the delivery details below",
         ),
     "pleaseEnsure": MessageLookupByLibrary.simpleMessage("Please ensure:"),
+    "pleaseEnterValidAmount": MessageLookupByLibrary.simpleMessage(
+      "Please enter a valid amount greater than zero",
+    ),
     "pleaseIncludeAReasonSoTheyUnderstandYourPosition":
         MessageLookupByLibrary.simpleMessage(
           "Please include a reason so they understand your position.",
@@ -4271,6 +4305,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "pleaseSelectADifferentPaymentMethod": MessageLookupByLibrary.simpleMessage(
       "Please select a different payment method.",
+    ),
+    "pleaseSelectResponsible": MessageLookupByLibrary.simpleMessage(
+      "Please select a responsible person from the list",
     ),
     "pleaseTryAgainLater": MessageLookupByLibrary.simpleMessage(
       "Please try again later.",
@@ -4763,6 +4800,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "relatedOrder": MessageLookupByLibrary.simpleMessage("Related Order"),
     "relocateWithin": m96,
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
+    "remainingAmount": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingBalanceAutoCalculated": MessageLookupByLibrary.simpleMessage(
       "Remaining Balance (Auto-calculated)",
     ),
@@ -4925,6 +4963,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "responsibleEmployeess": MessageLookupByLibrary.simpleMessage(
       "Responsible Employees’s",
     ),
+    "responsibleType": MessageLookupByLibrary.simpleMessage("Responsible Type"),
     "restartApp": MessageLookupByLibrary.simpleMessage("Restart App"),
     "restock": MessageLookupByLibrary.simpleMessage("Restock"),
     "resubmitted": MessageLookupByLibrary.simpleMessage("Resubmitted"),
@@ -5291,6 +5330,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectResponsibleEmployee": MessageLookupByLibrary.simpleMessage(
       "Select Responsible Employee",
     ),
+    "selectResponsibleNameAndId": MessageLookupByLibrary.simpleMessage(
+      "Select Responsible (Name & ID)",
+    ),
     "selectThisStore": MessageLookupByLibrary.simpleMessage(
       "Select this store",
     ),
@@ -5410,6 +5452,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Shortage Allocation Required",
     ),
     "shortageAmount": MessageLookupByLibrary.simpleMessage("Shortage Amount:"),
+    "shortageReasonOptional": MessageLookupByLibrary.simpleMessage(
+      "Shortage reason / allocation notes (optional)",
+    ),
     "shortageStockDeficit": MessageLookupByLibrary.simpleMessage(
       "Shortage (stock deficit)",
     ),
@@ -5547,6 +5592,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "specializedReports": MessageLookupByLibrary.simpleMessage(
       "Specialized Reports",
+    ),
+    "specifiedResponsibilities": MessageLookupByLibrary.simpleMessage(
+      "Specified Responsibilities:",
     ),
     "speedAndEfficiency": MessageLookupByLibrary.simpleMessage(
       "Speed and efficiency",
@@ -6023,6 +6071,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalSalesHintText": MessageLookupByLibrary.simpleMessage(
       "Amount (Total sales + Vat)",
     ),
+    "totalShortage": MessageLookupByLibrary.simpleMessage("Total Shortage"),
     "totalUnusedInventory": MessageLookupByLibrary.simpleMessage(
       "Total Unused Inventory",
     ),

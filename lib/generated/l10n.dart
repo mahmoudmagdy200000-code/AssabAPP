@@ -27111,6 +27111,196 @@ class S {
       args: [],
     );
   }
+
+  /// `Cash Shortage Allocation`
+  String get cashShortageAllocation {
+    return Intl.message(
+      'Cash Shortage Allocation',
+      name: 'cashShortageAllocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No cash shortage requiring responsibility allocation.`
+  String get noShortageRequiringAllocation {
+    return Intl.message(
+      'No cash shortage requiring responsibility allocation.',
+      name: 'noShortageRequiringAllocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Full allocation required`
+  String get fullAllocationRequired {
+    return Intl.message(
+      'Full allocation required',
+      name: 'fullAllocationRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total Shortage`
+  String get totalShortage {
+    return Intl.message(
+      'Total Shortage',
+      name: 'totalShortage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allocated`
+  String get allocatedAmount {
+    return Intl.message(
+      'Allocated',
+      name: 'allocatedAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining`
+  String get remainingAmount {
+    return Intl.message(
+      'Remaining',
+      name: 'remainingAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Specified Responsibilities:`
+  String get specifiedResponsibilities {
+    return Intl.message(
+      'Specified Responsibilities:',
+      name: 'specifiedResponsibilities',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add responsible for part of the shortage:`
+  String get addResponsibleForShortage {
+    return Intl.message(
+      'Add responsible for part of the shortage:',
+      name: 'addResponsibleForShortage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Responsible Type`
+  String get responsibleType {
+    return Intl.message(
+      'Responsible Type',
+      name: 'responsibleType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Responsible (Name & ID)`
+  String get selectResponsibleNameAndId {
+    return Intl.message(
+      'Select Responsible (Name & ID)',
+      name: 'selectResponsibleNameAndId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading eligible candidates...`
+  String get loadingEligibleCandidates {
+    return Intl.message(
+      'Loading eligible candidates...',
+      name: 'loadingEligibleCandidates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to load candidates`
+  String get failedToLoadCandidates {
+    return Intl.message(
+      'Failed to load candidates',
+      name: 'failedToLoadCandidates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No candidates available for this role in this branch.`
+  String get noCandidatesAvailableForRole {
+    return Intl.message(
+      'No candidates available for this role in this branch.',
+      name: 'noCandidatesAvailableForRole',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allocated Amount (SAR)`
+  String get allocatedAmountSar {
+    return Intl.message(
+      'Allocated Amount (SAR)',
+      name: 'allocatedAmountSar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shortage reason / allocation notes (optional)`
+  String get shortageReasonOptional {
+    return Intl.message(
+      'Shortage reason / allocation notes (optional)',
+      name: 'shortageReasonOptional',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please select a responsible person from the list`
+  String get pleaseSelectResponsible {
+    return Intl.message(
+      'Please select a responsible person from the list',
+      name: 'pleaseSelectResponsible',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter a valid amount greater than zero`
+  String get pleaseEnterValidAmount {
+    return Intl.message(
+      'Please enter a valid amount greater than zero',
+      name: 'pleaseEnterValidAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allocation amount exceeds remaining shortage`
+  String get allocationExceedsRemaining {
+    return Intl.message(
+      'Allocation amount exceeds remaining shortage',
+      name: 'allocationExceedsRemaining',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This responsible person has already been added`
+  String get duplicateResponsibleAdded {
+    return Intl.message(
+      'This responsible person has already been added',
+      name: 'duplicateResponsibleAdded',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

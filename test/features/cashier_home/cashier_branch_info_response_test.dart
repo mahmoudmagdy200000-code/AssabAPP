@@ -48,17 +48,46 @@ void main() {
     expect(response.branchManager, isNull);
   });
 
-  test('accepts flat branch data without inventing missing coordinates', () {
+  test('accepts a bare branch object without inventing a manager', () {
     final response = CashierBranchInfoResponse.fromJson({
-      'id': 12,
-      'name': null,
-      'branch_manager': {'id': null, 'name': null},
+      'id': 'branch-2',
+      'name': 'Branch 2',
+      'branch_manager': null,
     });
 
-    expect(response.id, '12');
+    expect(response.id, 'branch-2');
+    expect(response.branchManager, isNull);
+    expect(response.lat, isNull);
+    expect(response.openingHours, isNull);
+  });
+
+  test('handles missing and unexpected optional values without crashing', () {
+    final response = CashierBranchInfoResponse.fromJson({
+      'data': {
+        'id': null,
+        'name': null,
+        'lat': 'invalid',
+        'image': 123,
+        'branch_manager': 'invalid',
+      },
+    });
+
+    expect(response.id, isEmpty);
     expect(response.name, '-');
     expect(response.lat, isNull);
-    expect(response.lng, isNull);
-    expect(response.branchManager?.name, '-');
+    expect(response.image, isNull);
+    expect(response.branchManager, isNull);
+  });
+
+  test('omits an incomplete manager instead of inventing an ID', () {
+    final response = CashierBranchInfoResponse.fromJson({
+      'data': {
+        'id': 'branch-3',
+        'name': 'Branch 3',
+        'branch_manager': {'name': 'Manager', 'image': 4},
+      },
+    });
+
+    expect(response.branchManager, isNull);
   });
 }

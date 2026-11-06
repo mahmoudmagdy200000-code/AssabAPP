@@ -178,16 +178,6 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
 
                 buildShiftCardRowWidget(
                   context: context,
-                  firstTitleSvgAsset: AppAssets.cash,
-                  value: (context.watch<EndShiftCubit>().varianceAmount ?? 0)
-                      .toStringAsFixed(2),
-                  title: context.tr.variance,
-                  firstValueSvgAsset: AppAssets.saudiRiyal,
-                  hasSpaceBetweenTitleAndValue: true,
-                ),
-
-                buildShiftCardRowWidget(
-                  context: context,
                   firstTitleSvgAsset: AppAssets.personSvg,
                   value:
                       context.watch<EndShiftCubit>().cashier?.name ??
@@ -198,7 +188,10 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
               ],
             ),
 
-            if (context.watch<EndShiftCubit>().previewData != null) ...[
+            if (context.watch<EndShiftCubit>().previewData != null &&
+                !context.watch<EndShiftCubit>().previewStale &&
+                !context.watch<EndShiftCubit>().isPreviewLoading &&
+                state is! EndShiftPreviewFailure) ...[
               10.verticalSpace,
               SummarizeCardWidget(
                 children: [
@@ -250,12 +243,11 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
                       context: context,
                       firstTitleSvgAsset: AppAssets.cash,
                       title: context.tr.varianceType,
-                      value: context
-                          .watch<EndShiftCubit>()
-                          .cashVarianceType!,
+                      value: context.watch<EndShiftCubit>().cashVarianceType!,
                       hasSpaceBetweenTitleAndValue: true,
                     ),
-                  if (context.watch<EndShiftCubit>().confirmedOpeningCash != null)
+                  if (context.watch<EndShiftCubit>().confirmedOpeningCash !=
+                      null)
                     buildShiftCardRowWidget(
                       context: context,
                       firstTitleSvgAsset: AppAssets.cash,

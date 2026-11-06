@@ -39,17 +39,20 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required double countedCash,
     double? cardPayments,
     List<EndShiftAggregatorModel>? aggregators,
-  })? onPreview;
+  })?
+  onPreview;
 
   FutureApiResult<void> Function({
     required String shiftId,
     required EndShiftRequest endShiftRequest,
-  })? onEndShift;
+  })?
+  onEndShift;
 
   FutureApiResult<void> Function(
     String shiftId,
     EndShiftRequestWithHandOver request,
-  )? onEndShiftWithHandOver;
+  )?
+  onEndShiftWithHandOver;
 
   @override
   FutureApiResult<Map<String, dynamic>> previewCashReconciliation({
@@ -74,13 +77,17 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
           'expected_cash': 40.0,
           'counted_cash': countedCash,
           'cash_variance': countedCash - 40.0,
-          'cash_variance_type': countedCash == 40.0 ? 'balanced' : (countedCash < 40.0 ? 'shortage' : 'surplus'),
+          'cash_variance_type': countedCash == 40.0
+              ? 'balanced'
+              : (countedCash < 40.0 ? 'shortage' : 'surplus'),
           'confirmed_opening_cash': 100.0,
           'pending_incoming_cash': 0.0,
         },
-        'shortage_to_allocate': (countedCash < 40.0) ? (40.0 - countedCash) : 0.0,
+        'shortage_to_allocate': (countedCash < 40.0)
+            ? (40.0 - countedCash)
+            : 0.0,
         'allocation_required': countedCash < 40.0,
-      }
+      },
     });
   }
 
@@ -107,7 +114,10 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
   }
 }
 
-AggregatorEntity _fakeAggregator({required String id, required double totalAmount}) {
+AggregatorEntity _fakeAggregator({
+  required String id,
+  required double totalAmount,
+}) {
   return AggregatorEntity(
     id: id,
     name: 'Aggregator-$id',
@@ -116,7 +126,11 @@ AggregatorEntity _fakeAggregator({required String id, required double totalAmoun
     description: '',
     commissionRate: 0.1,
     commissionPercentage: '10%',
-    status: const AggregatorStatusEntity(value: true, label: 'Active', color: 'green'),
+    status: const AggregatorStatusEntity(
+      value: true,
+      label: 'Active',
+      color: 'green',
+    ),
     integrationType: 'pos',
     hasIntegration: false,
     branchesCount: 1,
@@ -139,9 +153,7 @@ Widget buildTestAppWithCubit({
     ],
     supportedLocales: S.delegate.supportedLocales,
     locale: const Locale('en'),
-    theme: ThemeData(
-      extensions: LightTheme.extension,
-    ),
+    theme: ThemeData(extensions: LightTheme.extension),
     home: BlocProvider<EndShiftCubit>.value(
       value: cubit,
       child: Builder(
@@ -168,90 +180,107 @@ void main() {
       cubit.close();
     });
 
-    test('fetchCashReconciliationPreview returns false and emits failure if counted cash is null', () async {
-      expect(cubit.countedCash, isNull);
+    test(
+      'fetchCashReconciliationPreview returns false and emits failure if counted cash is null',
+      () async {
+        expect(cubit.countedCash, isNull);
 
-      final success = await cubit.fetchCashReconciliationPreview();
-      expect(success, isFalse);
-      expect(cubit.state, isA<EndShiftPreviewFailure>());
-      expect(cubit.canProceedToEndShift, isFalse);
-    });
+        final success = await cubit.fetchCashReconciliationPreview();
+        expect(success, isFalse);
+        expect(cubit.state, isA<EndShiftPreviewFailure>());
+        expect(cubit.canProceedToEndShift, isFalse);
+      },
+    );
 
-    test('fetchCashReconciliationPreview sets isPreviewLoading while in flight and returns true on success', () async {
-      final completer = Completer<ApiResult<Map<String, dynamic>>>();
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) {
-        return completer.future;
-      };
+    test(
+      'fetchCashReconciliationPreview sets isPreviewLoading while in flight and returns true on success',
+      () async {
+        final completer = Completer<ApiResult<Map<String, dynamic>>>();
+        repository.onPreview =
+            ({
+              required String shiftId,
+              required double totalSales,
+              required double countedCash,
+              double? cardPayments,
+              List<EndShiftAggregatorModel>? aggregators,
+            }) {
+              return completer.future;
+            };
 
-      cubit.setCountedCash(40.0);
-      expect(cubit.previewStale, isTrue);
+        cubit.setCountedCash(40.0);
+        expect(cubit.previewStale, isTrue);
 
-      final future = cubit.fetchCashReconciliationPreview();
-      expect(cubit.isPreviewLoading, isTrue);
-      expect(cubit.state, isA<EndShiftPreviewLoading>());
-      expect(cubit.canProceedToEndShift, isFalse);
+        final future = cubit.fetchCashReconciliationPreview();
+        expect(cubit.isPreviewLoading, isTrue);
+        expect(cubit.state, isA<EndShiftPreviewLoading>());
+        expect(cubit.canProceedToEndShift, isFalse);
 
-      completer.complete(
-        ApiResult.success({
-          'data': {
-            'cash_reconciliation': {
-              'expected_cash': 40.0,
-              'counted_cash': 40.0,
-              'cash_variance': 0.0,
-              'cash_variance_type': 'balanced',
-              'confirmed_opening_cash': 100.0,
+        completer.complete(
+          ApiResult.success({
+            'data': {
+              'cash_reconciliation': {
+                'expected_cash': 40.0,
+                'counted_cash': 40.0,
+                'cash_variance': 0.0,
+                'cash_variance_type': 'balanced',
+                'confirmed_opening_cash': 100.0,
+              },
+              'shortage_to_allocate': 0.0,
+              'allocation_required': false,
             },
-            'shortage_to_allocate': 0.0,
-            'allocation_required': false,
-          }
-        }),
-      );
-
-      final result = await future;
-      expect(result, isTrue);
-      expect(cubit.isPreviewLoading, isFalse);
-      expect(cubit.previewStale, isFalse);
-      expect(cubit.previewData, isNotNull);
-      expect(cubit.state, isA<EndShiftPreviewSuccess>());
-      expect(cubit.canProceedToEndShift, isTrue);
-    });
-
-    test('Group B: HTTP error or network failure returns false and emits EndShiftPreviewFailure without clearing inputs', () async {
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) async {
-        return ApiResult.failure(
-          ValidationFailure(
-            error: LocalErrorModel(message: 'Validation failed: Invalid cash figure', errors: null),
-            icon: CupertinoIcons.exclamationmark_triangle,
-            statusCode: 422,
-            stackTrace: StackTrace.empty,
-          ),
+          }),
         );
-      };
 
-      cubit.setCountedCash(40.0);
-      final result = await cubit.fetchCashReconciliationPreview();
+        final result = await future;
+        expect(result, isTrue);
+        expect(cubit.isPreviewLoading, isFalse);
+        expect(cubit.previewStale, isFalse);
+        expect(cubit.previewData, isNotNull);
+        expect(cubit.state, isA<EndShiftPreviewSuccess>());
+        expect(cubit.canProceedToEndShift, isTrue);
+      },
+    );
 
-      expect(result, isFalse);
-      expect(cubit.state, isA<EndShiftPreviewFailure>());
-      final failureState = cubit.state as EndShiftPreviewFailure;
-      expect(failureState.failure.statusCode, equals(422));
-      expect(cubit.countedCash, equals(40.0)); // Counted cash preserved for correction
-      expect(cubit.previewData, isNull);
-      expect(cubit.previewStale, isTrue);
-      expect(cubit.canProceedToEndShift, isFalse);
-    });
+    test(
+      'Group B: HTTP error or network failure returns false and emits EndShiftPreviewFailure without clearing inputs',
+      () async {
+        repository.onPreview =
+            ({
+              required String shiftId,
+              required double totalSales,
+              required double countedCash,
+              double? cardPayments,
+              List<EndShiftAggregatorModel>? aggregators,
+            }) async {
+              return ApiResult.failure(
+                ValidationFailure(
+                  error: LocalErrorModel(
+                    message: 'Validation failed: Invalid cash figure',
+                    errors: null,
+                  ),
+                  icon: CupertinoIcons.exclamationmark_triangle,
+                  statusCode: 422,
+                  stackTrace: StackTrace.empty,
+                ),
+              );
+            };
+
+        cubit.setCountedCash(40.0);
+        final result = await cubit.fetchCashReconciliationPreview();
+
+        expect(result, isFalse);
+        expect(cubit.state, isA<EndShiftPreviewFailure>());
+        final failureState = cubit.state as EndShiftPreviewFailure;
+        expect(failureState.failure.statusCode, equals(422));
+        expect(
+          cubit.countedCash,
+          equals(40.0),
+        ); // Counted cash preserved for correction
+        expect(cubit.previewData, isNull);
+        expect(cubit.previewStale, isTrue);
+        expect(cubit.canProceedToEndShift, isFalse);
+      },
+    );
   });
 
   group('Group C: Request Generation ID & Input Fingerprint Protection', () {
@@ -267,252 +296,396 @@ void main() {
       cubit.close();
     });
 
-    test('Out-of-order in-flight preview response is silently dropped when inputs changed', () async {
-      final slowCompleter = Completer<ApiResult<Map<String, dynamic>>>();
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) {
-        return slowCompleter.future;
-      };
+    test(
+      'Out-of-order in-flight preview response is silently dropped when inputs changed',
+      () async {
+        final slowCompleter = Completer<ApiResult<Map<String, dynamic>>>();
+        repository.onPreview =
+            ({
+              required String shiftId,
+              required double totalSales,
+              required double countedCash,
+              double? cardPayments,
+              List<EndShiftAggregatorModel>? aggregators,
+            }) {
+              return slowCompleter.future;
+            };
 
-      cubit.setCountedCash(50.0);
-      final initialReqId = cubit.previewRequestId;
+        cubit.setCountedCash(50.0);
+        final initialReqId = cubit.previewRequestId;
 
-      // Start slow preview 1 with countedCash: 50.0
-      final future1 = cubit.fetchCashReconciliationPreview();
-      expect(cubit.previewRequestId, equals(initialReqId + 1));
-      final req1Id = cubit.previewRequestId;
+        // Start slow preview 1 with countedCash: 50.0
+        final future1 = cubit.fetchCashReconciliationPreview();
+        expect(cubit.previewRequestId, equals(initialReqId + 1));
+        final req1Id = cubit.previewRequestId;
 
-      // User changes counted cash to 75.0 before preview 1 completes
-      cubit.setCountedCash(75.0);
-      expect(cubit.previewRequestId, greaterThan(req1Id)); // Invalidation increments generation ID
-      expect(cubit.previewStale, isTrue);
+        // User changes counted cash to 75.0 before preview 1 completes
+        cubit.setCountedCash(75.0);
+        expect(
+          cubit.previewRequestId,
+          greaterThan(req1Id),
+        ); // Invalidation increments generation ID
+        expect(cubit.previewStale, isTrue);
 
-      // Now preview 1 arrives with stale data
-      slowCompleter.complete(
-        ApiResult.success({
-          'data': {
-            'cash_reconciliation': {
-              'expected_cash': 50.0,
-              'counted_cash': 50.0,
-              'cash_variance': 0.0,
-              'cash_variance_type': 'balanced',
-              'confirmed_opening_cash': 100.0,
+        // Now preview 1 arrives with stale data
+        slowCompleter.complete(
+          ApiResult.success({
+            'data': {
+              'cash_reconciliation': {
+                'expected_cash': 50.0,
+                'counted_cash': 50.0,
+                'cash_variance': 0.0,
+                'cash_variance_type': 'balanced',
+                'confirmed_opening_cash': 100.0,
+              },
+              'shortage_to_allocate': 0.0,
+              'allocation_required': false,
             },
-            'shortage_to_allocate': 0.0,
-            'allocation_required': false,
-          }
-        }),
-      );
+          }),
+        );
 
-      final success1 = await future1;
-      expect(success1, isFalse); // Silently discarded!
-      expect(cubit.previewData, isNull); // Stale data was NOT set!
-      expect(cubit.previewStale, isTrue);
-    });
+        final success1 = await future1;
+        expect(success1, isFalse); // Silently discarded!
+        expect(cubit.previewData, isNull); // Stale data was NOT set!
+        expect(cubit.previewStale, isTrue);
+      },
+    );
 
-    test('Updating sales values or aggregators invalidates preview and increments generation ID', () {
-      cubit.setCountedCash(100.0);
-      final reqIdBefore = cubit.previewRequestId;
+    test(
+      'Updating sales values or aggregators invalidates preview and increments generation ID',
+      () {
+        cubit.setCountedCash(100.0);
+        final reqIdBefore = cubit.previewRequestId;
 
-      cubit.endShiftTotalSalesValuesUpdated(
-        totalSales: 200.0,
-        cashCollected: 100.0,
-        cardPayments: 100.0,
-        aggregators: [
-          _fakeAggregator(id: '1', totalAmount: 50.0),
-        ],
-      );
+        cubit.endShiftTotalSalesValuesUpdated(
+          totalSales: 200.0,
+          cashCollected: 100.0,
+          cardPayments: 100.0,
+          aggregators: [_fakeAggregator(id: '1', totalAmount: 50.0)],
+        );
 
-      expect(cubit.previewRequestId, greaterThan(reqIdBefore));
-      expect(cubit.previewStale, isTrue);
-      expect(cubit.previewData, isNull);
-      expect(cubit.canProceedToEndShift, isFalse);
-    });
+        expect(cubit.previewRequestId, greaterThan(reqIdBefore));
+        expect(cubit.previewStale, isTrue);
+        expect(cubit.previewData, isNull);
+        expect(cubit.canProceedToEndShift, isFalse);
+      },
+    );
   });
 
-  group('Group D: Financial Reconciliation Rules & Server-Authoritative Getters', () {
-    late MockShiftManagementRepository repository;
-    late EndShiftCubit cubit;
+  group(
+    'Group D: Financial Reconciliation Rules & Server-Authoritative Getters',
+    () {
+      late MockShiftManagementRepository repository;
+      late EndShiftCubit cubit;
 
-    setUp(() {
-      repository = MockShiftManagementRepository();
-      cubit = EndShiftCubit(repository, 'shift-100', null);
-    });
+      setUp(() {
+        repository = MockShiftManagementRepository();
+        cubit = EndShiftCubit(repository, 'shift-100', null);
+      });
 
-    tearDown(() {
-      cubit.close();
-    });
+      tearDown(() {
+        cubit.close();
+      });
 
-    test('Balanced scenario: Gross 115, cards 50, apps 25, counted 40 -> 0 variance, balanced', () async {
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) async {
-        return ApiResult.success({
-          'data': {
-            'cash_reconciliation': {
-              'expected_cash': 40.0,
-              'counted_cash': 40.0,
-              'cash_variance': 0.0,
-              'cash_variance_type': 'balanced',
-              'confirmed_opening_cash': 100.0,
-            },
-            'shortage_to_allocate': 0.0,
-            'allocation_required': false,
-          }
-        });
-      };
+      test(
+        'Balanced scenario: Gross 115, cards 50, apps 25, counted 40 -> 0 variance, balanced',
+        () async {
+          repository.onPreview =
+              ({
+                required String shiftId,
+                required double totalSales,
+                required double countedCash,
+                double? cardPayments,
+                List<EndShiftAggregatorModel>? aggregators,
+              }) async {
+                return ApiResult.success({
+                  'data': {
+                    'cash_reconciliation': {
+                      'expected_cash': 40.0,
+                      'counted_cash': 40.0,
+                      'cash_variance': 0.0,
+                      'cash_variance_type': 'balanced',
+                      'confirmed_opening_cash': 100.0,
+                    },
+                    'shortage_to_allocate': 0.0,
+                    'allocation_required': false,
+                  },
+                });
+              };
 
-      cubit.setCountedCash(40.0);
-      cubit.endShiftTotalSalesValuesUpdated(
-        totalSales: 115.0,
-        cashCollected: 40.0,
-        cardPayments: 50.0,
-        aggregators: [
-          _fakeAggregator(id: '1', totalAmount: 25.0),
-        ],
+          cubit.setCountedCash(40.0);
+          cubit.endShiftTotalSalesValuesUpdated(
+            totalSales: 115.0,
+            cashCollected: 40.0,
+            cardPayments: 50.0,
+            aggregators: [_fakeAggregator(id: '1', totalAmount: 25.0)],
+          );
+
+          final success = await cubit.fetchCashReconciliationPreview();
+          expect(success, isTrue);
+          expect(cubit.expectedCash, equals(40.0));
+          expect(cubit.previewCountedCash, equals(40.0));
+          expect(cubit.cashVariance, equals(0.0));
+          expect(cubit.cashVarianceType, equals('balanced'));
+          expect(cubit.confirmedOpeningCash, equals(100.0));
+          expect(cubit.canProceedToEndShift, isTrue);
+        },
       );
 
-      final success = await cubit.fetchCashReconciliationPreview();
-      expect(success, isTrue);
-      expect(cubit.expectedCash, equals(40.0));
-      expect(cubit.previewCountedCash, equals(40.0));
-      expect(cubit.cashVariance, equals(0.0));
-      expect(cubit.cashVarianceType, equals('balanced'));
-      expect(cubit.confirmedOpeningCash, equals(100.0));
-      expect(cubit.canProceedToEndShift, isTrue);
-    });
+      test(
+        'Shortage scenario: Counted 30, expected 40 -> variance -10, shortage',
+        () async {
+          repository.onPreview =
+              ({
+                required String shiftId,
+                required double totalSales,
+                required double countedCash,
+                double? cardPayments,
+                List<EndShiftAggregatorModel>? aggregators,
+              }) async {
+                return ApiResult.success({
+                  'data': {
+                    'cash_reconciliation': {
+                      'expected_cash': 40.0,
+                      'counted_cash': 30.0,
+                      'cash_variance': -10.0,
+                      'cash_variance_type': 'shortage',
+                      'confirmed_opening_cash': 100.0,
+                    },
+                    'shortage_to_allocate': 10.0,
+                    'allocation_required': true,
+                  },
+                });
+              };
 
-    test('Shortage scenario: Counted 30, expected 40 -> variance -10, shortage', () async {
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) async {
-        return ApiResult.success({
-          'data': {
-            'cash_reconciliation': {
-              'expected_cash': 40.0,
-              'counted_cash': 30.0,
-              'cash_variance': -10.0,
-              'cash_variance_type': 'shortage',
-              'confirmed_opening_cash': 100.0,
-            },
-            'shortage_to_allocate': 10.0,
-            'allocation_required': true,
-          }
-        });
-      };
+          cubit.setCountedCash(30.0);
+          final success = await cubit.fetchCashReconciliationPreview();
+          expect(success, isTrue);
+          expect(cubit.expectedCash, equals(40.0));
+          expect(cubit.previewCountedCash, equals(30.0));
+          expect(cubit.cashVariance, equals(-10.0));
+          expect(cubit.cashVarianceType, equals('shortage'));
+          // Allocation required but not yet allocated -> cannot proceed
+          expect(cubit.canProceedToEndShift, isFalse);
 
-      cubit.setCountedCash(30.0);
-      final success = await cubit.fetchCashReconciliationPreview();
-      expect(success, isTrue);
-      expect(cubit.expectedCash, equals(40.0));
-      expect(cubit.previewCountedCash, equals(30.0));
-      expect(cubit.cashVariance, equals(-10.0));
-      expect(cubit.cashVarianceType, equals('shortage'));
-      // Allocation required but not yet allocated -> cannot proceed
-      expect(cubit.canProceedToEndShift, isFalse);
-
-      // Allocate exactly 10.0
-      cubit.updateShortageAllocations([
-        const CashShortageAllocation(responsibleType: 'cashier', responsibleId: '1', amount: 10.0),
-      ]);
-      expect(cubit.canProceedToEndShift, isTrue);
-    });
-
-    testWidgets('EndShiftSummaryWidget renders server-authoritative cash reconciliation', (tester) async {
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) async {
-        return ApiResult.success({
-          'data': {
-            'cash_reconciliation': {
-              'expected_cash': 40.0,
-              'counted_cash': 40.0,
-              'cash_variance': 0.0,
-              'cash_variance_type': 'balanced',
-              'confirmed_opening_cash': 100.0,
-            },
-            'shortage_to_allocate': 0.0,
-            'allocation_required': false,
-          }
-        });
-      };
-
-      cubit.setCountedCash(40.0);
-      await cubit.fetchCashReconciliationPreview();
-
-      await tester.pumpWidget(
-        buildTestAppWithCubit(
-          cubit: cubit,
-          child: const EndShiftSummaryWidget(),
-        ),
+          // Allocate exactly 10.0
+          cubit.updateShortageAllocations([
+            const CashShortageAllocation(
+              responsibleType: 'cashier',
+              responsibleId: '1',
+              amount: 10.0,
+            ),
+          ]);
+          expect(cubit.canProceedToEndShift, isTrue);
+        },
       );
-      await tester.pumpAndSettle();
 
-      expect(find.text('Cash Reconciliation'), findsOneWidget);
-      expect(find.text('Expected Cash'), findsOneWidget);
-      expect(find.text('40.00'), findsWidgets);
-      expect(find.text('balanced'), findsOneWidget);
-    });
+      testWidgets(
+        'EndShiftSummaryWidget renders server-authoritative cash reconciliation',
+        (tester) async {
+          repository.onPreview =
+              ({
+                required String shiftId,
+                required double totalSales,
+                required double countedCash,
+                double? cardPayments,
+                List<EndShiftAggregatorModel>? aggregators,
+              }) async {
+                return ApiResult.success({
+                  'data': {
+                    'cash_reconciliation': {
+                      'expected_cash': 40.0,
+                      'counted_cash': 40.0,
+                      'cash_variance': 0.0,
+                      'cash_variance_type': 'balanced',
+                      'confirmed_opening_cash': 100.0,
+                    },
+                    'shortage_to_allocate': 0.0,
+                    'allocation_required': false,
+                  },
+                });
+              };
 
-    testWidgets('EndShiftWithHandoverSummaryWidget renders server-authoritative cash reconciliation', (tester) async {
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) async {
-        return ApiResult.success({
-          'data': {
-            'cash_reconciliation': {
-              'expected_cash': 40.0,
-              'counted_cash': 30.0,
-              'cash_variance': -10.0,
-              'cash_variance_type': 'shortage',
-              'confirmed_opening_cash': 100.0,
-            },
-            'shortage_to_allocate': 10.0,
-            'allocation_required': true,
-          }
-        });
-      };
+          cubit.setCountedCash(40.0);
+          await cubit.fetchCashReconciliationPreview();
 
-      cubit.setCountedCash(30.0);
-      await cubit.fetchCashReconciliationPreview();
+          await tester.pumpWidget(
+            buildTestAppWithCubit(
+              cubit: cubit,
+              child: const EndShiftSummaryWidget(),
+            ),
+          );
+          await tester.pumpAndSettle();
 
-      await tester.pumpWidget(
-        buildTestAppWithCubit(
-          cubit: cubit,
-          child: const EndShiftWithHandoverSummaryWidget(),
-        ),
+          expect(find.text('Cash Reconciliation'), findsOneWidget);
+          expect(find.text('Expected Cash'), findsOneWidget);
+          expect(find.text('40.00'), findsWidgets);
+          expect(find.text('balanced'), findsOneWidget);
+        },
       );
-      await tester.pumpAndSettle();
 
-      expect(find.text('Cash Reconciliation'), findsOneWidget);
-      expect(find.text('Expected Cash'), findsOneWidget);
-      expect(find.text('40.00'), findsWidgets);
-      expect(find.text('30.00'), findsWidgets);
-      expect(find.text('-10.00'), findsWidgets);
-      expect(find.text('shortage'), findsOneWidget);
-    });
-  });
+      testWidgets(
+        'EndShiftWithHandoverSummaryWidget renders server-authoritative cash reconciliation',
+        (tester) async {
+          repository.onPreview =
+              ({
+                required String shiftId,
+                required double totalSales,
+                required double countedCash,
+                double? cardPayments,
+                List<EndShiftAggregatorModel>? aggregators,
+              }) async {
+                return ApiResult.success({
+                  'data': {
+                    'cash_reconciliation': {
+                      'expected_cash': 40.0,
+                      'counted_cash': 30.0,
+                      'cash_variance': -10.0,
+                      'cash_variance_type': 'shortage',
+                      'confirmed_opening_cash': 100.0,
+                    },
+                    'shortage_to_allocate': 10.0,
+                    'allocation_required': true,
+                  },
+                });
+              };
+
+          cubit.setCountedCash(30.0);
+          await cubit.fetchCashReconciliationPreview();
+
+          await tester.pumpWidget(
+            buildTestAppWithCubit(
+              cubit: cubit,
+              child: const EndShiftWithHandoverSummaryWidget(),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.text('Cash Reconciliation'), findsOneWidget);
+          expect(find.text('Expected Cash'), findsOneWidget);
+          expect(find.text('40.00'), findsWidgets);
+          expect(find.text('30.00'), findsWidgets);
+          expect(find.text('-10.00'), findsWidgets);
+          expect(find.text('shortage'), findsOneWidget);
+          expect(find.text('Variance:'), findsOneWidget);
+        },
+      );
+
+      for (final scenario in [
+        (counted: 20.0, variance: -20.0, type: 'shortage'),
+        (counted: 55.0, variance: 15.0, type: 'surplus'),
+        (counted: 40.0, variance: 0.0, type: 'balanced'),
+      ]) {
+        testWidgets('DEF-07 shows only preview variance ${scenario.variance}', (
+          tester,
+        ) async {
+          repository.onPreview =
+              ({
+                required String shiftId,
+                required double totalSales,
+                required double countedCash,
+                double? cardPayments,
+                List<EndShiftAggregatorModel>? aggregators,
+              }) async => ApiResult.success({
+                'data': {
+                  'cash_reconciliation': {
+                    'expected_cash': 40.0,
+                    'counted_cash': scenario.counted,
+                    'cash_variance': scenario.variance,
+                    'cash_variance_type': scenario.type,
+                    'confirmed_opening_cash': 100.0,
+                  },
+                  'shortage_to_allocate': scenario.variance < 0
+                      ? -scenario.variance
+                      : 0.0,
+                  'allocation_required': scenario.variance < 0,
+                },
+              });
+
+          cubit.setCountedCash(scenario.counted);
+          await cubit.fetchCashReconciliationPreview();
+          await tester.pumpWidget(
+            buildTestAppWithCubit(
+              cubit: cubit,
+              child: const EndShiftWithHandoverSummaryWidget(),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.text('Cash Reconciliation'), findsOneWidget);
+          expect(find.text('Variance:'), findsOneWidget);
+          final varianceRow = find
+              .ancestor(of: find.text('Variance:'), matching: find.byType(Row))
+              .at(1);
+          expect(
+            find.descendant(
+              of: varianceRow,
+              matching: find.text(scenario.variance.toStringAsFixed(2)),
+            ),
+            findsOneWidget,
+          );
+          expect(find.text('100.00'), findsOneWidget);
+        });
+      }
+
+      testWidgets('DEF-07 hides old preview while loading and when stale', (
+        tester,
+      ) async {
+        cubit.setCountedCash(30.0);
+        await cubit.fetchCashReconciliationPreview();
+        await tester.pumpWidget(
+          buildTestAppWithCubit(
+            cubit: cubit,
+            child: const EndShiftWithHandoverSummaryWidget(),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Cash Reconciliation'), findsOneWidget);
+
+        final pending = Completer<ApiResult<Map<String, dynamic>>>();
+        repository.onPreview =
+            ({
+              required String shiftId,
+              required double totalSales,
+              required double countedCash,
+              double? cardPayments,
+              List<EndShiftAggregatorModel>? aggregators,
+            }) => pending.future;
+        final request = cubit.fetchCashReconciliationPreview();
+        expect(cubit.isPreviewLoading, isTrue);
+        await tester.pumpAndSettle();
+        expect(find.text('Cash Reconciliation'), findsNothing);
+        expect(find.text('Variance:'), findsNothing);
+
+        cubit.invalidatePreview();
+        await tester.pumpAndSettle();
+        expect(find.text('Cash Reconciliation'), findsNothing);
+        pending.complete(ApiResult.success({}));
+        await request;
+
+        repository.onPreview =
+            ({
+              required String shiftId,
+              required double totalSales,
+              required double countedCash,
+              double? cardPayments,
+              List<EndShiftAggregatorModel>? aggregators,
+            }) async => ApiResult.failure(
+              ValidationFailure(
+                error: LocalErrorModel(message: 'Preview failed', errors: null),
+                icon: CupertinoIcons.exclamationmark_triangle,
+                statusCode: 422,
+                stackTrace: StackTrace.empty,
+              ),
+            );
+        expect(await cubit.fetchCashReconciliationPreview(), isFalse);
+        await tester.pumpAndSettle();
+        expect(cubit.state, isA<EndShiftPreviewFailure>());
+        expect(find.text('Cash Reconciliation'), findsNothing);
+        expect(find.text('Variance:'), findsNothing);
+      });
+    },
+  );
 
   group('Group E: Submit Button Gating on Summary Step', () {
     late MockShiftManagementRepository repository;
@@ -544,46 +717,123 @@ void main() {
       expect(cubit.canProceedToEndShift, isFalse);
     });
 
-    test('canProceedToEndShift is false when shortage allocation sum does not equal shortage', () async {
-      repository.onPreview = ({
-        required String shiftId,
-        required double totalSales,
-        required double countedCash,
-        double? cardPayments,
-        List<EndShiftAggregatorModel>? aggregators,
-      }) async {
-        return ApiResult.success({
-          'data': {
-            'cash_reconciliation': {
-              'expected_cash': 50.0,
-              'counted_cash': 30.0,
-              'cash_variance': -20.0,
-              'cash_variance_type': 'shortage',
-              'confirmed_opening_cash': 100.0,
-            },
-            'shortage_to_allocate': 20.0,
-            'allocation_required': true,
-          }
-        });
-      };
+    test(
+      'canProceedToEndShift is false when shortage allocation sum does not equal shortage',
+      () async {
+        repository.onPreview =
+            ({
+              required String shiftId,
+              required double totalSales,
+              required double countedCash,
+              double? cardPayments,
+              List<EndShiftAggregatorModel>? aggregators,
+            }) async {
+              return ApiResult.success({
+                'data': {
+                  'cash_reconciliation': {
+                    'expected_cash': 50.0,
+                    'counted_cash': 30.0,
+                    'cash_variance': -20.0,
+                    'cash_variance_type': 'shortage',
+                    'confirmed_opening_cash': 100.0,
+                  },
+                  'shortage_to_allocate': 20.0,
+                  'allocation_required': true,
+                },
+              });
+            };
 
-      cubit.setCountedCash(30.0);
-      await cubit.fetchCashReconciliationPreview();
-      expect(cubit.canProceedToEndShift, isFalse);
+        cubit.setCountedCash(30.0);
+        await cubit.fetchCashReconciliationPreview();
+        expect(cubit.canProceedToEndShift, isFalse);
 
-      // Partial allocation: 15.0 allocated instead of 20.0
-      cubit.updateShortageAllocations([
-        const CashShortageAllocation(responsibleType: 'cashier', responsibleId: '1', amount: 15.0),
-      ]);
-      expect(cubit.canProceedToEndShift, isFalse);
+        // Partial allocation: 15.0 allocated instead of 20.0
+        cubit.updateShortageAllocations([
+          const CashShortageAllocation(
+            responsibleType: 'cashier',
+            responsibleId: '1',
+            amount: 15.0,
+          ),
+        ]);
+        expect(cubit.canProceedToEndShift, isFalse);
 
-      // Full allocation: 20.0 allocated
-      cubit.updateShortageAllocations([
-        const CashShortageAllocation(responsibleType: 'cashier', responsibleId: '1', amount: 15.0),
-        const CashShortageAllocation(responsibleType: 'manager', responsibleId: '2', amount: 5.0),
-      ]);
-      expect(cubit.canProceedToEndShift, isTrue);
-    });
+        // Full allocation: 20.0 allocated
+        cubit.updateShortageAllocations([
+          const CashShortageAllocation(
+            responsibleType: 'cashier',
+            responsibleId: '1',
+            amount: 15.0,
+          ),
+          const CashShortageAllocation(
+            responsibleType: 'manager',
+            responsibleId: '2',
+            amount: 5.0,
+          ),
+        ]);
+        expect(cubit.canProceedToEndShift, isTrue);
+      },
+    );
+
+    test(
+      'Strict halala precision rejects 1-halala mismatch (e.g. 10.00 shortage vs 9.99 or 10.01 allocated)',
+      () async {
+        repository.onPreview =
+            ({
+              required String shiftId,
+              required double totalSales,
+              required double countedCash,
+              double? cardPayments,
+              List<EndShiftAggregatorModel>? aggregators,
+            }) async {
+              return ApiResult.success({
+                'data': {
+                  'cash_reconciliation': {
+                    'expected_cash': 40.0,
+                    'counted_cash': 30.0,
+                    'cash_variance': -10.0,
+                    'cash_variance_type': 'shortage',
+                    'confirmed_opening_cash': 100.0,
+                  },
+                  'shortage_to_allocate': 10.0,
+                  'allocation_required': true,
+                },
+              });
+            };
+
+        cubit.setCountedCash(30.0);
+        await cubit.fetchCashReconciliationPreview();
+
+        // Case 1: 9.99 allocated (1 halala short)
+        cubit.updateShortageAllocations([
+          const CashShortageAllocation(
+            responsibleType: 'cashier',
+            responsibleId: '1',
+            amount: 9.99,
+          ),
+        ]);
+        expect(cubit.canProceedToEndShift, isFalse);
+
+        // Case 2: 10.01 allocated (1 halala excess)
+        cubit.updateShortageAllocations([
+          const CashShortageAllocation(
+            responsibleType: 'cashier',
+            responsibleId: '1',
+            amount: 10.01,
+          ),
+        ]);
+        expect(cubit.canProceedToEndShift, isFalse);
+
+        // Case 3: Exactly 10.00 allocated (1000 halalas)
+        cubit.updateShortageAllocations([
+          const CashShortageAllocation(
+            responsibleType: 'cashier',
+            responsibleId: '1',
+            amount: 10.00,
+          ),
+        ]);
+        expect(cubit.canProceedToEndShift, isTrue);
+      },
+    );
 
     test('endShift rejects early if canProceedToEndShift is false', () async {
       final emptyVariance = Variance(
@@ -601,7 +851,9 @@ void main() {
       final failureState = cubit.state as EndShiftFailure;
       expect(
         failureState.failure.error.message,
-        contains('Stale or missing preview. Please preview cash reconciliation first.'),
+        contains(
+          'Stale or missing preview. Please preview cash reconciliation first.',
+        ),
       );
     });
   });

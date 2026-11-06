@@ -103,7 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m37(date, time) =>
       "تم تأكيد طلب التخلص النهائي من ${date} و${time} المقترحين";
 
-  static String m38(int count) => "${count} سنوات";
+  static String m38(count) => "${count} سنوات";
 
   static String m39(name) =>
       "يتم حاليًا تأكيد الطلب الذي تم إنشاؤه من ${name}.";
@@ -515,6 +515,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "addNewZone": MessageLookupByLibrary.simpleMessage("إضافة منطقة جديدة"),
     "addNote": MessageLookupByLibrary.simpleMessage("أضف ملاحظة"),
     "addPhotoOfItem": MessageLookupByLibrary.simpleMessage("إضافة صورة للعنصر"),
+    "addResponsibleForShortage": MessageLookupByLibrary.simpleMessage(
+      "إضافة مسؤول عن جزء من العجز:",
+    ),
     "addStaffForThisMonthsInventoryCount": MessageLookupByLibrary.simpleMessage(
       "إضافة الموظفين لعدد المخزون لهذا الشهر.",
     ),
@@ -602,6 +605,13 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "allShifts": MessageLookupByLibrary.simpleMessage("جميع الورديات"),
     "allSuppliers": MessageLookupByLibrary.simpleMessage("جميع الموردين"),
+    "allocatedAmount": MessageLookupByLibrary.simpleMessage("الموزّع"),
+    "allocatedAmountSar": MessageLookupByLibrary.simpleMessage(
+      "المبلغ المخصص (ر.س)",
+    ),
+    "allocationExceedsRemaining": MessageLookupByLibrary.simpleMessage(
+      "مبلغ التوزيع يتجاوز المتبقي من العجز",
+    ),
     "allocationIncomplete": MessageLookupByLibrary.simpleMessage(
       "يجب أن يكون المبلغ المتبقي 0.00 ر.س",
     ),
@@ -1020,6 +1030,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cashSalesTransfers": MessageLookupByLibrary.simpleMessage(
       "تحويلات المبيعات النقدية",
+    ),
+    "cashShortageAllocation": MessageLookupByLibrary.simpleMessage(
+      "توزيع العجز النقدي",
     ),
     "cashTransferAndOwnerPaymentLog": MessageLookupByLibrary.simpleMessage(
       "سجل تحويل النقد ومدفوعات المالك.",
@@ -1726,6 +1739,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "duplicateAndChangeSource": MessageLookupByLibrary.simpleMessage(
       "تكرار وتغيير المصدر",
     ),
+    "duplicateResponsibleAdded": MessageLookupByLibrary.simpleMessage(
+      "تمت إضافة هذا المسؤول مسبقاً",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("المدة"),
     "eGMinorIssues": MessageLookupByLibrary.simpleMessage(
       "مشاكل طفيفة، يتطلب التفتيش.",
@@ -2014,6 +2030,9 @@ class MessageLookup extends MessageLookupByLibrary {
           "قم بتصدير كشف حسابك بتنسيق الملف المفضل لديك والإطار الزمني.",
         ),
     "externalTransfer": MessageLookupByLibrary.simpleMessage("نقل خارجي"),
+    "failedToLoadCandidates": MessageLookupByLibrary.simpleMessage(
+      "تعذر تحميل المسؤولين",
+    ),
     "fast80100": MessageLookupByLibrary.simpleMessage("سريع (80% – 100%)"),
     "fastDeliveryLimitedQuantities": MessageLookupByLibrary.simpleMessage(
       "تسليم سريع - كميات محدودة",
@@ -2686,6 +2705,9 @@ class MessageLookup extends MessageLookupByLibrary {
           "سيؤدي تنفيذ هذا الطلب إلى انخفاض المخزون المتوفر إلى ما دون الحد الأدنى الآمن وهو 75 كجم.",
         ),
     "full": MessageLookupByLibrary.simpleMessage("كامل"),
+    "fullAllocationRequired": MessageLookupByLibrary.simpleMessage(
+      "مطلوب التوزيع بالكامل",
+    ),
     "fullAssetHistoryView": MessageLookupByLibrary.simpleMessage(
       "عرض كامل لسجل الأصول",
     ),
@@ -3160,6 +3182,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "lightMode": MessageLookupByLibrary.simpleMessage("فاتح"),
     "listBreakdown": MessageLookupByLibrary.simpleMessage("انهيار القائمة"),
     "liter": MessageLookupByLibrary.simpleMessage("لتر"),
+    "loadingEligibleCandidates": MessageLookupByLibrary.simpleMessage(
+      "جاري تحميل قائمة المسؤولين...",
+    ),
     "location": MessageLookupByLibrary.simpleMessage("الموقع"),
     "locationHistoryMap": MessageLookupByLibrary.simpleMessage(
       "خريطة تاريخ الموقع",
@@ -3518,6 +3543,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noAvailableCashiers": MessageLookupByLibrary.simpleMessage(
       "لا يوجد صرافون متاحون",
     ),
+    "noCandidatesAvailableForRole": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد مسؤول متاح بهذا الدور في هذا الفرع.",
+    ),
     "noCashiersAreAvailable": MessageLookupByLibrary.simpleMessage(
       "لا يوجد الصرافين المتاحة",
     ),
@@ -3663,6 +3691,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noShiftsInProgress": MessageLookupByLibrary.simpleMessage(
       "لا توجد ورديات قيد التنفيذ",
+    ),
+    "noShortageRequiringAllocation": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد عجز نقدي يستدعي توزيع المسؤولية.",
     ),
     "noSingleInvoicesDesc": MessageLookupByLibrary.simpleMessage(
       "لم يتم تحميل فواتير واحدة. قم بإضافة فاتورة لرؤيتها مدرجة هنا.",
@@ -4180,6 +4211,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseCompleteTheDeliveryDetailsBelow":
         MessageLookupByLibrary.simpleMessage("يرجى إكمال تفاصيل التسليم أدناه"),
     "pleaseEnsure": MessageLookupByLibrary.simpleMessage("يرجى التأكد:"),
+    "pleaseEnterValidAmount": MessageLookupByLibrary.simpleMessage(
+      "يرجى إدخال مبلغ صحيح أكبر من الصفر",
+    ),
     "pleaseIncludeAReasonSoTheyUnderstandYourPosition":
         MessageLookupByLibrary.simpleMessage(
           "يرجى تضمين سبب حتى يفهموا موقفك.",
@@ -4192,6 +4226,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "pleaseSelectADifferentPaymentMethod": MessageLookupByLibrary.simpleMessage(
       "الرجاء تحديد طريقة دفع مختلفة.",
+    ),
+    "pleaseSelectResponsible": MessageLookupByLibrary.simpleMessage(
+      "يرجى اختيار المسؤول من القائمة",
     ),
     "pleaseTryAgainLater": MessageLookupByLibrary.simpleMessage(
       "يرجى المحاولة مرة أخرى في وقت لاحق.",
@@ -4648,6 +4685,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "relatedOrder": MessageLookupByLibrary.simpleMessage("الطلب ذو الصلة"),
     "relocateWithin": m96,
     "remaining": MessageLookupByLibrary.simpleMessage("المتبقي"),
+    "remainingAmount": MessageLookupByLibrary.simpleMessage("المتبقي"),
     "remainingBalanceAutoCalculated": MessageLookupByLibrary.simpleMessage(
       "الرصيد المتبقي (يتم حسابه تلقائيًا)",
     ),
@@ -4814,6 +4852,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "responsibleEmployeess": MessageLookupByLibrary.simpleMessage(
       "الموظفين المسؤولين",
     ),
+    "responsibleType": MessageLookupByLibrary.simpleMessage("نوع المسؤول"),
     "restartApp": MessageLookupByLibrary.simpleMessage("إعادة تشغيل التطبيق"),
     "restock": MessageLookupByLibrary.simpleMessage("إعادة تخزين"),
     "resubmitted": MessageLookupByLibrary.simpleMessage("إعادة الإرسال"),
@@ -5182,6 +5221,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectResponsibleEmployee": MessageLookupByLibrary.simpleMessage(
       "حدد الموظف المسؤول",
     ),
+    "selectResponsibleNameAndId": MessageLookupByLibrary.simpleMessage(
+      "اختر المسؤول (الاسم ومعرف النظام)",
+    ),
     "selectThisStore": MessageLookupByLibrary.simpleMessage("حدد هذا المتجر"),
     "selectThisSupplier": MessageLookupByLibrary.simpleMessage(
       "حدد هذا المورد",
@@ -5297,6 +5339,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "توزيع العجز مطلوب",
     ),
     "shortageAmount": MessageLookupByLibrary.simpleMessage("مبلغ النقص:"),
+    "shortageReasonOptional": MessageLookupByLibrary.simpleMessage(
+      "سبب العجز / ملاحظات التوزيع (اختياري)",
+    ),
     "shortageStockDeficit": MessageLookupByLibrary.simpleMessage(
       "النقص (عجز المخزون)",
     ),
@@ -5426,6 +5471,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "specializedReports": MessageLookupByLibrary.simpleMessage(
       "التقارير المتخصصة",
+    ),
+    "specifiedResponsibilities": MessageLookupByLibrary.simpleMessage(
+      "المسؤوليات المحددة:",
     ),
     "speedAndEfficiency": MessageLookupByLibrary.simpleMessage(
       "السرعة والكفاءة",
@@ -5890,6 +5938,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalSalesHintText": MessageLookupByLibrary.simpleMessage(
       "المبلغ (إجمالي المبيعات + ضريبة القيمة المضافة)",
     ),
+    "totalShortage": MessageLookupByLibrary.simpleMessage("إجمالي العجز"),
     "totalUnusedInventory": MessageLookupByLibrary.simpleMessage(
       "إجمالي المخزون غير المستخدم",
     ),

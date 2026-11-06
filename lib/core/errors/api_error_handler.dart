@@ -16,6 +16,18 @@ import 'local_status_code.dart';
 class ApiErrorHandler {
   const ApiErrorHandler._();
 
+  static bool _isNetworkDown(SocketException? socketError) {
+    if (socketError == null) return false;
+    final osCode = socketError.osError?.errorCode;
+    final msg = socketError.message.toLowerCase();
+    return osCode == 100 ||
+        osCode == 101 ||
+        osCode == 50 ||
+        osCode == 51 ||
+        msg.contains('network is unreachable') ||
+        msg.contains('network is down');
+  }
+
   static String _msg(ErrorMessageKey key) => ErrorLocaleResolver.resolve(key);
 
   static ApiFailure handle(Object error, StackTrace stackTrace) {
@@ -29,10 +41,19 @@ class ApiErrorHandler {
       case DioException e:
         failure = _handleDioError(e);
 
-      case SocketException _:
+      case SocketException e:
+        final isDown = _isNetworkDown(e);
         failure = NetworkFailure(
-          error: LocalErrorModel(message: _msg(ErrorMessageKey.noInternet)),
-          icon: CupertinoIcons.wifi_slash,
+          error: LocalErrorModel(
+            message: _msg(
+              isDown
+                  ? ErrorMessageKey.noInternet
+                  : ErrorMessageKey.serverUnreachable,
+            ),
+          ),
+          icon: isDown
+              ? CupertinoIcons.wifi_slash
+              : CupertinoIcons.exclamationmark_circle,
           statusCode: LocalStatusCode.connectionError,
           stackTrace: stackTrace,
         );
@@ -104,9 +125,21 @@ class ApiErrorHandler {
       case DioExceptionType.cancel:
         throw const ApiCancelledException();
       case DioExceptionType.connectionError:
+        final socketError = e.error is SocketException
+            ? e.error as SocketException
+            : null;
+        final isDown = _isNetworkDown(socketError);
         return NetworkFailure(
-          error: DioErrorModel(message: _msg(ErrorMessageKey.noInternet)),
-          icon: CupertinoIcons.wifi_slash,
+          error: DioErrorModel(
+            message: _msg(
+              isDown
+                  ? ErrorMessageKey.noInternet
+                  : ErrorMessageKey.serverUnreachable,
+            ),
+          ),
+          icon: isDown
+              ? CupertinoIcons.wifi_slash
+              : CupertinoIcons.exclamationmark_circle,
           statusCode: LocalStatusCode.connectionError,
           stackTrace: e.stackTrace,
         );
