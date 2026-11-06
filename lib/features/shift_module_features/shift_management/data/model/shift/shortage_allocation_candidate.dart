@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-class ShortageAllocationCandidate extends Equatable {
+class ShortageAllocationCandidate {
   final String id;
   final String name;
   final String type; // 'cashier', 'branch_manager', 'employee'
@@ -15,13 +13,19 @@ class ShortageAllocationCandidate extends Equatable {
     this.employeeNumber,
   });
 
+  bool get isValid =>
+      id.trim().isNotEmpty &&
+      name.trim().isNotEmpty &&
+      (type == 'cashier' || type == 'branch_manager' || type == 'employee');
+
   factory ShortageAllocationCandidate.fromJson(Map<String, dynamic> json) {
+    final rawType = json['type']?.toString().trim();
     return ShortageAllocationCandidate(
-      id: json['id']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      type: json['type']?.toString() ?? 'cashier',
-      role: json['role']?.toString() ?? '',
-      employeeNumber: json['employee_number']?.toString(),
+      id: json['id']?.toString().trim() ?? '',
+      name: json['name']?.toString().trim() ?? '',
+      type: (rawType != null && rawType.isNotEmpty) ? rawType : '',
+      role: json['role']?.toString().trim() ?? '',
+      employeeNumber: json['employee_number']?.toString().trim(),
     );
   }
 
@@ -34,5 +38,13 @@ class ShortageAllocationCandidate extends Equatable {
       };
 
   @override
-  List<Object?> get props => [id, name, type, role, employeeNumber];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShortageAllocationCandidate &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          type == other.type;
+
+  @override
+  int get hashCode => id.hashCode ^ type.hashCode;
 }

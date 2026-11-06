@@ -643,6 +643,7 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
       return list
           .map((item) => ShortageAllocationCandidate.fromJson(
               item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map)))
+          .where((candidate) => candidate.isValid)
           .toList();
     });
   }

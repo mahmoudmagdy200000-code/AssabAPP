@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/responsive/app_responsive.dart';
@@ -120,6 +122,7 @@ void main() {
       expect(candidate.type, 'cashier');
       expect(candidate.role, 'كاشير');
       expect(candidate.employeeNumber, 'EMP-101');
+      expect(candidate.isValid, isTrue);
 
       final serialized = candidate.toJson();
       expect(serialized['id'], '101');
@@ -129,7 +132,7 @@ void main() {
       expect(serialized['employee_number'], 'EMP-101');
     });
 
-    test('fromJson handles null employee_number and default type gracefully', () {
+    test('fromJson handles null employee_number and does NOT default to cashier when type is missing', () {
       final json = {
         'id': 202,
         'name': 'Manager Khaled',
@@ -139,12 +142,22 @@ void main() {
       final candidate = ShortageAllocationCandidate.fromJson(json);
       expect(candidate.id, '202');
       expect(candidate.name, 'Manager Khaled');
-      expect(candidate.type, 'cashier');
+      expect(candidate.type, '');
+      expect(candidate.isValid, isFalse);
       expect(candidate.employeeNumber, isNull);
+    });
+
+    test('isValid validates id, name, and allowed types', () {
+      expect(const ShortageAllocationCandidate(id: '1', name: 'A', type: 'cashier', role: '').isValid, isTrue);
+      expect(const ShortageAllocationCandidate(id: '2', name: 'B', type: 'branch_manager', role: '').isValid, isTrue);
+      expect(const ShortageAllocationCandidate(id: '3', name: 'C', type: 'employee', role: '').isValid, isTrue);
+      expect(const ShortageAllocationCandidate(id: '4', name: 'D', type: 'invalid_role', role: '').isValid, isFalse);
+      expect(const ShortageAllocationCandidate(id: '', name: 'E', type: 'cashier', role: '').isValid, isFalse);
+      expect(const ShortageAllocationCandidate(id: '5', name: '', type: 'cashier', role: '').isValid, isFalse);
     });
   });
 
-  group('EndShiftCubit Candidate Integration', () {
+  group('EndShiftCubit Candidate Integration & Race Condition Protection', () {
     late MockShiftManagementRepository repository;
     late EndShiftCubit cubit;
 
@@ -195,6 +208,39 @@ void main() {
       expect(cubit.state, isA<EndShiftCandidatesSuccess>());
     });
 
+    test('fetchShortageCandidates filters out invalid or incomplete candidates', () async {
+      final mixedCandidates = [
+        const ShortageAllocationCandidate(
+          id: '1',
+          name: 'Ali Cashier',
+          type: 'cashier',
+          role: 'كاشير',
+        ),
+        const ShortageAllocationCandidate(
+          id: '2',
+          name: 'Incomplete Staff',
+          type: '', // Missing type
+          role: '',
+        ),
+        const ShortageAllocationCandidate(
+          id: '', // Missing ID
+          name: 'No ID Staff',
+          type: 'employee',
+          role: '',
+        ),
+      ];
+
+      repository.onCandidates = ({required String shiftId}) async {
+        return ApiResult.success(mixedCandidates);
+      };
+
+      await cubit.fetchShortageCandidates();
+
+      expect(cubit.shortageCandidates.length, 1);
+      expect(cubit.shortageCandidates[0].id, '1');
+      expect(cubit.shortageCandidates[0].name, 'Ali Cashier');
+    });
+
     test('fetchShortageCandidates failure sets candidatesError', () async {
       repository.onCandidates = ({required String shiftId}) async {
         return ApiResult.failure(
@@ -216,6 +262,61 @@ void main() {
       expect(cubit.shortageCandidates, isEmpty);
       expect(cubit.candidatesError, 'فشل في الاتصال بالخادم');
       expect(cubit.state, isA<EndShiftCandidatesFailure>());
+    });
+
+    test('out-of-order in-flight candidate response is dropped when preview is invalidated', () async {
+      final completer = Completer<ApiResult<List<ShortageAllocationCandidate>>>();
+      repository.onCandidates = ({required String shiftId}) => completer.future;
+
+      final future = cubit.fetchShortageCandidates();
+
+      // Invalidate preview (increments candidate generation ID)
+      cubit.invalidatePreview();
+
+      // Now complete the delayed candidate response
+      completer.complete(
+        ApiResult.success([
+          const ShortageAllocationCandidate(
+            id: '99',
+            name: 'Late Candidate',
+            type: 'cashier',
+            role: 'كاشير',
+          ),
+        ]),
+      );
+
+      await future;
+
+      // Stale candidates must NOT overwrite the invalidated cubit state
+      expect(cubit.shortageCandidates, isEmpty);
+      expect(cubit.state, isA<EndShiftPreviewInvalidated>());
+    });
+
+    test('stale allocations are pruned when candidate list updates', () async {
+      final initialCandidates = [
+        const ShortageAllocationCandidate(id: '1', name: 'Ali', type: 'cashier', role: 'كاشير'),
+        const ShortageAllocationCandidate(id: '2', name: 'Omar', type: 'branch_manager', role: 'مدير فرع'),
+      ];
+
+      repository.onCandidates = ({required String shiftId}) async => ApiResult.success(initialCandidates);
+      await cubit.fetchShortageCandidates();
+
+      // Add allocations for candidate 1 and candidate 2
+      cubit.updateShortageAllocations([
+        const CashShortageAllocation(responsibleType: 'cashier', responsibleId: '1', amount: 10.0),
+        const CashShortageAllocation(responsibleType: 'branch_manager', responsibleId: '2', amount: 10.0),
+      ]);
+      expect(cubit.shortageAllocations.length, 2);
+
+      // Candidate list is re-fetched and candidate 2 is no longer in the branch
+      repository.onCandidates = ({required String shiftId}) async => ApiResult.success([
+        const ShortageAllocationCandidate(id: '1', name: 'Ali', type: 'cashier', role: 'كاشير'),
+      ]);
+      await cubit.fetchShortageCandidates();
+
+      // Candidate 2's allocation must be pruned
+      expect(cubit.shortageAllocations.length, 1);
+      expect(cubit.shortageAllocations[0].responsibleId, '1');
     });
 
     test('fetchCashReconciliationPreview triggers candidate fetch when allocation required', () async {
@@ -304,7 +405,7 @@ void main() {
       ),
     ];
 
-    testWidgets('renders candidates dropdown populated with matching role', (tester) async {
+    testWidgets('renders candidates dropdown populated with matching role in Arabic RTL', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
           CashShortageAllocationWidget(
@@ -312,17 +413,39 @@ void main() {
             candidates: sampleCandidates,
             onAllocationsChanged: (_) {},
           ),
+          locale: const Locale('ar'),
         ),
       );
       await tester.pumpAndSettle();
 
-      // Check header and cards
       expect(find.text('توزيع العجز النقدي'), findsOneWidget);
       expect(find.text('إجمالي العجز'), findsOneWidget);
-      expect(find.text('20.00 ر.س'), findsWidgets);
-
-      // Check candidate dropdown is present
+      expect(find.text('الموزّع'), findsOneWidget);
+      expect(find.text('المتبقي'), findsOneWidget);
       expect(find.text('اختر المسؤول (الاسم ومعرف النظام)'), findsOneWidget);
+      expect(find.text('أضف'), findsOneWidget);
+    });
+
+    testWidgets('supports English LTR layout properly with actual English strings', (tester) async {
+      await tester.pumpWidget(
+        buildTestableWidget(
+          CashShortageAllocationWidget(
+            shortageAmount: 20.0,
+            candidates: sampleCandidates,
+            onAllocationsChanged: (_) {},
+          ),
+          locale: const Locale('en'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cash Shortage Allocation'), findsOneWidget);
+      expect(find.text('Total Shortage'), findsOneWidget);
+      expect(find.text('Allocated'), findsOneWidget);
+      expect(find.text('Remaining'), findsOneWidget);
+      expect(find.text('Select Responsible (Name & ID)'), findsOneWidget);
+      expect(find.text('Responsible Type'), findsOneWidget);
+      expect(find.text('Add'), findsOneWidget);
     });
 
     testWidgets('shows loading state when isLoadingCandidates is true', (tester) async {
@@ -333,6 +456,7 @@ void main() {
             isLoadingCandidates: true,
             onAllocationsChanged: (_) {},
           ),
+          locale: const Locale('ar'),
         ),
       );
       await tester.pump();
@@ -353,14 +477,15 @@ void main() {
             },
             onAllocationsChanged: (_) {},
           ),
+          locale: const Locale('ar'),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('فشل الاتصال بالشبكة'), findsOneWidget);
-      expect(find.text('إعادة المحاولة'), findsOneWidget);
+      expect(find.text('أعد المحاولة'), findsOneWidget);
 
-      await tester.tap(find.text('إعادة المحاولة'));
+      await tester.tap(find.text('أعد المحاولة'));
       await tester.pumpAndSettle();
 
       expect(retried, isTrue);
@@ -381,12 +506,12 @@ void main() {
             ],
             onAllocationsChanged: (_) {},
           ),
+          locale: const Locale('ar'),
         ),
       );
       await tester.pumpAndSettle();
 
-      // Current selected type is 'cashier' by default, but only 'branch_manager' exists
-      expect(find.text('لا يوجد كاشير متاح في هذا الفرع.'), findsOneWidget);
+      expect(find.text('لا يوجد مسؤول متاح بهذا الدور في هذا الفرع.'), findsOneWidget);
     });
 
     testWidgets('adding allocation with valid candidate updates allocations list', (tester) async {
@@ -401,6 +526,7 @@ void main() {
               emittedAllocs = allocs;
             },
           ),
+          locale: const Locale('ar'),
         ),
       );
       await tester.pumpAndSettle();
@@ -417,8 +543,8 @@ void main() {
       await tester.enterText(find.byType(TextField).first, '20.0');
       await tester.pumpAndSettle();
 
-      // Tap 'إضافة'
-      await tester.tap(find.text('إضافة'));
+      // Tap 'أضف' (the localized add button)
+      await tester.tap(find.text('أضف'));
       await tester.pumpAndSettle();
 
       expect(emittedAllocs.length, 1);
@@ -427,25 +553,8 @@ void main() {
       expect(emittedAllocs[0].amount, 20.0);
       expect(emittedAllocs[0].responsibleType, 'cashier');
 
-      // Allocation complete state badge
-      expect(find.text('مكتمل'), findsOneWidget);
-    });
-
-    testWidgets('supports English LTR layout properly', (tester) async {
-      await tester.pumpWidget(
-        buildTestableWidget(
-          CashShortageAllocationWidget(
-            shortageAmount: 20.0,
-            candidates: sampleCandidates,
-            onAllocationsChanged: (_) {},
-          ),
-          locale: const Locale('en'),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('توزيع العجز النقدي'), findsOneWidget);
-      expect(find.text('اختر المسؤول (الاسم ومعرف النظام)'), findsOneWidget);
+      // Allocation complete state badge in Arabic
+      expect(find.text('مكتملة'), findsOneWidget);
     });
   });
 }

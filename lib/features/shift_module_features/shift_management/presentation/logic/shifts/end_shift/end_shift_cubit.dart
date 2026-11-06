@@ -121,6 +121,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   List<ShortageAllocationCandidate> _shortageCandidates = [];
   bool _isLoadingCandidates = false;
   String? _candidatesError;
+  int _candidateRequestId = 0;
 
   double? get countedCash => _countedCash;
   Map<String, dynamic>? get previewData => _previewData;
@@ -133,6 +134,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   List<ShortageAllocationCandidate> get shortageCandidates => _shortageCandidates;
   bool get isLoadingCandidates => _isLoadingCandidates;
   String? get candidatesError => _candidatesError;
+  int get candidateRequestId => _candidateRequestId;
 
   String _computeInputFingerprint() {
     final aggList = _aggregators
@@ -235,6 +237,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
 
   void invalidatePreview() {
     _previewRequestId++;
+    _candidateRequestId++;
     _previewData = null;
     _previewStale = true;
     _isPreviewLoading = false;
@@ -245,16 +248,37 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     emit(EndShiftPreviewInvalidated());
   }
 
+  void _pruneStaleAllocations() {
+    if (_shortageAllocations.isEmpty) return;
+    _shortageAllocations.removeWhere((alloc) {
+      return !_shortageCandidates.any(
+        (c) => c.type == alloc.responsibleType && c.id == alloc.responsibleId,
+      );
+    });
+  }
+
   void updateShortageAllocations(
     List<CashShortageAllocation> allocations, [
     String? reason,
   ]) {
-    _shortageAllocations = allocations;
+    if (_shortageCandidates.isNotEmpty) {
+      _shortageAllocations = allocations.where((alloc) {
+        return _shortageCandidates.any(
+          (c) => c.type == alloc.responsibleType && c.id == alloc.responsibleId,
+        );
+      }).toList();
+    } else {
+      _shortageAllocations = allocations;
+    }
     if (reason != null) _allocationReason = reason;
     emit(EndShiftAllocationsUpdated(allocations: _shortageAllocations));
   }
 
   Future<void> fetchShortageCandidates() async {
+    _candidateRequestId++;
+    final currentCandidateId = _candidateRequestId;
+    final currentShiftId = shiftId;
+
     _isLoadingCandidates = true;
     _candidatesError = null;
     emit(EndShiftCandidatesLoading(varianceStrategy: state.varianceStrategy));
@@ -263,16 +287,25 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       shiftId: shiftId,
     );
 
+    // Drop out-of-order, stale, or invalidated responses
+    if (currentCandidateId != _candidateRequestId || currentShiftId != shiftId) {
+      _isLoadingCandidates = false;
+      return;
+    }
+
     _isLoadingCandidates = false;
 
     handle(
       result,
       success: (candidates) {
-        _shortageCandidates = candidates;
+        final validCandidates = candidates.where((c) => c.isValid).toList();
+        _shortageCandidates = validCandidates;
         _candidatesError = null;
+        _pruneStaleAllocations();
+
         emit(
           EndShiftCandidatesSuccess(
-            candidates,
+            validCandidates,
             varianceStrategy: state.varianceStrategy,
           ),
         );

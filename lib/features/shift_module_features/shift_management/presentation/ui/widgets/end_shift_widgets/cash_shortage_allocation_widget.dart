@@ -54,6 +54,35 @@ class _CashShortageAllocationWidgetState
   }
 
   @override
+  void didUpdateWidget(covariant CashShortageAllocationWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.candidates != oldWidget.candidates) {
+      if (_selectedCandidate != null &&
+          !widget.candidates.any((c) =>
+              c.id == _selectedCandidate!.id &&
+              c.type == _selectedCandidate!.type)) {
+        setState(() {
+          _selectedCandidate = null;
+        });
+      }
+      if (_allocations.isNotEmpty && widget.candidates.isNotEmpty) {
+        final pruned = _allocations.where((alloc) {
+          return widget.candidates.any(
+            (c) =>
+                c.type == alloc.responsibleType && c.id == alloc.responsibleId,
+          );
+        }).toList();
+        if (pruned.length != _allocations.length) {
+          setState(() {
+            _allocations = pruned;
+          });
+          widget.onAllocationsChanged(_allocations);
+        }
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _amountController.dispose();
     _reasonController.dispose();
@@ -72,14 +101,15 @@ class _CashShortageAllocationWidgetState
 
   List<ShortageAllocationCandidate> get _filteredCandidates {
     return widget.candidates
-        .where((c) => c.type == _selectedType)
+        .where((c) => c.type == _selectedType && c.isValid)
         .toList();
   }
 
   void _addAllocation() {
+    final tr = context.tr;
     if (_selectedCandidate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى اختيار المسؤول من القائمة')),
+        SnackBar(content: Text(tr.pleaseSelectResponsible)),
       );
       return;
     }
@@ -90,14 +120,14 @@ class _CashShortageAllocationWidgetState
 
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال مبلغ صحيح أكبر من الصفر')),
+        SnackBar(content: Text(tr.pleaseEnterValidAmount)),
       );
       return;
     }
 
     if (amount > _remainingAmount + 0.001) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('مبلغ التوزيع يتجاوز المتبقي من العجز')),
+        SnackBar(content: Text(tr.allocationExceedsRemaining)),
       );
       return;
     }
@@ -108,7 +138,7 @@ class _CashShortageAllocationWidgetState
     );
     if (duplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تمت إضافة هذا المسؤول مسبقاً')),
+        SnackBar(content: Text(tr.duplicateResponsibleAdded)),
       );
       return;
     }
@@ -138,6 +168,9 @@ class _CashShortageAllocationWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+    final currency = tr.sar;
+
     if (widget.shortageAmount <= 0) {
       return Container(
         padding: EdgeInsets.all(12.w),
@@ -152,7 +185,7 @@ class _CashShortageAllocationWidgetState
             10.horizontalSpace,
             Expanded(
               child: Text(
-                'لا يوجد عجز نقدي يستدعي توزيع المسؤولية.',
+                tr.noShortageRequiringAllocation,
                 style: AppStyles.s14W500.copyWith(color: Colors.green[800]),
               ),
             ),
@@ -177,7 +210,7 @@ class _CashShortageAllocationWidgetState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text('توزيع العجز النقدي', style: AppStyles.s16W500),
+                child: Text(tr.cashShortageAllocation, style: AppStyles.s16W500),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
@@ -188,7 +221,7 @@ class _CashShortageAllocationWidgetState
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Text(
-                  isComplete ? 'مكتمل' : 'مطلوب التوزيع بالكامل',
+                  isComplete ? tr.completed : tr.fullAllocationRequired,
                   style: AppStyles.s12W500.copyWith(
                     color: isComplete ? Colors.green[800] : Colors.red[800],
                   ),
@@ -201,24 +234,24 @@ class _CashShortageAllocationWidgetState
             children: [
               Expanded(
                 child: _buildMetricCard(
-                  title: 'إجمالي العجز',
-                  value: '${widget.shortageAmount.toStringAsFixed(2)} ر.س',
+                  title: tr.totalShortage,
+                  value: '${widget.shortageAmount.toStringAsFixed(2)} $currency',
                   color: Colors.red[700]!,
                 ),
               ),
               8.horizontalSpace,
               Expanded(
                 child: _buildMetricCard(
-                  title: 'الموزّع',
-                  value: '${_allocatedTotal.toStringAsFixed(2)} ر.س',
+                  title: tr.allocatedAmount,
+                  value: '${_allocatedTotal.toStringAsFixed(2)} $currency',
                   color: Colors.blue[700]!,
                 ),
               ),
               8.horizontalSpace,
               Expanded(
                 child: _buildMetricCard(
-                  title: 'المتبقي',
-                  value: '${_remainingAmount.toStringAsFixed(2)} ر.س',
+                  title: tr.remainingAmount,
+                  value: '${_remainingAmount.toStringAsFixed(2)} $currency',
                   color: _remainingAmount == 0 ? Colors.green : Colors.orange[800]!,
                 ),
               ),
@@ -230,7 +263,7 @@ class _CashShortageAllocationWidgetState
 
           // List of current allocations
           if (_allocations.isNotEmpty) ...[
-            Text('المسؤوليات المحددة:', style: AppStyles.s14W500),
+            Text(tr.specifiedResponsibilities, style: AppStyles.s14W500),
             6.verticalSpace,
             ...List.generate(_allocations.length, (index) {
               final alloc = _allocations[index];
@@ -245,7 +278,7 @@ class _CashShortageAllocationWidgetState
                   children: [
                     Expanded(
                       child: Text(
-                        '${_typeLabel(alloc.responsibleType)}: ${alloc.name ?? alloc.responsibleId} (${alloc.amount.toStringAsFixed(2)} ر.س)',
+                        '${_typeLabel(alloc.responsibleType)}: ${alloc.name ?? alloc.responsibleId} (${alloc.amount.toStringAsFixed(2)} $currency)',
                         style: AppStyles.s13W400,
                       ),
                     ),
@@ -263,20 +296,20 @@ class _CashShortageAllocationWidgetState
 
           // Add allocation form if not complete
           if (!isComplete) ...[
-            Text('إضافة مسؤول عن جزء من العجز:', style: AppStyles.s13W500),
+            Text(tr.addResponsibleForShortage, style: AppStyles.s13W500),
             8.verticalSpace,
             DropdownButtonFormField<String>(
               key: ValueKey('type_$_selectedType'),
               initialValue: _selectedType,
               decoration: InputDecoration(
-                labelText: 'نوع المسؤول',
+                labelText: tr.responsibleType,
                 contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
               ),
-              items: const [
-                DropdownMenuItem(value: 'cashier', child: Text('كاشير')),
-                DropdownMenuItem(value: 'branch_manager', child: Text('مدير فرع')),
-                DropdownMenuItem(value: 'employee', child: Text('موظف')),
+              items: [
+                DropdownMenuItem(value: 'cashier', child: Text(tr.cashier)),
+                DropdownMenuItem(value: 'branch_manager', child: Text(tr.branchManager)),
+                DropdownMenuItem(value: 'employee', child: Text(tr.employee)),
               ],
               onChanged: (val) {
                 if (val != null && val != _selectedType) {
@@ -295,7 +328,7 @@ class _CashShortageAllocationWidgetState
                 Expanded(
                   child: CustomTextField(
                     controller: _amountController,
-                    hintText: 'المبلغ المخصص (ر.س)',
+                    hintText: tr.allocatedAmountSar,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     maxLength: 20,
                   ),
@@ -307,7 +340,7 @@ class _CashShortageAllocationWidgetState
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                   ),
-                  child: const Text('إضافة'),
+                  child: Text(tr.add),
                 ),
               ],
             ),
@@ -317,7 +350,7 @@ class _CashShortageAllocationWidgetState
           // Reason input
           CustomTextField(
             controller: _reasonController,
-            hintText: 'سبب العجز / ملاحظات التوزيع (اختياري)',
+            hintText: tr.shortageReasonOptional,
             maxLength: 500,
             onChanged: (val) {
               widget.onReasonChanged?.call(val.trim().isEmpty ? null : val.trim());
@@ -329,6 +362,8 @@ class _CashShortageAllocationWidgetState
   }
 
   Widget _buildCandidateSelector() {
+    final tr = context.tr;
+
     if (widget.isLoadingCandidates) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
@@ -346,7 +381,7 @@ class _CashShortageAllocationWidgetState
             ),
             10.horizontalSpace,
             Text(
-              'جاري تحميل قائمة المسؤولين...',
+              tr.loadingEligibleCandidates,
               style: AppStyles.s12W400.copyWith(color: Colors.blue[900]),
             ),
           ],
@@ -368,7 +403,7 @@ class _CashShortageAllocationWidgetState
             8.horizontalSpace,
             Expanded(
               child: Text(
-                widget.candidatesError ?? 'تعذر تحميل المسؤولين',
+                widget.candidatesError ?? tr.failedToLoadCandidates,
                 style: AppStyles.s12W400.copyWith(color: Colors.red[800]),
               ),
             ),
@@ -379,7 +414,7 @@ class _CashShortageAllocationWidgetState
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 ),
-                child: const Text('إعادة المحاولة'),
+                child: Text(tr.retry),
               ),
           ],
         ),
@@ -401,7 +436,7 @@ class _CashShortageAllocationWidgetState
             8.horizontalSpace,
             Expanded(
               child: Text(
-                'لا يوجد ${_typeLabel(_selectedType)} متاح في هذا الفرع.',
+                tr.noCandidatesAvailableForRole,
                 style: AppStyles.s12W400.copyWith(color: Colors.orange[900]),
               ),
             ),
@@ -417,7 +452,7 @@ class _CashShortageAllocationWidgetState
       initialValue: currentVal,
       isExpanded: true,
       decoration: InputDecoration(
-        labelText: 'اختر المسؤول (الاسم ومعرف النظام)',
+        labelText: tr.selectResponsibleNameAndId,
         contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
       ),
@@ -463,14 +498,15 @@ class _CashShortageAllocationWidgetState
   }
 
   String _typeLabel(String type) {
+    final tr = context.tr;
     switch (type) {
       case 'branch_manager':
-        return 'مدير الفرع';
+        return tr.branchManager;
       case 'employee':
-        return 'موظف';
+        return tr.employee;
       case 'cashier':
       default:
-        return 'كاشير';
+        return tr.cashier;
     }
   }
 }
