@@ -511,6 +511,109 @@ void main() {
       expect(find.text('30.00'), findsWidgets);
       expect(find.text('-10.00'), findsWidgets);
       expect(find.text('shortage'), findsOneWidget);
+      expect(find.text('Variance:'), findsOneWidget);
+    });
+
+    for (final scenario in [
+      (counted: 20.0, variance: -20.0, type: 'shortage'),
+      (counted: 55.0, variance: 15.0, type: 'surplus'),
+      (counted: 40.0, variance: 0.0, type: 'balanced'),
+    ]) {
+      testWidgets('DEF-07 shows only preview variance ${scenario.variance}', (tester) async {
+        repository.onPreview = ({
+          required String shiftId,
+          required double totalSales,
+          required double countedCash,
+          double? cardPayments,
+          List<EndShiftAggregatorModel>? aggregators,
+        }) async => ApiResult.success({
+          'data': {
+            'cash_reconciliation': {
+              'expected_cash': 40.0,
+              'counted_cash': scenario.counted,
+              'cash_variance': scenario.variance,
+              'cash_variance_type': scenario.type,
+              'confirmed_opening_cash': 100.0,
+            },
+            'shortage_to_allocate': scenario.variance < 0 ? -scenario.variance : 0.0,
+            'allocation_required': scenario.variance < 0,
+          },
+        });
+
+        cubit.setCountedCash(scenario.counted);
+        await cubit.fetchCashReconciliationPreview();
+        await tester.pumpWidget(buildTestAppWithCubit(
+          cubit: cubit,
+          child: const EndShiftWithHandoverSummaryWidget(),
+        ));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Cash Reconciliation'), findsOneWidget);
+        expect(find.text('Variance:'), findsOneWidget);
+        final varianceRow = find.ancestor(
+          of: find.text('Variance:'),
+          matching: find.byType(Row),
+        ).at(1);
+        expect(
+          find.descendant(
+            of: varianceRow,
+            matching: find.text(scenario.variance.toStringAsFixed(2)),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('100.00'), findsOneWidget);
+      });
+    }
+
+    testWidgets('DEF-07 hides old preview while loading and when stale', (tester) async {
+      cubit.setCountedCash(30.0);
+      await cubit.fetchCashReconciliationPreview();
+      await tester.pumpWidget(buildTestAppWithCubit(
+        cubit: cubit,
+        child: const EndShiftWithHandoverSummaryWidget(),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Cash Reconciliation'), findsOneWidget);
+
+      final pending = Completer<ApiResult<Map<String, dynamic>>>();
+      repository.onPreview = ({
+        required String shiftId,
+        required double totalSales,
+        required double countedCash,
+        double? cardPayments,
+        List<EndShiftAggregatorModel>? aggregators,
+      }) => pending.future;
+      final request = cubit.fetchCashReconciliationPreview();
+      expect(cubit.isPreviewLoading, isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('Cash Reconciliation'), findsNothing);
+      expect(find.text('Variance:'), findsNothing);
+
+      cubit.invalidatePreview();
+      await tester.pumpAndSettle();
+      expect(find.text('Cash Reconciliation'), findsNothing);
+      pending.complete(ApiResult.success({}));
+      await request;
+
+      repository.onPreview = ({
+        required String shiftId,
+        required double totalSales,
+        required double countedCash,
+        double? cardPayments,
+        List<EndShiftAggregatorModel>? aggregators,
+      }) async => ApiResult.failure(
+        ValidationFailure(
+          error: LocalErrorModel(message: 'Preview failed', errors: null),
+          icon: CupertinoIcons.exclamationmark_triangle,
+          statusCode: 422,
+          stackTrace: StackTrace.empty,
+        ),
+      );
+      expect(await cubit.fetchCashReconciliationPreview(), isFalse);
+      await tester.pumpAndSettle();
+      expect(cubit.state, isA<EndShiftPreviewFailure>());
+      expect(find.text('Cash Reconciliation'), findsNothing);
+      expect(find.text('Variance:'), findsNothing);
     });
   });
 
