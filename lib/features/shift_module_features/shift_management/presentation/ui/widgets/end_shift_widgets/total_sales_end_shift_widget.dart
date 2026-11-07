@@ -358,39 +358,18 @@ class _SalesBreakDownEndShiftWidget
                           ),
                           maxLength: 30,
                           onChanged: (value) {
-                            final trimmed = value.trim();
-                            if (trimmed.isEmpty) {
-                              if (_pendingIncomingError != null) {
-                                setState(() {
-                                  _pendingIncomingError = null;
-                                });
-                              }
-                              context
-                                  .read<EndShiftCubit>()
-                                  .updatePendingIncomingCash(0.0);
-                              return;
-                            }
-                            final regex = RegExp(r'^\d+(\.\d{1,2})?$');
-                            if (!regex.hasMatch(trimmed)) {
-                              setState(() {
-                                _pendingIncomingError =
-                                    'Invalid amount. Enter non-negative SAR with up to 2 decimal places.';
-                              });
-                              return;
-                            }
-                            final parsed = double.tryParse(trimmed);
-                            if (parsed == null || parsed < 0) {
-                              setState(() {
-                                _pendingIncomingError = 'Invalid amount';
-                              });
-                              return;
-                            }
+                            final isAr =
+                                Localizations.localeOf(context).languageCode ==
+                                'ar';
+                            final cubit = context.read<EndShiftCubit>();
+                            cubit.validateAndSetPendingIncomingCash(
+                              value,
+                              isArabic: isAr,
+                            );
                             setState(() {
-                              _pendingIncomingError = null;
+                              _pendingIncomingError =
+                                  cubit.pendingIncomingCashError;
                             });
-                            context
-                                .read<EndShiftCubit>()
-                                .updatePendingIncomingCash(parsed);
                           },
                         ),
                       ),

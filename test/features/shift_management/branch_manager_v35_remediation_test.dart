@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:assab/core/enums/shift_status/shift_handover_status.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/handover_details_entity.dart';
@@ -9,6 +10,7 @@ import 'package:assab/features/shift_module_features/shift_management/domain/ent
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_request.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/variance_model.dart';
 import 'package:assab/features/receive_goods/data/models/receive_goods_local_item_model.dart';
+import 'package:assab/features/receive_goods/data/models/receive_order_supplier_request.dart';
 import 'package:assab/core/enums/receive_goods_quality_enum.dart';
 import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/future_api_result.dart';
@@ -443,6 +445,101 @@ void main() {
       expect(effectiveExpected, equals(600.0));
       expect(variance, equals(0.0));
     });
+
+    test('valid 500 then preview then malformed edit invalidates preview and blocks Next/submit', () async {
+      cubit.validateAndSetPendingIncomingCash('500.00');
+      cubit.setCountedCash(600.0);
+      expect(cubit.isPendingIncomingCashValid, isTrue);
+      expect(cubit.pendingIncomingCash, equals(500.0));
+
+      final previewSuccess = await cubit.fetchCashReconciliationPreview();
+      expect(previewSuccess, isTrue);
+      expect(cubit.previewStale, isFalse);
+      expect(cubit.canProceedToEndShift, isTrue);
+
+      // User types malformed amount (e.g. invalid decimals / chars)
+      cubit.validateAndSetPendingIncomingCash('500..abc');
+      expect(cubit.isPendingIncomingCashValid, isFalse);
+      expect(cubit.pendingIncomingCashError, isNotNull);
+      expect(cubit.previewStale, isTrue);
+      expect(cubit.previewData, isNull);
+      expect(cubit.canProceedToEndShift, isFalse);
+
+      // Submission must be refused while pending-cash input is invalid
+      await cubit.endShift(
+        variance: Variance(
+          currentCashierAmount: 0.0,
+          responsibilityType: 'none',
+          otherCashiers: [],
+          supportingFiles: [],
+          reason: 'none',
+        ),
+        isThereVariance: false,
+      );
+      expect(cubit.state, isA<EndShiftFailure>());
+
+      await cubit.endShitWithHandOver(
+        EndShiftRequestWithHandOver(
+          totalSales: 100.0,
+          cashCollected: 100.0,
+          cardPayments: 0.0,
+          posReceipt: null,
+          nextCashierId: 'c-2',
+          handoverAmount: 100.0,
+          handoverNotes: null,
+          aggregators: [],
+          variance: Variance(
+            currentCashierAmount: 0.0,
+            responsibilityType: 'none',
+            otherCashiers: [],
+            supportingFiles: [],
+            reason: 'none',
+          ),
+          isThereVariance: false,
+          isManager: false,
+        ),
+      );
+      expect(cubit.state, isA<EndShiftFailure>());
+    });
+
+    test('malformed pending incoming cash on first entry blocks progression and preview', () async {
+      cubit.validateAndSetPendingIncomingCash('-50.00');
+      expect(cubit.isPendingIncomingCashValid, isFalse);
+      expect(cubit.canProceedToEndShift, isFalse);
+
+      final previewSuccess = await cubit.fetchCashReconciliationPreview();
+      expect(previewSuccess, isFalse);
+      expect(cubit.state, isA<EndShiftPreviewFailure>());
+    });
+
+    test('clearing pending incoming cash field resets to 0.0, resets error, and requires fresh preview', () async {
+      cubit.validateAndSetPendingIncomingCash('500.00');
+      cubit.setCountedCash(600.0);
+      await cubit.fetchCashReconciliationPreview();
+      expect(cubit.canProceedToEndShift, isTrue);
+
+      // Explicit clear (empty string)
+      cubit.validateAndSetPendingIncomingCash('');
+      expect(cubit.isPendingIncomingCashValid, isTrue);
+      expect(cubit.pendingIncomingCash, equals(0.0));
+      expect(cubit.pendingIncomingCashError, isNull);
+      expect(cubit.previewStale, isTrue);
+      expect(cubit.previewData, isNull);
+      expect(cubit.canProceedToEndShift, isFalse);
+
+      // Fresh preview recalculates with 0.0 pending incoming cash
+      final freshSuccess = await cubit.fetchCashReconciliationPreview();
+      expect(freshSuccess, isTrue);
+      expect(cubit.canProceedToEndShift, isTrue);
+    });
+
+    test('EndShiftCubit localizes pending cash error in Arabic and English', () {
+      cubit.validateAndSetPendingIncomingCash('invalid', isArabic: false);
+      expect(cubit.pendingIncomingCashError, contains('Invalid amount'));
+
+      cubit.validateAndSetPendingIncomingCash('invalid', isArabic: true);
+      expect(cubit.pendingIncomingCashError, contains('مبلغ غير صحيح'));
+    });
   });
 
   group('BM-16: Purchase Receiving VAT Handling (PUR-05)', () {
@@ -616,6 +713,110 @@ void main() {
       expect(formatVatLabel(0.0, 'en'), equals('VAT (0%)'));
       expect(formatVatLabel(null, 'ar'), equals('ضريبة القيمة المضافة (غير محددة)'));
       expect(formatVatLabel(null, 'en'), equals('VAT (Not Specified)'));
+    });
+
+    test('ReceiveOrderSupplierRequest.toFormData serializes 15% tax_rate and financial amounts for invoice', () {
+      final tempDir = Directory.systemTemp.createTempSync('inv_test_15');
+      final dummyFile = File('${tempDir.path}/test_invoice.jpg')..writeAsStringSync('dummy content');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final request = ReceiveOrderSupplierRequest(
+        items: [],
+        documentType: 'invoice',
+        invoiceData: InvoiceData(
+          invoiceNumber: 'INV-15-SERIALIZE',
+          invoiceDate: '2026-11-07',
+          dueDate: '2026-12-07',
+          paymentTerms: 'Net 30 days',
+          file: dummyFile,
+          taxRate: 15.0,
+          amountBeforeTax: 100.0,
+          taxAmount: 15.0,
+          totalAmount: 115.0,
+        ),
+      );
+
+      final formData = request.toFormData();
+      final fields = Map.fromEntries(formData.fields);
+      expect(fields['document_type'], equals('invoice'));
+      expect(fields['invoice_data[invoice_number]'], equals('INV-15-SERIALIZE'));
+      expect(fields['invoice_data[tax_rate]'], equals('15'));
+      expect(fields['invoice_data[vat_rate]'], equals('15'));
+      expect(fields['invoice_data[amount_before_tax]'], equals('100.00'));
+      expect(fields['invoice_data[tax_amount]'], equals('15.00'));
+      expect(fields['invoice_data[total_amount]'], equals('115.00'));
+    });
+
+    test('ReceiveOrderSupplierRequest.toFormData serializes 0% tax_rate correctly', () {
+      final tempDir = Directory.systemTemp.createTempSync('inv_test_0');
+      final dummyFile = File('${tempDir.path}/test_invoice.jpg')..writeAsStringSync('dummy content');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final request = ReceiveOrderSupplierRequest(
+        items: [],
+        documentType: 'invoice',
+        invoiceData: InvoiceData(
+          invoiceNumber: 'INV-0-SERIALIZE',
+          invoiceDate: '2026-11-07',
+          dueDate: '2026-12-07',
+          paymentTerms: 'Net 30 days',
+          file: dummyFile,
+          taxRate: 0.0,
+          amountBeforeTax: 100.0,
+          taxAmount: 0.0,
+          totalAmount: 100.0,
+        ),
+      );
+
+      final formData = request.toFormData();
+      final fields = Map.fromEntries(formData.fields);
+      expect(fields['invoice_data[tax_rate]'], equals('0'));
+      expect(fields['invoice_data[vat_rate]'], equals('0'));
+      expect(fields['invoice_data[amount_before_tax]'], equals('100.00'));
+      expect(fields['invoice_data[total_amount]'], equals('100.00'));
+    });
+
+    test('Delivery note and receipt without document requests remain independent of invoice VAT', () {
+      final request = ReceiveOrderSupplierRequest(
+        items: [],
+        documentType: 'delivery_note',
+        invoiceData: null,
+      );
+
+      final formData = request.toFormData();
+      final fields = Map.fromEntries(formData.fields);
+      expect(fields['document_type'], equals('delivery_note'));
+      expect(fields.containsKey('invoice_data[tax_rate]'), isFalse);
+      expect(fields.containsKey('invoice_data[amount_before_tax]'), isFalse);
+    });
+
+    test('ReceiveOrderInspectionResponse parses invoice block when present', () {
+      final json = {
+        'data': {
+          'order_id': 'ord-inv-1',
+          'order_number': 'PO-INV-001',
+          'supplier_name': 'Supplier With Invoice',
+          'delivery_details': {
+            'driver_name': 'Driver',
+            'vehicle_number': '1234',
+            'arrival_time': '2026-11-07 10:00:00',
+            'delivery_address': 'Branch Main',
+          },
+          'goods_inspection': <Map<String, dynamic>>[],
+          'invoice': {
+            'amount_before_tax': 200.0,
+            'tax_rate': 15.0,
+            'tax_amount': 30.0,
+            'total_amount': 230.0,
+          },
+        },
+      };
+
+      final response = ReceiveOrderInspectionResponse.fromJson(json);
+      expect(response.data.authoritativeAmountBeforeTax, equals(200.0));
+      expect(response.data.authoritativeVatRate, equals(15.0));
+      expect(response.data.authoritativeVatAmount, equals(30.0));
+      expect(response.data.authoritativeTotalAmount, equals(230.0));
     });
   });
 }

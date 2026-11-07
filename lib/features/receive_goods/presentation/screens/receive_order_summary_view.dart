@@ -68,6 +68,16 @@ class ReceiveOrderSummaryView extends StatelessWidget {
       final paymentTerms = validationCubit.getFieldValue('paymentTerms');
       final file = validationCubit.getTypedValue<MediaFile>('file');
       final note = validationCubit.getFieldValue('note');
+      final vatRate =
+          (validationCubit.state.fieldsValue['vatRate'] as num?)?.toDouble();
+      final amountBeforeTax =
+          (validationCubit.state.fieldsValue['amountBeforeTax'] as num?)
+              ?.toDouble();
+      final vatAmount =
+          (validationCubit.state.fieldsValue['vatAmount'] as num?)?.toDouble();
+      final totalAmount =
+          (validationCubit.state.fieldsValue['totalAmount'] as num?)
+              ?.toDouble();
       invoiceData = InvoiceData(
         invoiceNumber: invoiceNumber,
         invoiceDate: invoiceDate,
@@ -75,6 +85,10 @@ class ReceiveOrderSummaryView extends StatelessWidget {
         paymentTerms: paymentTerms,
         file: file!.toFile,
         notes: note,
+        taxRate: vatRate,
+        amountBeforeTax: amountBeforeTax,
+        taxAmount: vatAmount,
+        totalAmount: totalAmount,
       );
     }
 
@@ -182,8 +196,7 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                           final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
                           final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
 
-                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
-                              (items.isNotEmpty ? items.first.vatRate : null);
+                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble();
 
                           final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
                           final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
@@ -635,8 +648,7 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                           final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
                           final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
 
-                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
-                              (items.isNotEmpty ? items.first.vatRate : null);
+                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble();
 
                           final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
                           final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);

@@ -319,8 +319,7 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                           final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
                           final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
 
-                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
-                              (items.isNotEmpty ? items.first.vatRate : null);
+                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble();
 
                           final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
                           final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
