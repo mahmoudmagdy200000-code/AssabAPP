@@ -8,6 +8,7 @@ abstract class ShiftManagementRepository {
     required double totalSales,
     required double countedCash,
     double? cardPayments,
+    double? pendingIncomingCash,
     List<EndShiftAggregatorModel>? aggregators,
   });
 

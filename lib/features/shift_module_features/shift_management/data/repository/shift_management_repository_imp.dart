@@ -590,6 +590,7 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     required double totalSales,
     required double countedCash,
     double? cardPayments,
+    double? pendingIncomingCash,
     List<EndShiftAggregatorModel>? aggregators,
   }) async {
     return execute(() async {
@@ -598,6 +599,8 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         'counted_cash': countedCash.toStringAsFixed(2),
         if (cardPayments != null)
           'card_payments': cardPayments.toStringAsFixed(2),
+        if (pendingIncomingCash != null && pendingIncomingCash > 0)
+          'pending_incoming_cash': pendingIncomingCash.toStringAsFixed(2),
         if (aggregators != null && aggregators.isNotEmpty)
           'aggregators': aggregators
               .map(

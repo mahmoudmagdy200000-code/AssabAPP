@@ -20,6 +20,7 @@ class EndShiftRequestWithHandOver {
   final bool isThereVariance;
   final bool isManager;
   final double? countedCash;
+  final double? pendingIncomingCash;
   final List<CashShortageAllocation>? shortageAllocations;
   final String? allocationReason;
 
@@ -36,6 +37,7 @@ class EndShiftRequestWithHandOver {
     required this.isThereVariance,
     required this.isManager,
     this.countedCash,
+    this.pendingIncomingCash,
     this.shortageAllocations,
     this.allocationReason,
   });
@@ -112,6 +114,10 @@ class EndShiftRequestWithHandOver {
 
     if (countedCash != null) {
       formMap['counted_cash'] = countedCash!.toStringAsFixed(2);
+    }
+
+    if (pendingIncomingCash != null && pendingIncomingCash! > 0) {
+      formMap['pending_incoming_cash'] = pendingIncomingCash!.toStringAsFixed(2);
     }
 
     if (shortageAllocations != null && shortageAllocations!.isNotEmpty) {

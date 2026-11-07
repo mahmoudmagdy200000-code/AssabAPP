@@ -33,14 +33,7 @@ class FakeRemoteDataSource implements ShiftManagementRemoteDataSource {
 class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
   MockShiftManagementRepository() : super(FakeRemoteDataSource());
 
-  FutureApiResult<Map<String, dynamic>> Function({
-    required String shiftId,
-    required double totalSales,
-    required double countedCash,
-    double? cardPayments,
-    List<EndShiftAggregatorModel>? aggregators,
-  })?
-  onPreview;
+  Function? onPreview;
 
   FutureApiResult<void> Function({
     required String shiftId,
@@ -60,16 +53,35 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required double totalSales,
     required double countedCash,
     double? cardPayments,
+    double? pendingIncomingCash,
     List<EndShiftAggregatorModel>? aggregators,
   }) async {
     if (onPreview != null) {
-      return onPreview!(
-        shiftId: shiftId,
-        totalSales: totalSales,
-        countedCash: countedCash,
-        cardPayments: cardPayments,
-        aggregators: aggregators,
-      );
+      dynamic res;
+      try {
+        res = await (onPreview as dynamic)(
+          shiftId: shiftId,
+          totalSales: totalSales,
+          countedCash: countedCash,
+          cardPayments: cardPayments,
+          pendingIncomingCash: pendingIncomingCash,
+          aggregators: aggregators,
+        );
+      } catch (_) {
+        res = await (onPreview as dynamic)(
+          shiftId: shiftId,
+          totalSales: totalSales,
+          countedCash: countedCash,
+          cardPayments: cardPayments,
+          aggregators: aggregators,
+        );
+      }
+      if (res is ApiResult) {
+        return res.when(
+          success: (d) => ApiResult<Map<String, dynamic>>.success(d is Map<String, dynamic> ? d : (d is Map ? d.cast<String, dynamic>() : <String, dynamic>{})),
+          failure: (f) => ApiResult<Map<String, dynamic>>.failure(f),
+        );
+      }
     }
     return ApiResult.success({
       'data': {

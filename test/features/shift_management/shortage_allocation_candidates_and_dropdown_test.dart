@@ -31,13 +31,7 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required String shiftId,
   })? onCandidates;
 
-  FutureApiResult<Map<String, dynamic>> Function({
-    required String shiftId,
-    required double totalSales,
-    required double countedCash,
-    double? cardPayments,
-    List<EndShiftAggregatorModel>? aggregators,
-  })? onPreview;
+  Function? onPreview;
 
   @override
   FutureApiResult<List<ShortageAllocationCandidate>> getShortageAllocationCandidates({
@@ -55,16 +49,28 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required double totalSales,
     required double countedCash,
     double? cardPayments,
+    double? pendingIncomingCash,
     List<EndShiftAggregatorModel>? aggregators,
   }) async {
     if (onPreview != null) {
-      return onPreview!(
-        shiftId: shiftId,
-        totalSales: totalSales,
-        countedCash: countedCash,
-        cardPayments: cardPayments,
-        aggregators: aggregators,
-      );
+      try {
+        return await (onPreview as dynamic)(
+          shiftId: shiftId,
+          totalSales: totalSales,
+          countedCash: countedCash,
+          cardPayments: cardPayments,
+          pendingIncomingCash: pendingIncomingCash,
+          aggregators: aggregators,
+        );
+      } catch (_) {
+        return await (onPreview as dynamic)(
+          shiftId: shiftId,
+          totalSales: totalSales,
+          countedCash: countedCash,
+          cardPayments: cardPayments,
+          aggregators: aggregators,
+        );
+      }
     }
     return ApiResult.success({
       'data': {

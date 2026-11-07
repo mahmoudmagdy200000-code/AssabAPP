@@ -34,6 +34,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
   final TextEditingController madaController;
   final TextEditingController cashController;
   final TextEditingController countedCashController;
+  final TextEditingController? pendingIncomingCashController;
 
   final bool viewUpload;
   const SalesBreakDownEndShiftWidget({
@@ -43,6 +44,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
     required this.madaController,
     required this.cashController,
     required this.countedCashController,
+    this.pendingIncomingCashController,
     required this.viewUpload,
   });
 
@@ -291,7 +293,7 @@ class _SalesBreakDownEndShiftWidget
                                   .read<ValidationCubit>()
                                   .validateField('countedCash', false);
                             } else {
-                              final parsed = double.tryParse(trimmed);
+                              final parsed = EndShiftCubit.tryParseFinancialAmount(trimmed);
                               if (parsed != null && parsed >= 0) {
                                 context
                                     .read<EndShiftCubit>()
@@ -320,6 +322,50 @@ class _SalesBreakDownEndShiftWidget
                     ],
                   ),
                 ),
+                if (widget.pendingIncomingCashController != null) ...[
+                  10.verticalSpace,
+                  ContainerCustomTextField(
+                    label: 'النقد الوارد غير المؤكد في الدرج (اختياري)',
+                    isLabelRequired: false,
+                    pngAssetName: AppAssets.cashPng,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: CustomTextField(
+                            controller: widget.pendingIncomingCashController,
+                            hintText: '0.00',
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            maxLength: 30,
+                            onChanged: (value) {
+                              final trimmed = value.trim();
+                              if (trimmed.isEmpty) {
+                                context.read<EndShiftCubit>().setPendingIncomingCash(null, isInvalid: false);
+                                context.read<ValidationCubit>().validateField('pendingIncomingCash', true);
+                              } else {
+                                final parsed = EndShiftCubit.tryParseFinancialAmount(trimmed);
+                                if (parsed != null && parsed >= 0) {
+                                  context.read<EndShiftCubit>().setPendingIncomingCash(parsed, isInvalid: false);
+                                  context.read<ValidationCubit>().validateField('pendingIncomingCash', true);
+                                } else {
+                                  context.read<EndShiftCubit>().setPendingIncomingCash(null, isInvalid: true);
+                                  context.read<ValidationCubit>().validateField('pendingIncomingCash', false);
+                                }
+                              }
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                        AppSvg(
+                          assetName: AppAssets.saudiRiyal,
+                          width: 20.w,
+                          height: 20.h,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
 
                 const CustomDivider(),
                 15.verticalSpace,
@@ -329,15 +375,19 @@ class _SalesBreakDownEndShiftWidget
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          context.tr.paymentAggregtors(
-                            context
-                                .read<AggregatorCubit>()
-                                .addedAggregators
-                                .length,
+                        Expanded(
+                          child: Text(
+                            context.tr.paymentAggregtors(
+                              context
+                                  .read<AggregatorCubit>()
+                                  .addedAggregators
+                                  .length,
+                            ),
+                            style: AppStyles.s15W500,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          style: AppStyles.s15W500,
                         ),
+                        10.horizontalSpace,
 
                         AppGestureDetectorButton(
                           child: Container(
@@ -420,7 +470,7 @@ class _SalesBreakDownEndShiftWidget
                                                 .addedAggregators[index] =
                                             aggregator.copyWith(
                                               totalAmount:
-                                                  double.tryParse(value) ?? 0,
+                                                  EndShiftCubit.tryParseFinancialAmount(value) ?? 0,
                                             );
                                       },
                                     ),
