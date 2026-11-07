@@ -126,8 +126,11 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
 
   double get pendingIncomingCash => _pendingIncomingCash;
   void updatePendingIncomingCash(double value) {
-    _pendingIncomingCash = value >= 0 ? value : 0.0;
-    _previewStale = true;
+    final normalized = value >= 0 ? value : 0.0;
+    if (_pendingIncomingCash != normalized) {
+      _pendingIncomingCash = normalized;
+      invalidatePreview();
+    }
   }
 
   double? get countedCash => _countedCash;
@@ -716,6 +719,8 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       countedCash: _countedCash!,
       shortageAllocations: _shortageAllocations,
       allocationReason: _allocationReason,
+      pendingIncomingCash: request.pendingIncomingCash ??
+          (_pendingIncomingCash > 0 ? _pendingIncomingCash : null),
       posReceipt: request.posReceipt,
       nextCashierId: request.nextCashierId,
       handoverAmount: request.handoverAmount,

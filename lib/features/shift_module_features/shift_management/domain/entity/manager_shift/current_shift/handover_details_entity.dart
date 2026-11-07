@@ -18,6 +18,7 @@ class HandoverDetailsEntity {
   final HandoverStatus handoverStatus;
   final VarianceType? varianceType;
   final String? varianceReason;
+  final bool isDocumentedPending;
 
   HandoverDetailsEntity({
     required this.handoverId,
@@ -35,16 +36,8 @@ class HandoverDetailsEntity {
     this.varianceType,
     this.varianceReason,
     required this.handoverStatus,
+    this.isDocumentedPending = false,
   });
-
-  /// Under DAY-03 / AC-34: A pending cashier handover does not block workday closure
-  /// if it is fully documented (positive amount, sender cashier known, recipient identified).
-  bool get isDocumentedPending =>
-      handoverStatus == HandoverStatus.pending &&
-      handoverAmount > 0 &&
-      cashierShiftId.isNotEmpty &&
-      cashierName.isNotEmpty &&
-      handoverTo.isNotEmpty;
 
   String get formattedHandoverDateTime {
     try {

@@ -26,6 +26,37 @@ ReceiveOrderInspectionData _$ReceiveOrderInspectionDataFromJson(
   goodsInspection: (json['goods_inspection'] as List<dynamic>)
       .map((e) => GoodsInspectionItem.fromJson(e as Map<String, dynamic>))
       .toList(),
+  financialSummary: json['financial_summary'] is Map<String, dynamic>
+      ? InspectionFinancialSummary.fromJson(
+          json['financial_summary'] as Map<String, dynamic>,
+        )
+      : null,
+  invoice: json['invoice'] is Map<String, dynamic>
+      ? InspectionInvoiceData.fromJson(
+          json['invoice'] as Map<String, dynamic>,
+        )
+      : null,
+);
+
+InspectionFinancialSummary _$InspectionFinancialSummaryFromJson(
+  Map<String, dynamic> json,
+) => InspectionFinancialSummary(
+  expectedAmount: (json['expected_amount'] as num?)?.toDouble(),
+  receivedAmount: (json['received_amount'] as num?)?.toDouble(),
+  varianceAmount: (json['variance_amount'] as num?)?.toDouble(),
+  amountBeforeTax: (json['amount_before_tax'] as num?)?.toDouble(),
+  vatRate: (json['vat_rate'] as num?)?.toDouble(),
+  vatAmount: (json['vat_amount'] as num?)?.toDouble(),
+  totalAmount: (json['total_amount'] as num?)?.toDouble(),
+);
+
+InspectionInvoiceData _$InspectionInvoiceDataFromJson(
+  Map<String, dynamic> json,
+) => InspectionInvoiceData(
+  amountBeforeTax: (json['amount_before_tax'] as num?)?.toDouble(),
+  taxRate: (json['tax_rate'] as num?)?.toDouble(),
+  taxAmount: (json['tax_amount'] as num?)?.toDouble(),
+  totalAmount: (json['total_amount'] as num?)?.toDouble(),
 );
 
 DeliveryDetails _$DeliveryDetailsFromJson(Map<String, dynamic> json) =>

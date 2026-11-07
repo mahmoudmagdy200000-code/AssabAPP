@@ -761,6 +761,44 @@ class _ReceiveOrderInspectionViewState
                         isValid: true,
                       );
 
+                      final vatRate = inspection.data.authoritativeVatRate;
+                      if (vatRate != null) {
+                        validationCubit.validateFieldAndStoreTypedValue<double>(
+                          fieldName: 'vatRate',
+                          value: vatRate,
+                          isValid: true,
+                        );
+                      }
+
+                      final amountBeforeTax =
+                          inspection.data.authoritativeAmountBeforeTax;
+                      if (amountBeforeTax != null) {
+                        validationCubit.validateFieldAndStoreTypedValue<double>(
+                          fieldName: 'amountBeforeTax',
+                          value: amountBeforeTax,
+                          isValid: true,
+                        );
+                      }
+
+                      final vatAmount = inspection.data.authoritativeVatAmount;
+                      if (vatAmount != null) {
+                        validationCubit.validateFieldAndStoreTypedValue<double>(
+                          fieldName: 'vatAmount',
+                          value: vatAmount,
+                          isValid: true,
+                        );
+                      }
+
+                      final totalAmount =
+                          inspection.data.authoritativeTotalAmount;
+                      if (totalAmount != null) {
+                        validationCubit.validateFieldAndStoreTypedValue<double>(
+                          fieldName: 'totalAmount',
+                          value: totalAmount,
+                          isValid: true,
+                        );
+                      }
+
                       validationCubit.addDynamicFields({'documentType'});
 
                       context.read<PagingCubit>().nextStep();

@@ -174,15 +174,22 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                               .length;
 
                           // Calculate financials from received items
-                          final totalBeforeTax = items.fold<double>(
+                          final calculatedTotalBeforeTax = items.fold<double>(
                             0,
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
+                          final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
+                          final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
+
                           final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
                               (items.isNotEmpty ? items.first.vatRate : null);
-                          final vatAmount = rawVatRate != null ? totalBeforeTax * rawVatRate : 0.0;
-                          final totalWithVat = totalBeforeTax + vatAmount;
+
+                          final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
+                          final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
+
+                          final storedTotalAmount = (context.read<ValidationCubit>().state.fieldsValue['totalAmount'] as num?)?.toDouble();
+                          final totalWithVat = storedTotalAmount ?? (vatAmount != null ? totalBeforeTax + vatAmount : totalBeforeTax);
 
                           String formatAmount(double value) =>
                               '${value.toStringAsFixed(2)} SAR';
@@ -620,18 +627,42 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                               data['items'] as List<ReceiveGoodsLocalItemModel>;
                           final orderNumber = data['orderNumber'] as String?;
 
-                          final totalBeforeTax = items.fold<double>(
+                          final calculatedTotalBeforeTax = items.fold<double>(
                             0,
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
+                          final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
+                          final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
+
                           final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble() ??
                               (items.isNotEmpty ? items.first.vatRate : null);
-                          final vatAmount = rawVatRate != null ? totalBeforeTax * rawVatRate : 0.0;
-                          final totalWithVat = totalBeforeTax + vatAmount;
+
+                          final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
+                          final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
+
+                          final storedTotalAmount = (context.read<ValidationCubit>().state.fieldsValue['totalAmount'] as num?)?.toDouble();
+                          final totalWithVat = storedTotalAmount ?? (vatAmount != null ? totalBeforeTax + vatAmount : totalBeforeTax);
 
                           String formatAmount(double value) =>
                               '${value.toStringAsFixed(2)} SAR';
+
+                          String formatVatLabel(double? rate) {
+                            if (rate == null) {
+                              return context.tr.vatNotSpecified;
+                            }
+                            if (rate == 0) {
+                              return context.tr.vat0Percent;
+                            }
+                            if (rate == 0.15) {
+                              return context.tr.vat15Percent;
+                            }
+                            final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+                            final percentage = (rate * 100).toStringAsFixed(0);
+                            return isArabic
+                                ? 'ضريبة القيمة المضافة ($percentage%)'
+                                : 'VAT ($percentage%)';
+                          }
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,16 +726,16 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                                     10.verticalSpace,
                                     _buildRowWidget(
                                       context: context,
-                                      title: rawVatRate == null
-                                          ? context.tr.vatNotSpecified
-                                          : (rawVatRate == 0 ? context.tr.vat0Percent : (rawVatRate == 0.15 ? context.tr.vat15Percent : 'VAT (${(rawVatRate * 100).toStringAsFixed(0)}%)')),
-                                      value: rawVatRate == null ? '-' : formatAmount(vatAmount),
+                                      title: formatVatLabel(rawVatRate),
+                                      value: vatAmount == null ? '-' : formatAmount(vatAmount),
                                     ),
                                     10.verticalSpace,
                                     _buildRowWidget(
                                       context: context,
                                       title: context.tr.totalAmount,
-                                      value: formatAmount(totalWithVat),
+                                      value: rawVatRate == null && storedTotalAmount == null
+                                          ? '-'
+                                          : formatAmount(totalWithVat),
                                     ),
                                   ],
                                 ),
@@ -742,12 +773,19 @@ class ReceiveOrderSummaryView extends StatelessWidget {
               return const AppButtonLoading();
             }
 
+            final validationCubit = context.read<ValidationCubit>();
+            final isInvoice = validationCubit.getFieldValue('documentType') ==
+                DocumentTypeEnum.invoice.value;
+            final rawVatRate =
+                (validationCubit.state.fieldsValue['vatRate'] as num?)?.toDouble();
+            final canFinalize = !isInvoice || rawVatRate != null;
+
             return AppButton(
               onClick: () {
                 _receive(context);
               },
               text: context.tr.markOrderAsReceived,
-              enabled: true,
+              enabled: canFinalize,
               borderRadius: BorderRadius.circular(15.r),
             );
           },

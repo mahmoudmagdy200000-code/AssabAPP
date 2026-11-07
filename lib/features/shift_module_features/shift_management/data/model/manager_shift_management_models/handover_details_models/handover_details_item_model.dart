@@ -85,6 +85,9 @@ class HandoverDetailsItemModel {
   @JsonKey(name: 'accounting_name')
   final String accountingName;
 
+  @JsonKey(name: 'is_documented_pending')
+  final bool? isDocumentedPending;
+
   const HandoverDetailsItemModel({
     required this.handoverId,
     required this.cashierShiftId,
@@ -112,6 +115,7 @@ class HandoverDetailsItemModel {
     required this.canReject,
     required this.varianceDetails,
     required this.accountingName,
+    this.isDocumentedPending,
   });
 
   factory HandoverDetailsItemModel.fromJson(Map<String, dynamic> json) =>

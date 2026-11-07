@@ -7,10 +7,12 @@ class CurrentShiftEntity {
   final ManagerShiftEntity shift;
   final ProgressEntity progress;
   final List<HandoverDetailsEntity> handover;
+  final bool canEnd;
 
   CurrentShiftEntity({
     required this.shift,
     required this.progress,
     required this.handover,
+    this.canEnd = false,
   });
 }

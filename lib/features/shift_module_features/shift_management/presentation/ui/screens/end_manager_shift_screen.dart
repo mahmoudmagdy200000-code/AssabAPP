@@ -31,14 +31,22 @@ import '../widgets/shift_management_from_app_bar.dart';
 class EndManagerShiftScreen extends StatefulWidget {
   final List<HandoverDetailsEntity> handovers;
   final String managerName;
+  final bool? serverCanEnd;
 
   const EndManagerShiftScreen({
     super.key,
     required this.handovers,
     required this.managerName,
+    this.serverCanEnd,
   });
 
-  static bool canProceedFromHandovers(List<HandoverDetailsEntity> handovers) {
+  static bool canProceedFromHandovers(
+    List<HandoverDetailsEntity> handovers, {
+    bool? serverCanEnd,
+  }) {
+    if (serverCanEnd != null) {
+      return serverCanEnd;
+    }
     if (handovers.isEmpty) {
       return true;
     }
@@ -198,6 +206,7 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
                                   if (currentIndex == 0) {
                                     return EndManagerShiftScreen.canProceedFromHandovers(
                                       widget.handovers,
+                                      serverCanEnd: widget.serverCanEnd,
                                     );
                                   } else if (currentIndex == 1) {
                                     return context

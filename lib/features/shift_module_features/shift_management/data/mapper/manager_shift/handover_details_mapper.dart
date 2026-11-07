@@ -19,5 +19,6 @@ extension HandoverDetailsMapper on HandoverDetailsItemModel {
     approvedAt: approvedAt ?? '0000-00-00 00:00:00',
     varianceReason: varianceReason,
     varianceType: varianceType,
+    isDocumentedPending: isDocumentedPending ?? false,
   );
 }

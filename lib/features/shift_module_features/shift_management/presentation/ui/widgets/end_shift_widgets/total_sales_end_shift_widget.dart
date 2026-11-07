@@ -55,6 +55,8 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
 
 class _SalesBreakDownEndShiftWidget
     extends State<SalesBreakDownEndShiftWidget> {
+  String? _pendingIncomingError;
+
   @override
   Widget build(BuildContext context) {
     // final previousCashier = context.read<EndShiftCubit>().previousCashier;
@@ -350,17 +352,45 @@ class _SalesBreakDownEndShiftWidget
                         child: CustomTextField(
                           controller: widget.pendingIncomingCashController,
                           hintText: '0.00',
+                          error: _pendingIncomingError,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           maxLength: 30,
                           onChanged: (value) {
                             final trimmed = value.trim();
-                            final parsed = double.tryParse(trimmed) ?? 0.0;
+                            if (trimmed.isEmpty) {
+                              if (_pendingIncomingError != null) {
+                                setState(() {
+                                  _pendingIncomingError = null;
+                                });
+                              }
+                              context
+                                  .read<EndShiftCubit>()
+                                  .updatePendingIncomingCash(0.0);
+                              return;
+                            }
+                            final regex = RegExp(r'^\d+(\.\d{1,2})?$');
+                            if (!regex.hasMatch(trimmed)) {
+                              setState(() {
+                                _pendingIncomingError =
+                                    'Invalid amount. Enter non-negative SAR with up to 2 decimal places.';
+                              });
+                              return;
+                            }
+                            final parsed = double.tryParse(trimmed);
+                            if (parsed == null || parsed < 0) {
+                              setState(() {
+                                _pendingIncomingError = 'Invalid amount';
+                              });
+                              return;
+                            }
+                            setState(() {
+                              _pendingIncomingError = null;
+                            });
                             context
                                 .read<EndShiftCubit>()
                                 .updatePendingIncomingCash(parsed);
-                            setState(() {});
                           },
                         ),
                       ),
