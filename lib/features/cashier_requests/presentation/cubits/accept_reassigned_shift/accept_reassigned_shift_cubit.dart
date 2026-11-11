@@ -32,4 +32,30 @@ class AcceptReassignedShiftCubit extends SafeCubit<AcceptReassignedShiftState> {
       success: (_) => emit(state.copyWith(loadingShiftId: null, success: true)),
     );
   }
+
+  Future<void> rejectReassignedShift({
+    required String shiftId,
+    required String reason,
+  }) async {
+    emit(
+      state.copyWith(loadingShiftId: shiftId, failure: null, success: false),
+    );
+
+    final result = await _repositoryImp.rejectReassignedShift(
+      shiftId: shiftId,
+      reason: reason,
+    );
+
+    handle(
+      result,
+      failure: (failure) => emit(
+        state.copyWith(
+          loadingShiftId: null,
+          errorShiftId: shiftId,
+          failure: failure,
+        ),
+      ),
+      success: (_) => emit(state.copyWith(loadingShiftId: null, success: true)),
+    );
+  }
 }

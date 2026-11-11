@@ -31,12 +31,32 @@ import '../widgets/shift_management_from_app_bar.dart';
 class EndManagerShiftScreen extends StatefulWidget {
   final List<HandoverDetailsEntity> handovers;
   final String managerName;
+  final bool? serverCanEnd;
 
   const EndManagerShiftScreen({
     super.key,
     required this.handovers,
     required this.managerName,
+    this.serverCanEnd,
   });
+
+  static bool canProceedFromHandovers(
+    List<HandoverDetailsEntity> handovers, {
+    bool? serverCanEnd,
+  }) {
+    if (serverCanEnd != null) {
+      return serverCanEnd;
+    }
+    if (handovers.isEmpty) {
+      return true;
+    }
+    return handovers.every(
+      (handover) =>
+          handover.handoverStatus == HandoverStatus.accepted ||
+          (handover.handoverStatus == HandoverStatus.pending &&
+              handover.isDocumentedPending),
+    );
+  }
 
   @override
   State<EndManagerShiftScreen> createState() => _EndManagerShiftScreenState();
@@ -184,16 +204,10 @@ class _EndManagerShiftScreenState extends State<EndManagerShiftScreen> {
                               child: BlocSelector<ValidationCubit, ValidationState, bool>(
                                 selector: (state) {
                                   if (currentIndex == 0) {
-                                    final areAllHandoversCompleted =
-                                        widget.handovers.isEmpty
-                                        ? false
-                                        : widget.handovers.every(
-                                            (handover) =>
-                                                handover.handoverStatus ==
-                                                HandoverStatus.accepted,
-                                          );
-
-                                    return areAllHandoversCompleted;
+                                    return EndManagerShiftScreen.canProceedFromHandovers(
+                                      widget.handovers,
+                                      serverCanEnd: widget.serverCanEnd,
+                                    );
                                   } else if (currentIndex == 1) {
                                     return context
                                             .read<ValidationCubit>()

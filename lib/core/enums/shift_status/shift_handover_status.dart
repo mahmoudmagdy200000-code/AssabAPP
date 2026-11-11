@@ -1,4 +1,4 @@
-enum HandoverStatus { pending, accepted, rejected, notSubmitted }
+enum HandoverStatus { pending, accepted, rejected, rejectedFinal, notSubmitted }
 
 HandoverStatus handoverStatusFromJson(String? value) {
   switch (value) {
@@ -14,6 +14,11 @@ HandoverStatus handoverStatusFromJson(String? value) {
     case 'rejected':
     case 'Rejected':
       return HandoverStatus.rejected;
+
+    case 'rejected_final':
+    case 'rejectedFinal':
+    case 'RejectedFinal':
+      return HandoverStatus.rejectedFinal;
 
     case 'notSubmitted':
     case 'NotSubmitted':
@@ -33,6 +38,8 @@ String handoverStatusToJson(HandoverStatus status) {
       return 'accepted'; // canonical value
     case HandoverStatus.rejected:
       return 'rejected';
+    case HandoverStatus.rejectedFinal:
+      return 'rejected_final';
     case HandoverStatus.notSubmitted:
       return 'notSubmitted';
   }

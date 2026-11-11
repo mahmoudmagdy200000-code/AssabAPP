@@ -410,6 +410,7 @@ extension ShiftStatusUiMapper on ShiftStatusType {
                 'managerName':
                     currentManagerShift.shift.shiftDetails.managerName,
                 'managerCubit': context.read<ManagerShiftCubit>(),
+                'serverCanEnd': currentManagerShift.canEnd,
               },
             );
           },

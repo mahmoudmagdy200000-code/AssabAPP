@@ -7,6 +7,7 @@ import 'package:assab/core/widgets/upload_expense_invoice_receipt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/receive_goods_local_item_model.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/cubits/media/media_cubit.dart';
 import '../../../../core/cubits/media/media_state.dart';
@@ -302,20 +303,50 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                       BlocSelector<
                         ValidationCubit,
                         ValidationState,
-                        List<dynamic>
+                        List<ReceiveGoodsLocalItemModel>
                       >(
                         selector: (state) =>
-                            state.getListValue('receiveGoodsItems') ?? [],
+                            state.getListValue<ReceiveGoodsLocalItemModel>(
+                              'receiveGoodsItems',
+                            ) ??
+                            [],
                         builder: (context, items) {
-                          final totalBeforeTax = items.fold<double>(
+                          final calculatedTotalBeforeTax = items.fold<double>(
                             0,
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final vatAmount = totalBeforeTax * 0.15;
-                          final totalWithVat = totalBeforeTax + vatAmount;
+                          final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
+                          final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
+
+                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble();
+
+                          final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
+                          final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
+
+                          final storedTotalAmount = (context.read<ValidationCubit>().state.fieldsValue['totalAmount'] as num?)?.toDouble();
+                          final totalWithVat = storedTotalAmount ?? (vatAmount != null ? totalBeforeTax + vatAmount : totalBeforeTax);
+
                           String formatAmount(double value) =>
                               '${value.toStringAsFixed(2)} SAR';
+
+                          String formatVatLabel(double? rate) {
+                            if (rate == null) {
+                              return context.tr.vatNotSpecified;
+                            }
+                            if (rate == 0) {
+                              return context.tr.vat0Percent;
+                            }
+                            if (rate == 0.15) {
+                              return context.tr.vat15Percent;
+                            }
+                            final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+                            final percentage = (rate * 100).toStringAsFixed(0);
+                            return isArabic
+                                ? 'ضريبة القيمة المضافة ($percentage%)'
+                                : 'VAT ($percentage%)';
+                          }
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -327,14 +358,16 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                               10.verticalSpace,
                               _buildRowWidget(
                                 context: context,
-                                title: context.tr.vat15Percent,
-                                value: formatAmount(vatAmount),
+                                title: formatVatLabel(rawVatRate),
+                                value: vatAmount == null ? '-' : formatAmount(vatAmount),
                               ),
                               10.verticalSpace,
                               _buildRowWidget(
                                 context: context,
                                 title: context.tr.totalAmount,
-                                value: formatAmount(totalWithVat),
+                                value: rawVatRate == null && storedTotalAmount == null
+                                    ? '-'
+                                    : formatAmount(totalWithVat),
                               ),
                             ],
                           );
@@ -526,7 +559,11 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
             final isVariance = state.fieldsValueTyped['isVariance'];
             final hasVariance = isVariance is bool ? isVariance : false;
 
+            final rawVatRate = (state.fieldsValue['vatRate'] as num?)?.toDouble();
+            final vatValid = rawVatRate != null;
+
             final baseValidation =
+                vatValid &&
                 state.fieldsValidity['invoiceNumber'] == true &&
                 state.fieldsValidity['invoiceDate'] == true &&
                 state.fieldsValidity['paymentTerms'] == true &&

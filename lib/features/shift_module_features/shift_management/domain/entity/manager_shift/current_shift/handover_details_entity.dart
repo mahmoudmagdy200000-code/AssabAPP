@@ -18,6 +18,7 @@ class HandoverDetailsEntity {
   final HandoverStatus handoverStatus;
   final VarianceType? varianceType;
   final String? varianceReason;
+  final bool isDocumentedPending;
 
   HandoverDetailsEntity({
     required this.handoverId,
@@ -35,6 +36,7 @@ class HandoverDetailsEntity {
     this.varianceType,
     this.varianceReason,
     required this.handoverStatus,
+    this.isDocumentedPending = false,
   });
 
   String get formattedHandoverDateTime {

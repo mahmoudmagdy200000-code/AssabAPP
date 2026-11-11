@@ -34,6 +34,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
   final TextEditingController madaController;
   final TextEditingController cashController;
   final TextEditingController countedCashController;
+  final TextEditingController? pendingIncomingCashController;
 
   final bool viewUpload;
   const SalesBreakDownEndShiftWidget({
@@ -43,6 +44,7 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
     required this.madaController,
     required this.cashController,
     required this.countedCashController,
+    this.pendingIncomingCashController,
     required this.viewUpload,
   });
 
@@ -53,6 +55,8 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
 
 class _SalesBreakDownEndShiftWidget
     extends State<SalesBreakDownEndShiftWidget> {
+  String? _pendingIncomingError;
+
   @override
   Widget build(BuildContext context) {
     // final previousCashier = context.read<EndShiftCubit>().previousCashier;
@@ -86,7 +90,9 @@ class _SalesBreakDownEndShiftWidget
                         child: CustomTextField(
                           controller: widget.totalSaleSController,
                           hintText: context.tr.totalSalesHintText,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           maxLength: 30,
                           onChanged: (value) {
                             context.read<ValidationCubit>().validateField(
@@ -207,7 +213,10 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.cashController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -234,7 +243,10 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.madaController,
                                   hintText: context.tr.amount,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -257,12 +269,12 @@ class _SalesBreakDownEndShiftWidget
                 10.verticalSpace,
 
                 Text(
-                  'النقد الفعلي المعدود (جرد الصندوق)',
+                  context.tr.actualCountedCashCashDrawer,
                   style: AppStyles.s15W500,
                 ),
                 2.verticalSpace,
                 Text(
-                  'أدخل المبلغ الفعلي الموجود في الدرج بشكل مستقل عن المبيعات',
+                  context.tr.enterActualCashInDrawerIndependent,
                   style: AppStyles.s13W500.copyWith(
                     color: context.customColor.text3,
                   ),
@@ -270,7 +282,7 @@ class _SalesBreakDownEndShiftWidget
                 10.verticalSpace,
 
                 ContainerCustomTextField(
-                  label: 'النقد الفعلي المعدود',
+                  label: context.tr.actualCountedCash,
                   isLabelRequired: true,
                   pngAssetName: AppAssets.cashPng,
                   child: Row(
@@ -286,29 +298,86 @@ class _SalesBreakDownEndShiftWidget
                           onChanged: (value) {
                             final trimmed = value.trim();
                             if (trimmed.isEmpty) {
-                              context.read<EndShiftCubit>().setCountedCash(null);
-                              context
-                                  .read<ValidationCubit>()
-                                  .validateField('countedCash', false);
+                              context.read<EndShiftCubit>().setCountedCash(
+                                null,
+                              );
+                              context.read<ValidationCubit>().validateField(
+                                'countedCash',
+                                false,
+                              );
                             } else {
-                              final parsed = double.tryParse(trimmed);
+                              final parsed =
+                                  EndShiftCubit.tryParseFinancialAmount(
+                                    trimmed,
+                                  );
                               if (parsed != null && parsed >= 0) {
-                                context
-                                    .read<EndShiftCubit>()
-                                    .setCountedCash(parsed);
-                                context
-                                    .read<ValidationCubit>()
-                                    .validateField('countedCash', true);
+                                context.read<EndShiftCubit>().setCountedCash(
+                                  parsed,
+                                );
+                                context.read<ValidationCubit>().validateField(
+                                  'countedCash',
+                                  true,
+                                );
                               } else {
-                                context
-                                    .read<EndShiftCubit>()
-                                    .setCountedCash(null);
-                                context
-                                    .read<ValidationCubit>()
-                                    .validateField('countedCash', false);
+                                context.read<EndShiftCubit>().setCountedCash(
+                                  null,
+                                );
+                                context.read<ValidationCubit>().validateField(
+                                  'countedCash',
+                                  false,
+                                );
                               }
                             }
                             setState(() {});
+                          },
+                        ),
+                      ),
+                      AppSvg(
+                        assetName: AppAssets.saudiRiyal,
+                        width: 20.w,
+                        height: 20.h,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(context.tr.pendingIncomingCash, style: AppStyles.s15W500),
+                2.verticalSpace,
+                Text(
+                  context.tr.pendingIncomingCashDesc,
+                  style: AppStyles.s13W500.copyWith(
+                    color: context.customColor.text3,
+                  ),
+                ),
+                10.verticalSpace,
+
+                ContainerCustomTextField(
+                  label: context.tr.pendingIncomingCash,
+                  isLabelRequired: false,
+                  pngAssetName: AppAssets.cashPng,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          controller: widget.pendingIncomingCashController,
+                          hintText: '0.00',
+                          error: _pendingIncomingError,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          maxLength: 30,
+                          onChanged: (value) {
+                            final isAr =
+                                Localizations.localeOf(context).languageCode ==
+                                'ar';
+                            final cubit = context.read<EndShiftCubit>();
+                            cubit.validateAndSetPendingIncomingCash(
+                              value,
+                              isArabic: isAr,
+                            );
+                            setState(() {
+                              _pendingIncomingError =
+                                  cubit.pendingIncomingCashError;
+                            });
                           },
                         ),
                       ),
@@ -329,15 +398,19 @@ class _SalesBreakDownEndShiftWidget
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          context.tr.paymentAggregtors(
-                            context
-                                .read<AggregatorCubit>()
-                                .addedAggregators
-                                .length,
+                        Expanded(
+                          child: Text(
+                            context.tr.paymentAggregtors(
+                              context
+                                  .read<AggregatorCubit>()
+                                  .addedAggregators
+                                  .length,
+                            ),
+                            style: AppStyles.s15W500,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          style: AppStyles.s15W500,
                         ),
+                        10.horizontalSpace,
 
                         AppGestureDetectorButton(
                           child: Container(
@@ -413,14 +486,20 @@ class _SalesBreakDownEndShiftWidget
                                           (aggregator.totalAmount ?? 0)
                                               .toString(),
                                       maxLength: 30,
-                                      keyboardType: TextInputType.number,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
                                       onChanged: (value) {
                                         context
                                                 .read<AggregatorCubit>()
                                                 .addedAggregators[index] =
                                             aggregator.copyWith(
                                               totalAmount:
-                                                  double.tryParse(value) ?? 0,
+                                                  EndShiftCubit.tryParseFinancialAmount(
+                                                    value,
+                                                  ) ??
+                                                  0,
                                             );
                                       },
                                     ),

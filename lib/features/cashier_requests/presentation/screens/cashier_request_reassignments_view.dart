@@ -69,6 +69,76 @@ class _CashierRequestReassignmentsViewState
     );
   }
 
+  void _showRejectDialog(BuildContext context, String shiftId) {
+    final reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(
+            context.tr.reject,
+            style: AppStyles.s16W600.copyWith(color: context.customColor.text1),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.tr.reasonForRejection,
+                style: AppStyles.s13W400.copyWith(
+                  color: context.customColor.text3,
+                ),
+              ),
+              8.verticalSpace,
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: context.tr.reasonForRejection,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(context.tr.cancel),
+            ),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: reasonController,
+              builder: (_, value, _) {
+                final hasReason = value.text.trim().isNotEmpty;
+                return TextButton(
+                  onPressed: hasReason
+                      ? () {
+                          final reason = reasonController.text.trim();
+                          Navigator.of(dialogContext).pop();
+                          context
+                              .read<AcceptReassignedShiftCubit>()
+                              .rejectReassignedShift(
+                                shiftId: shiftId,
+                                reason: reason,
+                              );
+                        }
+                      : null,
+                  child: Text(
+                    context.tr.confirm,
+                    style: TextStyle(
+                      color: hasReason ? AppColors.red : Colors.grey,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppPaddingWidget(
@@ -242,25 +312,18 @@ class _CashierRequestReassignmentsViewState
                               );
                             },
                           ),
-
-                          // Expanded(
-                          //   child: CustomTextButton(
-                          //     text: context.tr.seeDetails,
-                          //     onTap: () {
-                          //
-                          //       NavigationService.I.pushNamed(
-                          //         AppRouteName.shiftDetailsScreen,
-                          //         arguments: {
-                          //           'shiftId': orders[index].id,
-                          //           'isNavigatedFromCashier': false,
-                          //         },
-                          //       );
-                          //     },
-                          //     backgroundColor: AppColors.lightBackground,
-                          //     textColor: context.customColor.text1,
-                          //     padding: EdgeInsets.symmetric(vertical: 15.r),
-                          //   ),
-                          // ),
+                          10.horizontalSpace,
+                          Expanded(
+                            child: CustomTextButton(
+                              text: context.tr.reject,
+                              onTap: () =>
+                                  _showRejectDialog(context, orders[index].id),
+                              backgroundColor: AppColors.red,
+                              textColor: AppColors.lightBackground,
+                              padding: EdgeInsets.symmetric(vertical: 15.r),
+                            ),
+                          ),
+                          10.horizontalSpace,
                           Expanded(
                             child: SeeDetailsButtonWidget(
                               shiftId: orders[index].id,

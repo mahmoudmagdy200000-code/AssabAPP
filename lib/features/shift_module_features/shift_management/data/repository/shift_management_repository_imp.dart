@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import '../model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/cashier_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/check_email_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/shift/shift_mapper.dart';
@@ -47,7 +49,9 @@ import '../../domain/repository/shift_management_repository.dart';
 import '../model/shift/end_shift_aggregator_model.dart';
 
 @LazySingleton()
-class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManagementRepository {
+class ShiftManagementRepositoryImp
+    with RepositoryMixin
+    implements ShiftManagementRepository {
   final ShiftManagementRemoteDataSource _remoteDataSource;
 
   ShiftManagementRepositoryImp(this._remoteDataSource);
@@ -382,11 +386,12 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     return execute(() async {
       await _remoteDataSource.approveHandover(
         shiftId: shiftId,
-        handoverApproveAndRejectBodyRequest: HandoverApproveAndRejectBodyRequest(
-          confirmedAmount: confirmedAmount,
-          managerComment: managerComment,
-          transferAttemptId: transferAttemptId,
-        ),
+        handoverApproveAndRejectBodyRequest:
+            HandoverApproveAndRejectBodyRequest(
+              confirmedAmount: confirmedAmount,
+              managerComment: managerComment,
+              transferAttemptId: transferAttemptId,
+            ),
       );
       return true;
     });
@@ -540,9 +545,15 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     });
   }
 
-  FutureApiResult<FinalDailyCloseData> getDailyClose({String? managerWorkdayId, String? workday}) async {
+  FutureApiResult<FinalDailyCloseData> getDailyClose({
+    String? managerWorkdayId,
+    String? workday,
+  }) async {
     return execute(() async {
-      final response = await _remoteDataSource.getDailyClose(managerWorkdayId: managerWorkdayId, workday: workday);
+      final response = await _remoteDataSource.getDailyClose(
+        managerWorkdayId: managerWorkdayId,
+        workday: workday,
+      );
 
       return response.data;
     });
@@ -589,6 +600,7 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     required double countedCash,
     double? cardPayments,
     List<EndShiftAggregatorModel>? aggregators,
+    double? pendingIncomingCash,
   }) async {
     return execute(() async {
       final body = <String, dynamic>{
@@ -596,6 +608,8 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         'counted_cash': countedCash.toStringAsFixed(2),
         if (cardPayments != null)
           'card_payments': cardPayments.toStringAsFixed(2),
+        if (pendingIncomingCash != null && pendingIncomingCash > 0)
+          'pending_incoming_cash': pendingIncomingCash.toStringAsFixed(2),
         if (aggregators != null && aggregators.isNotEmpty)
           'aggregators': aggregators
               .map(
@@ -618,6 +632,41 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         return Map<String, dynamic>.from(response);
       }
       return <String, dynamic>{};
+    });
+  }
+
+  @override
+  FutureApiResult<List<ShortageAllocationCandidate>>
+  getShortageAllocationCandidates({required String shiftId}) async {
+    return execute(() async {
+      try {
+        final response = await _remoteDataSource
+            .getShortageAllocationCandidates(shiftId: shiftId);
+
+        final List<dynamic> list;
+        if (response is Map && response['data'] is List) {
+          list = response['data'] as List;
+        } else if (response is List) {
+          list = response;
+        } else {
+          list = [];
+        }
+
+        return list
+            .map(
+              (item) => ShortageAllocationCandidate.fromJson(
+                item is Map<String, dynamic>
+                    ? item
+                    : Map<String, dynamic>.from(item as Map),
+              ),
+            )
+            .where((candidate) => candidate.isValid)
+            .toList();
+      } on DioException {
+        // Handover recipient eligibility is fundamentally different from cash shortage liability.
+        // If the candidates endpoint fails or returns 404, fail closed.
+        rethrow;
+      }
     });
   }
 }

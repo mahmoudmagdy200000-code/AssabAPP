@@ -143,7 +143,9 @@ class HandOverWidget extends StatelessWidget {
                     child: CustomTextField(
                       controller: handOverAmountController,
                       hintText: context.tr.amount,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       maxLength: 30,
                       onChanged: (value) {
                         context
@@ -408,101 +410,107 @@ class HandOverWidget extends StatelessWidget {
                                             selectedCashier = cashier;
                                           },
                                           child: Opacity(
-                                            opacity: cashier.disabled ? 0.45 : 1.0,
+                                            opacity: cashier.disabled
+                                                ? 0.45
+                                                : 1.0,
                                             child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: Row(
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 40.w,
-                                                      height: 35.h,
-                                                      child:
-                                                          (cashier.image !=
-                                                                  null &&
-                                                              cashier
-                                                                  .image!
-                                                                  .isNotEmpty)
-                                                          ? Image.network(
-                                                              cashier.image!,
-                                                              errorBuilder:
-                                                                  (
-                                                                    context,
-                                                                    error,
-                                                                    stackTrace,
-                                                                  ) {
-                                                                    return const AppSvg(
-                                                                      assetName:
-                                                                          AppAssets
-                                                                              .noProfile,
-                                                                    );
-                                                                  },
-                                                            )
-                                                          : const AppSvg(
-                                                              assetName:
-                                                                  AppAssets
-                                                                      .noProfile,
-                                                            ),
-                                                    ),
+                                              children: [
+                                                Expanded(
+                                                  child: Row(
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 40.w,
+                                                        height: 35.h,
+                                                        child:
+                                                            (cashier.image !=
+                                                                    null &&
+                                                                cashier
+                                                                    .image!
+                                                                    .isNotEmpty)
+                                                            ? Image.network(
+                                                                cashier.image!,
+                                                                errorBuilder:
+                                                                    (
+                                                                      context,
+                                                                      error,
+                                                                      stackTrace,
+                                                                    ) {
+                                                                      return const AppSvg(
+                                                                        assetName:
+                                                                            AppAssets.noProfile,
+                                                                      );
+                                                                    },
+                                                              )
+                                                            : const AppSvg(
+                                                                assetName:
+                                                                    AppAssets
+                                                                        .noProfile,
+                                                              ),
+                                                      ),
 
-                                                    10.horizontalSpace,
+                                                      10.horizontalSpace,
 
-                                                    CashierNameAndBranch(
-                                                      Name: cashier.name,
-                                                      BranchName: cashier.isSuggested
-                                                          ? (cashier.suggestionReason ??
-                                                              'Next scheduled cashier (auto-handover)')
-                                                          : (cashier.disabled &&
-                                                                  cashier.reasonDisabled != null)
-                                                              ? cashier.reasonDisabled!
-                                                              : cashier.branchName,
-                                                    ),
-                                                  ],
+                                                      CashierNameAndBranch(
+                                                        Name: cashier.name,
+                                                        BranchName:
+                                                            cashier.isSuggested
+                                                            ? (cashier.suggestionReason ??
+                                                                  'Next scheduled cashier (auto-handover)')
+                                                            : (cashier.disabled &&
+                                                                  cashier.reasonDisabled !=
+                                                                      null)
+                                                            ? cashier
+                                                                  .reasonDisabled!
+                                                            : cashier
+                                                                  .branchName,
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
 
-                                              BlocSelector<
-                                                ChooseItemCubit,
-                                                ChooseItemState,
-                                                int?
-                                              >(
-                                                selector: (state) =>
-                                                    state.selectedIndex,
-                                                builder: (context, selectedIndex) {
-                                                  // return RowTextCirculeSelection(
-                                                  //   text: cashier.name,
-                                                  //   isSelected:
-                                                  //   selectedIndex == index,
-                                                  // );
-                                                  return SelectionCircule(
-                                                    isSelected:
-                                                        selectedIndex == index,
-                                                  );
-                                                },
-                                              ),
-                                              // Expanded(
-                                              //   child: BlocSelector<
-                                              //       ChooseItemCubit,
-                                              //       ChooseItemState,
-                                              //       int?>(
-                                              //     selector: (state) =>
-                                              //     state.selectedIndex,
-                                              //     builder:
-                                              //         (context, selectedIndex) {
-                                              //       // return RowTextCirculeSelection(
-                                              //       //   text: cashier.name,
-                                              //       //   isSelected:
-                                              //       //   selectedIndex == index,
-                                              //       // );
-                                              //           return SelectionCircule(isSelected: selectedIndex == index);
-                                              //         },
-                                              //   ),
-                                              // ),
-                                            ],
+                                                BlocSelector<
+                                                  ChooseItemCubit,
+                                                  ChooseItemState,
+                                                  int?
+                                                >(
+                                                  selector: (state) =>
+                                                      state.selectedIndex,
+                                                  builder: (context, selectedIndex) {
+                                                    // return RowTextCirculeSelection(
+                                                    //   text: cashier.name,
+                                                    //   isSelected:
+                                                    //   selectedIndex == index,
+                                                    // );
+                                                    return SelectionCircule(
+                                                      isSelected:
+                                                          selectedIndex ==
+                                                          index,
+                                                    );
+                                                  },
+                                                ),
+                                                // Expanded(
+                                                //   child: BlocSelector<
+                                                //       ChooseItemCubit,
+                                                //       ChooseItemState,
+                                                //       int?>(
+                                                //     selector: (state) =>
+                                                //     state.selectedIndex,
+                                                //     builder:
+                                                //         (context, selectedIndex) {
+                                                //       // return RowTextCirculeSelection(
+                                                //       //   text: cashier.name,
+                                                //       //   isSelected:
+                                                //       //   selectedIndex == index,
+                                                //       // );
+                                                //           return SelectionCircule(isSelected: selectedIndex == index);
+                                                //         },
+                                                //   ),
+                                                // ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
+                                      );
                                     },
                                   );
                                 },

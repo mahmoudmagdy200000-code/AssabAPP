@@ -59,6 +59,7 @@ class ManagerMainScreenFinalHandoverTabWidget
               'handovers': currentManagerShift.handover,
               'managerName': currentManagerShift.shift.shiftDetails.managerName,
               'managerCubit': context.read<ManagerShiftCubit>(),
+              'serverCanEnd': currentManagerShift.canEnd,
             },
           );
         },

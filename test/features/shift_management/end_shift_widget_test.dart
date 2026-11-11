@@ -1,27 +1,53 @@
-import 'package:assab/core/theme/light_theme.dart';
 import 'package:assab/core/responsive/app_responsive.dart';
+import 'package:assab/core/theme/light_theme.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/end_shift_widgets/cash_shortage_allocation_widget.dart';
+import 'package:assab/generated/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildTestApp(Widget child) {
+Widget buildTestApp(Widget child, {Locale locale = const Locale('ar')}) {
   return MaterialApp(
+    locale: locale,
+    supportedLocales: S.delegate.supportedLocales,
+    localizationsDelegates: const [
+      S.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
     theme: ThemeData(
       extensions: LightTheme.extension,
     ),
-    home: Builder(
-      builder: (context) {
-        AppResponsive.init(context, designWidth: 375, designHeight: 812);
-        return Scaffold(
-          body: SingleChildScrollView(child: child),
-        );
-      },
+    home: Scaffold(
+      body: Builder(
+        builder: (context) {
+          AppResponsive.init(context, designWidth: 375, designHeight: 812);
+          return SingleChildScrollView(child: child);
+        },
+      ),
     ),
   );
 }
 
 void main() {
+  const sampleCandidates = [
+    ShortageAllocationCandidate(
+      id: '101',
+      name: 'Ahmed',
+      type: 'cashier',
+      role: 'أمين الصندوق',
+    ),
+    ShortageAllocationCandidate(
+      id: '202',
+      name: 'Khaled',
+      type: 'branch_manager',
+      role: 'مدير الفرع',
+    ),
+  ];
+
   group('CashShortageAllocationWidget Tests', () {
     testWidgets('Renders balanced / no shortage message when shortageAmount <= 0',
         (tester) async {
@@ -53,6 +79,7 @@ void main() {
             builder: (context, setState) {
               return CashShortageAllocationWidget(
                 shortageAmount: 100.0,
+                candidates: sampleCandidates,
                 initialAllocations: latestAllocations,
                 onAllocationsChanged: (allocs) {
                   setState(() {
@@ -69,21 +96,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify initial shortage and remaining display
+      // Verify initial shortage display
       expect(find.textContaining('100.00'), findsWidgets);
 
-      // Find the ID, Name, and Amount text fields
-      final textFields = find.byType(TextField);
-      expect(textFields, findsNWidgets(4)); // ID, Name, Amount, Reason
+      // 1. Select First allocation: Cashier Ahmed 60.00
+      await tester.tap(find.text('اختر المسؤول (الاسم ومعرف النظام)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ahmed (ID: 101)').last);
+      await tester.pumpAndSettle();
 
-      // 1. Enter First allocation: Cashier Ahmed 60.00
-      await tester.enterText(textFields.at(0), '101'); // ID
-      await tester.enterText(textFields.at(1), 'Ahmed'); // Name
-      await tester.enterText(textFields.at(2), '60.00'); // Amount
+      final textFields = find.byType(TextField);
+      await tester.enterText(textFields.first, '60.00'); // Amount
       await tester.pumpAndSettle();
 
       // Tap Add button
-      final addButton = find.widgetWithText(ElevatedButton, 'إضافة');
+      final addButton = find.widgetWithText(ElevatedButton, 'أضف');
       expect(addButton, findsOneWidget);
       await tester.tap(addButton);
       await tester.pumpAndSettle();
@@ -95,10 +122,19 @@ void main() {
       expect(find.textContaining('Ahmed'), findsOneWidget);
       expect(find.textContaining('40.00'), findsWidgets); // remaining is 40.00
 
-      // 2. Enter Second allocation: Manager Khaled 40.00
-      await tester.enterText(textFields.at(0), '202'); // ID
-      await tester.enterText(textFields.at(1), 'Khaled'); // Name
-      await tester.enterText(textFields.at(2), '40.00'); // Amount
+      // 2. Select Second allocation: Manager Khaled 40.00
+      // Switch type to branch_manager
+      await tester.tap(find.text('أمين الصندوق').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('مدير الفرع').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('اختر المسؤول (الاسم ومعرف النظام)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Khaled (ID: 202)').last);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, '40.00');
       await tester.pumpAndSettle();
 
       await tester.tap(addButton);
@@ -109,7 +145,7 @@ void main() {
       expect(latestAllocations[1].responsibleId, equals('202'));
       expect(latestAllocations[1].amount, equals(40.0));
       expect(find.textContaining('0.00'), findsWidgets); // remaining is 0.00
-      expect(find.text('مكتمل'), findsOneWidget);
+      expect(find.text('مكتملة'), findsOneWidget);
 
       // 3. Remove first allocation
       final closeButtons = find.byIcon(Icons.close);
@@ -121,35 +157,51 @@ void main() {
       expect(latestAllocations.first.responsibleId, equals('202'));
 
       // Test reason field update
-      await tester.enterText(textFields.at(3), 'End-of-shift register discrepancy');
+      final reasonField = find.byType(TextField).last;
+      await tester.enterText(reasonField, 'End-of-shift register discrepancy');
       await tester.pumpAndSettle();
       expect(latestReason, equals('End-of-shift register discrepancy'));
     });
 
     testWidgets('Validates input errors: empty ID, exceeding amount, duplicate ID',
         (tester) async {
+      List<CashShortageAllocation> latestAllocations = [];
+
       await tester.pumpWidget(
         buildTestApp(
-          CashShortageAllocationWidget(
-            shortageAmount: 50.0,
-            onAllocationsChanged: (_) {},
+          StatefulBuilder(
+            builder: (context, setState) {
+              return CashShortageAllocationWidget(
+                shortageAmount: 50.0,
+                candidates: sampleCandidates,
+                initialAllocations: latestAllocations,
+                onAllocationsChanged: (allocs) {
+                  setState(() {
+                    latestAllocations = allocs;
+                  });
+                },
+              );
+            },
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      final addButton = find.widgetWithText(ElevatedButton, 'إضافة');
-      final textFields = find.byType(TextField);
+      final addButton = find.widgetWithText(ElevatedButton, 'أضف');
 
-      // 1. Tap add with empty fields -> Error snackbar for ID
+      // 1. Tap add without candidate -> Error snackbar
       await tester.tap(addButton);
       await tester.pumpAndSettle();
-      expect(find.text('يرجى إدخال معرّف المسؤول'), findsOneWidget);
+      expect(find.text('يرجى اختيار المسؤول من القائمة'), findsOneWidget);
       ScaffoldMessenger.of(tester.element(find.byType(Scaffold))).clearSnackBars();
       await tester.pumpAndSettle();
 
-      // 2. Enter ID, tap add with empty amount -> Error snackbar for Amount
-      await tester.enterText(textFields.at(0), '101');
+      // 2. Select candidate, tap add with empty amount -> Error snackbar for Amount
+      await tester.tap(find.text('اختر المسؤول (الاسم ومعرف النظام)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ahmed (ID: 101)').last);
+      await tester.pumpAndSettle();
+
       await tester.tap(addButton);
       await tester.pumpAndSettle();
       expect(find.text('يرجى إدخال مبلغ صحيح أكبر من الصفر'), findsOneWidget);
@@ -157,7 +209,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // 3. Enter amount exceeding remaining (75 > 50) -> Error snackbar for exceeding
-      await tester.enterText(textFields.at(2), '75.00');
+      final amountField = find.byType(TextField).first;
+      await tester.enterText(amountField, '75.00');
+      await tester.pumpAndSettle();
       await tester.tap(addButton);
       await tester.pumpAndSettle();
       expect(find.text('مبلغ التوزيع يتجاوز المتبقي من العجز'), findsOneWidget);
@@ -165,13 +219,20 @@ void main() {
       await tester.pumpAndSettle();
 
       // 4. Enter valid partial 20.00 -> Success
-      await tester.enterText(textFields.at(2), '20.00');
+      await tester.enterText(amountField, '20.00');
+      await tester.pumpAndSettle();
       await tester.tap(addButton);
       await tester.pumpAndSettle();
+      expect(latestAllocations.length, 1);
 
-      // 5. Try adding same ID again -> Error snackbar for duplicate
-      await tester.enterText(textFields.at(0), '101');
-      await tester.enterText(textFields.at(2), '10.00');
+      // 5. Try adding same candidate again -> Error snackbar for duplicate
+      await tester.tap(find.text('اختر المسؤول (الاسم ومعرف النظام)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ahmed (ID: 101)').last);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, '10.00');
+      await tester.pumpAndSettle();
       await tester.tap(addButton);
       await tester.pumpAndSettle();
       expect(find.text('تمت إضافة هذا المسؤول مسبقاً'), findsOneWidget);

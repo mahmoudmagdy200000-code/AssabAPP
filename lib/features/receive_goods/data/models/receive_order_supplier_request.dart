@@ -43,6 +43,10 @@ class InvoiceData {
   final String paymentTerms;
   final File file;
   final String? notes;
+  final double? taxRate;
+  final double? amountBeforeTax;
+  final double? taxAmount;
+  final double? totalAmount;
 
   InvoiceData({
     required this.invoiceNumber,
@@ -51,6 +55,10 @@ class InvoiceData {
     required this.paymentTerms,
     required this.file,
     this.notes,
+    this.taxRate,
+    this.amountBeforeTax,
+    this.taxAmount,
+    this.totalAmount,
   });
 }
 
@@ -120,6 +128,48 @@ extension ReceiveOrderSupplierRequestForm on ReceiveOrderSupplierRequest {
         MapEntry('invoice_data[due_date]', invoiceData!.dueDate),
         MapEntry('invoice_data[payment_terms]', invoiceData!.paymentTerms),
       ]);
+
+      if (invoiceData!.taxRate != null) {
+        final rateValue =
+            invoiceData!.taxRate! <= 1.0 && invoiceData!.taxRate! > 0.0
+                ? (invoiceData!.taxRate! * 100).round()
+                : invoiceData!.taxRate!.round();
+        formData.fields.addAll([
+          MapEntry('invoice_data[tax_rate]', rateValue.toString()),
+          MapEntry('invoice_data[vat_rate]', rateValue.toString()),
+        ]);
+      }
+
+      if (invoiceData!.amountBeforeTax != null) {
+        formData.fields.add(
+          MapEntry(
+            'invoice_data[amount_before_tax]',
+            invoiceData!.amountBeforeTax!.toStringAsFixed(2),
+          ),
+        );
+      }
+
+      if (invoiceData!.taxAmount != null) {
+        formData.fields.addAll([
+          MapEntry(
+            'invoice_data[tax_amount]',
+            invoiceData!.taxAmount!.toStringAsFixed(2),
+          ),
+          MapEntry(
+            'invoice_data[vat_amount]',
+            invoiceData!.taxAmount!.toStringAsFixed(2),
+          ),
+        ]);
+      }
+
+      if (invoiceData!.totalAmount != null) {
+        formData.fields.add(
+          MapEntry(
+            'invoice_data[total_amount]',
+            invoiceData!.totalAmount!.toStringAsFixed(2),
+          ),
+        );
+      }
 
       if (invoiceData!.notes != null) {
         formData.fields.add(

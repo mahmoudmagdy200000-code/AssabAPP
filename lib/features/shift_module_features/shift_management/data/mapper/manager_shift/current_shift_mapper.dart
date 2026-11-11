@@ -11,5 +11,6 @@ extension CurrentShiftMapper on CurrentShiftDataModel {
     handover: handoversDetails.toBranchManager
         .map((e) => e.toHandoverDetailsEntity())
         .toList(),
+    canEnd: canEnd,
   );
 }

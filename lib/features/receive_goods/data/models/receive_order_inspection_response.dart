@@ -29,16 +29,98 @@ class ReceiveOrderInspectionData {
   @JsonKey(name: 'goods_inspection')
   final List<GoodsInspectionItem> goodsInspection;
 
+  @JsonKey(name: 'financial_summary')
+  final InspectionFinancialSummary? financialSummary;
+
+  @JsonKey(name: 'invoice')
+  final InspectionInvoiceData? invoice;
+
   ReceiveOrderInspectionData({
     required this.orderId,
     required this.orderNumber,
     required this.supplierName,
     required this.deliveryDetails,
     required this.goodsInspection,
+    this.financialSummary,
+    this.invoice,
   });
+
+  double? get authoritativeAmountBeforeTax =>
+      financialSummary?.amountBeforeTax ?? invoice?.amountBeforeTax;
+
+  double? get authoritativeVatRate =>
+      financialSummary?.vatRate ?? invoice?.taxRate;
+
+  double? get authoritativeVatAmount =>
+      financialSummary?.vatAmount ?? invoice?.taxAmount;
+
+  double? get authoritativeTotalAmount =>
+      financialSummary?.totalAmount ?? invoice?.totalAmount;
 
   factory ReceiveOrderInspectionData.fromJson(Map<String, dynamic> json) =>
       _$ReceiveOrderInspectionDataFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class InspectionFinancialSummary {
+  @JsonKey(name: 'expected_amount')
+  final double? expectedAmount;
+
+  @JsonKey(name: 'received_amount')
+  final double? receivedAmount;
+
+  @JsonKey(name: 'variance_amount')
+  final double? varianceAmount;
+
+  @JsonKey(name: 'amount_before_tax')
+  final double? amountBeforeTax;
+
+  @JsonKey(name: 'vat_rate')
+  final double? vatRate;
+
+  @JsonKey(name: 'vat_amount')
+  final double? vatAmount;
+
+  @JsonKey(name: 'total_amount')
+  final double? totalAmount;
+
+  InspectionFinancialSummary({
+    this.expectedAmount,
+    this.receivedAmount,
+    this.varianceAmount,
+    this.amountBeforeTax,
+    this.vatRate,
+    this.vatAmount,
+    this.totalAmount,
+  });
+
+  factory InspectionFinancialSummary.fromJson(Map<String, dynamic> json) =>
+      _$InspectionFinancialSummaryFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class InspectionInvoiceData {
+  @JsonKey(name: 'amount_before_tax')
+  final double? amountBeforeTax;
+
+  @JsonKey(name: 'tax_rate')
+  final double? taxRate;
+
+  @JsonKey(name: 'tax_amount')
+  final double? taxAmount;
+
+  @JsonKey(name: 'total_amount')
+  final double? totalAmount;
+
+  InspectionInvoiceData({
+    this.amountBeforeTax,
+    this.taxRate,
+    this.taxAmount,
+    this.totalAmount,
+  });
+
+  factory InspectionInvoiceData.fromJson(Map<String, dynamic> json) =>
+      _$InspectionInvoiceDataFromJson(json);
 }
 
 @JsonSerializable(createToJson: false)

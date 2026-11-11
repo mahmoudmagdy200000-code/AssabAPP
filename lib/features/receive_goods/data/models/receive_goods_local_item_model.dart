@@ -15,6 +15,7 @@ class ReceiveGoodsLocalItemModel {
   final String expirationDate;
   final MediaFile? selectedImage;
   final String? note;
+  final double? vatRate;
 
   ReceiveGoodsLocalItemModel({
     required this.itemId,
@@ -30,5 +31,6 @@ class ReceiveGoodsLocalItemModel {
     required this.expirationDate,
     this.selectedImage,
     this.note,
+    this.vatRate,
   });
 }

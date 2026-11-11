@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'package:assab/core/utils/shift_time_formatter.dart';
 
 class ShiftTimeDetailsEntity {
   final String startTime;
@@ -7,16 +7,9 @@ class ShiftTimeDetailsEntity {
   ShiftTimeDetailsEntity({required this.startTime, required this.endTime});
 }
 
-extension ShiftTimeFormatter on ShiftTimeDetailsEntity {
+extension ShiftTimeDetailsFormatter on ShiftTimeDetailsEntity {
   String get formattedStartTime => _formatTime(startTime);
   String get formattedEndTime => _formatTime(endTime);
 
-  static String _formatTime(String time) {
-    try {
-      final date = DateFormat('HH:mm').parse(time);
-      return DateFormat('hh:mm a').format(date);
-    } catch (_) {
-      return time;
-    }
-  }
+  static String _formatTime(String time) => ShiftTimeFormatter.format(time, fallback: time);
 }

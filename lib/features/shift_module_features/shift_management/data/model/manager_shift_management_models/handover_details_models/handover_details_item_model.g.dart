@@ -42,6 +42,7 @@ HandoverDetailsItemModel _$HandoverDetailsItemModelFromJson(
         )
       : null,
   accountingName: (json['accounting_name'] as String?) ?? '',
+  isDocumentedPending: json['is_documented_pending'] as bool?,
 );
 
 Map<String, dynamic> _$HandoverDetailsItemModelToJson(

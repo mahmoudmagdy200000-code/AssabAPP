@@ -1036,6 +1036,7 @@ class AppRouter {
         final handovers = args['handovers'] as List<HandoverDetailsEntity>;
         final managerName = args['managerName'] as String;
         final managerCubit = args['managerCubit'] as ManagerShiftCubit;
+        final serverCanEnd = args['serverCanEnd'] as bool? ?? managerCubit.managerShift.canEnd;
 
         return MaterialPageRoute(
           builder: (context) => MultiBlocProvider(
@@ -1058,6 +1059,7 @@ class AppRouter {
             child: EndManagerShiftScreen(
               handovers: handovers,
               managerName: managerName,
+              serverCanEnd: serverCanEnd,
             ),
           ),
         );
