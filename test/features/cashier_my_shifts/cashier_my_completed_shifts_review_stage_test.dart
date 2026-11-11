@@ -11,11 +11,14 @@ import 'package:assab/core/theme/light_theme.dart';
 import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/app_bottom_sheet.dart';
 import 'package:assab/core/utils/future_api_result.dart';
+import 'package:assab/core/widgets/app_back_button.dart';
 import 'package:assab/core/widgets/app_button.dart';
 import 'package:assab/features/cashier_home/data/models/cashier_info_response.dart';
 import 'package:assab/features/cashier_home/data/repository/cashier_home_repository.dart';
 import 'package:assab/features/cashier_home/presentation/cubit/get_cashier_info/get_cashier_info_cubit.dart';
 import 'package:assab/features/cashier_home/presentation/screens/cashier_list_screen.dart';
+import 'package:assab/features/cashier_home/presentation/widgets/cashier_grid_view_item.dart';
+import 'package:assab/features/cashier_home/presentation/widgets/cashier_home_bottom_section.dart';
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/completed/cashier_completed_shifts_response_model.dart';
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/in_progress/cashier_in_progress_shifts_data_model.dart';
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/in_progress/cashier_in_progress_shifts_response_model.dart';
@@ -796,6 +799,155 @@ void main() {
         expect(loaded.handoverStatus?.reviewedBy, 'Manager Ahmed');
 
         await cubit.close();
+      },
+    );
+
+    testWidgets(
+      'reopening cashier list from CashierHomeBottomSection requests getCashierInfo() and displays updated canonical shift info for same shift',
+      (tester) async {
+        tester.view.physicalSize = const Size(500, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        final homeRepo = MockCashierHomeRepository();
+        int getCashierInfoCallCount = 0;
+
+        // Initial shift state on server for shift_101
+        homeRepo.onGetCashierInfo = () async {
+          getCashierInfoCallCount++;
+          return ApiResult.success(
+            CashierInfoResponse(
+              id: '10',
+              name: 'Ali Cashier',
+              email: 'ali@example.com',
+              phone: '0501234567',
+              image: null,
+              role: 'كاشير',
+              status: 'active',
+              statusLabel: 'نشط',
+              activity: 'نشط',
+              shiftDetails: CashierInfoShiftDetails(
+                id: 'shift_101',
+                storeBranch: 'Branch Initial 101',
+                shiftName: 'Morning Initial Shift',
+                startTime: '2026-11-11T08:00:00',
+                endTime: '2026-11-11T16:00:00',
+                shiftDate: '2026-11-11',
+                status: 'in_progress',
+                statusLabel: 'قيد المراجعة',
+                workdays: 'السبت - الخميس',
+                handsOverTo: CashierInfoHandsOverTo(
+                  id: '20',
+                  role: 'مشرف الفرع',
+                  name: 'Manager Ahmed',
+                ),
+              ),
+            ),
+          );
+        };
+
+        if (getIt.isRegistered<GetCashierInfoCubit>()) {
+          getIt.unregister<GetCashierInfoCubit>();
+        }
+        getIt.registerFactory<GetCashierInfoCubit>(
+          () => GetCashierInfoCubit(homeRepo),
+        );
+        addTearDown(() {
+          if (getIt.isRegistered<GetCashierInfoCubit>()) {
+            getIt.unregister<GetCashierInfoCubit>();
+          }
+        });
+
+        // 1. Mount CashierHomeBottomSection with PagingCubit
+        await tester.pumpWidget(
+          buildTestWidget(
+            wrapInScaffold: true,
+            designSize: const Size(500, 1000),
+            BlocProvider<PagingCubit>(
+              create: (_) => PagingCubit(totalSteps: 2),
+              child: const CashierHomeBottomSection(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // 2. Initial state: verify zero calls before clicking entry point
+        expect(getCashierInfoCallCount, 0);
+
+        // 3. Open CashierListScreen via production entry point
+        await tester.tap(
+          find.widgetWithText(CashierGridViewItem, S.current.cashiersList),
+        );
+        await tester.pumpAndSettle();
+
+        // 4. Verify the application requested data on open
+        expect(getCashierInfoCallCount, 1);
+        expect(find.byType(CashierListScreen), findsOneWidget);
+        expect(find.text('Branch Initial 101'), findsOneWidget);
+        expect(find.textContaining('Morning Initial Shift'), findsOneWidget);
+        expect(find.text('Ali Cashier'), findsOneWidget);
+
+        // 5. Pop / return to Home (CashierHomeBottomSection)
+        final backBtn = find.byType(AppBackButton);
+        expect(backBtn, findsOneWidget);
+        await tester.tap(backBtn);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CashierListScreen), findsNothing);
+        expect(find.byType(CashierHomeBottomSection), findsOneWidget);
+
+        // 6. Mutate shift state on server for the SAME canonical shift (shift_101)
+        homeRepo.onGetCashierInfo = () async {
+          getCashierInfoCallCount++;
+          return ApiResult.success(
+            CashierInfoResponse(
+              id: '10',
+              name: 'Ali Cashier',
+              email: 'ali@example.com',
+              phone: '0501234567',
+              image: null,
+              role: 'كاشير',
+              status: 'active',
+              statusLabel: 'نشط',
+              activity: 'مكتمل',
+              shiftDetails: CashierInfoShiftDetails(
+                id: 'shift_101', // Canonical ID preserved
+                storeBranch: 'Branch Updated 101', // Updated distinctive value
+                shiftName: 'Morning Updated Shift', // Updated distinctive value
+                startTime: '2026-11-11T08:00:00',
+                endTime: '2026-11-11T16:00:00',
+                shiftDate: '2026-11-11',
+                status: 'completed',
+                statusLabel: 'مكتملة',
+                workdays: 'السبت - الخميس',
+                handsOverTo: CashierInfoHandsOverTo(
+                  id: '20',
+                  role: 'مشرف الفرع',
+                  name: 'Manager Ahmed',
+                ),
+              ),
+            ),
+          );
+        };
+
+        // 7. Re-open Cashier List via production entry point
+        await tester.tap(
+          find.widgetWithText(CashierGridViewItem, S.current.cashiersList),
+        );
+        await tester.pumpAndSettle();
+
+        // 8. Verify the application itself invoked getCashierInfo() on re-open
+        expect(getCashierInfoCallCount, 2);
+
+        // 9. Verify CashierListScreen renders the updated values for same shift_101
+        expect(find.byType(CashierListScreen), findsOneWidget);
+        expect(find.text('Branch Updated 101'), findsOneWidget);
+        expect(find.textContaining('Morning Updated Shift'), findsOneWidget);
+        expect(find.text('Branch Initial 101'), findsNothing);
+        expect(find.textContaining('Morning Initial Shift'), findsNothing);
       },
     );
   });
