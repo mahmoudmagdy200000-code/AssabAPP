@@ -1,8 +1,21 @@
+import 'package:assab/core/cubits/paging_cubit/paging_cubit.dart';
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/enums/shift_status/shift_handover_status.dart';
 import 'package:assab/core/enums/shift_status/shift_status_type.dart';
 import 'package:assab/core/responsive/app_responsive.dart';
+import 'package:assab/core/routing/app_route_name.dart';
+import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/services/user_type_service.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/theme/light_theme.dart';
 import 'package:assab/core/utils/api_result.dart';
+import 'package:assab/core/utils/app_bottom_sheet.dart';
+import 'package:assab/core/utils/future_api_result.dart';
+import 'package:assab/core/widgets/app_button.dart';
+import 'package:assab/features/cashier_home/data/models/cashier_info_response.dart';
+import 'package:assab/features/cashier_home/data/repository/cashier_home_repository.dart';
+import 'package:assab/features/cashier_home/presentation/cubit/get_cashier_info/get_cashier_info_cubit.dart';
+import 'package:assab/features/cashier_home/presentation/screens/cashier_list_screen.dart';
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/completed/cashier_completed_shifts_response_model.dart';
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/in_progress/cashier_in_progress_shifts_data_model.dart';
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/in_progress/cashier_in_progress_shifts_response_model.dart';
@@ -19,7 +32,12 @@ import 'package:assab/features/shift_module_features/shift_management/data/data_
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/approve_and_reject_handover/approve_and_reject_handover_cubit.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/shift_details/handover_option/end_shift_option_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/shift_details/shift_details_cubit.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/end_shift_options_bottom_sheet.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/manager_approve_button_widget.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/manager_reject_handover_button.dart';
 import 'package:assab/generated/l10n.dart';
 import 'package:assab/shared/models/meta_model/meta_model.dart';
 import 'package:flutter/material.dart';
@@ -89,6 +107,64 @@ class MockShiftDetailsRepo extends ShiftManagementRepositoryImp {
     }
     return super.getShiftDetails(shiftId);
   }
+
+  @override
+  FutureApiResult approveHandover({
+    required String shiftId,
+    String? confirmedAmount,
+    String? managerComment,
+    String? transferAttemptId,
+  }) async {
+    return ApiResult.success(true);
+  }
+
+  @override
+  FutureApiResult rejectHandover({
+    required String shiftId,
+    String? managerComment,
+  }) async {
+    return ApiResult.success(true);
+  }
+}
+
+class MockCashierHomeRepository extends Fake implements CashierHomeRepository {
+  FutureApiResult<CashierInfoResponse> Function()? onGetCashierInfo;
+
+  @override
+  FutureApiResult<CashierInfoResponse> getCashierInfo() async {
+    if (onGetCashierInfo != null) {
+      return onGetCashierInfo!();
+    }
+    return ApiResult.success(
+      CashierInfoResponse(
+        id: '10',
+        name: 'Ali Cashier',
+        email: 'ali@example.com',
+        phone: '0501234567',
+        image: null,
+        role: 'كاشير',
+        status: 'active',
+        statusLabel: 'نشط',
+        activity: 'نشط',
+        shiftDetails: CashierInfoShiftDetails(
+          id: 'shift_101',
+          storeBranch: 'Branch 1',
+          shiftName: 'Morning Shift',
+          startTime: '2026-11-11T08:00:00',
+          endTime: '2026-11-11T16:00:00',
+          shiftDate: '2026-11-11',
+          status: 'completed',
+          statusLabel: 'قيد المراجعة',
+          workdays: 'السبت - الخميس',
+          handsOverTo: CashierInfoHandsOverTo(
+            id: '20',
+            role: 'مشرف الفرع',
+            name: 'Manager Ahmed',
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class FakeDetailsShiftEntity extends Fake implements ShiftEntity {
@@ -106,8 +182,14 @@ class FakeDetailsShiftEntity extends Fake implements ShiftEntity {
   });
 }
 
-Widget buildTestWidget(Widget child, {Locale locale = const Locale('ar')}) {
+Widget buildTestWidget(
+  Widget child, {
+  Locale locale = const Locale('ar'),
+  Size? designSize,
+  bool wrapInScaffold = true,
+}) {
   return MaterialApp(
+    navigatorKey: NavigationService.I.navigatorKey,
     locale: locale,
     supportedLocales: S.delegate.supportedLocales,
     localizationsDelegates: const [
@@ -117,13 +199,33 @@ Widget buildTestWidget(Widget child, {Locale locale = const Locale('ar')}) {
       GlobalCupertinoLocalizations.delegate,
     ],
     theme: ThemeData(extensions: LightTheme.extension),
-    home: Scaffold(
-      body: Builder(
-        builder: (context) {
-          AppResponsive.init(context, designWidth: 375, designHeight: 812);
-          return SingleChildScrollView(child: child);
-        },
-      ),
+    onGenerateRoute: (settings) {
+      if (settings.name == AppRouteName.endShiftScreen) {
+        return MaterialPageRoute<bool>(
+          settings: settings,
+          builder: (context) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop(true);
+              }
+            });
+            return const Scaffold(body: SizedBox());
+          },
+        );
+      }
+      return null;
+    },
+    home: Builder(
+      builder: (context) {
+        AppResponsive.init(
+          context,
+          designWidth: designSize?.width ?? 375,
+          designHeight: designSize?.height ?? 812,
+        );
+        return wrapInScaffold
+            ? Scaffold(body: SingleChildScrollView(child: child))
+            : child;
+      },
     ),
   );
 }
@@ -251,10 +353,23 @@ void main() {
     );
 
     testWidgets(
-      'production action callback (onSuccessEndedOrReassigned) triggers shift refresh from server, preserving canonical ID, "قيد المراجعة" for pending shift, and distinct second shift',
+      'production action (EndShiftOptionsBottomSheet) triggers shift refresh from server, preserving canonical ID, "قيد المراجعة" for pending shift, distinct second shift, and updating Home upon return',
       (tester) async {
+        tester.view.physicalSize = const Size(750, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        if (!getIt.isRegistered<EndShiftOptionCubit>()) {
+          getIt.registerFactory<EndShiftOptionCubit>(() => EndShiftOptionCubit());
+        }
+
         final repo = MockCashierMyShiftsRepo();
         final cubit = CashierMyShiftsCubit(repo);
+        final homeRepo = MockCashierHomeRepository();
+        final homeCubit = GetCashierInfoCubit(homeRepo);
 
         repo.onGetCompletedShifts = ({int? page}) async {
           return ApiResult.success(
@@ -310,21 +425,39 @@ void main() {
 
         await tester.pumpWidget(
           buildTestWidget(
-            BlocProvider.value(
-              value: cubit,
+            designSize: const Size(500, 1000),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: cubit),
+                BlocProvider.value(value: homeCubit),
+              ],
               child: Builder(
                 builder: (context) {
                   return Column(
                     children: [
-                      ElevatedButton(
-                        key: const Key('action_trigger_btn'),
-                        onPressed: () {
-                          // The exact production callback executed on action completion
-                          // (e.g. EndShiftOptionsBottomSheet / CashierMyInProgressShiftsDefaultCard):
-                          context.read<CashierMyShiftsCubit>().getInProgressShifts();
-                          context.read<CashierMyShiftsCubit>().getCompletedShifts();
+                      AppButton(
+                        key: const Key('open_end_shift_sheet_btn'),
+                        text: 'إنهاء الوردية',
+                        enabled: true,
+                        onClick: () {
+                          AppBottomSheet.showModal(
+                            context,
+                            isScrollControlled: true,
+                            (sheetContext) => EndShiftOptionsBottomSheet(
+                              shiftId: 'shift_101',
+                              hasEnded: true,
+                              isCashierUserType: true,
+                              onSuccessEndedOrReassigned: () {
+                                context
+                                    .read<CashierMyShiftsCubit>()
+                                    .getInProgressShifts();
+                                context
+                                    .read<CashierMyShiftsCubit>()
+                                    .getCompletedShifts();
+                              },
+                            ),
+                          );
                         },
-                        child: const Text('Trigger Action'),
                       ),
                       BlocBuilder<CashierMyShiftsCubit, CashierMyShiftsState>(
                         builder: (context, state) {
@@ -349,8 +482,25 @@ void main() {
         expect(find.text('قيد المراجعة'), findsNothing);
         expect(find.text('مكتملة'), findsNothing);
 
-        // Step 1: Execute the production action callback
-        await tester.tap(find.byKey(const Key('action_trigger_btn')));
+        // Step 1: Trigger the end shift flow from the production bottom sheet
+        await tester.tap(find.byKey(const Key('open_end_shift_sheet_btn')));
+        await tester.pumpAndSettle();
+
+        // Bottom sheet is now open: select "إنهاء الوردية فقط" (withoutHandover)
+        final endShiftOnlyOption = find.text(S.current.endShiftOnly).first;
+        expect(endShiftOnlyOption, findsOneWidget);
+        await tester.tap(endShiftOnlyOption);
+        await tester.pumpAndSettle();
+
+        // Tap proceed button inside EndShiftOptionsBottomSheet
+        final proceedBtn =
+            find.widgetWithText(AppButton, S.current.endShiftOnly);
+        expect(proceedBtn, findsOneWidget);
+        await tester.tap(proceedBtn);
+        // Advance navigation route + the 1500ms delay in EndShiftOptionsBottomSheet
+        await tester.pump();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1600));
         await tester.pumpAndSettle();
 
         // Shift 101 must render "قيد المراجعة" and NEVER "مكتملة"
@@ -358,7 +508,7 @@ void main() {
         expect(find.text('قيد المراجعة'), findsOneWidget);
         expect(find.text('مكتملة'), findsOneWidget);
 
-        // Step 2: Simulate server receipt decision (manager accepts handover for shift_101)
+        // Step 2: Simulate manager acceptance on server
         repo.onGetCompletedShifts = ({int? page}) async {
           return ApiResult.success(
             CashierCompletedShiftsResponseModel.fromJson({
@@ -411,23 +561,77 @@ void main() {
           );
         };
 
-        // Trigger refresh on return / screen re-opening
-        await tester.tap(find.byKey(const Key('action_trigger_btn')));
+        // Re-trigger from production action flow
+        await tester.tap(find.byKey(const Key('open_end_shift_sheet_btn')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(S.current.endShiftOnly).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(AppButton, S.current.endShiftOnly));
+        await tester.pump();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1600));
         await tester.pumpAndSettle();
 
-        // Now both shift_101 and shift_102 render "مكتملة"
+        // Both shift_101 and shift_102 now render "مكتملة"
         expect(find.text('مكتملة'), findsNWidgets(2));
         expect(find.text('قيد المراجعة'), findsNothing);
 
+        // Step 3: Return to Home / open CashierListScreen from Home
+        await homeCubit.getCashierInfo();
+        await tester.pumpWidget(
+          buildTestWidget(
+            wrapInScaffold: false,
+            designSize: const Size(500, 1000),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: cubit),
+                BlocProvider<PagingCubit>(create: (_) => PagingCubit(totalSteps: 2)),
+                BlocProvider<GetCashierInfoCubit>.value(
+                  value: homeCubit,
+                ),
+              ],
+              child: const CashierListScreen(),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Verify canonical shift_101 is reflected in Home screen
+        expect(find.textContaining('Morning Shift'), findsOneWidget);
+        expect(find.text('Branch 1'), findsOneWidget);
+        expect(find.text('Ali Cashier'), findsOneWidget);
+
         await cubit.close();
+        await homeCubit.close();
       },
     );
 
-    test(
-      'ShiftDetailsCubit getShiftDetails triggered by action callback refreshes canonical shift from server upon receipt decision and rejection',
-      () async {
+    testWidgets(
+      'production action widgets (ManagerApproveButtonWidget & ManagerRejectHandoverButton) trigger ShiftDetailsCubit refresh from server upon receipt decision and rejection',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1200);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
         final repo = MockShiftDetailsRepo();
+        if (!getIt.isRegistered<ShiftManagementRepositoryImp>()) {
+          getIt.registerSingleton<ShiftManagementRepositoryImp>(repo);
+        }
+        if (!getIt.isRegistered<ApproveAndRejectHandoverCubit>()) {
+          getIt.registerFactory<ApproveAndRejectHandoverCubit>(
+            () => ApproveAndRejectHandoverCubit(repo),
+          );
+        }
+
         final cubit = ShiftDetailsCubit(repo, 'shift_101', true);
+        UserTypeService.setUserType(
+          strategy: BranchManagerUserStrategy(),
+          userType: UserType.branchManager,
+        );
 
         // Initial state from server: pending handover
         repo.onGetShiftDetails = (shiftId) async {
@@ -445,7 +649,7 @@ void main() {
           );
         };
 
-        // Production path: successFunction() or screen load triggers getShiftDetails()
+        // Initial load
         await cubit.getShiftDetails();
         expect(cubit.state, isA<ShiftDetailsLoaded>());
         var loaded = (cubit.state as ShiftDetailsLoaded).shift;
@@ -468,12 +672,60 @@ void main() {
           );
         };
 
-        // Triggered by ManagerRejectHandoverButton.successFunction
-        await cubit.getShiftDetails();
+        // Mount production ManagerRejectHandoverButton
+        await tester.pumpWidget(
+          buildTestWidget(
+            MultiBlocProvider(
+              providers: [
+                BlocProvider<ShiftDetailsCubit>.value(value: cubit),
+                BlocProvider<ApproveAndRejectHandoverCubit>(
+                  create: (_) => getIt<ApproveAndRejectHandoverCubit>(),
+                ),
+              ],
+              child: Builder(
+                builder: (context) {
+                  return ManagerRejectHandoverButton(
+                    shiftId: 'shift_101',
+                    openedFromModalSheet: true,
+                    successFunction: () {
+                      context.read<ShiftDetailsCubit>().getShiftDetails();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Click production reject button
+        await tester.tap(find.byType(ManagerRejectHandoverButton));
+        await tester.pumpAndSettle();
+
+        // Enter rejection comment into the modal sheet
+        final commentField = find.byType(TextField);
+        expect(commentField, findsOneWidget);
+        await tester.enterText(commentField, 'Please adjust card receipts');
+        await tester.pumpAndSettle();
+
+        // Tap submit reject button inside RejectHandoverModalSheetWidget
+        final submitRejectBtn =
+            find.widgetWithText(AppButton, S.current.rejectAndAskForCorrection);
+        await tester.tap(submitRejectBtn);
+        await tester.pumpAndSettle();
+
+        // Verify successFunction was invoked and ShiftDetailsCubit refreshed from server
         expect(cubit.state, isA<ShiftDetailsLoaded>());
         loaded = (cubit.state as ShiftDetailsLoaded).shift;
         expect(loaded.id, 'shift_101');
         expect(loaded.handoverStatus?.status, HandoverStatus.rejected);
+        expect(loaded.handoverStatus?.reviewedBy, 'Manager Ahmed');
+
+        // Dismiss any confirmation modal sheet if present
+        while (NavigationService.I.canPop()) {
+          NavigationService.I.pop();
+          await tester.pumpAndSettle();
+        }
 
         // Receipt decision approved by manager from server:
         repo.onGetShiftDetails = (shiftId) async {
@@ -491,8 +743,52 @@ void main() {
           );
         };
 
-        // Triggered by ManagerApproveButtonWidget.successFunction
-        await cubit.getShiftDetails();
+        // Mount production ManagerApproveButtonWidget
+        await tester.pumpWidget(
+          buildTestWidget(
+            MultiBlocProvider(
+              providers: [
+                BlocProvider<ShiftDetailsCubit>.value(value: cubit),
+                BlocProvider<ApproveAndRejectHandoverCubit>(
+                  create: (_) => getIt<ApproveAndRejectHandoverCubit>(),
+                ),
+              ],
+              child: Builder(
+                builder: (context) {
+                  return ManagerApproveButtonWidget(
+                    cashierShiftId: 'shift_101',
+                    cashierName: 'Ali Cashier',
+                    managerName: 'Manager Ahmed',
+                    cashGiven: 100.0,
+                    variance: 0.0,
+                    openedFromModalSheet: true,
+                    successFunction: () {
+                      context.read<ShiftDetailsCubit>().getShiftDetails();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Click production approve button
+        await tester.tap(find.byType(ManagerApproveButtonWidget));
+        await tester.pumpAndSettle();
+
+        // Enter confirmed amount equal to cashGiven (100)
+        final amountField = find.byType(TextField).first;
+        await tester.enterText(amountField, '100');
+        await tester.pumpAndSettle();
+
+        // Tap confirm receipt button inside AcceptHandoverSheetWidget
+        final submitApproveBtn =
+            find.widgetWithText(AppButton, S.current.approveHandover);
+        await tester.tap(submitApproveBtn);
+        await tester.pumpAndSettle();
+
+        // Verify successFunction was invoked and ShiftDetailsCubit refreshed from server
         expect(cubit.state, isA<ShiftDetailsLoaded>());
         loaded = (cubit.state as ShiftDetailsLoaded).shift;
         expect(loaded.id, 'shift_101');

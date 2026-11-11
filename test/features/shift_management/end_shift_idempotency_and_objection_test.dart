@@ -1,4 +1,5 @@
 import 'package:assab/core/enums/shift_status/shift_handover_status.dart';
+import 'package:assab/core/enums/shift_status/shift_status_type.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/future_api_result.dart';
@@ -9,8 +10,12 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/variance_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_status_details_entities/handover_status_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_status_details_entities/rejection_details_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_cashier_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_time_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/end_shift/end_shift_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +45,45 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
   FutureApiResult<List<ShortageAllocationCandidate>> Function({
     required String shiftId,
   })? onCandidates;
+
+  FutureApiResult<ShiftEntity> Function(String shiftId)? onGetShiftDetails;
+  FutureApiResult<HandoverStatusDetailsEntity> Function(String shiftId)?
+      onGetHandoverRejectionDetails;
+
+  @override
+  FutureApiResult<ShiftEntity> getShiftDetails(String shiftId) async {
+    if (onGetShiftDetails != null) {
+      return onGetShiftDetails!(shiftId);
+    }
+    return ApiResult.success(
+      ShiftEntity(
+        id: shiftId,
+        shiftDateFormatted: '2026-11-11',
+        shiftTimeDetails: ShiftTimeDetailsEntity(
+          startTime: '08:00',
+          endTime: '16:00',
+        ),
+        openingBalance: 100.0,
+        closingBalance: 70.0,
+        vatAmount: 0.0,
+        cashCollected: 70.0,
+        handoverAmount: 70.0,
+        status: ShiftStatusType.completed,
+        cashier: ShiftCashierEntity(id: '10', name: 'Ali Cashier'),
+        shiftDate: '2026-11-11',
+      ),
+    );
+  }
+
+  @override
+  FutureApiResult<HandoverStatusDetailsEntity> getHandoverRejectionDetails(
+    String shiftId,
+  ) async {
+    if (onGetHandoverRejectionDetails != null) {
+      return onGetHandoverRejectionDetails!(shiftId);
+    }
+    return super.getHandoverRejectionDetails(shiftId);
+  }
 
   @override
   FutureApiResult<Map<String, dynamic>> previewCashReconciliation({
@@ -325,7 +369,7 @@ void main() {
       expect(submissionCount, 1);
 
       // --- Cycle 1 Server Response: Handover returned/rejected for correction ---
-      // The server returns rejection/correction details:
+      // The server returns rejection/correction details through the repository data source:
       const cycle1ServerRejection = HandoverStatusDetailsEntity(
         status: HandoverStatus.rejected,
         handoverTime: '16:00',
@@ -343,30 +387,82 @@ void main() {
         rejectionReviewedBy: 'Manager Ahmed',
         correctionDetails: null,
       );
-      // App reads the server status
-      expect(cycle1ServerRejection.status, HandoverStatus.rejected);
-      expect(cycle1ServerRejection.rejectionDetails?.rejectionCount, 1);
-      expect(cycle1ServerRejection.rejectionDetails?.canCashierEdit, isTrue);
-      expect(cycle1ServerRejection.rejectionDetails?.rejectionReason,
-          'Recheck card payments and counted cash');
 
-      // Cashier opens shift for correction Cycle 2:
-      // Modifying numbers invalidates preview
-      cubit.endShiftTotalSalesValuesUpdated(
+      final shiftWithRejection1 = ShiftEntity(
+        id: 'shift_mt28',
+        shiftDateFormatted: '2026-11-11',
+        shiftTimeDetails: ShiftTimeDetailsEntity(
+          startTime: '08:00',
+          endTime: '16:00',
+        ),
+        openingBalance: 100.0,
+        closingBalance: 70.0,
+        vatAmount: 0.0,
+        cashCollected: 70.0,
+        handoverAmount: 70.0,
+        status: ShiftStatusType.completed,
+        cashier: ShiftCashierEntity(id: '10', name: 'Ali Cashier'),
+        shiftDate: '2026-11-11',
+        handoverStatus: const HandoverStatusEntity(
+          id: 'h1',
+          status: HandoverStatus.rejected,
+          reviewedBy: 'Manager Ahmed',
+        ),
+      );
+
+      // Wire repository data source to return Cycle 1 rejection data:
+      repository.onGetHandoverRejectionDetails = (shiftId) async {
+        expect(shiftId, 'shift_mt28');
+        return ApiResult.success(cycle1ServerRejection);
+      };
+      repository.onGetShiftDetails = (shiftId) async {
+        expect(shiftId, 'shift_mt28');
+        return ApiResult.success(shiftWithRejection1);
+      };
+
+      // The app reads the return status from the repository data source:
+      final repoRejectionResult1 =
+          await repository.getHandoverRejectionDetails('shift_mt28');
+      final repoShiftResult1 =
+          await repository.getShiftDetails('shift_mt28');
+
+      late HandoverStatusDetailsEntity fetchedRejection1;
+      late ShiftEntity fetchedShift1;
+
+      repoRejectionResult1.when(
+        failure: (f) => fail('Unexpected failure: ${f.error.message}'),
+        success: (s) => fetchedRejection1 = s,
+      );
+      repoShiftResult1.when(
+        failure: (f) => fail('Unexpected failure: ${f.error.message}'),
+        success: (s) => fetchedShift1 = s,
+      );
+
+      expect(fetchedRejection1.status, HandoverStatus.rejected);
+      expect(fetchedRejection1.rejectionDetails?.rejectionCount, 1);
+      expect(fetchedRejection1.rejectionDetails?.canCashierEdit, isTrue);
+      expect(fetchedRejection1.rejectionDetails?.rejectionReason,
+          'Recheck card payments and counted cash');
+      expect(fetchedShift1.handoverStatus?.status, HandoverStatus.rejected);
+
+      // Cashier opens shift for correction Cycle 2 passing the shift entity received from data source:
+      final cubitCycle2 = EndShiftCubit(repository, 'shift_mt28', fetchedShift1);
+      cubitCycle2.endShiftTotalSalesValuesUpdated(
         totalSales: 100.0,
         cashCollected: 70.0,
         cardPayments: 0.0,
         aggregators: [],
       );
-      cubit.setCountedCash(70.0);
-      expect(cubit.previewStale, isTrue);
+      cubitCycle2.setCountedCash(70.0);
+      expect(cubitCycle2.previewStale, isTrue);
 
       // Fetch fresh preview for Cycle 2
-      final cycle2PreviewSuccess = await cubit.fetchCashReconciliationPreview();
+      final cycle2PreviewSuccess =
+          await cubitCycle2.fetchCashReconciliationPreview();
       expect(cycle2PreviewSuccess, isTrue);
-      expect(cubit.previewStale, isFalse);
+      expect(cubitCycle2.previewStale, isFalse);
 
-      cubit.updateShortageAllocations([
+      cubitCycle2.updateShortageAllocations([
         const CashShortageAllocation(
           responsibleType: 'cashier',
           responsibleId: '10',
@@ -374,9 +470,9 @@ void main() {
           name: 'Ali Cashier',
         ),
       ], 'Cycle 2 correction after first return');
-      expect(cubit.canProceedToEndShift, isTrue);
+      expect(cubitCycle2.canProceedToEndShift, isTrue);
 
-      await cubit.endShift(
+      await cubitCycle2.endShift(
         variance: Variance(
           responsibilityType: 'i_was_responsible',
           currentCashierAmount: 30.0,
@@ -385,8 +481,9 @@ void main() {
         ),
         isThereVariance: true,
       );
-      expect(cubit.state, isA<EndShiftSuccess>());
+      expect(cubitCycle2.state, isA<EndShiftSuccess>());
       expect(submissionCount, 2);
+      cubitCycle2.close();
 
       // --- Cycle 2 Server Response: Second rejection/return from server ---
       const cycle2ServerRejection = HandoverStatusDetailsEntity(
@@ -407,29 +504,83 @@ void main() {
         rejectionReviewedBy: 'Manager Ahmed',
         correctionDetails: null,
       );
-      expect(cycle2ServerRejection.status, HandoverStatus.rejected);
-      expect(cycle2ServerRejection.rejectionDetails?.rejectionCount, 2);
-      expect(cycle2ServerRejection.rejectionDetails?.canCashierEdit, isTrue);
-      expect(cycle2ServerRejection.rejectionDetails?.rejectionReason,
-          'Check shortage allocation note and candidate split');
 
-      // Cashier initiates fresh correction Cycle 3:
-      cubit.endShiftTotalSalesValuesUpdated(
+      final shiftWithRejection2 = ShiftEntity(
+        id: 'shift_mt28',
+        shiftDateFormatted: '2026-11-11',
+        shiftTimeDetails: ShiftTimeDetailsEntity(
+          startTime: '08:00',
+          endTime: '16:00',
+        ),
+        openingBalance: 100.0,
+        closingBalance: 70.0,
+        vatAmount: 0.0,
+        cashCollected: 70.0,
+        handoverAmount: 70.0,
+        status: ShiftStatusType.completed,
+        cashier: ShiftCashierEntity(id: '10', name: 'Ali Cashier'),
+        shiftDate: '2026-11-11',
+        handoverStatus: const HandoverStatusEntity(
+          id: 'h2',
+          status: HandoverStatus.rejected,
+          reviewedBy: 'Manager Ahmed',
+        ),
+      );
+
+      // Wire repository data source to return Cycle 2 rejection data:
+      repository.onGetHandoverRejectionDetails = (shiftId) async {
+        expect(shiftId, 'shift_mt28');
+        return ApiResult.success(cycle2ServerRejection);
+      };
+      repository.onGetShiftDetails = (shiftId) async {
+        expect(shiftId, 'shift_mt28');
+        return ApiResult.success(shiftWithRejection2);
+      };
+
+      // The app reads the second return status from the repository data source:
+      final repoRejectionResult2 =
+          await repository.getHandoverRejectionDetails('shift_mt28');
+      final repoShiftResult2 =
+          await repository.getShiftDetails('shift_mt28');
+
+      late HandoverStatusDetailsEntity fetchedRejection2;
+      late ShiftEntity fetchedShift2;
+
+      repoRejectionResult2.when(
+        failure: (f) => fail('Unexpected failure: ${f.error.message}'),
+        success: (s) => fetchedRejection2 = s,
+      );
+      repoShiftResult2.when(
+        failure: (f) => fail('Unexpected failure: ${f.error.message}'),
+        success: (s) => fetchedShift2 = s,
+      );
+
+      expect(fetchedRejection2.status, HandoverStatus.rejected);
+      expect(fetchedRejection2.rejectionDetails?.rejectionCount, 2);
+      expect(fetchedRejection2.rejectionDetails?.canCashierEdit, isTrue);
+      expect(fetchedRejection2.rejectionDetails?.rejectionReason,
+          'Check shortage allocation note and candidate split');
+      expect(fetchedShift2.handoverStatus?.status, HandoverStatus.rejected);
+
+      // Cashier initiates fresh correction Cycle 3 passing the shift entity from data source:
+      final cubitCycle3 = EndShiftCubit(repository, 'shift_mt28', fetchedShift2);
+      cubitCycle3.endShiftTotalSalesValuesUpdated(
         totalSales: 100.0,
         cashCollected: 70.0,
         cardPayments: 0.0,
         aggregators: [],
       );
-      cubit.setCountedCash(70.0);
-      expect(cubit.previewStale, isTrue);
+      cubitCycle3.setCountedCash(70.0);
+      expect(cubitCycle3.previewStale, isTrue);
 
       // Cycle 3 must enforce fresh preview before submission
-      final cycle3PreviewSuccess = await cubit.fetchCashReconciliationPreview();
+      final cycle3PreviewSuccess =
+          await cubitCycle3.fetchCashReconciliationPreview();
       expect(cycle3PreviewSuccess, isTrue);
-      expect(cubit.previewStale, isFalse);
+      expect(cubitCycle3.previewStale, isFalse);
 
-      await cubit.fetchShortageCandidates();
-      cubit.updateShortageAllocations(
+      await cubitCycle3.fetchShortageCandidates();
+      cubitCycle3.updateShortageAllocations(
         [
           const CashShortageAllocation(
             responsibleType: 'cashier',
@@ -440,10 +591,10 @@ void main() {
         ],
         'Correction cycle 3 after second manager return',
       );
-      expect(cubit.canProceedToEndShift, isTrue);
+      expect(cubitCycle3.canProceedToEndShift, isTrue);
 
       // Submit Cycle 3 correction
-      await cubit.endShift(
+      await cubitCycle3.endShift(
         variance: Variance(
           responsibilityType: 'i_was_responsible',
           currentCashierAmount: 30.0,
@@ -454,7 +605,7 @@ void main() {
       );
 
       // Verify Cycle 3 succeeded without blocking
-      expect(cubit.state, isA<EndShiftSuccess>());
+      expect(cubitCycle3.state, isA<EndShiftSuccess>());
       expect(submissionCount, 3);
       expect(capturedRequests.length, 3);
       expect(capturedRequests[2].allocationReason,
