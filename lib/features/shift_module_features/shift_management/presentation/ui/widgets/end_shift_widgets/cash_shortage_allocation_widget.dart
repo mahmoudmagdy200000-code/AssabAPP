@@ -210,14 +210,15 @@ class _CashShortageAllocationWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8.w,
+            runSpacing: 6.h,
             children: [
-              Expanded(
-                child: Text(
-                  tr.cashShortageAllocation,
-                  style: AppStyles.s16W500,
-                ),
+              Text(
+                tr.cashShortageAllocation,
+                style: AppStyles.s16W500,
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
@@ -524,10 +525,17 @@ class _CashShortageAllocationWidgetState
         children: [
           Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: AppStyles.s11W400.copyWith(color: context.customColor.text3),
           ),
           4.verticalSpace,
-          Text(value, style: AppStyles.s13W500.copyWith(color: color)),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppStyles.s13W500.copyWith(color: color),
+          ),
         ],
       ),
     );

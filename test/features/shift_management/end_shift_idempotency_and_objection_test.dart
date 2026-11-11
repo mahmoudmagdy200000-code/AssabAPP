@@ -262,5 +262,138 @@ void main() {
       interceptor.onRequest(getOptions, getHandler);
       expect(getOptions.headers['Idempotency-Key'], isNull);
     });
+
+    test('repeated refusal or return for correction (2nd cycle) permits fresh correction submission without blocking', () async {
+      int submissionCount = 0;
+      final List<EndShiftRequest> capturedRequests = [];
+      repository.onEndShift = ({
+        required String shiftId,
+        required EndShiftRequest endShiftRequest,
+      }) async {
+        submissionCount++;
+        capturedRequests.add(endShiftRequest);
+        return ApiResult.success(null);
+      };
+
+      // Cycle 1: initial submission
+      cubit.setCountedCash(70.0);
+      await cubit.fetchCashReconciliationPreview();
+      await cubit.fetchShortageCandidates();
+      cubit.updateShortageAllocations([
+        const CashShortageAllocation(
+          responsibleType: 'cashier',
+          responsibleId: '10',
+          amount: 30.0,
+          name: 'Ali Cashier',
+        ),
+      ], 'Initial submission note');
+      expect(cubit.canProceedToEndShift, isTrue);
+
+      await cubit.endShift(
+        variance: Variance(
+          responsibilityType: 'i_was_responsible',
+          currentCashierAmount: 30.0,
+          reason: 'Cycle 1 initial submission',
+          otherCashiers: [],
+        ),
+        isThereVariance: true,
+      );
+      expect(cubit.state, isA<EndShiftSuccess>());
+      expect(submissionCount, 1);
+
+      // Cycle 1 Handover Rejected / Returned for correction by manager:
+      // Manager requests correction with note: "Recheck card payments"
+      // Cashier opens shift for correction Cycle 2:
+      // Update figures & fetch fresh preview
+      cubit.endShiftTotalSalesValuesUpdated(
+        totalSales: 100.0,
+        cashCollected: 70.0,
+        cardPayments: 0.0,
+        aggregators: [],
+      );
+      cubit.setCountedCash(70.0);
+      expect(cubit.previewStale, isTrue);
+      // Fetch fresh preview for Cycle 2
+      final cycle2PreviewSuccess = await cubit.fetchCashReconciliationPreview();
+      expect(cycle2PreviewSuccess, isTrue);
+      expect(cubit.previewStale, isFalse);
+
+      cubit.updateShortageAllocations([
+        const CashShortageAllocation(
+          responsibleType: 'cashier',
+          responsibleId: '10',
+          amount: 30.0,
+          name: 'Ali Cashier',
+        ),
+      ], 'Cycle 2 correction after first return');
+      expect(cubit.canProceedToEndShift, isTrue);
+
+      await cubit.endShift(
+        variance: Variance(
+          responsibilityType: 'i_was_responsible',
+          currentCashierAmount: 30.0,
+          reason: 'Cycle 2 correction attempt',
+          otherCashiers: [],
+        ),
+        isThereVariance: true,
+      );
+      expect(cubit.state, isA<EndShiftSuccess>());
+      expect(submissionCount, 2);
+
+      // Cycle 2 Second rejection / return for correction:
+      // Manager rejects a second time with note: "Check shortage allocation"
+      // Cashier initiates fresh correction Cycle 3:
+      // Fresh preview + fresh shortage allocation
+      cubit.endShiftTotalSalesValuesUpdated(
+        totalSales: 100.0,
+        cashCollected: 70.0,
+        cardPayments: 0.0,
+        aggregators: [],
+      );
+      cubit.setCountedCash(70.0);
+      expect(cubit.previewStale, isTrue);
+
+      final cycle3PreviewSuccess = await cubit.fetchCashReconciliationPreview();
+      expect(cycle3PreviewSuccess, isTrue);
+      expect(cubit.previewStale, isFalse);
+
+      await cubit.fetchShortageCandidates();
+      cubit.updateShortageAllocations(
+        [
+          const CashShortageAllocation(
+            responsibleType: 'cashier',
+            responsibleId: '10',
+            amount: 30.0,
+            name: 'Ali Cashier',
+          ),
+        ],
+        'Correction cycle 3 after second manager return',
+      );
+      expect(cubit.canProceedToEndShift, isTrue);
+
+      // Submit Cycle 3 correction
+      await cubit.endShift(
+        variance: Variance(
+          responsibilityType: 'i_was_responsible',
+          currentCashierAmount: 30.0,
+          reason: 'Cycle 3 correction after 2nd rejection',
+          otherCashiers: [],
+        ),
+        isThereVariance: true,
+      );
+
+      // Verify Cycle 3 succeeded without blocking
+      expect(cubit.state, isA<EndShiftSuccess>());
+      expect(submissionCount, 3);
+      expect(capturedRequests.length, 3);
+      expect(capturedRequests[2].allocationReason, 'Correction cycle 3 after second manager return');
+      expect(capturedRequests[2].shortageAllocations?.first.amount, 30.0);
+
+      // Also verify distinct idempotency keys across cycles
+      final keyCycle1 = IdempotencyScopeManager.getOrCreateKey('shifts/shift_mt28/end_c1');
+      final keyCycle2 = IdempotencyScopeManager.getOrCreateKey('shifts/shift_mt28/end_c2');
+      final keyCycle3 = IdempotencyScopeManager.getOrCreateKey('shifts/shift_mt28/end_c3');
+      expect({keyCycle1, keyCycle2, keyCycle3}.length, 3, reason: 'Each correction cycle must have a unique idempotency key');
+    });
   });
 }

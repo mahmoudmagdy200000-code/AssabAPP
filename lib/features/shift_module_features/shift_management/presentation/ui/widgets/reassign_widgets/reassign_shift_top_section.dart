@@ -19,24 +19,27 @@ class ReassignShiftTopSection extends StatelessWidget {
       builder: (context, state) {
         final currentIndex = state.currentIndex;
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(titles.length, (index) {
-            return Row(
-              children: [
-                CustomPagingWidget(
-                  condition: index == currentIndex,
-                  text: titles[index],
-                  padding: EdgeInsets.symmetric(horizontal: 2.r, vertical: 5.r),
-                ),
-                AnimatedContainerOfPagingWidget(
-                  condition: index == currentIndex,
-                  width: 35.r,
-                  color: context.theme.primaryColor,
-                ),
-              ],
-            );
-          }),
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(titles.length, (index) {
+              return Row(
+                children: [
+                  CustomPagingWidget(
+                    condition: index == currentIndex,
+                    text: titles[index],
+                    padding: EdgeInsets.symmetric(horizontal: 2.r, vertical: 5.r),
+                  ),
+                  AnimatedContainerOfPagingWidget(
+                    condition: index == currentIndex,
+                    width: 35.r,
+                    color: context.theme.primaryColor,
+                  ),
+                ],
+              );
+            }),
+          ),
         );
       },
     );

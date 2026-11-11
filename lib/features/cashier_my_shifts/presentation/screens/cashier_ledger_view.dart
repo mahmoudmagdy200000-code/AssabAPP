@@ -41,6 +41,7 @@ class CashierLedgerView extends StatelessWidget {
               ),
               24.verticalSpace,
               AppButton(
+                enabled: true,
                 text: context.tr.accountStatement,
                 onClick: () {
                   NavigationService.I.pushNamed(
