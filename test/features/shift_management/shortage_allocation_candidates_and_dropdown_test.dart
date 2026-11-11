@@ -320,6 +320,46 @@ void main() {
       expect(cubit.state, isA<EndShiftCandidatesFailure>());
     });
 
+    test('fetchShortageCandidates failure with 403 Forbidden sets candidatesError and emits failure', () async {
+      repository.onCandidates = ({required String shiftId}) async {
+        return ApiResult.failure(
+          ValidationFailure(
+            error: LocalErrorModel(
+              message: 'غير مصرح لك باستعراض قائمة مسؤولي العجز في هذا الفرع',
+              errors: null,
+            ),
+            icon: CupertinoIcons.lock,
+            statusCode: 403,
+            stackTrace: StackTrace.empty,
+          ),
+        );
+      };
+
+      await cubit.fetchShortageCandidates();
+
+      expect(cubit.isLoadingCandidates, isFalse);
+      expect(cubit.shortageCandidates, isEmpty);
+      expect(cubit.candidatesError, 'غير مصرح لك باستعراض قائمة مسؤولي العجز في هذا الفرع');
+      expect(cubit.state, isA<EndShiftCandidatesFailure>());
+      final failState = cubit.state as EndShiftCandidatesFailure;
+      expect(failState.failure.statusCode, 403);
+    });
+
+    test('fetchShortageCandidates with empty candidate list returns empty list and emits success', () async {
+      repository.onCandidates = ({required String shiftId}) async {
+        return ApiResult.success([]);
+      };
+
+      await cubit.fetchShortageCandidates();
+
+      expect(cubit.isLoadingCandidates, isFalse);
+      expect(cubit.shortageCandidates, isEmpty);
+      expect(cubit.candidatesError, isNull);
+      expect(cubit.state, isA<EndShiftCandidatesSuccess>());
+      final successState = cubit.state as EndShiftCandidatesSuccess;
+      expect(successState.candidates, isEmpty);
+    });
+
     test(
       'out-of-order in-flight candidate response is dropped when preview is invalidated',
       () async {
@@ -590,6 +630,57 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(retried, isTrue);
+      },
+    );
+
+    testWidgets(
+      'shows 403 forbidden error message and triggers retry on button tap',
+      (tester) async {
+        bool retried = false;
+        await tester.pumpWidget(
+          buildTestableWidget(
+            CashShortageAllocationWidget(
+              shortageAmount: 20.0,
+              candidatesError: 'غير مصرح لك باستعراض مسؤولي الوردية (403)',
+              onRetryCandidates: () {
+                retried = true;
+              },
+              onAllocationsChanged: (_) {},
+            ),
+            locale: const Locale('ar'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('غير مصرح لك باستعراض مسؤولي الوردية (403)'), findsOneWidget);
+        expect(find.text('أعد المحاولة'), findsOneWidget);
+
+        await tester.tap(find.text('أعد المحاولة'));
+        await tester.pumpAndSettle();
+
+        expect(retried, isTrue);
+      },
+    );
+
+    testWidgets(
+      'shows clear empty helper message when candidates list is completely empty []',
+      (tester) async {
+        await tester.pumpWidget(
+          buildTestableWidget(
+            CashShortageAllocationWidget(
+              shortageAmount: 20.0,
+              candidates: const [],
+              onAllocationsChanged: (_) {},
+            ),
+            locale: const Locale('ar'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('لا يوجد مسؤول متاح بهذا الدور في هذا الفرع.'),
+          findsOneWidget,
+        );
       },
     );
 
