@@ -30,7 +30,7 @@ class AppButton extends StatelessWidget {
     this.borderRadius,
     this.padding,
     this.isTransparent = false,
-    this.isFlexible = true,
+    this.isFlexible = false,
     this.icon,
   });
 

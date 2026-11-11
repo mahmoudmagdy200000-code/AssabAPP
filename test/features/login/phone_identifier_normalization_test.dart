@@ -3,8 +3,6 @@ import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/utils/app_reg_exp.dart';
 import 'package:assab/features/login/presentation/cubits/login_form/login_form_cubit.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:assab/generated/l10n.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {

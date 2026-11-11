@@ -736,6 +736,7 @@ class _EndShiftWithHandoverScreenState
                                                   currentIndex,
                                                 );
                                               },
+                                        isFlexible: true,
                                         enabled: pagingState.isLastStep
                                             ? (enableButton && cubit.canProceedToEndShift)
                                             : enableButton,

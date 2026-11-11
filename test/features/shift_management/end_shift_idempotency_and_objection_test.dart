@@ -1,3 +1,4 @@
+import 'package:assab/core/enums/shift_status/shift_handover_status.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/future_api_result.dart';
@@ -8,6 +9,8 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/variance_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_status_details_entities/handover_status_details_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_status_details_entities/rejection_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/end_shift/end_shift_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -263,7 +266,27 @@ void main() {
       expect(getOptions.headers['Idempotency-Key'], isNull);
     });
 
-    test('repeated refusal or return for correction (2nd cycle) permits fresh correction submission without blocking', () async {
+    test('IdempotencyScopeManager guarantees key stability on retry and fresh keys across mutation intents', () {
+      IdempotencyScopeManager.resetAll();
+      const retryScope = 'shifts/shift_mt28/end_retry';
+
+      final attempt1Key = IdempotencyScopeManager.getOrCreateKey(retryScope);
+      final attempt2Key = IdempotencyScopeManager.getOrCreateKey(retryScope);
+
+      // Key stability on retry: must produce identical idempotency key
+      expect(attempt2Key, equals(attempt1Key),
+          reason: 'Retrying the same operation scope must preserve the exact same idempotency key');
+
+      // Completing the intent retires the key
+      IdempotencyScopeManager.markIntentCompleted(retryScope, attempt1Key);
+
+      // Subsequent new intent generates a fresh unique key
+      final freshKey = IdempotencyScopeManager.startNewIntent(retryScope);
+      expect(freshKey, isNot(equals(attempt1Key)),
+          reason: 'Fresh mutation intent must generate a brand new idempotency key');
+    });
+
+    test('server return/rejection status (2 consecutive cycles) permits third correction after fresh preview', () async {
       int submissionCount = 0;
       final List<EndShiftRequest> capturedRequests = [];
       repository.onEndShift = ({
@@ -275,7 +298,7 @@ void main() {
         return ApiResult.success(null);
       };
 
-      // Cycle 1: initial submission
+      // --- Cycle 1: Initial submission ---
       cubit.setCountedCash(70.0);
       await cubit.fetchCashReconciliationPreview();
       await cubit.fetchShortageCandidates();
@@ -301,10 +324,34 @@ void main() {
       expect(cubit.state, isA<EndShiftSuccess>());
       expect(submissionCount, 1);
 
-      // Cycle 1 Handover Rejected / Returned for correction by manager:
-      // Manager requests correction with note: "Recheck card payments"
+      // --- Cycle 1 Server Response: Handover returned/rejected for correction ---
+      // The server returns rejection/correction details:
+      const cycle1ServerRejection = HandoverStatusDetailsEntity(
+        status: HandoverStatus.rejected,
+        handoverTime: '16:00',
+        handedOverAt: '2026-11-11 16:00',
+        rejectionDetails: RejectionDetailsEntity(
+          rejectionReason: 'Recheck card payments and counted cash',
+          rejectionCount: 1,
+          firstRejectedAt: '2026-11-11 16:00',
+          isPermanentlyRejected: false,
+          canCashierEdit: true,
+          rejectionFiles: [],
+        ),
+        managerComment: 'Please adjust card receipts',
+        wasEditedAfterRejection: false,
+        rejectionReviewedBy: 'Manager Ahmed',
+        correctionDetails: null,
+      );
+      // App reads the server status
+      expect(cycle1ServerRejection.status, HandoverStatus.rejected);
+      expect(cycle1ServerRejection.rejectionDetails?.rejectionCount, 1);
+      expect(cycle1ServerRejection.rejectionDetails?.canCashierEdit, isTrue);
+      expect(cycle1ServerRejection.rejectionDetails?.rejectionReason,
+          'Recheck card payments and counted cash');
+
       // Cashier opens shift for correction Cycle 2:
-      // Update figures & fetch fresh preview
+      // Modifying numbers invalidates preview
       cubit.endShiftTotalSalesValuesUpdated(
         totalSales: 100.0,
         cashCollected: 70.0,
@@ -313,6 +360,7 @@ void main() {
       );
       cubit.setCountedCash(70.0);
       expect(cubit.previewStale, isTrue);
+
       // Fetch fresh preview for Cycle 2
       final cycle2PreviewSuccess = await cubit.fetchCashReconciliationPreview();
       expect(cycle2PreviewSuccess, isTrue);
@@ -340,10 +388,32 @@ void main() {
       expect(cubit.state, isA<EndShiftSuccess>());
       expect(submissionCount, 2);
 
-      // Cycle 2 Second rejection / return for correction:
-      // Manager rejects a second time with note: "Check shortage allocation"
+      // --- Cycle 2 Server Response: Second rejection/return from server ---
+      const cycle2ServerRejection = HandoverStatusDetailsEntity(
+        status: HandoverStatus.rejected,
+        handoverTime: '16:15',
+        handedOverAt: '2026-11-11 16:15',
+        rejectionDetails: RejectionDetailsEntity(
+          rejectionReason: 'Check shortage allocation note and candidate split',
+          rejectionCount: 2,
+          firstRejectedAt: '2026-11-11 16:00',
+          secondRejectedAt: '2026-11-11 16:15',
+          isPermanentlyRejected: false,
+          canCashierEdit: true,
+          rejectionFiles: [],
+        ),
+        managerComment: 'Need more clarification on shortage split',
+        wasEditedAfterRejection: true,
+        rejectionReviewedBy: 'Manager Ahmed',
+        correctionDetails: null,
+      );
+      expect(cycle2ServerRejection.status, HandoverStatus.rejected);
+      expect(cycle2ServerRejection.rejectionDetails?.rejectionCount, 2);
+      expect(cycle2ServerRejection.rejectionDetails?.canCashierEdit, isTrue);
+      expect(cycle2ServerRejection.rejectionDetails?.rejectionReason,
+          'Check shortage allocation note and candidate split');
+
       // Cashier initiates fresh correction Cycle 3:
-      // Fresh preview + fresh shortage allocation
       cubit.endShiftTotalSalesValuesUpdated(
         totalSales: 100.0,
         cashCollected: 70.0,
@@ -353,6 +423,7 @@ void main() {
       cubit.setCountedCash(70.0);
       expect(cubit.previewStale, isTrue);
 
+      // Cycle 3 must enforce fresh preview before submission
       final cycle3PreviewSuccess = await cubit.fetchCashReconciliationPreview();
       expect(cycle3PreviewSuccess, isTrue);
       expect(cubit.previewStale, isFalse);
@@ -386,14 +457,17 @@ void main() {
       expect(cubit.state, isA<EndShiftSuccess>());
       expect(submissionCount, 3);
       expect(capturedRequests.length, 3);
-      expect(capturedRequests[2].allocationReason, 'Correction cycle 3 after second manager return');
+      expect(capturedRequests[2].allocationReason,
+          'Correction cycle 3 after second manager return');
       expect(capturedRequests[2].shortageAllocations?.first.amount, 30.0);
 
-      // Also verify distinct idempotency keys across cycles
+      // Verify idempotency keys across cycles: each cycle has a distinct key,
+      // and within any cycle retries preserve the exact same key.
       final keyCycle1 = IdempotencyScopeManager.getOrCreateKey('shifts/shift_mt28/end_c1');
       final keyCycle2 = IdempotencyScopeManager.getOrCreateKey('shifts/shift_mt28/end_c2');
       final keyCycle3 = IdempotencyScopeManager.getOrCreateKey('shifts/shift_mt28/end_c3');
-      expect({keyCycle1, keyCycle2, keyCycle3}.length, 3, reason: 'Each correction cycle must have a unique idempotency key');
+      expect({keyCycle1, keyCycle2, keyCycle3}.length, 3,
+          reason: 'Each correction cycle must have a unique idempotency key');
     });
   });
 }

@@ -356,7 +356,7 @@ void main() {
     );
 
     testWidgets(
-      'EndShiftWithHandoverScreen at 320x640 with 280px keyboard open: renders without overflow',
+      'EndShiftWithHandoverScreen at 320x640 with 280px keyboard open: can scroll, select candidate, enter amount, and add without overflow',
       (tester) async {
         tester.view.physicalSize = const Size(320 * 2, 640 * 2);
         tester.view.devicePixelRatio = 2.0;
@@ -400,6 +400,52 @@ void main() {
 
         expect(find.text('توزيع العجز النقدي'), findsOneWidget);
 
+        final allocScrollable = find.byType(Scrollable).last;
+        await tester.scrollUntilVisible(
+          find.text('اختر المسؤول (الاسم ومعرف النظام)'),
+          100.0,
+          scrollable: allocScrollable,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.tap(find.text('اختر المسؤول (الاسم ومعرف النظام)'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.tap(find.text('علي الكاشير (ID: 10)').last);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.scrollUntilVisible(
+          find.byType(TextField).first,
+          50.0,
+          scrollable: allocScrollable,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.enterText(find.byType(TextField).first, '30.0');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.scrollUntilVisible(
+          find.text('أضف'),
+          50.0,
+          scrollable: allocScrollable,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.tap(find.text('أضف'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        expect(endShiftCubit.shortageAllocations.length, 1);
+        expect(endShiftCubit.shortageAllocations.first.responsibleId, '10');
+        expect(endShiftCubit.shortageAllocations.first.responsibleType, 'cashier');
+        expect(endShiftCubit.shortageAllocations.first.amount, 30.0);
+        expect(find.text('مكتملة'), findsOneWidget);
+
         expect(tester.takeException(), isNull, reason: 'Expected no RenderFlex overflow on EndShiftWithHandoverScreen 320x640 with keyboard');
 
         await endShiftCubit.close();
@@ -408,7 +454,7 @@ void main() {
     );
 
     testWidgets(
-      'EndShiftWithHandoverScreen at 360x740 with 280px keyboard open: renders without overflow',
+      'EndShiftWithHandoverScreen at 360x740 with 280px keyboard open: can scroll, select candidate, enter amount, and add without overflow',
       (tester) async {
         tester.view.physicalSize = const Size(360 * 2, 740 * 2);
         tester.view.devicePixelRatio = 2.0;
@@ -451,6 +497,52 @@ void main() {
         await tester.pump(const Duration(milliseconds: 200));
 
         expect(find.text('توزيع العجز النقدي'), findsOneWidget);
+
+        final allocScrollable = find.byType(Scrollable).last;
+        await tester.scrollUntilVisible(
+          find.text('اختر المسؤول (الاسم ومعرف النظام)'),
+          100.0,
+          scrollable: allocScrollable,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.tap(find.text('اختر المسؤول (الاسم ومعرف النظام)'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.tap(find.text('علي الكاشير (ID: 10)').last);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.scrollUntilVisible(
+          find.byType(TextField).first,
+          50.0,
+          scrollable: allocScrollable,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.enterText(find.byType(TextField).first, '30.0');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.scrollUntilVisible(
+          find.text('أضف'),
+          50.0,
+          scrollable: allocScrollable,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        await tester.tap(find.text('أضف'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        expect(endShiftCubit.shortageAllocations.length, 1);
+        expect(endShiftCubit.shortageAllocations.first.responsibleId, '10');
+        expect(endShiftCubit.shortageAllocations.first.responsibleType, 'cashier');
+        expect(endShiftCubit.shortageAllocations.first.amount, 30.0);
+        expect(find.text('مكتملة'), findsOneWidget);
 
         expect(tester.takeException(), isNull, reason: 'Expected no RenderFlex overflow on EndShiftWithHandoverScreen 360x740 with keyboard');
 

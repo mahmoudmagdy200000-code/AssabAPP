@@ -572,6 +572,7 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                                 );
                                               },
 
+                                        isFlexible: true,
                                         enabled: pagingState.isLastStep
                                             ? (enableButton && cubit.canProceedToEndShift)
                                             : enableButton,
