@@ -49,7 +49,9 @@ import '../../domain/repository/shift_management_repository.dart';
 import '../model/shift/end_shift_aggregator_model.dart';
 
 @LazySingleton()
-class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManagementRepository {
+class ShiftManagementRepositoryImp
+    with RepositoryMixin
+    implements ShiftManagementRepository {
   final ShiftManagementRemoteDataSource _remoteDataSource;
 
   ShiftManagementRepositoryImp(this._remoteDataSource);
@@ -384,11 +386,12 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     return execute(() async {
       await _remoteDataSource.approveHandover(
         shiftId: shiftId,
-        handoverApproveAndRejectBodyRequest: HandoverApproveAndRejectBodyRequest(
-          confirmedAmount: confirmedAmount,
-          managerComment: managerComment,
-          transferAttemptId: transferAttemptId,
-        ),
+        handoverApproveAndRejectBodyRequest:
+            HandoverApproveAndRejectBodyRequest(
+              confirmedAmount: confirmedAmount,
+              managerComment: managerComment,
+              transferAttemptId: transferAttemptId,
+            ),
       );
       return true;
     });
@@ -542,9 +545,15 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
     });
   }
 
-  FutureApiResult<FinalDailyCloseData> getDailyClose({String? managerWorkdayId, String? workday}) async {
+  FutureApiResult<FinalDailyCloseData> getDailyClose({
+    String? managerWorkdayId,
+    String? workday,
+  }) async {
     return execute(() async {
-      final response = await _remoteDataSource.getDailyClose(managerWorkdayId: managerWorkdayId, workday: workday);
+      final response = await _remoteDataSource.getDailyClose(
+        managerWorkdayId: managerWorkdayId,
+        workday: workday,
+      );
 
       return response.data;
     });
@@ -627,14 +636,12 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
   }
 
   @override
-  FutureApiResult<List<ShortageAllocationCandidate>> getShortageAllocationCandidates({
-    required String shiftId,
-  }) async {
+  FutureApiResult<List<ShortageAllocationCandidate>>
+  getShortageAllocationCandidates({required String shiftId}) async {
     return execute(() async {
       try {
-        final response = await _remoteDataSource.getShortageAllocationCandidates(
-          shiftId: shiftId,
-        );
+        final response = await _remoteDataSource
+            .getShortageAllocationCandidates(shiftId: shiftId);
 
         final List<dynamic> list;
         if (response is Map && response['data'] is List) {
@@ -646,8 +653,13 @@ class ShiftManagementRepositoryImp with RepositoryMixin implements ShiftManageme
         }
 
         return list
-            .map((item) => ShortageAllocationCandidate.fromJson(
-                item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map)))
+            .map(
+              (item) => ShortageAllocationCandidate.fromJson(
+                item is Map<String, dynamic>
+                    ? item
+                    : Map<String, dynamic>.from(item as Map),
+              ),
+            )
             .where((candidate) => candidate.isValid)
             .toList();
       } on DioException {

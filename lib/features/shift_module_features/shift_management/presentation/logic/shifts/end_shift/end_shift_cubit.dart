@@ -126,12 +126,11 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   bool _isPendingIncomingCashValid = true;
   String? _pendingIncomingCashError;
 
-  double get pendingIncomingCash => _pendingIncomingCash;
   bool get isPendingIncomingCashValid => _isPendingIncomingCashValid;
   String? get pendingIncomingCashError => _pendingIncomingCashError;
 
   void updatePendingIncomingCash(double value) {
-    final normalized = value >= 0 ? value : 0.0;
+    final normalized = value.isFinite && value >= 0 ? value : 0.0;
     _isPendingIncomingCashValid = true;
     _pendingIncomingCashError = null;
     if (_pendingIncomingCash != normalized) {
@@ -154,7 +153,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       return;
     }
 
-    final trimmed = rawInput.trim();
+    final trimmed = rawInput
+        .trim()
+        .replaceAllMapped(RegExp(r'[٠-٩۰-۹]'), (match) {
+          final digit = match[0]!.codeUnitAt(0);
+          return (digit >= 0x06f0 ? digit - 0x06f0 : digit - 0x0660).toString();
+        })
+        .replaceAll('٫', '.');
     final regex = RegExp(r'^\d+(\.\d{1,2})?$');
     if (!regex.hasMatch(trimmed)) {
       _isPendingIncomingCashValid = false;
@@ -167,11 +172,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     }
 
     final parsed = double.tryParse(trimmed);
-    if (parsed == null || parsed < 0) {
+    if (parsed == null || !parsed.isFinite || parsed < 0) {
       _isPendingIncomingCashValid = false;
-      _pendingIncomingCashError = isArabic
-          ? 'مبلغ غير صحيح'
-          : 'Invalid amount';
+      _pendingIncomingCashError = isArabic ? 'مبلغ غير صحيح' : 'Invalid amount';
       invalidatePreview();
       emit(EndShiftPreviewInvalidated());
       return;
@@ -291,6 +294,24 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     if (val is num) return val.toDouble();
     if (val != null) return double.tryParse(val.toString());
     return null;
+  }
+
+  double get declaredPendingIncomingCash => _pendingIncomingCash;
+  bool get hasInvalidPendingIncomingCash => !_isPendingIncomingCashValid;
+
+  void setPendingIncomingCash(double? value, {bool isInvalid = false}) {
+    if (isInvalid || (value != null && (!value.isFinite || value < 0))) {
+      validateAndSetPendingIncomingCash('invalid');
+      return;
+    }
+    updatePendingIncomingCash(value ?? 0.0);
+  }
+
+  double? get pendingIncomingCash {
+    final val = cashReconciliation?['pending_incoming_cash'];
+    if (val is num) return val.toDouble();
+    if (val != null) return double.tryParse(val.toString());
+    return _pendingIncomingCash;
   }
 
   static ApiFailure _createValidationFailure(String message) {
@@ -422,6 +443,17 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       return false;
     }
 
+    if (_pendingIncomingCash > (_countedCash ?? 0.0)) {
+      emit(
+        EndShiftPreviewFailure(
+          _createValidationFailure(
+            'النقد الوارد المعلق لا يمكن أن يتجاوز النقد الفعلي المعدود بالدرج',
+          ),
+        ),
+      );
+      return false;
+    }
+
     _previewRequestId++;
     final currentRequestId = _previewRequestId;
     final currentFingerprint = _computeInputFingerprint();
@@ -434,8 +466,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       totalSales: _totalSales,
       countedCash: _countedCash!,
       cardPayments: _cardPayments,
-      pendingIncomingCash:
-          _pendingIncomingCash > 0 ? _pendingIncomingCash : null,
+      pendingIncomingCash: _pendingIncomingCash > 0
+          ? _pendingIncomingCash
+          : null,
       aggregators: _aggregators
           .map((a) => EndShiftAggregatorModel.fromEntity(a))
           .toList(),
@@ -545,16 +578,53 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     emit(state.copyWith(varianceStrategy: strategy));
   }
 
+  static double? tryParseFinancialAmount(String? text) {
+    if (text == null) return null;
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return null;
+    final sanitized = trimmed
+        .replaceAll('٠', '0')
+        .replaceAll('١', '1')
+        .replaceAll('٢', '2')
+        .replaceAll('٣', '3')
+        .replaceAll('٤', '4')
+        .replaceAll('٥', '5')
+        .replaceAll('٦', '6')
+        .replaceAll('٧', '7')
+        .replaceAll('٨', '8')
+        .replaceAll('٩', '9')
+        .replaceAll('۰', '0')
+        .replaceAll('۱', '1')
+        .replaceAll('۲', '2')
+        .replaceAll('۳', '3')
+        .replaceAll('۴', '4')
+        .replaceAll('۵', '5')
+        .replaceAll('۶', '6')
+        .replaceAll('۷', '7')
+        .replaceAll('۸', '8')
+        .replaceAll('۹', '9')
+        .replaceAll('٫', '.')
+        .replaceAll('،', '')
+        .replaceAll('٬', '')
+        .replaceAll('\u066C', '')
+        .replaceAll(',', '');
+    final parsed = double.tryParse(sanitized);
+    if (parsed == null || !parsed.isFinite || parsed < 0) return null;
+    return parsed;
+  }
+
+  static double _parseFinancialAmount(String text) {
+    return tryParseFinancialAmount(text) ?? 0.0;
+  }
+
   String calculateNetSales(String totalSalesText) {
-    final sanitized = totalSalesText.replaceAll(',', '').trim();
-    final totalSales = double.tryParse(sanitized) ?? 0.0;
+    final totalSales = _parseFinancialAmount(totalSalesText);
     final netSales = totalSales / 1.15;
     return netSales.toStringAsFixed(2);
   }
 
   String calculateNetVal(String totalSalesText) {
-    final sanitized = totalSalesText.replaceAll(',', '').trim();
-    final totalSales = double.tryParse(sanitized) ?? 0.0;
+    final totalSales = _parseFinancialAmount(totalSalesText);
     final netVal = totalSales - (totalSales / 1.15);
     return netVal.toStringAsFixed(2);
   }
@@ -679,6 +749,17 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       }
     }
 
+    if (_pendingIncomingCash > (_countedCash ?? 0.0)) {
+      emit(
+        EndShiftFailure(
+          _createValidationFailure(
+            'النقد الوارد المعلق لا يمكن أن يتجاوز النقد الفعلي المعدود بالدرج',
+          ),
+        ),
+      );
+      return;
+    }
+
     _isSubmitting = true;
     emit(EndShiftLoading(varianceStrategy: state.varianceStrategy));
 
@@ -687,8 +768,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       cashCollected: _cashCollected,
       cardPayments: _cardPayments,
       countedCash: _countedCash!,
-      pendingIncomingCash:
-          _pendingIncomingCash > 0 ? _pendingIncomingCash : null,
+      pendingIncomingCash: _pendingIncomingCash > 0
+          ? _pendingIncomingCash
+          : null,
       shortageAllocations: _shortageAllocations,
       allocationReason: _allocationReason,
       aggregators: _aggregators
@@ -700,7 +782,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     );
 
     final result = await runUserIntent(
-      'end:$shiftId:${request.countedCash}:${request.totalSales}:${request.cashCollected}:${request.cardPayments}',
+      'end:$shiftId:${request.countedCash}:${request.totalSales}:${request.cashCollected}:${request.cardPayments}:${request.pendingIncomingCash ?? 0.0}',
       () => _repository.endShift(shiftId: shiftId, endShiftRequest: request),
     );
 
@@ -794,10 +876,22 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       }
     }
 
+    if (_pendingIncomingCash > (_countedCash ?? 0.0)) {
+      emit(
+        EndShiftFailure(
+          _createValidationFailure(
+            'النقد الوارد المعلق لا يمكن أن يتجاوز النقد الفعلي المعدود بالدرج',
+          ),
+        ),
+      );
+      return;
+    }
+
     _isSubmitting = true;
     emit(EndShiftLoading(varianceStrategy: state.varianceStrategy));
 
     // Bind physical count, allocations and allocation reason to the handover request
+
     final boundRequest = EndShiftRequestWithHandOver(
       totalSales: request.totalSales,
       cashCollected: request.cashCollected,
@@ -805,8 +899,9 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       countedCash: _countedCash!,
       shortageAllocations: _shortageAllocations,
       allocationReason: _allocationReason,
-      pendingIncomingCash: request.pendingIncomingCash ??
-          (_pendingIncomingCash > 0 ? _pendingIncomingCash : null),
+      pendingIncomingCash: _pendingIncomingCash > 0
+          ? _pendingIncomingCash
+          : null,
       posReceipt: request.posReceipt,
       nextCashierId: request.nextCashierId,
       handoverAmount: request.handoverAmount,
@@ -818,7 +913,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     );
 
     final result = await runUserIntent(
-      'end-with-handover:$shiftId:${boundRequest.countedCash}:${boundRequest.nextCashierId}:${boundRequest.handoverAmount}:${boundRequest.totalSales}',
+      'end-with-handover:$shiftId:${boundRequest.countedCash}:${boundRequest.nextCashierId}:${boundRequest.handoverAmount}:${boundRequest.totalSales}:${boundRequest.pendingIncomingCash ?? 0.0}',
       () => _repository.endShiftWithHandOver(shiftId, boundRequest),
     );
 

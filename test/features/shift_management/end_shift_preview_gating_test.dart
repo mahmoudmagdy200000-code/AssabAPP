@@ -38,6 +38,7 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required double totalSales,
     required double countedCash,
     double? cardPayments,
+    double? pendingIncomingCash,
     List<EndShiftAggregatorModel>? aggregators,
   })?
   onPreview;
@@ -60,15 +61,17 @@ class MockShiftManagementRepository extends ShiftManagementRepositoryImp {
     required double totalSales,
     required double countedCash,
     double? cardPayments,
-    List<EndShiftAggregatorModel>? aggregators,
     double? pendingIncomingCash,
+    List<EndShiftAggregatorModel>? aggregators,
   }) async {
-    if (onPreview != null) {
-      return onPreview!(
+    final callback = onPreview;
+    if (callback != null) {
+      return callback(
         shiftId: shiftId,
         totalSales: totalSales,
         countedCash: countedCash,
         cardPayments: cardPayments,
+        pendingIncomingCash: pendingIncomingCash,
         aggregators: aggregators,
       );
     }
@@ -203,6 +206,7 @@ void main() {
               required double totalSales,
               required double countedCash,
               double? cardPayments,
+              double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) {
               return completer.future;
@@ -251,6 +255,7 @@ void main() {
               required double totalSales,
               required double countedCash,
               double? cardPayments,
+              double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) async {
               return ApiResult.failure(
@@ -307,6 +312,7 @@ void main() {
               required double totalSales,
               required double countedCash,
               double? cardPayments,
+              double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) {
               return slowCompleter.future;
@@ -397,6 +403,7 @@ void main() {
                 required double totalSales,
                 required double countedCash,
                 double? cardPayments,
+                double? pendingIncomingCash,
                 List<EndShiftAggregatorModel>? aggregators,
               }) async {
                 return ApiResult.success({
@@ -442,6 +449,7 @@ void main() {
                 required double totalSales,
                 required double countedCash,
                 double? cardPayments,
+                double? pendingIncomingCash,
                 List<EndShiftAggregatorModel>? aggregators,
               }) async {
                 return ApiResult.success({
@@ -490,6 +498,7 @@ void main() {
                 required double totalSales,
                 required double countedCash,
                 double? cardPayments,
+                double? pendingIncomingCash,
                 List<EndShiftAggregatorModel>? aggregators,
               }) async {
                 return ApiResult.success({
@@ -534,6 +543,7 @@ void main() {
                 required double totalSales,
                 required double countedCash,
                 double? cardPayments,
+                double? pendingIncomingCash,
                 List<EndShiftAggregatorModel>? aggregators,
               }) async {
                 return ApiResult.success({
@@ -586,6 +596,7 @@ void main() {
                 required double totalSales,
                 required double countedCash,
                 double? cardPayments,
+                double? pendingIncomingCash,
                 List<EndShiftAggregatorModel>? aggregators,
               }) async => ApiResult.success({
                 'data': {
@@ -650,6 +661,7 @@ void main() {
               required double totalSales,
               required double countedCash,
               double? cardPayments,
+              double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) => pending.future;
         final request = cubit.fetchCashReconciliationPreview();
@@ -670,6 +682,7 @@ void main() {
               required double totalSales,
               required double countedCash,
               double? cardPayments,
+              double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) async => ApiResult.failure(
               ValidationFailure(
@@ -727,6 +740,7 @@ void main() {
               required double totalSales,
               required double countedCash,
               double? cardPayments,
+              double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) async {
               return ApiResult.success({
@@ -784,6 +798,7 @@ void main() {
               required double totalSales,
               required double countedCash,
               double? cardPayments,
+              double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) async {
               return ApiResult.success({

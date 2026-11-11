@@ -90,7 +90,9 @@ class _SalesBreakDownEndShiftWidget
                         child: CustomTextField(
                           controller: widget.totalSaleSController,
                           hintText: context.tr.totalSalesHintText,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           maxLength: 30,
                           onChanged: (value) {
                             context.read<ValidationCubit>().validateField(
@@ -211,7 +213,10 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.cashController,
                                   hintText: context.tr.amount,
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -238,7 +243,10 @@ class _SalesBreakDownEndShiftWidget
                                 child: CustomTextField(
                                   controller: widget.madaController,
                                   hintText: context.tr.amount,
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   maxLength: 30,
                                   onChanged: (value) {},
                                 ),
@@ -290,26 +298,34 @@ class _SalesBreakDownEndShiftWidget
                           onChanged: (value) {
                             final trimmed = value.trim();
                             if (trimmed.isEmpty) {
-                              context.read<EndShiftCubit>().setCountedCash(null);
-                              context
-                                  .read<ValidationCubit>()
-                                  .validateField('countedCash', false);
+                              context.read<EndShiftCubit>().setCountedCash(
+                                null,
+                              );
+                              context.read<ValidationCubit>().validateField(
+                                'countedCash',
+                                false,
+                              );
                             } else {
-                              final parsed = double.tryParse(trimmed);
+                              final parsed =
+                                  EndShiftCubit.tryParseFinancialAmount(
+                                    trimmed,
+                                  );
                               if (parsed != null && parsed >= 0) {
-                                context
-                                    .read<EndShiftCubit>()
-                                    .setCountedCash(parsed);
-                                context
-                                    .read<ValidationCubit>()
-                                    .validateField('countedCash', true);
+                                context.read<EndShiftCubit>().setCountedCash(
+                                  parsed,
+                                );
+                                context.read<ValidationCubit>().validateField(
+                                  'countedCash',
+                                  true,
+                                );
                               } else {
-                                context
-                                    .read<EndShiftCubit>()
-                                    .setCountedCash(null);
-                                context
-                                    .read<ValidationCubit>()
-                                    .validateField('countedCash', false);
+                                context.read<EndShiftCubit>().setCountedCash(
+                                  null,
+                                );
+                                context.read<ValidationCubit>().validateField(
+                                  'countedCash',
+                                  false,
+                                );
                               }
                             }
                             setState(() {});
@@ -324,15 +340,7 @@ class _SalesBreakDownEndShiftWidget
                     ],
                   ),
                 ),
-
-                10.verticalSpace,
-                const CustomDivider(),
-                10.verticalSpace,
-
-                Text(
-                  context.tr.pendingIncomingCash,
-                  style: AppStyles.s15W500,
-                ),
+                Text(context.tr.pendingIncomingCash, style: AppStyles.s15W500),
                 2.verticalSpace,
                 Text(
                   context.tr.pendingIncomingCashDesc,
@@ -390,15 +398,19 @@ class _SalesBreakDownEndShiftWidget
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          context.tr.paymentAggregtors(
-                            context
-                                .read<AggregatorCubit>()
-                                .addedAggregators
-                                .length,
+                        Expanded(
+                          child: Text(
+                            context.tr.paymentAggregtors(
+                              context
+                                  .read<AggregatorCubit>()
+                                  .addedAggregators
+                                  .length,
+                            ),
+                            style: AppStyles.s15W500,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          style: AppStyles.s15W500,
                         ),
+                        10.horizontalSpace,
 
                         AppGestureDetectorButton(
                           child: Container(
@@ -474,14 +486,20 @@ class _SalesBreakDownEndShiftWidget
                                           (aggregator.totalAmount ?? 0)
                                               .toString(),
                                       maxLength: 30,
-                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
                                       onChanged: (value) {
                                         context
                                                 .read<AggregatorCubit>()
                                                 .addedAggregators[index] =
                                             aggregator.copyWith(
                                               totalAmount:
-                                                  double.tryParse(value) ?? 0,
+                                                  EndShiftCubit.tryParseFinancialAmount(
+                                                    value,
+                                                  ) ??
+                                                  0,
                                             );
                                       },
                                     ),

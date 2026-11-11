@@ -16,6 +16,7 @@ import '../../../../core/services/navigation/navigation_service.dart';
 import '../../../../core/styles/app_styles.dart';
 import '../../../../core/utils/app_bottom_sheet.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/app_snack_bar.dart';
 import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_failure_widget.dart';
 import '../../../../core/widgets/app_padding_widget.dart';
@@ -330,7 +331,12 @@ class CashierNewAssignmentsScreen extends StatelessWidget {
           ),
           AppPaddingWidget(
             child: ButtonTextIcon(
-              onTap: () {},
+              onTap: () {
+                AppSnackBar.showError(
+                  context,
+                  '${context.tr.contactManager}: ${context.tr.notAvailable}',
+                );
+              },
               label: context.tr.contactManager,
               icon: AppSvg(
                 assetName: AppAssets.call2,

@@ -269,6 +269,21 @@ class RequestsRepository with RepositoryMixin {
     });
   }
 
+  FutureApiResult rejectReassignedShift({
+    required String shiftId,
+    required String reason,
+  }) async {
+    return execute(() async {
+      await remoteDataSource.rejectReassignedShift(
+        shiftId: shiftId,
+        responsibilityRejectBodyRequest: ResponsibilityRejectBodyRequest(
+          reason: reason,
+        ),
+      );
+      return true;
+    });
+  }
+
   FutureApiResult<ResponsibilityDetailsEntity> getResponsibilityDetails(
     String shiftId,
   ) async {

@@ -259,6 +259,20 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
                       firstValueSvgAsset: AppAssets.saudiRiyal,
                       hasSpaceBetweenTitleAndValue: true,
                     ),
+                  if (context.watch<EndShiftCubit>().pendingIncomingCash !=
+                          null &&
+                      context.watch<EndShiftCubit>().pendingIncomingCash! > 0)
+                    buildShiftCardRowWidget(
+                      context: context,
+                      firstTitleSvgAsset: AppAssets.cash,
+                      title: context.tr.totalPendingAmounts,
+                      value: context
+                          .watch<EndShiftCubit>()
+                          .pendingIncomingCash!
+                          .toStringAsFixed(2),
+                      firstValueSvgAsset: AppAssets.saudiRiyal,
+                      hasSpaceBetweenTitleAndValue: true,
+                    ),
                 ],
               ),
             ],

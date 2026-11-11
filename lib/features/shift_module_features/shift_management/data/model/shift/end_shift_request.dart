@@ -108,7 +108,9 @@ class EndShiftRequest {
     }
 
     if (pendingIncomingCash != null && pendingIncomingCash! > 0) {
-      formMap['pending_incoming_cash'] = pendingIncomingCash!.toStringAsFixed(2);
+      formMap['pending_incoming_cash'] = pendingIncomingCash!.toStringAsFixed(
+        2,
+      );
     }
 
     if (shortageAllocations != null && shortageAllocations!.isNotEmpty) {
@@ -118,8 +120,8 @@ class EndShiftRequest {
             alloc.responsibleType;
         formMap['shortage_allocations[$i][responsible_id]'] =
             alloc.responsibleId;
-        formMap['shortage_allocations[$i][amount]'] =
-            alloc.amount.toStringAsFixed(2);
+        formMap['shortage_allocations[$i][amount]'] = alloc.amount
+            .toStringAsFixed(2);
       }
     }
 
