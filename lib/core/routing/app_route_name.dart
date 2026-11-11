@@ -28,6 +28,7 @@ class AppRouteName {
   static const String preApprovalRequestScreen = '/preApprovalRequestScreen';
   static const String addCashierScreen = '/addCashierScreen';
   static const String cashierShiftsScreen = '/cashierShiftsScreen';
+  static const String datedShiftAssignmentScreen = '/datedShiftAssignmentScreen';
   static const String shiftDetailsScreen = '/ShiftDetailsScreen';
   static const String endShiftScreen = '/EndShiftScreen';
   static const String handoverScreen = '/HandoverScreen';

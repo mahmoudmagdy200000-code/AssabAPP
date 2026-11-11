@@ -105,6 +105,47 @@ class ShiftManagementAppBar extends StatelessWidget {
                   ),
                 ),
               ),
+
+              SizedBox(width: 8.w),
+
+              AppGestureDetectorButton(
+                key: const Key('btn_dated_shift_assignment'),
+                onTap: () async {
+                  await Navigator.pushNamed(
+                    context,
+                    AppRouteName.datedShiftAssignmentScreen,
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10.r),
+                  decoration: BoxDecoration(
+                    color: context.customColor.text2,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: context.theme.primaryColor.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        color: context.theme.primaryColor,
+                        size: 15.w,
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'تعيين مؤرّخ',
+                        style: AppStyles.s13W400.copyWith(
+                          color: context.theme.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),

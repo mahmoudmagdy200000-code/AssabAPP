@@ -230,6 +230,7 @@ import '../../features/shift_module_features/shift_management/presentation/logic
 import '../../features/shift_module_features/shift_management/presentation/ui/arguments/shift_arguments.dart';
 import '../../features/shift_module_features/shift_management/presentation/ui/screens/cashier_shifts_screen.dart';
 import '../../features/shift_module_features/shift_management/presentation/ui/screens/cashiers_management_screen.dart';
+import '../../features/shift_module_features/shift_management/presentation/ui/screens/dated_shift_assignment_screen.dart';
 import '../../features/shift_module_features/shift_management/presentation/ui/screens/end_shift_with_handover_screen.dart';
 import '../../features/shift_module_features/shift_management/presentation/ui/screens/handover_only_screen.dart';
 import '../../features/shift_module_features/shift_management/presentation/ui/screens/reassign_shift_with_handover_screen.dart';
@@ -603,6 +604,11 @@ class AppRouter {
             ],
             child: const CashiersManagementScreen(),
           ),
+          settings: settings,
+        );
+      case AppRouteName.datedShiftAssignmentScreen:
+        return MaterialPageRoute(
+          builder: (context) => const DatedShiftAssignmentScreen(),
           settings: settings,
         );
       case AppRouteName.addCashierScreen:
