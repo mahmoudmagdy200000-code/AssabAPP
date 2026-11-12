@@ -144,6 +144,7 @@ class _DatedShiftAssignmentScreenState
   String? _statusMessage;
   bool _isLoading = false;
   bool _isManuallySelected = false;
+  bool _hasLoadError = false;
 
   Dio? get _effectiveDio =>
       widget.dio ?? (getIt.isRegistered<Dio>() ? getIt<Dio>() : null);
@@ -203,7 +204,10 @@ class _DatedShiftAssignmentScreenState
   }
 
   Future<void> _loadRoster() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _hasLoadError = false;
+    });
 
     if (widget.onFetchRoster != null) {
       try {
@@ -221,6 +225,7 @@ class _DatedShiftAssignmentScreenState
             _templates = slots;
             _isLoading = false;
             _statusMessage = null;
+            _hasLoadError = false;
           });
         }
       } catch (e) {
@@ -228,6 +233,7 @@ class _DatedShiftAssignmentScreenState
           setState(() {
             _statusMessage = 'تعذر تحميل التعيينات من الخادم: $e';
             _isLoading = false;
+            _hasLoadError = true;
           });
         }
       }
@@ -242,10 +248,31 @@ class _DatedShiftAssignmentScreenState
           queryParams['end_date'] = _endDate;
         }
 
-        final response = await _effectiveDio!.get(
-          '${ApiEndpoint.branchManagerCashiers}/dated-roster',
-          queryParameters: queryParams.isNotEmpty ? queryParams : null,
-        );
+        Response response;
+        try {
+          response = await _effectiveDio!.get(
+            '${ApiEndpoint.branchManagerCashiers}/dated-roster',
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+        } on DioException catch (dioErr) {
+          // Backward compatibility fallback: if older server requires start_date & end_date (422 Unprocessable)
+          if (queryParams.isEmpty && dioErr.response?.statusCode == 422) {
+            final errBody = dioErr.response?.data?.toString() ?? '';
+            if (errBody.contains('start_date') || errBody.contains('end_date')) {
+              response = await _effectiveDio!.get(
+                '${ApiEndpoint.branchManagerCashiers}/dated-roster',
+                queryParameters: {
+                  'start_date': _startDate,
+                  'end_date': _endDate,
+                },
+              );
+            } else {
+              rethrow;
+            }
+          } else {
+            rethrow;
+          }
+        }
 
         final data = response.data['data'] as Map<String, dynamic>? ?? {};
 
@@ -386,6 +413,7 @@ class _DatedShiftAssignmentScreenState
             _templates = parsedSlots;
             _isLoading = false;
             _statusMessage = null;
+            _hasLoadError = false;
           });
         }
       } catch (e) {
@@ -393,6 +421,7 @@ class _DatedShiftAssignmentScreenState
           setState(() {
             _statusMessage = 'تعذر تحميل التعيينات من الخادم.';
             _isLoading = false;
+            _hasLoadError = true;
           });
         }
       }
@@ -416,6 +445,7 @@ class _DatedShiftAssignmentScreenState
         _selectedDayFilter = null;
         _selectedSlotForSwap = null;
         _statusMessage = null;
+        _hasLoadError = false;
       });
 
       _loadRoster();
@@ -982,8 +1012,8 @@ class _DatedShiftAssignmentScreenState
             else
               SizedBox(height: 4.h),
 
-            // Status message (if any)
-            if (_statusMessage != null)
+            // Status message (if any operational message, suppressed when central error card is active)
+            if (_statusMessage != null && !_hasLoadError)
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
                 padding: EdgeInsets.all(8.r),
@@ -1020,9 +1050,51 @@ class _DatedShiftAssignmentScreenState
                 ),
               ),
 
-            // Content Area (Empty state or Templates list)
+            // Content Area (Error state, Empty state, or Templates list)
             Expanded(
-              child: displayedTemplates.isEmpty && !_isLoading
+              child: _hasLoadError
+                  ? Center(
+                      key: const Key('error_roster_state'),
+                      child: Padding(
+                        padding: EdgeInsets.all(32.r),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.cloud_off_outlined,
+                              size: 48.w,
+                              color: Colors.red.shade400,
+                            ),
+                            SizedBox(height: 12.h),
+                            Text(
+                              _statusMessage ?? 'تعذر تحميل التعيينات من الخادم.',
+                              textAlign: TextAlign.center,
+                              style: AppStyles.s14W500.copyWith(
+                                color: Colors.red.shade700,
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            ElevatedButton.icon(
+                              key: const Key('btn_retry_roster'),
+                              onPressed: _isLoading ? null : () => _loadRoster(),
+                              icon: Icon(Icons.refresh, size: 18.w),
+                              label: Text(
+                                'إعادة المحاولة',
+                                style: AppStyles.s14W500,
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24.w, vertical: 10.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : displayedTemplates.isEmpty && !_isLoading
                   ? Center(
                       key: const Key('empty_roster_state'),
                       child: Padding(

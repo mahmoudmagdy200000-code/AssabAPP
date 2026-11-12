@@ -1,6 +1,5 @@
 import 'package:assab/core/utils/shift_time_formatter.dart';
 import 'package:assab/features/cashier_my_shifts/domain/entities/cashier_handover_status_entity.dart';
-import 'package:intl/intl.dart';
 
 import '../enums/my_shifts_status.dart';
 import 'cashier_reassign_user_type_entity.dart';
@@ -57,7 +56,8 @@ class CashierShiftEntity {
 
     try {
       final now = DateTime.now();
-      final shiftDateObj = DateFormat('yyyy-MM-dd').parse(date.toString());
+      final shiftDateObj = DateTime.tryParse(date.toString());
+      if (shiftDateObj == null) return false;
 
       // If shift is in the past, it has ended
       if (shiftDateObj.isBefore(now)) return true;

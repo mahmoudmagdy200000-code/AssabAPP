@@ -11,7 +11,6 @@ import 'package:assab/features/shift_module_features/shift_management/presentati
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/shift_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../../../../core/constants/app_assets.dart';
 import '../../../../../../../../core/enums/shift_status/shift_status.dart';
@@ -176,11 +175,19 @@ class PendingShiftCardWidget extends ShiftCardStrategy {
   }
 
   bool isShiftTodayOrBefore(String shiftDate) {
+    if (shiftDate.isEmpty) return false;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final parsedShiftDate = DateFormat('yyyy-MM-dd').parse(shiftDate);
+    final parsedShiftDate = DateTime.tryParse(shiftDate);
+    if (parsedShiftDate == null) return false;
 
-    return !parsedShiftDate.isAfter(today);
+    final shiftDay = DateTime(
+      parsedShiftDate.year,
+      parsedShiftDate.month,
+      parsedShiftDate.day,
+    );
+
+    return !shiftDay.isAfter(today);
   }
 }

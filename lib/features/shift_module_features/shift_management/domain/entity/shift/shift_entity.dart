@@ -109,7 +109,8 @@ class ShiftEntity {
 
     try {
       final now = DateTime.now();
-      final shiftDateObj = DateFormat('yyyy-MM-dd').parse(shiftDate);
+      final shiftDateObj = DateTime.tryParse(shiftDate);
+      if (shiftDateObj == null) return false;
 
       // If shift is in the future, hasn't started
       if (shiftDateObj.isAfter(now)) return false;
@@ -138,7 +139,8 @@ class ShiftEntity {
 
     try {
       final now = DateTime.now();
-      final shiftDateObj = DateFormat('yyyy-MM-dd').parse(shiftDate);
+      final shiftDateObj = DateTime.tryParse(shiftDate);
+      if (shiftDateObj == null) return false;
 
       // If shift is in the past, it has ended
       if (shiftDateObj.isBefore(now)) return true;

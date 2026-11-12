@@ -1703,10 +1703,14 @@ void main() {
       // Selection is preserved even on error
       expect(find.textContaining('2026-11-22 — 2026-11-28'), findsOneWidget);
       expect(find.textContaining('تعذر تحميل التعيينات من الخادم'), findsOneWidget);
+      // Crucial: Error state and Retry button are shown, NOT the empty templates state
+      expect(find.byKey(const Key('error_roster_state')), findsOneWidget);
+      expect(find.byKey(const Key('btn_retry_roster')), findsOneWidget);
+      expect(find.byKey(const Key('empty_roster_state')), findsNothing);
 
-      // 4. Network restored and manager retries
+      // 4. Network restored and manager taps the Retry button directly
       simulateFailure = false;
-      await tester.tap(find.byKey(const Key('btn_refresh_roster')));
+      await tester.tap(find.byKey(const Key('btn_retry_roster')));
       await tester.pumpAndSettle();
 
       // Verified reload succeeded with the exact preserved dates
@@ -1714,6 +1718,133 @@ void main() {
       expect(requestedQueries.last['start_date'], '2026-11-22');
       expect(requestedQueries.last['end_date'], '2026-11-28');
       expect(find.textContaining('تعذر تحميل التعيينات من الخادم'), findsNothing);
+      expect(find.byKey(const Key('error_roster_state')), findsNothing);
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R6 Acceptance 5: Empty state displayed ONLY after successful and empty response, never during error',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      bool simulateFailure = false;
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://test.assab.com/api/v1/'));
+      dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (simulateFailure) {
+          return ResponseBody.fromString(
+            jsonEncode({'message': 'Server down'}),
+            500,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        return ResponseBody.fromString(
+          jsonEncode({
+            'success': true,
+            'data': {
+              'start_date': '2026-11-15',
+              'end_date': '2026-11-21',
+              'templates': [], // Empty templates
+              'roster': {},
+            },
+          }),
+          200,
+          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        );
+      });
+
+      // 1. Successful response with empty templates -> empty_roster_state MUST be visible
+      await tester.pumpWidget(_buildTestApp(DatedShiftAssignmentScreen(dio: dio)));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('empty_roster_state')), findsOneWidget);
+      expect(find.text('لا توجد قوالب أو ورديات في هذه الفترة'), findsOneWidget);
+      expect(find.byKey(const Key('error_roster_state')), findsNothing);
+
+      // 2. Failure occurs -> error_roster_state MUST be visible, empty_roster_state MUST be hidden
+      simulateFailure = true;
+      await tester.tap(find.byKey(const Key('btn_refresh_roster')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('error_roster_state')), findsOneWidget);
+      expect(find.byKey(const Key('btn_retry_roster')), findsOneWidget);
+      expect(find.byKey(const Key('empty_roster_state')), findsNothing);
+      expect(find.text('لا توجد قوالب أو ورديات في هذه الفترة'), findsNothing);
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R6 Acceptance 6: Backward compatibility fallback with older backend requiring start_date and end_date (HTTP 422)',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final List<RequestOptions> recordedRequests = [];
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://test.assab.com/api/v1/'));
+      dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        recordedRequests.add(options);
+
+        // Older backend rejects empty params on dated-roster with 422
+        if (options.path.contains('dated-roster') && options.queryParameters.isEmpty) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'message': 'The start date field is required. (and 1 more error)',
+              'errors': {
+                'start_date': ['The start date field is required.'],
+                'end_date': ['The end date field is required.'],
+              },
+            }),
+            422,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+
+        // When retried with start_date & end_date, it succeeds
+        return ResponseBody.fromString(
+          jsonEncode({
+            'success': true,
+            'data': {
+              'start_date': options.queryParameters['start_date'],
+              'end_date': options.queryParameters['end_date'],
+              'templates': [
+                {
+                  'id': 'tpl-compat-1',
+                  'name': 'قالب توافقي',
+                  'start_time': '08:00:00',
+                  'end_time': '16:00:00',
+                },
+              ],
+              'roster': {},
+            },
+          }),
+          200,
+          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        );
+      });
+
+      await tester.pumpWidget(_buildTestApp(DatedShiftAssignmentScreen(dio: dio)));
+      await tester.pumpAndSettle();
+
+      final rosterRequests = recordedRequests.where((r) => r.path.contains('dated-roster')).toList();
+      // Verified: 2 dated-roster queries were sent: 1st empty, 2nd with start_date/end_date fallback
+      expect(rosterRequests.length, 2);
+      expect(rosterRequests[0].queryParameters.isEmpty, isTrue);
+      expect(rosterRequests[1].queryParameters.containsKey('start_date'), isTrue);
+      expect(rosterRequests[1].queryParameters.containsKey('end_date'), isTrue);
+
+      // Successfully rendered template from fallback without error
+      expect(find.text('قالب توافقي'), findsWidgets);
+      expect(find.byKey(const Key('error_roster_state')), findsNothing);
 
       expect(tester.takeException(), isNull);
     });
