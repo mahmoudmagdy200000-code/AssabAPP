@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 /// preventing the app from freezing indefinitely on the native splash screen.
 class AppStartupErrorWidget extends StatelessWidget {
   final String errorMessage;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
 
   const AppStartupErrorWidget({
     super.key,
     required this.errorMessage,
-    required this.onRetry,
+    this.onRetry,
   });
 
   @override
@@ -87,7 +87,7 @@ class AppStartupErrorWidget extends StatelessWidget {
                     height: 48,
                     child: ElevatedButton.icon(
                       key: const Key('btn_retry_startup'),
-                      onPressed: onRetry,
+                      onPressed: onRetry ?? () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E88E5),
                         foregroundColor: Colors.white,

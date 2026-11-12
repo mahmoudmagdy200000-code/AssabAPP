@@ -1,6 +1,8 @@
 // ignore_for_file: unused_import
 
 import 'package:dio/dio.dart';
+import 'package:assab/core/network/api_endpoints.dart';
+import 'package:assab/core/widgets/app_startup_error_widget.dart';
 import 'package:assab/core/cubits/add_item/add_item_cubit.dart';
 import 'package:assab/core/cubits/media/media_cubit.dart';
 import 'package:assab/core/cubits/switch_button/switch_button_cubit.dart';
@@ -369,18 +371,46 @@ class AppRouter {
         );
       case AppRouteName.loginWithEmailScreen:
         return MaterialPageRoute(
-          builder: (context) => BlocProvider(
-            create: (context) => getIt<LoginCubit>(),
-            child: const LoginWithEmailScreen(),
-          ),
+          builder: (context) {
+            if (!ApiEndpoint.hasValidBaseUrl) {
+              return const AppStartupErrorWidget(
+                errorMessage:
+                    'تعذر تهيئة عنوان الخادم الأساسي (API_BASE_URL). يرجى التأكد من تكوين بيئة البناء باستخدام --dart-define=API_BASE_URL=<url>.',
+              );
+            }
+            try {
+              return BlocProvider(
+                create: (context) => getIt<LoginCubit>(),
+                child: const LoginWithEmailScreen(),
+              );
+            } catch (e) {
+              return AppStartupErrorWidget(
+                errorMessage: 'تعذر تهيئة نموذج تسجيل الدخول: $e',
+              );
+            }
+          },
           settings: settings,
         );
       case AppRouteName.loginWithPhoneScreen:
         return MaterialPageRoute(
-          builder: (context) => BlocProvider(
-            create: (context) => getIt<LoginCubit>(),
-            child: const LoginWithPhoneScreen(),
-          ),
+          builder: (context) {
+            if (!ApiEndpoint.hasValidBaseUrl) {
+              return const AppStartupErrorWidget(
+                errorMessage:
+                    'تعذر تهيئة عنوان الخادم الأساسي (API_BASE_URL). يرجى التأكد من تكوين بيئة البناء باستخدام --dart-define=API_BASE_URL=<url>.',
+              );
+            }
+            try {
+              return BlocProvider(
+                create: (context) => getIt<LoginCubit>(),
+                child: const LoginWithPhoneScreen(),
+              );
+            } catch (e) {
+              return AppStartupErrorWidget(
+                errorMessage: 'تعذر تهيئة نموذج تسجيل الدخول: $e',
+              );
+            }
+          },
           settings: settings,
         );
       case AppRouteName.resetPasswordWithEmailScreen:

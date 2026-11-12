@@ -93,6 +93,26 @@ class ApiEndpoint {
   static String get validatedBaseUrl =>
       normalizeBaseUrl(debugTestBaseUrl ?? _envBaseUrl);
 
+  /// Returns true if a valid API base URL has been configured at build time or for testing.
+  static bool get hasValidBaseUrl {
+    try {
+      final _ = validatedBaseUrl;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Returns the configuration error description if the configured base URL is missing or invalid.
+  static String? get configurationError {
+    try {
+      final _ = validatedBaseUrl;
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   /// Pusher auth URL evaluated on the same host as the active API base URL.
   static String get pusherAuth =>
       (debugTestBaseUrl ?? _envBaseUrl).isNotEmpty ? derivePusherAuthUrl(validatedBaseUrl) : '';

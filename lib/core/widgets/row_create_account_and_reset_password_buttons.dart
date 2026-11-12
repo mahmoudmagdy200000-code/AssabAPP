@@ -30,6 +30,7 @@ class RowCreateAccountAndResetPasswordButtons extends StatelessWidget {
           child: AppButton(
             onClick: () => _showCreateAccountBottomSheet(context: context),
             isTransparent: true,
+            isFlexible: true,
             enabled: true,
             text: context.tr.createNewAccount,
             textColor: context.customColor.text1,
@@ -40,6 +41,7 @@ class RowCreateAccountAndResetPasswordButtons extends StatelessWidget {
           child: AppButton(
             onClick: _goToResetPasswordScreen,
             isTransparent: true,
+            isFlexible: true,
             enabled: true,
             text: context.tr.resetPassword,
             textColor: context.customColor.text1,

@@ -1457,5 +1457,79 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('R6: branchBusinessDate takes precedence over device date',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      String? queriedStart;
+      String? queriedEnd;
+
+      // Branch business date set to Wednesday 2026-11-18 (week is Sunday 2026-11-15 to Saturday 2026-11-21)
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            branchBusinessDate: '2026-11-18',
+            onFetchRoster: (start, end) async {
+              queriedStart = start;
+              queriedEnd = end;
+              return [];
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(queriedStart, '2026-11-15');
+      expect(queriedEnd, '2026-11-21');
+      expect(find.textContaining('2026-11-15 — 2026-11-21'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R6: week navigation handles week transitions and year boundary safely',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final List<String> loadedRanges = [];
+
+      // Start on week covering year boundary: 2026-12-27 (Sunday) to 2027-01-02 (Saturday)
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            branchBusinessDate: '2026-12-31',
+            onFetchRoster: (start, end) async {
+              loadedRanges.add('$start — $end');
+              return [];
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(loadedRanges.first, '2026-12-27 — 2027-01-02');
+      expect(find.textContaining('2026-12-27 — 2027-01-02'), findsOneWidget);
+
+      // Navigate to next week: should cleanly transition to 2027-01-03 — 2027-01-09
+      await tester.tap(find.byKey(const Key('btn_next_week')));
+      await tester.pumpAndSettle();
+
+      expect(loadedRanges.last, '2027-01-03 — 2027-01-09');
+      expect(find.textContaining('2027-01-03 — 2027-01-09'), findsOneWidget);
+
+      // Navigate back to previous week twice: transitions back across year boundary to 2026-12-20 — 2026-12-26
+      await tester.tap(find.byKey(const Key('btn_prev_week')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('btn_prev_week')));
+      await tester.pumpAndSettle();
+
+      expect(loadedRanges.last, '2026-12-20 — 2026-12-26');
+      expect(find.textContaining('2026-12-20 — 2026-12-26'), findsOneWidget);
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }

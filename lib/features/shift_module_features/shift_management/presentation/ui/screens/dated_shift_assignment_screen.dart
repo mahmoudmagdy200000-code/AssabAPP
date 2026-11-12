@@ -86,6 +86,7 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
   final Dio? dio;
   final List<DatedTemplateSlot>? initialTemplates;
   final String? initialDateRange;
+  final String? branchBusinessDate;
   final Future<List<DatedTemplateSlot>> Function(String startDate, String endDate)?
       onFetchRoster;
   final Future<void> Function(
@@ -115,6 +116,7 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
     this.dio,
     this.initialTemplates,
     this.initialDateRange,
+    this.branchBusinessDate,
     this.onFetchRoster,
     this.onExecuteSwap,
     this.onExecuteAssign,
@@ -171,7 +173,10 @@ class _DatedShiftAssignmentScreenState
         _dateRange = rangeStr;
       }
     } else {
-      final sun = _computeCurrentWeekSunday();
+      final ref = widget.branchBusinessDate != null
+          ? DateTime.tryParse(widget.branchBusinessDate!)
+          : null;
+      final sun = _computeCurrentWeekSunday(ref);
       final sat = sun.add(const Duration(days: 6));
       _startDate = _formatYmd(sun);
       _endDate = _formatYmd(sat);

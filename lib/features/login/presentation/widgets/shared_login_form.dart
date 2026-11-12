@@ -210,10 +210,12 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
                     );
                   },
                 ),
-                Text(
-                  context.tr.saveLoginDetailsToDevice,
-                  style: AppStyles.s14W400.copyWith(
-                    color: context.customColor.text3,
+                Expanded(
+                  child: Text(
+                    context.tr.saveLoginDetailsToDevice,
+                    style: AppStyles.s14W400.copyWith(
+                      color: context.customColor.text3,
+                    ),
                   ),
                 ),
               ],
