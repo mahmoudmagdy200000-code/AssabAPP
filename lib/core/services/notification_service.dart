@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:assab/core/services/permission_service.dart';
 import 'package:assab/core/utils/app_logger.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -24,26 +26,49 @@ class NotificationService {
   static const String _completeChannelDesc = 'Shown when a download completes';
 
   static Future<void> init() async {
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosInit = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+    try {
+      const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const iosInit = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
-    const initSettings = InitializationSettings(
-      android: androidInit,
-      iOS: iosInit,
-    );
+      const initSettings = InitializationSettings(
+        android: androidInit,
+        iOS: iosInit,
+      );
 
-    await _plugin.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (response) {
-        AppLogger.log('Notification tapped: ${response.payload}');
-      },
-    );
+      await _plugin.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: (response) {
+          AppLogger.log('Notification tapped: ${response.payload}');
+        },
+      );
 
-    await _requestPermissions();
+      // Request runtime permissions asynchronously in background so startup UI is not blocked.
+      unawaited(
+        _requestPermissionsSafely().catchError((e) {
+          AppLogger.log('Async notification permission error: $e', tag: 'NotificationService');
+        }),
+      );
+    } catch (e, stack) {
+      AppLogger.log(
+        'NotificationService.init error ($e) — continuing without notifications',
+        tag: 'NotificationService',
+      );
+      if (kDebugMode) {
+        debugPrint('NotificationService init error: $e\n$stack');
+      }
+    }
+  }
+
+  static Future<void> _requestPermissionsSafely() async {
+    try {
+      await _requestPermissions();
+    } catch (e) {
+      AppLogger.log('Safe permission request failed ($e)', tag: 'NotificationService');
+    }
   }
 
   static Future<void> _requestPermissions() async {

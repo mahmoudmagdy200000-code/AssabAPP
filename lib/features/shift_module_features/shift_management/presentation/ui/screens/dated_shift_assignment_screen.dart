@@ -21,6 +21,10 @@ class DatedTemplateSlot {
   final String? cashierName;
   final String status; // 'not_started', 'in_progress', 'completed'
   final bool hasFinancialEvidence;
+  final String? primaryCashierId;
+  final String? primaryCashierName;
+  final String? primaryEffectiveFrom;
+  final bool isRecurringPrimary;
 
   const DatedTemplateSlot({
     required this.templateId,
@@ -33,6 +37,10 @@ class DatedTemplateSlot {
     this.cashierName,
     this.status = 'not_started',
     this.hasFinancialEvidence = false,
+    this.primaryCashierId,
+    this.primaryCashierName,
+    this.primaryEffectiveFrom,
+    this.isRecurringPrimary = false,
   });
 
   bool get isProtected => status != 'not_started' || hasFinancialEvidence;
@@ -49,6 +57,10 @@ class DatedTemplateSlot {
     String? cashierName,
     String? status,
     bool? hasFinancialEvidence,
+    String? primaryCashierId,
+    String? primaryCashierName,
+    String? primaryEffectiveFrom,
+    bool? isRecurringPrimary,
   }) {
     return DatedTemplateSlot(
       templateId: templateId ?? this.templateId,
@@ -61,11 +73,15 @@ class DatedTemplateSlot {
       cashierName: cashierName ?? this.cashierName,
       status: status ?? this.status,
       hasFinancialEvidence: hasFinancialEvidence ?? this.hasFinancialEvidence,
+      primaryCashierId: primaryCashierId ?? this.primaryCashierId,
+      primaryCashierName: primaryCashierName ?? this.primaryCashierName,
+      primaryEffectiveFrom: primaryEffectiveFrom ?? this.primaryEffectiveFrom,
+      isRecurringPrimary: isRecurringPrimary ?? this.isRecurringPrimary,
     );
   }
 }
 
-/// Screen providing branch manager dated cashier assignment (P4a)
+/// Screen providing branch manager dated cashier assignment (P4a / P4b)
 class DatedShiftAssignmentScreen extends StatefulWidget {
   final Dio? dio;
   final List<DatedTemplateSlot>? initialTemplates;
@@ -85,6 +101,12 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
     String shiftId,
     String shiftDate,
   )? onExecuteAssign;
+  final Future<void> Function(
+    String cashierId,
+    String shiftId,
+    String effectiveFrom,
+  )? onSaveRosterAssignment;
+  final Future<List<Map<String, dynamic>>> Function()? onFetchRosterAssignments;
   final Future<List<Map<String, dynamic>>> Function()? onFetchAvailableCashiers;
   final void Function(String templateA, String templateB)? onSwapCompleted;
 
@@ -96,6 +118,8 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
     this.onFetchRoster,
     this.onExecuteSwap,
     this.onExecuteAssign,
+    this.onSaveRosterAssignment,
+    this.onFetchRosterAssignments,
     this.onFetchAvailableCashiers,
     this.onSwapCompleted,
   });
@@ -119,40 +143,51 @@ class _DatedShiftAssignmentScreenState
   Dio? get _effectiveDio =>
       widget.dio ?? (getIt.isRegistered<Dio>() ? getIt<Dio>() : null);
 
+  Map<String, Map<String, dynamic>> _recurringRosterByShift = {};
+  @visibleForTesting
+  Map<String, Map<String, dynamic>> get recurringRosterByShift => _recurringRosterByShift;
+
+  static String _formatYmd(DateTime d) =>
+      "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
+
+  static DateTime _computeCurrentWeekSunday([DateTime? ref]) {
+    final now = ref ?? DateTime.now();
+    final daysToSubtract = now.weekday % 7; // Sunday is 7, 7 % 7 = 0
+    return DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: daysToSubtract));
+  }
+
   @override
   void initState() {
     super.initState();
-    _dateRange = widget.initialDateRange ?? '2026-11-15 — 2026-11-21';
-    if (widget.initialTemplates != null) {
-      _templates = List.from(widget.initialTemplates!);
-    } else if (widget.onFetchRoster == null && widget.dio == null) {
-      _templates = [
-        const DatedTemplateSlot(
-          templateId: 'tpl-1',
-          templateName: 'وردية الصباح الأولى',
-          startTime: '08:00',
-          endTime: '16:00',
-          shiftDate: '2026-11-15',
-          cashierId: 'csh-1',
-          cashierName: 'محمد أحمد السعيد',
-          status: 'not_started',
-        ),
-        const DatedTemplateSlot(
-          templateId: 'tpl-2',
-          templateName: 'وردية المساء الثانية',
-          startTime: '16:00',
-          endTime: '00:00',
-          shiftDate: '2026-11-15',
-          cashierId: 'csh-2',
-          cashierName: 'عبدالله إبراهيم محمود',
-          status: 'not_started',
-        ),
-      ];
+    final rangeStr = widget.initialDateRange;
+    if (rangeStr != null) {
+      final match = RegExp(r'(\d{4}-\d{2}-\d{2})\s*[\u2014\u2013\u002d-]\s*(\d{4}-\d{2}-\d{2})').firstMatch(rangeStr);
+      if (match != null) {
+        _startDate = match.group(1)!;
+        _endDate = match.group(2)!;
+        _dateRange = rangeStr;
+      } else {
+        _dateRange = rangeStr;
+      }
     } else {
-      _templates = [];
+      final sun = _computeCurrentWeekSunday();
+      final sat = sun.add(const Duration(days: 6));
+      _startDate = _formatYmd(sun);
+      _endDate = _formatYmd(sat);
+      _dateRange = '$_startDate — $_endDate';
     }
 
-    if (widget.onFetchRoster != null || widget.dio != null) {
+    if (widget.initialTemplates != null) {
+      _templates = List.from(widget.initialTemplates!);
+    } else {
+      _templates = [];
+      if (widget.onFetchRoster == null && _effectiveDio == null) {
+        _statusMessage = 'تعذر الاتصال: لم يتم العثور على مزود خدمة API.';
+      }
+    }
+
+    if (widget.onFetchRoster != null || _effectiveDio != null) {
       _loadRoster();
     }
   }
@@ -192,7 +227,48 @@ class _DatedShiftAssignmentScreenState
 
         final data = response.data['data'] as Map<String, dynamic>? ?? {};
         final templatesList = data['templates'] as List<dynamic>? ?? [];
-        final rosterMap = data['roster'] as Map<String, dynamic>? ?? {};
+        final rawRoster = data['roster'];
+        final Map<String, dynamic> rosterMap = rawRoster is Map<String, dynamic>
+            ? rawRoster
+            : (rawRoster is Map ? rawRoster.cast<String, dynamic>() : {});
+
+        // Fetch recurring roster assignments (P4b / MT-23)
+        Map<String, Map<String, dynamic>> recurring = {};
+        if (widget.onFetchRosterAssignments != null) {
+          try {
+            final list = await widget.onFetchRosterAssignments!();
+            for (final item in list) {
+              final shiftId = item['shift_id']?.toString();
+              if (shiftId != null) {
+                recurring[shiftId] = item;
+              }
+            }
+          } catch (_) {}
+        } else if (_effectiveDio != null) {
+          try {
+            final rRes = await _effectiveDio!.get(
+              '${ApiEndpoint.branchManagerCashiers}/roster-assignments',
+            );
+            final rData = rRes.data['data'] as List<dynamic>? ?? [];
+            for (final item in rData) {
+              if (item is Map) {
+                final shiftId = item['shift_id']?.toString() ??
+                    (item['shift'] is Map ? item['shift']['id']?.toString() : null);
+                final cashier = item['cashier'] is Map ? item['cashier'] : null;
+                if (shiftId != null) {
+                  recurring[shiftId] = {
+                    'shift_id': shiftId,
+                    'cashier_id': item['cashier_id']?.toString() ?? cashier?['id']?.toString(),
+                    'cashier_name': cashier?['name']?.toString() ?? item['cashier_name']?.toString(),
+                    'effective_from': item['effective_from']?.toString(),
+                    'effective_to': item['effective_to']?.toString(),
+                  };
+                }
+              }
+            }
+          } catch (_) {}
+        }
+        _recurringRosterByShift = recurring;
 
         // Generate all dates in the requested range [_startDate, _endDate]
         final List<String> allDates = [];
@@ -234,6 +310,14 @@ class _DatedShiftAssignmentScreenState
               final key = '${dateStr}_$tId';
               final rEntry = rosterMap[key] as Map<String, dynamic>?;
               final isAssigned = rEntry?['cashier_id'] != null;
+              final primary = recurring[tId];
+              final primaryCashierId = primary?['cashier_id']?.toString();
+              final primaryCashierName = primary?['cashier_name']?.toString();
+              final primaryEffectiveFrom = primary?['effective_from']?.toString();
+              final effectiveCashierId = rEntry?['cashier_id']?.toString() ?? primaryCashierId;
+              final effectiveCashierName = rEntry?['cashier_name']?.toString() ?? primaryCashierName;
+              final isRecurringPrimary = primaryCashierId != null &&
+                  primaryCashierId == effectiveCashierId;
 
               parsedSlots.add(DatedTemplateSlot(
                 templateId: tId,
@@ -243,11 +327,15 @@ class _DatedShiftAssignmentScreenState
                 shiftDate: dateStr,
                 cashierShiftId: rEntry?['cashier_shift_id']?.toString() ??
                     rEntry?['id']?.toString(),
-                cashierId: rEntry?['cashier_id']?.toString(),
-                cashierName: rEntry?['cashier_name']?.toString(),
+                cashierId: effectiveCashierId,
+                cashierName: effectiveCashierName,
                 status: rEntry?['status']?.toString() ?? 'not_started',
                 hasFinancialEvidence: rEntry?['has_financial_evidence'] as bool? ??
                     (!(rEntry?['can_swap'] as bool? ?? true) && isAssigned),
+                primaryCashierId: primaryCashierId,
+                primaryCashierName: primaryCashierName,
+                primaryEffectiveFrom: primaryEffectiveFrom,
+                isRecurringPrimary: isRecurringPrimary,
               ));
             }
           }
@@ -438,21 +526,101 @@ class _DatedShiftAssignmentScreenState
       return;
     }
 
-    // Fallback local swap
-    setState(() {
-      _templates[idxA] = itemA.copyWith(
-        cashierId: itemB.cashierId,
-        cashierName: itemB.cashierName,
-      );
-      _templates[idxB] = itemB.copyWith(
-        cashierId: itemA.cashierId,
-        cashierName: itemA.cashierName,
-      );
-      _selectedSlotForSwap = null;
-      _statusMessage = 'تم تبديل الكاشيرين بنجاح وحفظ السجل المؤرّخ ذرياً.';
-    });
+    if (mounted) {
+      setState(() {
+        _selectedSlotForSwap = null;
+        _statusMessage = 'تعذر التبديل: لم يتم العثور على مزود خدمة API.';
+        _isLoading = false;
+      });
+    }
+  }
 
-    widget.onSwapCompleted?.call(itemA.templateId, itemB.templateId);
+  Future<void> _executeRecurringAssign(
+    DatedTemplateSlot slot,
+    String cashierId,
+    String cashierName,
+    String effectiveFrom,
+  ) async {
+    setState(() => _isLoading = true);
+    if (widget.onSaveRosterAssignment != null) {
+      try {
+        await widget.onSaveRosterAssignment!(cashierId, slot.templateId, effectiveFrom);
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'تم حفظ الكاشير الأساسي للقالب بنجاح ($effectiveFrom).';
+            _isLoading = false;
+          });
+          await _loadRoster();
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _statusMessage =
+                'تعذر حفظ التعيين المتكرر: ${e.toString().replaceAll("Exception: ", "")}';
+            _isLoading = false;
+          });
+        }
+      }
+      return;
+    }
+
+    if (_effectiveDio != null) {
+      try {
+        final res = await _effectiveDio!.post(
+          '${ApiEndpoint.branchManagerCashiers}/roster-assignments',
+          data: {
+            'assignments': [
+              {
+                'shift_id': slot.templateId,
+                'cashier_id': cashierId,
+                'effective_from': effectiveFrom,
+              }
+            ]
+          },
+        );
+        if (res.statusCode == 200 || res.statusCode == 201) {
+          if (mounted) {
+            setState(() {
+              _statusMessage = 'تم حفظ الكاشير الأساسي للقالب بنجاح ($effectiveFrom).';
+              _isLoading = false;
+            });
+            await _loadRoster();
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              _statusMessage =
+                  'تعذر حفظ التعيين المتكرر: ${res.data?['message'] ?? 'خطأ في الخادم'}';
+              _isLoading = false;
+            });
+          }
+        }
+      } on DioException catch (e) {
+        final serverMsg = e.response?.data?['message'] ??
+            'تعذر حفظ التعيين المتكرر: خطأ في الاتصال بالخادم.';
+        if (mounted) {
+          setState(() {
+            _statusMessage = serverMsg.toString();
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'تعذر حفظ التعيين المتكرر: $e';
+            _isLoading = false;
+          });
+        }
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _statusMessage = 'تعذر التنفيذ: لم يتم العثور على مزود خدمة API.';
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _executeAssign(
@@ -544,15 +712,12 @@ class _DatedShiftAssignmentScreenState
       return;
     }
 
-    // Fallback local assign
-    setState(() {
-      _templates[idx] = slot.copyWith(
-        cashierId: cashierId,
-        cashierName: cashierName,
-        status: 'not_started',
-      );
-      _statusMessage = 'تم تعيين الكاشير للقالب بنجاح.';
-    });
+    if (mounted) {
+      setState(() {
+        _statusMessage = 'تعذر التنفيذ: لم يتم العثور على مزود خدمة API.';
+        _isLoading = false;
+      });
+    }
   }
 
   void _showAssignCashierDialog(DatedTemplateSlot slot) {
@@ -568,8 +733,12 @@ class _DatedShiftAssignmentScreenState
           slot: slot,
           effectiveDio: _effectiveDio,
           onFetchAvailableCashiers: widget.onFetchAvailableCashiers,
-          onCashierSelected: (cId, cName) {
-            _executeAssign(slot, cId, cName);
+          onCashierSelected: (cId, cName, isRecurring, effectiveFrom) {
+            if (isRecurring) {
+              _executeRecurringAssign(slot, cId, cName, effectiveFrom);
+            } else {
+              _executeAssign(slot, cId, cName);
+            }
           },
         );
       },
@@ -930,6 +1099,39 @@ class _DatedShiftAssignmentScreenState
                               ),
                               SizedBox(height: 8.h),
 
+                              // Primary Cashier for template (Recurring Roster MTG-OPS-02/03)
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.repeat,
+                                    size: 15.w,
+                                    color: context.theme.primaryColor,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Text(
+                                    'الأساسي المتكرر: ',
+                                    style: AppStyles.s12W500.copyWith(
+                                      color: context.theme.primaryColor,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      slot.primaryCashierName != null
+                                          ? '${slot.primaryCashierName!} (سارٍ من ${slot.primaryEffectiveFrom ?? "—"})'
+                                          : 'غير محدد (لم يُعيّن كاشير أساسي)',
+                                      key: Key('txt_primary_cashier_${slot.templateId}'),
+                                      style: AppStyles.s12W600.copyWith(
+                                        color: slot.primaryCashierName != null
+                                            ? context.customColor.text1
+                                            : context.customColor.text3,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 6.h),
+
                               // Assigned Cashier
                               Row(
                                 children: [
@@ -946,17 +1148,49 @@ class _DatedShiftAssignmentScreenState
                                     ),
                                   ),
                                   Expanded(
-                                    child: Text(
-                                      slot.cashierName ?? 'غير معيّن',
-                                      key: Key(
-                                        'txt_cashier_name_${slot.templateId}',
-                                      ),
-                                      style: AppStyles.s13W600.copyWith(
-                                        color: slot.cashierName != null
-                                            ? context.customColor.text1
-                                            : Colors.orange.shade700,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                                    child: Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            slot.cashierName ?? 'غير معيّن',
+                                            key: Key(
+                                              'txt_cashier_name_${slot.templateId}',
+                                            ),
+                                            style: AppStyles.s13W600.copyWith(
+                                              color: slot.cashierName != null
+                                                  ? context.customColor.text1
+                                                  : Colors.orange.shade700,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        if (slot.isAssigned && slot.primaryCashierId != null) ...[
+                                          SizedBox(width: 6.w),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 6.w,
+                                              vertical: 2.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: slot.isRecurringPrimary
+                                                  ? Colors.blue.withValues(alpha: 0.1)
+                                                  : Colors.amber.withValues(alpha: 0.15),
+                                              borderRadius: BorderRadius.circular(4.r),
+                                            ),
+                                            child: Text(
+                                              slot.isRecurringPrimary ? 'أساسي' : 'استثناء مؤقت',
+                                              key: Key('badge_assignment_type_${slot.templateId}'),
+                                              style: TextStyle(
+                                                color: slot.isRecurringPrimary
+                                                    ? Colors.blue.shade800
+                                                    : Colors.amber.shade900,
+                                                fontSize: 10.w,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -1020,6 +1254,30 @@ class _DatedShiftAssignmentScreenState
                                           size: 16.w),
                                       label: Text(
                                         'تعيين كاشير',
+                                        style: AppStyles.s12W500,
+                                      ),
+                                    ),
+
+                                  // Action: Edit / Reassign if assigned and not protected
+                                  if (slot.isAssigned && !slot.isProtected)
+                                    OutlinedButton.icon(
+                                      key: Key('btn_assign_edit_${slot.templateId}'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: context.theme.primaryColor,
+                                        side: BorderSide(
+                                          color: context.theme.primaryColor,
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 10.w,
+                                          vertical: 6.h,
+                                        ),
+                                      ),
+                                      onPressed: _isLoading
+                                          ? null
+                                          : () => _showAssignCashierDialog(slot),
+                                      icon: Icon(Icons.edit, size: 14.w),
+                                      label: Text(
+                                        'تعديل التعيين',
                                         style: AppStyles.s12W500,
                                       ),
                                     ),
@@ -1097,7 +1355,12 @@ class _AssignCashierModalContent extends StatefulWidget {
   final DatedTemplateSlot slot;
   final Dio? effectiveDio;
   final Future<List<Map<String, dynamic>>> Function()? onFetchAvailableCashiers;
-  final void Function(String cashierId, String cashierName) onCashierSelected;
+  final void Function(
+    String cashierId,
+    String cashierName,
+    bool isRecurring,
+    String effectiveFrom,
+  ) onCashierSelected;
 
   const _AssignCashierModalContent({
     required this.slot,
@@ -1118,11 +1381,20 @@ class _AssignCashierModalContentState
   List<Map<String, dynamic>> _cashiers = [];
   String? _selectedCashierId;
   String? _selectedCashierName;
+  bool _isRecurring = true;
+  late TextEditingController _effectiveDateCtrl;
 
   @override
   void initState() {
     super.initState();
+    _effectiveDateCtrl = TextEditingController(text: widget.slot.shiftDate);
     _fetchCashiers();
+  }
+
+  @override
+  void dispose() {
+    _effectiveDateCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchCashiers() async {
@@ -1245,7 +1517,113 @@ class _AssignCashierModalContentState
                   color: context.customColor.text3,
                 ),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 8.h),
+
+              // Mode selection: Recurring Primary vs Single-Day Exception (R5 / MTG-OPS-02/03)
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 4.h),
+                padding: EdgeInsets.all(8.r),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'نوع التعيين:',
+                      style: AppStyles.s12W600.copyWith(color: context.customColor.text1),
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            key: const Key('radio_recurring_assignment'),
+                            onTap: () => setState(() => _isRecurring = true),
+                            child: Row(
+                              children: [
+                                Radio<bool>(
+                                  value: true,
+                                  groupValue: _isRecurring,
+                                  onChanged: (v) => setState(() => _isRecurring = v ?? true),
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    'أساسي متكرر',
+                                    style: AppStyles.s12W500.copyWith(
+                                      color: _isRecurring ? context.theme.primaryColor : context.customColor.text2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            key: const Key('radio_single_day_exception'),
+                            onTap: () => setState(() => _isRecurring = false),
+                            child: Row(
+                              children: [
+                                Radio<bool>(
+                                  value: false,
+                                  groupValue: _isRecurring,
+                                  onChanged: (v) => setState(() => _isRecurring = v ?? false),
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    'استثناء يوم واحد',
+                                    style: AppStyles.s12W500.copyWith(
+                                      color: !_isRecurring ? context.theme.primaryColor : context.customColor.text2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_isRecurring) ...[
+                      SizedBox(height: 6.h),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today, size: 14.w, color: context.theme.primaryColor),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'تاريخ سريان الأساسي: ',
+                            style: AppStyles.s11W400.copyWith(color: context.customColor.text2),
+                          ),
+                          SizedBox(width: 4.w),
+                          Expanded(
+                            child: SizedBox(
+                              height: 32.h,
+                              child: TextField(
+                                key: const Key('input_effective_from'),
+                                controller: _effectiveDateCtrl,
+                                style: AppStyles.s12W600,
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(4.r),
+                                    borderSide: BorderSide(color: Colors.grey.shade300),
+                                  ),
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              SizedBox(height: 8.h),
               if (_isLoading)
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 32.h),
@@ -1309,7 +1687,7 @@ class _AssignCashierModalContentState
                     key: const Key('list_available_cashiers'),
                     shrinkWrap: true,
                     itemCount: _cashiers.length,
-                    separatorBuilder: (_, __) => Divider(height: 1.h),
+                    separatorBuilder: (_, _) => Divider(height: 1.h),
                     itemBuilder: (ctx, index) {
                       final c = _cashiers[index];
                       final cId = c['id'].toString();
@@ -1409,9 +1787,14 @@ class _AssignCashierModalContentState
                     onPressed: _selectedCashierId != null
                         ? () {
                             Navigator.pop(context);
+                            final effFrom = _effectiveDateCtrl.text.trim().isNotEmpty
+                                ? _effectiveDateCtrl.text.trim()
+                                : widget.slot.shiftDate;
                             widget.onCashierSelected(
                               _selectedCashierId!,
                               _selectedCashierName!,
+                              _isRecurring,
+                              effFrom,
                             );
                           }
                         : null,

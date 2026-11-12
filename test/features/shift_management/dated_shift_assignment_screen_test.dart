@@ -74,6 +74,31 @@ Widget _buildTestApp(Widget child, {Locale locale = const Locale('ar')}) {
   );
 }
 
+const List<DatedTemplateSlot> kTestTemplates = [
+  DatedTemplateSlot(
+    templateId: 'tpl-1',
+    templateName: 'الوردية الصباحية - كاشير 1',
+    startTime: '08:00',
+    endTime: '16:00',
+    cashierId: 'csh-1',
+    cashierName: 'محمد أحمد السعيد',
+    status: 'not_started',
+    shiftDate: '2026-11-15',
+    hasFinancialEvidence: false,
+  ),
+  DatedTemplateSlot(
+    templateId: 'tpl-2',
+    templateName: 'الوردية المسائية - كاشير 2',
+    startTime: '16:00',
+    endTime: '00:00',
+    cashierId: 'csh-2',
+    cashierName: 'عبدالله إبراهيم محمود',
+    status: 'not_started',
+    shiftDate: '2026-11-15',
+    hasFinancialEvidence: false,
+  ),
+];
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -87,6 +112,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           const DatedShiftAssignmentScreen(
+            initialTemplates: kTestTemplates,
             initialDateRange: '2026-11-15 — 2026-11-21',
           ),
         ),
@@ -133,6 +159,12 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           DatedShiftAssignmentScreen(
+            initialTemplates: kTestTemplates,
+            initialDateRange: '2026-11-15 — 2026-11-21',
+            onExecuteSwap: (cA, sA, cB, sB, d, f) async {
+              swappedA = sA;
+              swappedB = sB;
+            },
             onSwapCompleted: (a, b) {
               swappedA = a;
               swappedB = b;
@@ -264,6 +296,8 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           DatedShiftAssignmentScreen(
+            initialTemplates: kTestTemplates,
+            initialDateRange: '2026-11-15 — 2026-11-21',
             onExecuteSwap: (cashierAId, shiftAId, cashierBId, shiftBId, date, forFullWeek) async {
               swapCalled = true;
               throw Exception('تعذر التبديل: إحدى الورديات نشطة أو تحتوي على قيود مالية محمية.');
@@ -434,6 +468,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           DatedShiftAssignmentScreen(
+            initialDateRange: '2026-11-15 — 2026-11-21',
             onFetchRoster: (start, end) async {
               requestedStart = start;
               return [];
@@ -534,7 +569,10 @@ void main() {
 
       await tester.pumpWidget(
         _buildTestApp(
-          DatedShiftAssignmentScreen(dio: dio),
+          DatedShiftAssignmentScreen(
+            dio: dio,
+            initialDateRange: '2026-11-15 — 2026-11-21',
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -673,7 +711,10 @@ void main() {
 
       await tester.pumpWidget(
         _buildTestApp(
-          DatedShiftAssignmentScreen(dio: dio),
+          DatedShiftAssignmentScreen(
+            dio: dio,
+            initialDateRange: '2026-11-15 — 2026-11-21',
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -774,6 +815,7 @@ void main() {
         _buildTestApp(
           DatedShiftAssignmentScreen(
             dio: dio,
+            initialDateRange: '2026-11-15 — 2026-11-21',
             onFetchAvailableCashiers: () async {
               return [
                 {'id': 'csh-99', 'name': 'عبدالمحسن فهد التميمي'},
@@ -795,6 +837,10 @@ void main() {
       // Bottom sheet is visible
       expect(find.byKey(const Key('txt_dialog_assign_title')), findsOneWidget);
       expect(find.byKey(const Key('tile_cashier_csh-99')), findsOneWidget);
+
+      // Select single-day exception
+      await tester.tap(find.byKey(const Key('radio_single_day_exception')));
+      await tester.pumpAndSettle();
 
       // Select cashier
       await tester.tap(find.byKey(const Key('tile_cashier_csh-99')));
@@ -851,7 +897,10 @@ void main() {
 
       await tester.pumpWidget(
         _buildTestApp(
-          DatedShiftAssignmentScreen(dio: dio),
+          DatedShiftAssignmentScreen(
+            dio: dio,
+            initialDateRange: '2026-11-15 — 2026-11-21',
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -876,6 +925,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           const DatedShiftAssignmentScreen(
+            initialTemplates: kTestTemplates,
             initialDateRange: '2026-11-15 — 2026-11-21',
           ),
         ),
@@ -1104,6 +1154,10 @@ void main() {
       final confirmBtnWidget = tester.widget<ElevatedButton>(confirmBtnFinder);
       expect(confirmBtnWidget.onPressed, isNull); // disabled!
 
+      // Select single-day exception
+      await tester.tap(find.byKey(const Key('radio_single_day_exception')));
+      await tester.pumpAndSettle();
+
       // Select available cashier
       await tester.tap(find.byKey(const Key('tile_cashier_csh-free')));
       await tester.pumpAndSettle();
@@ -1160,5 +1214,248 @@ void main() {
         );
       },
     );
+
+    testWidgets('R1 contract: roster as empty array [] parses safely without type error',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final adapter = TestHttpAdapter(onFetch: (options) async {
+        return ResponseBody.fromString(
+          jsonEncode({
+            'success': true,
+            'message': 'OK',
+            'data': {
+              'branch_id': 'branch-1',
+              'start_date': '2026-11-15',
+              'end_date': '2026-11-21',
+              'templates': [],
+              'roster': [], // Array [] from legacy/live endpoint
+            },
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType],
+          },
+        );
+      });
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+      dio.httpClientAdapter = adapter;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            dio: dio,
+            initialDateRange: '2026-11-15 — 2026-11-21',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('empty_roster_state')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R5: branch manager sets recurring primary cashier with effective date calling roster-assignments',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      RequestOptions? recordedRosterAssignReq;
+      Map<String, dynamic>? persistedRosterAssignment;
+
+      final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'OK',
+              'data': {
+                'branch_id': 'branch-1',
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'templates': [
+                  {
+                    'id': 'tpl-unassigned',
+                    'name': 'وردية شاغرة بلا كاشير',
+                    'start_time': '08:00:00',
+                    'end_time': '16:00:00',
+                  },
+                ],
+                'roster': {
+                  '2026-11-15_tpl-unassigned': {
+                    'cashier_id': null,
+                    'cashier_name': null,
+                    'status': 'not_started',
+                    'shift_date': '2026-11-15',
+                    'shift_id': 'tpl-unassigned',
+                    'can_swap': false,
+                  },
+                },
+              },
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          );
+        }
+
+        if (options.path.contains('roster-assignments')) {
+          if (options.method == 'POST') {
+            recordedRosterAssignReq = options;
+            persistedRosterAssignment = {
+              'id': 'ra-1',
+              'shift_id': 'tpl-unassigned',
+              'cashier_id': 'csh-primary-1',
+              'cashier_name': 'الكاشير الأساسي المعتمد',
+              'effective_from': '2026-11-15',
+            };
+            return ResponseBody.fromString(
+              jsonEncode({
+                'success': true,
+                'message': 'تم حفظ التعيين المتكرر بنجاح.',
+                'data': persistedRosterAssignment,
+              }),
+              200,
+              headers: {
+                Headers.contentTypeHeader: [Headers.jsonContentType],
+              },
+            );
+          } else {
+            return ResponseBody.fromString(
+              jsonEncode({
+                'success': true,
+                'message': 'OK',
+                'data': persistedRosterAssignment != null ? [persistedRosterAssignment] : [],
+              }),
+              200,
+              headers: {
+                Headers.contentTypeHeader: [Headers.jsonContentType],
+              },
+            );
+          }
+        }
+
+        return ResponseBody.fromString('{"success": true}', 200);
+      });
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+      dio.httpClientAdapter = adapter;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            dio: dio,
+            initialDateRange: '2026-11-15 — 2026-11-21',
+            onFetchAvailableCashiers: () async {
+              return [
+                {'id': 'csh-primary-1', 'name': 'الكاشير الأساسي المعتمد'},
+              ];
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap assign cashier button
+      await tester.tap(find.byKey(const Key('btn_assign_tpl-unassigned')).first);
+      await tester.pumpAndSettle();
+
+      // By default, recurring primary assignment radio is selected
+      expect(find.byKey(const Key('radio_recurring_assignment')), findsOneWidget);
+
+      // Select cashier
+      await tester.tap(find.byKey(const Key('tile_cashier_csh-primary-1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('btn_confirm_cashier_assignment')));
+      await tester.pumpAndSettle();
+
+      // Verify POST roster-assignments was called with shift_id, cashier_id, effective_from
+      expect(recordedRosterAssignReq, isNotNull);
+      expect(recordedRosterAssignReq!.method, 'POST');
+      expect(
+        recordedRosterAssignReq!.uri.toString(),
+        'https://erp.assab.sa/api/v1/branch-manager/cashiers/roster-assignments',
+      );
+      final assignments = recordedRosterAssignReq!.data['assignments'] as List;
+      final firstAssign = assignments.first as Map;
+      expect(firstAssign['shift_id'], 'tpl-unassigned');
+      expect(firstAssign['cashier_id'], 'csh-primary-1');
+      expect(firstAssign['effective_from'], '2026-11-15');
+
+      // Verify UI updated with primary cashier and recurring badge
+      expect(find.textContaining('الكاشير الأساسي المعتمد'), findsWidgets);
+      expect(find.text('أساسي'), findsWidgets);
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R6: default date range derived dynamically from current week when initialDateRange is omitted',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      String? queriedStart;
+      String? queriedEnd;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            onFetchRoster: (start, end) async {
+              queriedStart = start;
+              queriedEnd = end;
+              return [];
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final now = DateTime.now();
+      final expectedSunday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday % 7));
+      final expectedSaturday = expectedSunday.add(const Duration(days: 6));
+      final expectedStartStr =
+          "${expectedSunday.year}-${expectedSunday.month.toString().padLeft(2, '0')}-${expectedSunday.day.toString().padLeft(2, '0')}";
+      final expectedEndStr =
+          "${expectedSaturday.year}-${expectedSaturday.month.toString().padLeft(2, '0')}-${expectedSaturday.day.toString().padLeft(2, '0')}";
+
+      expect(queriedStart, expectedStartStr);
+      expect(queriedEnd, expectedEndStr);
+      expect(find.textContaining(expectedStartStr), findsOneWidget);
+      expect(find.textContaining(expectedEndStr), findsOneWidget);
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R7: missing Dio and callbacks displays explicit error and rejects fake local mutations',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          const DatedShiftAssignmentScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Explicit error banner displayed
+      expect(
+        find.textContaining('تعذر الاتصال: لم يتم العثور على مزود خدمة API.'),
+        findsOneWidget,
+      );
+
+      // Empty state rendered - no fake mock templates in production path
+      expect(find.byKey(const Key('empty_roster_state')), findsOneWidget);
+      expect(find.byKey(const Key('card_template_tpl-1')), findsNothing);
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }
