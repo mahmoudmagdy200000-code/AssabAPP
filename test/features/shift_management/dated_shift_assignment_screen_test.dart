@@ -211,5 +211,209 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('server rejection (422) displays error and does not swap UI state',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      bool swapCalled = false;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            onExecuteSwap: (cashierAId, shiftAId, cashierBId, shiftBId, date, forFullWeek) async {
+              swapCalled = true;
+              throw Exception('تعذر التبديل: إحدى الورديات نشطة أو تحتوي على قيود مالية محمية.');
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap swap on template 1
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-1')));
+      await tester.pumpAndSettle();
+
+      // Tap swap on template 2 (triggering rejected execution)
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-2')));
+      await tester.pumpAndSettle();
+
+      expect(swapCalled, isTrue);
+
+      // Verify server rejection message is displayed
+      expect(
+        find.textContaining('تعذر التبديل: إحدى الورديات نشطة أو تحتوي على قيود مالية محمية.'),
+        findsOneWidget,
+      );
+
+      // Verify NO false success message
+      expect(find.textContaining('تم تبديل الكاشيرين بنجاح'), findsNothing);
+
+      // Verify UI state was NOT swapped
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('txt_cashier_name_tpl-1')))
+            .data,
+        'محمد أحمد السعيد',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('txt_cashier_name_tpl-2')))
+            .data,
+        'عبدالله إبراهيم محمود',
+      );
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('screen retains persisted state from backend across reopening/refreshing',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Simulated remote backend repository
+      List<DatedTemplateSlot> backendRoster = [
+        const DatedTemplateSlot(
+          templateId: 'tpl-1',
+          templateName: 'وردية الصباح الأولى',
+          startTime: '08:00',
+          endTime: '16:00',
+          cashierId: 'csh-1',
+          cashierName: 'محمد أحمد السعيد',
+          status: 'not_started',
+        ),
+        const DatedTemplateSlot(
+          templateId: 'tpl-2',
+          templateName: 'وردية المساء الثانية',
+          startTime: '16:00',
+          endTime: '00:00',
+          cashierId: 'csh-2',
+          cashierName: 'عبدالله إبراهيم محمود',
+          status: 'not_started',
+        ),
+      ];
+
+      Future<List<DatedTemplateSlot>> fetchRoster(String start, String end) async {
+        return List.from(backendRoster);
+      }
+
+      Future<void> executeSwap(
+        String cA,
+        String sA,
+        String cB,
+        String sB,
+        String date,
+        bool fullWeek,
+      ) async {
+        // Backend updates persisted state
+        final idxA = backendRoster.indexWhere((t) => t.templateId == sA);
+        final idxB = backendRoster.indexWhere((t) => t.templateId == sB);
+        final itemA = backendRoster[idxA];
+        final itemB = backendRoster[idxB];
+
+        backendRoster[idxA] = itemA.copyWith(
+          cashierId: itemB.cashierId,
+          cashierName: itemB.cashierName,
+        );
+        backendRoster[idxB] = itemB.copyWith(
+          cashierId: itemA.cashierId,
+          cashierName: itemA.cashierName,
+        );
+      }
+
+      // 1. Initial screen opening
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            onFetchRoster: fetchRoster,
+            onExecuteSwap: executeSwap,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('txt_cashier_name_tpl-1')))
+            .data,
+        'محمد أحمد السعيد',
+      );
+
+      // 2. Perform atomic swap
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-2')));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('تم تبديل الكاشيرين بنجاح'), findsOneWidget);
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('txt_cashier_name_tpl-1')))
+            .data,
+        'عبدالله إبراهيم محمود',
+      );
+
+      // 3. Reopen screen (simulating navigating away and back to datedShiftAssignmentScreen)
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            onFetchRoster: fetchRoster,
+            onExecuteSwap: executeSwap,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // State is retained from backend
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('txt_cashier_name_tpl-1')))
+            .data,
+        'عبدالله إبراهيم محمود',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('txt_cashier_name_tpl-2')))
+            .data,
+        'محمد أحمد السعيد',
+      );
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('date range navigation buttons update range and trigger reload',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      String? requestedStart;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            onFetchRoster: (start, end) async {
+              requestedStart = start;
+              return [];
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(requestedStart, '2026-11-15');
+
+      // Click next week button
+      await tester.tap(find.byKey(const Key('btn_next_week')));
+      await tester.pumpAndSettle();
+
+      expect(requestedStart, '2026-11-22');
+      expect(find.textContaining('2026-11-22'), findsOneWidget);
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }

@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import
 
+import 'package:dio/dio.dart';
 import 'package:assab/core/cubits/add_item/add_item_cubit.dart';
 import 'package:assab/core/cubits/media/media_cubit.dart';
 import 'package:assab/core/cubits/switch_button/switch_button_cubit.dart';
@@ -608,7 +609,9 @@ class AppRouter {
         );
       case AppRouteName.datedShiftAssignmentScreen:
         return MaterialPageRoute(
-          builder: (context) => const DatedShiftAssignmentScreen(),
+          builder: (context) => DatedShiftAssignmentScreen(
+            dio: getIt.isRegistered<Dio>() ? getIt<Dio>() : null,
+          ),
           settings: settings,
         );
       case AppRouteName.addCashierScreen:
