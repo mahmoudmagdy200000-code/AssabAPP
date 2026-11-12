@@ -111,6 +111,7 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> Function()? onFetchAvailableCashiers;
   final Future<Map<String, String>> Function()? onFetchSchedulingRange;
   final void Function(String templateA, String templateB)? onSwapCompleted;
+  final String? initialScheduleSourceLabel;
 
   const DatedShiftAssignmentScreen({
     super.key,
@@ -126,6 +127,7 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
     this.onFetchAvailableCashiers,
     this.onFetchSchedulingRange,
     this.onSwapCompleted,
+    this.initialScheduleSourceLabel,
   });
 
   @override
@@ -145,6 +147,10 @@ class _DatedShiftAssignmentScreenState
   bool _isLoading = false;
   bool _isManuallySelected = false;
   bool _hasLoadError = false;
+  String? _scheduleSourceLabel;
+
+  @visibleForTesting
+  String? get scheduleSourceLabel => _scheduleSourceLabel;
 
   Dio? get _effectiveDio =>
       widget.dio ?? (getIt.isRegistered<Dio>() ? getIt<Dio>() : null);
@@ -166,6 +172,7 @@ class _DatedShiftAssignmentScreenState
   @override
   void initState() {
     super.initState();
+    _scheduleSourceLabel = widget.initialScheduleSourceLabel;
     final rangeStr = widget.initialDateRange;
     if (rangeStr != null) {
       _isManuallySelected = true;
@@ -275,6 +282,18 @@ class _DatedShiftAssignmentScreenState
         }
 
         final data = response.data['data'] as Map<String, dynamic>? ?? {};
+
+        // Extract schedule source metadata (branch override vs brand inheritance)
+        if (data['schedule_source'] is Map) {
+          final src = data['schedule_source'] as Map;
+          final labelAr = src['label_ar']?.toString();
+          final ownerName = src['owner_name']?.toString();
+          if (labelAr != null && ownerName != null && ownerName.isNotEmpty) {
+            _scheduleSourceLabel = '$labelAr ($ownerName)';
+          } else if (labelAr != null) {
+            _scheduleSourceLabel = labelAr;
+          }
+        }
 
         // If the manager has not manually navigated, adopt the server-driven scheduling calendar
         if (!_isManuallySelected && widget.initialDateRange == null) {
@@ -470,6 +489,62 @@ class _DatedShiftAssignmentScreenState
         .toList();
   }
 
+  String _extractDioErrorMessage(
+    DioException e, {
+    required String defaultAction,
+  }) {
+    final response = e.response;
+    if (response != null) {
+      final statusCode = response.statusCode;
+      final data = response.data;
+      if (data is Map) {
+        final err = data['error'];
+        if (err is Map) {
+          final msgAr = err['messageAr']?.toString();
+          if (msgAr != null && msgAr.trim().isNotEmpty) {
+            return '$defaultAction: $msgAr';
+          }
+          final msgEn = err['message']?.toString();
+          if (msgEn != null && msgEn.trim().isNotEmpty) {
+            return '$defaultAction: $msgEn';
+          }
+        }
+        final directMsg = data['message']?.toString();
+        if (directMsg != null && directMsg.trim().isNotEmpty) {
+          return '$defaultAction: $directMsg';
+        }
+        final errors = data['errors'];
+        if (errors is Map && errors.isNotEmpty) {
+          final firstVal = errors.values.first;
+          if (firstVal is List && firstVal.isNotEmpty) {
+            return '$defaultAction: ${firstVal.first}';
+          }
+          return '$defaultAction: ${firstVal.toString()}';
+        }
+      }
+      if (statusCode == 500) {
+        return '$defaultAction: خطأ غير متوقع في خادم النظام (500). يرجى مراجعة إعدادات قاعدة البيانات.';
+      } else if (statusCode == 403 || statusCode == 401) {
+        return '$defaultAction: لا تملك الصلاحية الكافية لتنفيذ هذا الإجراء ($statusCode).';
+      } else if (statusCode == 422) {
+        return '$defaultAction: البيانات المدخلة غير صحيحة أو غير مقبولة (422).';
+      } else if (statusCode != null) {
+        return '$defaultAction: استجاب الخادم برمز خطأ ($statusCode).';
+      }
+    }
+
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return '$defaultAction: انتهت مهلة الاتصال بالخادم. يرجى التحقق من الشبكة.';
+    }
+    if (e.type == DioExceptionType.connectionError) {
+      return '$defaultAction: تعذر الاتصال بالخادم. يرجى التحقق من الشبكة.';
+    }
+
+    return '$defaultAction: ${e.message ?? 'خطأ في الاتصال بالخادم.'}';
+  }
+
   Future<void> _executeAtomicSwap(
     DatedTemplateSlot itemA,
     DatedTemplateSlot itemB,
@@ -575,14 +650,14 @@ class _DatedShiftAssignmentScreenState
           }
         }
       } on DioException catch (e) {
-        final serverMsg = e.response?.data?['message'] ??
-            (e.response?.statusCode == 422
-                ? 'تعذر التبديل: إحدى الورديات نشطة أو تحتوي على قيود مالية محمية.'
-                : 'تعذر التبديل: خطأ في الاتصال بالخادم.');
+        final serverMsg = _extractDioErrorMessage(
+          e,
+          defaultAction: 'تعذر التبديل',
+        );
         if (mounted) {
           setState(() {
             _selectedSlotForSwap = null;
-            _statusMessage = serverMsg.toString();
+            _statusMessage = serverMsg;
             _isLoading = false;
           });
         }
@@ -668,11 +743,13 @@ class _DatedShiftAssignmentScreenState
           }
         }
       } on DioException catch (e) {
-        final serverMsg = e.response?.data?['message'] ??
-            'تعذر حفظ التعيين المتكرر: خطأ في الاتصال بالخادم.';
+        final serverMsg = _extractDioErrorMessage(
+          e,
+          defaultAction: 'تعذر حفظ التعيين المتكرر',
+        );
         if (mounted) {
           setState(() {
-            _statusMessage = serverMsg.toString();
+            _statusMessage = serverMsg;
             _isLoading = false;
           });
         }
@@ -765,11 +842,13 @@ class _DatedShiftAssignmentScreenState
           }
         }
       } on DioException catch (e) {
-        final serverMsg = e.response?.data?['message'] ??
-            'تعذر تعيين الكاشير: خطأ في الاتصال بالخادم.';
+        final serverMsg = _extractDioErrorMessage(
+          e,
+          defaultAction: 'تعذر تعيين الكاشير',
+        );
         if (mounted) {
           setState(() {
-            _statusMessage = serverMsg.toString();
+            _statusMessage = serverMsg;
             _isLoading = false;
           });
         }
@@ -884,7 +963,9 @@ class _DatedShiftAssignmentScreenState
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
-                      'إعداد القوالب والمواعيد يظل ضمن صلاحيات المحاسب',
+                      _scheduleSourceLabel != null && _scheduleSourceLabel!.isNotEmpty
+                          ? 'إعداد القوالب والمواعيد يظل ضمن صلاحيات المحاسب ($_scheduleSourceLabel)'
+                          : 'إعداد القوالب والمواعيد يظل ضمن صلاحيات المحاسب',
                       key: const Key('txt_accountant_governance_notice'),
                       style: AppStyles.s13W400.copyWith(
                         color: Colors.blue.shade900,

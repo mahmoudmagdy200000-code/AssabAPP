@@ -1848,6 +1848,128 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('Session 7 Acceptance: Schedule source metadata displays origin in governance notice', (WidgetTester tester) async {
+      final dio = Dio();
+      dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'data': {
+                'branch_id': 'branch-malqa',
+                'branch_name': 'فرع الملقا – الرياض',
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'schedule_source': {
+                  'has_own_config': true,
+                  'type': 'branch',
+                  'label_ar': 'إعداد خاص بالفرع',
+                  'owner_name': 'فرع الملقا – الرياض',
+                },
+                'templates': [
+                  {
+                    'id': 'tpl-1',
+                    'name': 'الوردية الأولى',
+                    'start_time': '08:00:00',
+                    'end_time': '10:00:00',
+                  },
+                ],
+                'roster': {},
+              },
+            }),
+            200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        return ResponseBody.fromString(jsonEncode({'success': true, 'data': []}), 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+      });
+
+      await tester.pumpWidget(_buildTestApp(DatedShiftAssignmentScreen(dio: dio)));
+      await tester.pumpAndSettle();
+
+      // Verified: Governance notice includes the schedule source origin
+      expect(find.text('إعداد القوالب والمواعيد يظل ضمن صلاحيات المحاسب (إعداد خاص بالفرع (فرع الملقا – الرياض))'), findsOneWidget);
+    });
+
+    testWidgets('Session 7 Acceptance: Recurring roster assignment handles 500 error envelope safely without generic network error', (WidgetTester tester) async {
+      final dio = Dio();
+      dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('roster-assignments') && options.method == 'POST') {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'error': {
+                'code': 'SERVER_ERROR',
+                'message': 'Table branch_shift_roster_assignments does not exist',
+                'messageAr': 'جدول التعيينات المتكررة غير مرحل على قاعدة البيانات. يرجى تطبيق الترحيل البرمجي على الخادم.',
+              },
+            }),
+            500,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        if (options.path.contains('dated-roster')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'data': {
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'templates': [
+                  {
+                    'id': 'tpl-rec-1',
+                    'name': 'الوردية الأولى',
+                    'start_time': '08:00:00',
+                    'end_time': '10:00:00',
+                  },
+                ],
+                'roster': {},
+              },
+            }),
+            200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        if (options.path.contains('available-cashiers')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'data': [
+                {'id': 'c-1', 'name': 'يوسف الدوسري'},
+              ],
+            }),
+            200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        return ResponseBody.fromString(jsonEncode({'success': true, 'data': []}), 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+      });
+
+      await tester.pumpWidget(_buildTestApp(DatedShiftAssignmentScreen(dio: dio)));
+      await tester.pumpAndSettle();
+
+      // Open assign dialog
+      final assignBtn = find.byKey(const Key('btn_assign_tpl-rec-1')).first;
+      expect(assignBtn, findsOneWidget);
+      await tester.tap(assignBtn);
+      await tester.pumpAndSettle();
+
+      // Select cashier
+      final cashierTile = find.byKey(const Key('tile_cashier_c-1'));
+      expect(cashierTile, findsOneWidget);
+      await tester.tap(cashierTile);
+      await tester.pumpAndSettle();
+
+      // Tap confirm button
+      final confirmBtn = find.byKey(const Key('btn_confirm_cashier_assignment'));
+      expect(confirmBtn, findsOneWidget);
+      await tester.tap(confirmBtn);
+      await tester.pumpAndSettle();
+
+      // Verified: Error message extracted from server envelope instead of generic connection error
+      expect(find.textContaining('جدول التعيينات المتكررة غير مرحل على قاعدة البيانات'), findsOneWidget);
+      expect(find.text('تعذر حفظ التعيين المتكرر: خطأ في الاتصال بالخادم.'), findsNothing);
+    });
   });
 }
 
