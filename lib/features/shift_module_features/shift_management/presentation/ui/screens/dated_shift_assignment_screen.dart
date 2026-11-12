@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:assab/core/helpers/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 import '../../../../../../core/di/dependency_injection.dart';
 import '../../../../../../core/extensions/build_context_extensions.dart';
@@ -173,9 +174,19 @@ class _DatedShiftAssignmentScreenState
         _dateRange = rangeStr;
       }
     } else {
-      final ref = widget.branchBusinessDate != null
-          ? DateTime.tryParse(widget.branchBusinessDate!)
-          : null;
+      String? businessDate = widget.branchBusinessDate;
+      if ((businessDate == null || businessDate.isEmpty) &&
+          getIt.isRegistered<SharedPreferencesHelper>()) {
+        try {
+          final prefs = getIt<SharedPreferencesHelper>();
+          businessDate = prefs.getString('branch_business_date') ??
+              prefs.getString('business_date') ??
+              prefs.getString('workday_date');
+        } catch (_) {}
+      }
+      final ref = businessDate != null
+          ? DateTime.tryParse(businessDate)
+          : DateTime.now().toUtc().add(const Duration(hours: 3));
       final sun = _computeCurrentWeekSunday(ref);
       final sat = sun.add(const Duration(days: 6));
       _startDate = _formatYmd(sun);

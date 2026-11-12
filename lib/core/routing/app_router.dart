@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import
 
 import 'package:dio/dio.dart';
+import 'package:assab/core/helpers/shared_preferences_helper.dart';
 import 'package:assab/core/network/api_endpoints.dart';
 import 'package:assab/core/widgets/app_startup_error_widget.dart';
 import 'package:assab/core/cubits/add_item/add_item_cubit.dart';
@@ -638,9 +639,34 @@ class AppRouter {
           settings: settings,
         );
       case AppRouteName.datedShiftAssignmentScreen:
+        String? branchBusinessDate;
+        final args = settings.arguments;
+        if (args is String && args.trim().isNotEmpty) {
+          branchBusinessDate = args.trim();
+        } else if (args is Map) {
+          branchBusinessDate = (args['branchBusinessDate'] ??
+                  args['businessDate'] ??
+                  args['date'])
+              ?.toString();
+        }
+        if ((branchBusinessDate == null || branchBusinessDate.isEmpty) &&
+            getIt.isRegistered<SharedPreferencesHelper>()) {
+          try {
+            final prefs = getIt<SharedPreferencesHelper>();
+            branchBusinessDate = prefs.getString('branch_business_date') ??
+                prefs.getString('business_date') ??
+                prefs.getString('workday_date');
+          } catch (_) {}
+        }
+        if (branchBusinessDate == null || branchBusinessDate.isEmpty) {
+          final riyadhNow = DateTime.now().toUtc().add(const Duration(hours: 3));
+          branchBusinessDate =
+              "${riyadhNow.year}-${riyadhNow.month.toString().padLeft(2, '0')}-${riyadhNow.day.toString().padLeft(2, '0')}";
+        }
         return MaterialPageRoute(
           builder: (context) => DatedShiftAssignmentScreen(
             dio: getIt.isRegistered<Dio>() ? getIt<Dio>() : null,
+            branchBusinessDate: branchBusinessDate,
           ),
           settings: settings,
         );

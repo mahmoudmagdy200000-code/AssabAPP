@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:assab/core/responsive/app_responsive.dart';
+import 'package:assab/core/routing/app_route_name.dart';
+import 'package:assab/core/routing/app_router.dart';
 import 'package:assab/core/theme/light_theme.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/screens/dated_shift_assignment_screen.dart';
 import 'package:assab/generated/l10n.dart';
@@ -1464,6 +1466,36 @@ void main() {
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
 
+      // Verify AppRouter extracts branchBusinessDate from settings.arguments String
+      final routeFromString = AppRouter.generateRoute(
+        const RouteSettings(
+          name: AppRouteName.datedShiftAssignmentScreen,
+          arguments: '2026-11-18',
+        ),
+      );
+      expect(routeFromString, isA<MaterialPageRoute>());
+      final widgetFromStr = (routeFromString as MaterialPageRoute).builder(_FakeBuildContext()) as DatedShiftAssignmentScreen;
+      expect(widgetFromStr.branchBusinessDate, '2026-11-18');
+
+      // Verify AppRouter extracts branchBusinessDate from settings.arguments Map
+      final routeFromMap = AppRouter.generateRoute(
+        const RouteSettings(
+          name: AppRouteName.datedShiftAssignmentScreen,
+          arguments: {'branchBusinessDate': '2026-11-25'},
+        ),
+      );
+      final widgetFromMap = (routeFromMap as MaterialPageRoute).builder(_FakeBuildContext()) as DatedShiftAssignmentScreen;
+      expect(widgetFromMap.branchBusinessDate, '2026-11-25');
+
+      // Verify AppRouter without arguments defaults to non-null Riyadh timezone business date
+      final routeDefault = AppRouter.generateRoute(
+        const RouteSettings(
+          name: AppRouteName.datedShiftAssignmentScreen,
+        ),
+      );
+      final widgetDefault = (routeDefault as MaterialPageRoute).builder(_FakeBuildContext()) as DatedShiftAssignmentScreen;
+      expect(widgetDefault.branchBusinessDate, isNotNull);
+
       String? queriedStart;
       String? queriedEnd;
 
@@ -1532,4 +1564,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+}
+
+class _FakeBuildContext implements BuildContext {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
