@@ -640,32 +640,25 @@ class AppRouter {
         );
       case AppRouteName.datedShiftAssignmentScreen:
         String? branchBusinessDate;
+        String? initialDateRange;
         final args = settings.arguments;
         if (args is String && args.trim().isNotEmpty) {
-          branchBusinessDate = args.trim();
+          if (args.contains('—') || (args.contains('-') && args.length > 12)) {
+            initialDateRange = args.trim();
+          } else {
+            branchBusinessDate = args.trim();
+          }
         } else if (args is Map) {
+          initialDateRange = (args['initialDateRange'] ?? args['dateRange'])?.toString();
           branchBusinessDate = (args['branchBusinessDate'] ??
                   args['businessDate'] ??
                   args['date'])
               ?.toString();
         }
-        if ((branchBusinessDate == null || branchBusinessDate.isEmpty) &&
-            getIt.isRegistered<SharedPreferencesHelper>()) {
-          try {
-            final prefs = getIt<SharedPreferencesHelper>();
-            branchBusinessDate = prefs.getString('branch_business_date') ??
-                prefs.getString('business_date') ??
-                prefs.getString('workday_date');
-          } catch (_) {}
-        }
-        if (branchBusinessDate == null || branchBusinessDate.isEmpty) {
-          final riyadhNow = DateTime.now().toUtc().add(const Duration(hours: 3));
-          branchBusinessDate =
-              "${riyadhNow.year}-${riyadhNow.month.toString().padLeft(2, '0')}-${riyadhNow.day.toString().padLeft(2, '0')}";
-        }
         return MaterialPageRoute(
           builder: (context) => DatedShiftAssignmentScreen(
             dio: getIt.isRegistered<Dio>() ? getIt<Dio>() : null,
+            initialDateRange: initialDateRange,
             branchBusinessDate: branchBusinessDate,
           ),
           settings: settings,

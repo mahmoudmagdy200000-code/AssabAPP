@@ -1,8 +1,6 @@
 import 'package:assab/core/constants/app_assets.dart';
-import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
-import 'package:assab/core/helpers/shared_preferences_helper.dart';
 import 'package:assab/core/routing/app_route_name.dart';
 import 'package:assab/core/utils/app_bottom_sheet.dart';
 import 'package:assab/core/widgets/app_gesture_detector_button.dart';
@@ -113,19 +111,9 @@ class ShiftManagementAppBar extends StatelessWidget {
               AppGestureDetectorButton(
                 key: const Key('btn_dated_shift_assignment'),
                 onTap: () async {
-                  String? branchBusinessDate;
-                  if (getIt.isRegistered<SharedPreferencesHelper>()) {
-                    try {
-                      final prefs = getIt<SharedPreferencesHelper>();
-                      branchBusinessDate = prefs.getString('branch_business_date') ??
-                          prefs.getString('business_date') ??
-                          prefs.getString('workday_date');
-                    } catch (_) {}
-                  }
                   await Navigator.pushNamed(
                     context,
                     AppRouteName.datedShiftAssignmentScreen,
-                    arguments: branchBusinessDate,
                   );
                 },
                 child: Container(

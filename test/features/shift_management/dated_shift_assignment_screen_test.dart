@@ -1460,67 +1460,67 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('R6: branchBusinessDate takes precedence over device date',
+    testWidgets('R6 Acceptance 1: Screen opened from manager button adopts server-driven scheduling calendar even with differing device timezone',
         (tester) async {
       tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      // Verify AppRouter extracts branchBusinessDate from settings.arguments String
-      final routeFromString = AppRouter.generateRoute(
-        const RouteSettings(
-          name: AppRouteName.datedShiftAssignmentScreen,
-          arguments: '2026-11-18',
-        ),
-      );
-      expect(routeFromString, isA<MaterialPageRoute>());
-      final widgetFromStr = (routeFromString as MaterialPageRoute).builder(_FakeBuildContext()) as DatedShiftAssignmentScreen;
-      expect(widgetFromStr.branchBusinessDate, '2026-11-18');
+      Map<String, dynamic>? capturedQueryParams;
+      final dio = Dio();
+      dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          capturedQueryParams = options.queryParameters;
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'OK',
+              'data': {
+                'branch_id': 'branch-1',
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'scheduling_calendar': {
+                  'today': '2026-11-15',
+                  'timezone': 'Asia/Riyadh',
+                  'week_start': 0,
+                  'default_start_date': '2026-11-15',
+                  'default_end_date': '2026-11-21',
+                },
+                'templates': [
+                  {
+                    'id': 'tpl-1',
+                    'name': 'وردية الصباح الأولى',
+                    'start_time': '08:00:00',
+                    'end_time': '16:00:00',
+                  },
+                ],
+                'roster': {},
+              },
+            }),
+            200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        return ResponseBody.fromString(
+          jsonEncode({'success': true, 'data': []}),
+          200,
+          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        );
+      });
 
-      // Verify AppRouter extracts branchBusinessDate from settings.arguments Map
-      final routeFromMap = AppRouter.generateRoute(
-        const RouteSettings(
-          name: AppRouteName.datedShiftAssignmentScreen,
-          arguments: {'branchBusinessDate': '2026-11-25'},
-        ),
-      );
-      final widgetFromMap = (routeFromMap as MaterialPageRoute).builder(_FakeBuildContext()) as DatedShiftAssignmentScreen;
-      expect(widgetFromMap.branchBusinessDate, '2026-11-25');
-
-      // Verify AppRouter without arguments defaults to non-null Riyadh timezone business date
-      final routeDefault = AppRouter.generateRoute(
-        const RouteSettings(
-          name: AppRouteName.datedShiftAssignmentScreen,
-        ),
-      );
-      final widgetDefault = (routeDefault as MaterialPageRoute).builder(_FakeBuildContext()) as DatedShiftAssignmentScreen;
-      expect(widgetDefault.branchBusinessDate, isNotNull);
-
-      String? queriedStart;
-      String? queriedEnd;
-
-      // Branch business date set to Wednesday 2026-11-18 (week is Sunday 2026-11-15 to Saturday 2026-11-21)
       await tester.pumpWidget(
         _buildTestApp(
-          DatedShiftAssignmentScreen(
-            branchBusinessDate: '2026-11-18',
-            onFetchRoster: (start, end) async {
-              queriedStart = start;
-              queriedEnd = end;
-              return [];
-            },
-          ),
+          DatedShiftAssignmentScreen(dio: dio),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(queriedStart, '2026-11-15');
-      expect(queriedEnd, '2026-11-21');
+      expect(capturedQueryParams, isEmpty);
       expect(find.textContaining('2026-11-15 — 2026-11-21'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('R6: week navigation handles week transitions and year boundary safely',
+    testWidgets('R6 Acceptance 2: Week start and year boundary transitions follow server calendar across 2026-12-27 -> 2027-01-03',
         (tester) async {
       tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
       tester.view.devicePixelRatio = 2.0;
@@ -1532,7 +1532,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           DatedShiftAssignmentScreen(
-            branchBusinessDate: '2026-12-31',
+            initialDateRange: '2026-12-27 — 2027-01-02',
             onFetchRoster: (start, end) async {
               loadedRanges.add('$start — $end');
               return [];
@@ -1552,7 +1552,7 @@ void main() {
       expect(loadedRanges.last, '2027-01-03 — 2027-01-09');
       expect(find.textContaining('2027-01-03 — 2027-01-09'), findsOneWidget);
 
-      // Navigate back to previous week twice: transitions back across year boundary to 2026-12-20 — 2026-12-26
+      // Navigate back across boundary
       await tester.tap(find.byKey(const Key('btn_prev_week')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('btn_prev_week')));
@@ -1560,6 +1560,160 @@ void main() {
 
       expect(loadedRanges.last, '2026-12-20 — 2026-12-26');
       expect(find.textContaining('2026-12-20 — 2026-12-26'), findsOneWidget);
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R6 Acceptance 3: Open shift from Saturday remains in its day while scheduling screen opens on current week',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final route = AppRouter.generateRoute(
+        const RouteSettings(name: AppRouteName.datedShiftAssignmentScreen),
+      );
+      expect(route, isA<MaterialPageRoute>());
+      final widget = (route as MaterialPageRoute).builder(_FakeBuildContext()) as DatedShiftAssignmentScreen;
+      expect(widget.branchBusinessDate, isNull);
+
+      final dio = Dio();
+      dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'OK',
+              'data': {
+                'branch_id': 'branch-1',
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'scheduling_calendar': {
+                  'today': '2026-11-15',
+                  'timezone': 'Asia/Riyadh',
+                  'week_start': 0,
+                  'default_start_date': '2026-11-15',
+                  'default_end_date': '2026-11-21',
+                },
+                'templates': [
+                  {
+                    'id': 'tpl-1',
+                    'name': 'وردية الصباح الأولى',
+                    'start_time': '08:00:00',
+                    'end_time': '16:00:00',
+                  },
+                ],
+                'roster': {},
+              },
+            }),
+            200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        return ResponseBody.fromString(
+          jsonEncode({'success': true, 'data': []}),
+          200,
+          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        );
+      });
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(dio: dio),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('2026-11-15 — 2026-11-21'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('R6 Acceptance 4: Manual week selection preserved across refresh, and retry succeeds after network restoration',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      bool simulateFailure = false;
+      final List<Map<String, dynamic>> requestedQueries = [];
+
+      final dio = Dio();
+      dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          requestedQueries.add(Map<String, dynamic>.from(options.queryParameters));
+          if (simulateFailure) {
+            return ResponseBody.fromString(
+              jsonEncode({'success': false, 'message': 'Network timeout'}),
+              500,
+              headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+            );
+          }
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'OK',
+              'data': {
+                'branch_id': 'branch-1',
+                'start_date': options.queryParameters['start_date'] ?? '2026-11-15',
+                'end_date': options.queryParameters['end_date'] ?? '2026-11-21',
+                'templates': [
+                  {
+                    'id': 'tpl-1',
+                    'name': 'وردية الصباح الأولى',
+                    'start_time': '08:00:00',
+                    'end_time': '16:00:00',
+                  },
+                ],
+                'roster': {},
+              },
+            }),
+            200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          );
+        }
+        return ResponseBody.fromString(
+          jsonEncode({'success': true, 'data': []}),
+          200,
+          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        );
+      });
+
+      // 1. Initial load
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(dio: dio),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('2026-11-15 — 2026-11-21'), findsOneWidget);
+
+      // 2. Manager manually navigates to next week (2026-11-22 — 2026-11-28)
+      await tester.tap(find.byKey(const Key('btn_next_week')));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('2026-11-22 — 2026-11-28'), findsOneWidget);
+      expect(requestedQueries.last['start_date'], '2026-11-22');
+      expect(requestedQueries.last['end_date'], '2026-11-28');
+
+      // 3. Network fails during refresh
+      simulateFailure = true;
+      await tester.tap(find.byKey(const Key('btn_refresh_roster')));
+      await tester.pumpAndSettle();
+
+      // Selection is preserved even on error
+      expect(find.textContaining('2026-11-22 — 2026-11-28'), findsOneWidget);
+      expect(find.textContaining('تعذر تحميل التعيينات من الخادم'), findsOneWidget);
+
+      // 4. Network restored and manager retries
+      simulateFailure = false;
+      await tester.tap(find.byKey(const Key('btn_refresh_roster')));
+      await tester.pumpAndSettle();
+
+      // Verified reload succeeded with the exact preserved dates
+      expect(find.textContaining('2026-11-22 — 2026-11-28'), findsOneWidget);
+      expect(requestedQueries.last['start_date'], '2026-11-22');
+      expect(requestedQueries.last['end_date'], '2026-11-28');
+      expect(find.textContaining('تعذر تحميل التعيينات من الخادم'), findsNothing);
 
       expect(tester.takeException(), isNull);
     });

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:assab/core/helpers/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 import '../../../../../../core/di/dependency_injection.dart';
 import '../../../../../../core/extensions/build_context_extensions.dart';
@@ -110,6 +109,7 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
   )? onSaveRosterAssignment;
   final Future<List<Map<String, dynamic>>> Function()? onFetchRosterAssignments;
   final Future<List<Map<String, dynamic>>> Function()? onFetchAvailableCashiers;
+  final Future<Map<String, String>> Function()? onFetchSchedulingRange;
   final void Function(String templateA, String templateB)? onSwapCompleted;
 
   const DatedShiftAssignmentScreen({
@@ -124,6 +124,7 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
     this.onSaveRosterAssignment,
     this.onFetchRosterAssignments,
     this.onFetchAvailableCashiers,
+    this.onFetchSchedulingRange,
     this.onSwapCompleted,
   });
 
@@ -142,6 +143,7 @@ class _DatedShiftAssignmentScreenState
   DatedTemplateSlot? _selectedSlotForSwap;
   String? _statusMessage;
   bool _isLoading = false;
+  bool _isManuallySelected = false;
 
   Dio? get _effectiveDio =>
       widget.dio ?? (getIt.isRegistered<Dio>() ? getIt<Dio>() : null);
@@ -165,6 +167,7 @@ class _DatedShiftAssignmentScreenState
     super.initState();
     final rangeStr = widget.initialDateRange;
     if (rangeStr != null) {
+      _isManuallySelected = true;
       final match = RegExp(r'(\d{4}-\d{2}-\d{2})\s*[\u2014\u2013\u002d-]\s*(\d{4}-\d{2}-\d{2})').firstMatch(rangeStr);
       if (match != null) {
         _startDate = match.group(1)!;
@@ -174,18 +177,9 @@ class _DatedShiftAssignmentScreenState
         _dateRange = rangeStr;
       }
     } else {
-      String? businessDate = widget.branchBusinessDate;
-      if ((businessDate == null || businessDate.isEmpty) &&
-          getIt.isRegistered<SharedPreferencesHelper>()) {
-        try {
-          final prefs = getIt<SharedPreferencesHelper>();
-          businessDate = prefs.getString('branch_business_date') ??
-              prefs.getString('business_date') ??
-              prefs.getString('workday_date');
-        } catch (_) {}
-      }
-      final ref = businessDate != null
-          ? DateTime.tryParse(businessDate)
+      _isManuallySelected = false;
+      final ref = widget.branchBusinessDate != null
+          ? DateTime.tryParse(widget.branchBusinessDate!)
           : DateTime.now().toUtc().add(const Duration(hours: 3));
       final sun = _computeCurrentWeekSunday(ref);
       final sat = sun.add(const Duration(days: 6));
@@ -213,11 +207,20 @@ class _DatedShiftAssignmentScreenState
 
     if (widget.onFetchRoster != null) {
       try {
+        if (!_isManuallySelected && widget.initialDateRange == null && widget.onFetchSchedulingRange != null) {
+          final range = await widget.onFetchSchedulingRange!();
+          if (range['start_date'] != null && range['end_date'] != null) {
+            _startDate = range['start_date']!;
+            _endDate = range['end_date']!;
+            _dateRange = '$_startDate — $_endDate';
+          }
+        }
         final slots = await widget.onFetchRoster!(_startDate, _endDate);
         if (mounted) {
           setState(() {
             _templates = slots;
             _isLoading = false;
+            _statusMessage = null;
           });
         }
       } catch (e) {
@@ -233,15 +236,36 @@ class _DatedShiftAssignmentScreenState
 
     if (_effectiveDio != null) {
       try {
+        final queryParams = <String, dynamic>{};
+        if (_isManuallySelected || widget.initialDateRange != null) {
+          queryParams['start_date'] = _startDate;
+          queryParams['end_date'] = _endDate;
+        }
+
         final response = await _effectiveDio!.get(
           '${ApiEndpoint.branchManagerCashiers}/dated-roster',
-          queryParameters: {
-            'start_date': _startDate,
-            'end_date': _endDate,
-          },
+          queryParameters: queryParams.isNotEmpty ? queryParams : null,
         );
 
         final data = response.data['data'] as Map<String, dynamic>? ?? {};
+
+        // If the manager has not manually navigated, adopt the server-driven scheduling calendar
+        if (!_isManuallySelected && widget.initialDateRange == null) {
+          final serverStart = data['start_date']?.toString() ??
+              (data['scheduling_calendar'] is Map
+                  ? data['scheduling_calendar']['default_start_date']?.toString()
+                  : null);
+          final serverEnd = data['end_date']?.toString() ??
+              (data['scheduling_calendar'] is Map
+                  ? data['scheduling_calendar']['default_end_date']?.toString()
+                  : null);
+          if (serverStart != null && serverEnd != null) {
+            _startDate = serverStart;
+            _endDate = serverEnd;
+            _dateRange = '$_startDate — $_endDate';
+          }
+        }
+
         final templatesList = data['templates'] as List<dynamic>? ?? [];
         final rawRoster = data['roster'];
         final Map<String, dynamic> rosterMap = rawRoster is Map<String, dynamic>
@@ -361,6 +385,7 @@ class _DatedShiftAssignmentScreenState
           setState(() {
             _templates = parsedSlots;
             _isLoading = false;
+            _statusMessage = null;
           });
         }
       } catch (e) {
@@ -384,6 +409,7 @@ class _DatedShiftAssignmentScreenState
           "${e.year}-${e.month.toString().padLeft(2, '0')}-${e.day.toString().padLeft(2, '0')}";
 
       setState(() {
+        _isManuallySelected = true;
         _startDate = sStr;
         _endDate = eStr;
         _dateRange = '$sStr — $eStr';
