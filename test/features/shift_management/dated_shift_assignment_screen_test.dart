@@ -1,10 +1,54 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:assab/core/responsive/app_responsive.dart';
 import 'package:assab/core/theme/light_theme.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/screens/dated_shift_assignment_screen.dart';
 import 'package:assab/generated/l10n.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// Test HTTP adapter to record raw HTTP requests and verify URL resolution
+class TestHttpAdapter implements HttpClientAdapter {
+  final Future<ResponseBody> Function(RequestOptions options)? onFetch;
+  final List<RequestOptions> recordedRequests = [];
+
+  TestHttpAdapter({this.onFetch});
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    recordedRequests.add(options);
+    if (onFetch != null) {
+      return onFetch!(options);
+    }
+    return ResponseBody.fromString(
+      jsonEncode({
+        'success': true,
+        'message': 'OK',
+        'data': {
+          'branch_id': 'branch-1',
+          'start_date': '2026-11-15',
+          'end_date': '2026-11-21',
+          'templates': [],
+          'roster': {},
+        },
+      }),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
 
 Widget _buildTestApp(Widget child, {Locale locale = const Locale('ar')}) {
   return MaterialApp(
@@ -98,9 +142,6 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Initial state:
-      // tpl-1 -> محمد أحمد السعيد
-      // tpl-2 -> عبدالله إبراهيم محمود
       expect(find.byKey(const Key('txt_cashier_name_tpl-1')), findsOneWidget);
       expect(
         tester
@@ -274,7 +315,6 @@ void main() {
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      // Simulated remote backend repository
       List<DatedTemplateSlot> backendRoster = [
         const DatedTemplateSlot(
           templateId: 'tpl-1',
@@ -308,7 +348,6 @@ void main() {
         String date,
         bool fullWeek,
       ) async {
-        // Backend updates persisted state
         final idxA = backendRoster.indexWhere((t) => t.templateId == sA);
         final idxB = backendRoster.indexWhere((t) => t.templateId == sB);
         final itemA = backendRoster[idxA];
@@ -356,7 +395,7 @@ void main() {
         'عبدالله إبراهيم محمود',
       );
 
-      // 3. Reopen screen (simulating navigating away and back to datedShiftAssignmentScreen)
+      // 3. Reopen screen
       await tester.pumpWidget(
         _buildTestApp(
           DatedShiftAssignmentScreen(
@@ -413,6 +452,439 @@ void main() {
       expect(requestedStart, '2026-11-22');
       expect(find.textContaining('2026-11-22'), findsOneWidget);
 
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('API relative paths: Dio request URLs, methods, and parameters match app contract',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'OK',
+              'data': {
+                'branch_id': 'branch-1',
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'templates': [
+                  {
+                    'id': 'tpl-1',
+                    'name': 'وردية الصباح الأولى',
+                    'start_time': '08:00:00',
+                    'end_time': '16:00:00',
+                  },
+                  {
+                    'id': 'tpl-2',
+                    'name': 'وردية المساء الثانية',
+                    'start_time': '16:00:00',
+                    'end_time': '00:00:00',
+                  },
+                ],
+                'roster': {
+                  '2026-11-15_tpl-1': {
+                    'cashier_id': 'csh-1',
+                    'cashier_name': 'محمد أحمد السعيد',
+                    'status': 'not_started',
+                    'shift_date': '2026-11-15',
+                    'shift_id': 'tpl-1',
+                    'can_swap': true,
+                  },
+                  '2026-11-15_tpl-2': {
+                    'cashier_id': 'csh-2',
+                    'cashier_name': 'عبدالله إبراهيم محمود',
+                    'status': 'not_started',
+                    'shift_date': '2026-11-15',
+                    'shift_id': 'tpl-2',
+                    'can_swap': true,
+                  },
+                },
+              },
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          );
+        }
+
+        if (options.path.contains('swap-shifts')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'تم تبديل الكاشيرين بنجاح وحفظ السجل المؤرّخ ذرياً.',
+              'data': {},
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          );
+        }
+
+        return ResponseBody.fromString('{"success": true}', 200);
+      });
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+      dio.httpClientAdapter = adapter;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(dio: dio),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify GET dated-roster was called with clean relative path and query parameters
+      expect(adapter.recordedRequests.isNotEmpty, isTrue);
+      final getReq = adapter.recordedRequests.first;
+      expect(getReq.method, 'GET');
+      expect(
+        getReq.uri.toString(),
+        'https://erp.assab.sa/api/v1/branch-manager/cashiers/dated-roster?start_date=2026-11-15&end_date=2026-11-21',
+      );
+      expect(getReq.path, 'branch-manager/cashiers/dated-roster');
+      expect(getReq.queryParameters['start_date'], '2026-11-15');
+      expect(getReq.queryParameters['end_date'], '2026-11-21');
+
+      // Now perform swap between tpl-1 and tpl-2
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-2')));
+      await tester.pumpAndSettle();
+
+      // Verify POST swap-shifts was called with clean relative path
+      final swapReq = adapter.recordedRequests.firstWhere(
+        (r) => r.path.contains('swap-shifts'),
+      );
+      expect(swapReq.method, 'POST');
+      expect(
+        swapReq.uri.toString(),
+        'https://erp.assab.sa/api/v1/branch-manager/cashiers/swap-shifts',
+      );
+      expect(swapReq.data['cashier_a_id'], 'csh-1');
+      expect(swapReq.data['shift_a_id'], 'tpl-1');
+      expect(swapReq.data['cashier_b_id'], 'csh-2');
+      expect(swapReq.data['shift_b_id'], 'tpl-2');
+      expect(swapReq.data['shift_date'], '2026-11-15');
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('multi-day period: displays distinct dates and action on day 2 sends day 2 date',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      String? capturedDate;
+
+      final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'OK',
+              'data': {
+                'branch_id': 'branch-1',
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'templates': [
+                  {
+                    'id': 'tpl-1',
+                    'name': 'وردية الصباح الأولى',
+                    'start_time': '08:00:00',
+                    'end_time': '16:00:00',
+                  },
+                  {
+                    'id': 'tpl-2',
+                    'name': 'وردية المساء الثانية',
+                    'start_time': '16:00:00',
+                    'end_time': '00:00:00',
+                  },
+                ],
+                'roster': {
+                  '2026-11-15_tpl-1': {
+                    'cashier_id': 'csh-1',
+                    'cashier_name': 'كاشير يوم 15 قالب 1',
+                    'status': 'not_started',
+                    'shift_date': '2026-11-15',
+                    'shift_id': 'tpl-1',
+                    'can_swap': true,
+                  },
+                  '2026-11-15_tpl-2': {
+                    'cashier_id': 'csh-2',
+                    'cashier_name': 'كاشير يوم 15 قالب 2',
+                    'status': 'not_started',
+                    'shift_date': '2026-11-15',
+                    'shift_id': 'tpl-2',
+                    'can_swap': true,
+                  },
+                  '2026-11-16_tpl-1': {
+                    'cashier_id': 'csh-3',
+                    'cashier_name': 'كاشير يوم 16 قالب 1',
+                    'status': 'not_started',
+                    'shift_date': '2026-11-16',
+                    'shift_id': 'tpl-1',
+                    'can_swap': true,
+                  },
+                  '2026-11-16_tpl-2': {
+                    'cashier_id': 'csh-4',
+                    'cashier_name': 'كاشير يوم 16 قالب 2',
+                    'status': 'not_started',
+                    'shift_date': '2026-11-16',
+                    'shift_id': 'tpl-2',
+                    'can_swap': true,
+                  },
+                },
+              },
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          );
+        }
+
+        if (options.path.contains('swap-shifts')) {
+          capturedDate = options.data['shift_date']?.toString();
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'تم تبديل الكاشيرين بنجاح وحفظ السجل المؤرّخ ذرياً.',
+              'data': {},
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          );
+        }
+
+        return ResponseBody.fromString('{"success": true}', 200);
+      });
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+      dio.httpClientAdapter = adapter;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(dio: dio),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify day chips are rendered for both days
+      expect(find.byKey(const Key('chip_day_2026-11-15')), findsOneWidget);
+      expect(find.byKey(const Key('chip_day_2026-11-16')), findsOneWidget);
+
+      // Select Day 2 (2026-11-16)
+      await tester.ensureVisible(find.byKey(const Key('chip_day_2026-11-16')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('chip_day_2026-11-16')));
+      await tester.pumpAndSettle();
+
+      // Verify day 2 cashier names are visible
+      expect(find.text('كاشير يوم 16 قالب 1'), findsOneWidget);
+      expect(find.text('كاشير يوم 16 قالب 2'), findsOneWidget);
+
+      // Execute swap on day 2
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('btn_swap_tpl-2')));
+      await tester.pumpAndSettle();
+
+      // Assert request sent day 2 date
+      expect(capturedDate, '2026-11-16');
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('MT-21: manager assigns authorized cashier to unassigned template via assign-shifts',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      RequestOptions? recordedAssignReq;
+
+      final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.contains('dated-roster')) {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'OK',
+              'data': {
+                'branch_id': 'branch-1',
+                'start_date': '2026-11-15',
+                'end_date': '2026-11-21',
+                'templates': [
+                  {
+                    'id': 'tpl-unassigned',
+                    'name': 'وردية شاغرة بلا كاشير',
+                    'start_time': '08:00:00',
+                    'end_time': '16:00:00',
+                  },
+                ],
+                'roster': {
+                  '2026-11-15_tpl-unassigned': {
+                    'cashier_id': null,
+                    'cashier_name': null,
+                    'status': 'not_started',
+                    'shift_date': '2026-11-15',
+                    'shift_id': 'tpl-unassigned',
+                    'can_swap': false,
+                  },
+                },
+              },
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          );
+        }
+
+        if (options.path.contains('assign-shifts')) {
+          recordedAssignReq = options;
+          return ResponseBody.fromString(
+            jsonEncode({
+              'success': true,
+              'message': 'تم تعيين الكاشير للقالب بنجاح.',
+              'data': {},
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          );
+        }
+
+        return ResponseBody.fromString('{"success": true}', 200);
+      });
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+      dio.httpClientAdapter = adapter;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(
+            dio: dio,
+            onFetchAvailableCashiers: () async {
+              return [
+                {'id': 'csh-99', 'name': 'عبدالمحسن فهد التميمي'},
+              ];
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify template displays 'غير معيّن' and 'تعيين كاشير' button
+      expect(find.text('غير معيّن'), findsOneWidget);
+      expect(find.byKey(const Key('btn_assign_tpl-unassigned')), findsOneWidget);
+
+      // Tap 'تعيين كاشير'
+      await tester.tap(find.byKey(const Key('btn_assign_tpl-unassigned')));
+      await tester.pumpAndSettle();
+
+      // Bottom sheet is visible
+      expect(find.byKey(const Key('txt_dialog_assign_title')), findsOneWidget);
+      expect(find.byKey(const Key('tile_cashier_csh-99')), findsOneWidget);
+
+      // Select cashier
+      await tester.tap(find.byKey(const Key('tile_cashier_csh-99')));
+      await tester.pumpAndSettle();
+
+      // Verify assign-shifts was called via Dio
+      expect(recordedAssignReq, isNotNull);
+      expect(recordedAssignReq!.method, 'POST');
+      expect(
+        recordedAssignReq!.uri.toString(),
+        'https://erp.assab.sa/api/v1/branch-manager/cashiers/assign-shifts',
+      );
+      expect(recordedAssignReq!.data['cashier_id'], 'csh-99');
+      expect(recordedAssignReq!.data['shift_ids'], ['tpl-unassigned']);
+      expect(recordedAssignReq!.data['shift_date'], '2026-11-15');
+
+      // Verify UI updated
+      expect(find.text('عبدالمحسن فهد التميمي'), findsOneWidget);
+      expect(find.text('جاهز للتعيين / التبديل'), findsOneWidget);
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('empty roster response displays clean empty state without falling back to mock fixtures',
+        (tester) async {
+      tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final adapter = TestHttpAdapter(onFetch: (options) async {
+        return ResponseBody.fromString(
+          jsonEncode({
+            'success': true,
+            'message': 'OK',
+            'data': {
+              'branch_id': 'branch-1',
+              'start_date': '2026-11-15',
+              'end_date': '2026-11-21',
+              'templates': [],
+              'roster': {},
+            },
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType],
+          },
+        );
+      });
+
+      final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+      dio.httpClientAdapter = adapter;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          DatedShiftAssignmentScreen(dio: dio),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify empty state is displayed
+      expect(find.byKey(const Key('empty_roster_state')), findsOneWidget);
+      expect(find.text('لا توجد قوالب أو ورديات في هذه الفترة'), findsOneWidget);
+
+      // Verify no mock fixtures are rendered
+      expect(find.byKey(const Key('card_template_tpl-1')), findsNothing);
+      expect(find.byKey(const Key('card_template_tpl-2')), findsNothing);
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('responsive verification on 820px tablet with zero RenderFlex overflow',
+        (tester) async {
+      tester.view.physicalSize = const Size(820 * 2.0, 1180 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          const DatedShiftAssignmentScreen(
+            initialDateRange: '2026-11-15 — 2026-11-21',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('txt_screen_title')), findsOneWidget);
+      expect(find.byKey(const Key('card_template_tpl-1')), findsOneWidget);
+      expect(find.byKey(const Key('card_template_tpl-2')), findsOneWidget);
+
+      // Zero RenderFlex overflow on 820px tablet
       expect(tester.takeException(), isNull);
     });
   });
