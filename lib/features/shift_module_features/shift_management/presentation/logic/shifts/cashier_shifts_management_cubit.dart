@@ -4,7 +4,9 @@ import 'package:injectable/injectable.dart';
 import '../../../../../../core/enums/shift_status/shift_status.dart';
 import '../../../../../../core/helpers/paginator.dart';
 import '../../../../../../core/helpers/safe_cubit.dart';
+import '../../../../../../core/helpers/shift_start_window_helper.dart';
 import '../../../../../../core/utils/api_result.dart';
+import '../../../domain/entity/shift/shift_entity.dart';
 import '../../../data/mapper/shift/shift_mapper.dart';
 import '../../../data/model/shift/shift_model.dart';
 import '../../../data/model/shift/shift_response_model.dart';
@@ -268,6 +270,17 @@ class CashierShiftsManagementCubit
     selector: (s) => s.pending,
     updater: (tab) => state.copyWith(pending: tab),
     loadMore: loadMore,
+    itemTransform: (entities) {
+      return entities
+          .where((e) => ShiftStartWindowHelper.isWithin7DayWindow(e.shiftDate))
+          .toList()
+        ..sort((a, b) => ShiftStartWindowHelper.compareShiftsChronologically(
+              dateA: a.shiftDate,
+              startTimeA: a.shiftTimeDetails.startTime,
+              dateB: b.shiftDate,
+              startTimeB: b.shiftTimeDetails.startTime,
+            ));
+    },
   );
 
   /// ===============================
@@ -307,6 +320,7 @@ class CashierShiftsManagementCubit
     required CashierShiftsManagementState Function(CashierShiftTabState)
     updater,
     required bool loadMore,
+    List<ShiftEntity> Function(List<ShiftEntity>)? itemTransform,
   }) async {
     final tabState = selector(state);
 
@@ -324,11 +338,15 @@ class CashierShiftsManagementCubit
         emit(updater(tabState.copyWith(isLoading: false, failure: f)));
       },
       success: (items) {
+        var entities = items.map((e) => e.toEntity()).toList();
+        if (itemTransform != null) {
+          entities = itemTransform(entities);
+        }
         emit(
           updater(
             tabState.copyWith(
               isLoading: false,
-              items: items.map((e) => e.toEntity()).toList(),
+              items: entities,
               hasMore: paginator.hasMore,
             ),
           ),

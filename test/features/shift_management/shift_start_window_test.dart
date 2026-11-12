@@ -220,6 +220,53 @@ void main() {
       expect(status.canStart, isFalse);
       expect(status.disabledReason, contains('انتهت نافذة بدء الوردية'));
     });
+
+    test('7-day rolling window: strictly includes today through today+6 inclusive, excludes past and future', () {
+      final now = DateTime(2026, 11, 12, 14, 30); // Thursday Nov 12, 2026
+
+      // Past dates: Nov 10, Nov 11 -> must be FALSE
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-10', referenceNow: now), isFalse);
+      expect(ShiftStartWindowHelper.isWithin7DayWindow(DateTime(2026, 11, 10), referenceNow: now), isFalse);
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-11', referenceNow: now), isFalse);
+      expect(ShiftStartWindowHelper.isWithin7DayWindow(DateTime(2026, 11, 11), referenceNow: now), isFalse);
+
+      // Current 7-day window (Nov 12 to Nov 18 inclusive) -> must be TRUE
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-12', referenceNow: now), isTrue); // Today (Day 0)
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-13', referenceNow: now), isTrue); // Day 1
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-14', referenceNow: now), isTrue); // Day 2
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-15', referenceNow: now), isTrue); // Day 3
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-16', referenceNow: now), isTrue); // Day 4
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-17', referenceNow: now), isTrue); // Day 5
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-18', referenceNow: now), isTrue); // Day 6 (end of window)
+
+      // Distant future (> day 6): Nov 19 -> must be FALSE
+      expect(ShiftStartWindowHelper.isWithin7DayWindow('2026-11-19', referenceNow: now), isFalse);
+      expect(ShiftStartWindowHelper.isWithin7DayWindow(DateTime(2026, 11, 19), referenceNow: now), isFalse);
+    });
+
+    test('compareShiftsChronologically orders by date ASC then startTime ASC', () {
+      // Different dates
+      expect(
+        ShiftStartWindowHelper.compareShiftsChronologically(
+          dateA: '2026-11-12',
+          startTimeA: '14:00',
+          dateB: '2026-11-13',
+          startTimeB: '10:00',
+        ),
+        lessThan(0),
+      );
+
+      // Same date, different times
+      expect(
+        ShiftStartWindowHelper.compareShiftsChronologically(
+          dateA: '2026-11-12',
+          startTimeA: '10:00',
+          dateB: '2026-11-12',
+          startTimeB: '14:00',
+        ),
+        lessThan(0),
+      );
+    });
   });
 
   group('CashierStartShiftButton Widget Tests', () {

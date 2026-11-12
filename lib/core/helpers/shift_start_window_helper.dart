@@ -145,6 +145,59 @@ class ShiftStartWindowHelper {
     );
   }
 
+  /// Returns whether a given shiftDate (DateTime or String "YYYY-MM-DD") falls
+  /// strictly within the 7-day rolling window (today through today+6 inclusive)
+  /// according to server branch time (Asia/Riyadh, UTC+3).
+  static bool isWithin7DayWindow(dynamic shiftDate, {DateTime? referenceNow}) {
+    final current = referenceNow ?? ShiftStartWindowHelper.now;
+    final today = DateTime(current.year, current.month, current.day);
+    final maxDate = DateTime(today.year, today.month, today.day + 6, 23, 59, 59, 999);
+
+    DateTime? targetDate;
+    if (shiftDate is DateTime) {
+      targetDate = DateTime(shiftDate.year, shiftDate.month, shiftDate.day);
+    } else if (shiftDate is String && shiftDate.isNotEmpty) {
+      final parsed = DateTime.tryParse(shiftDate);
+      if (parsed != null) {
+        targetDate = DateTime(parsed.year, parsed.month, parsed.day);
+      }
+    }
+
+    if (targetDate == null) return false;
+    return !targetDate.isBefore(today) && !targetDate.isAfter(maxDate);
+  }
+
+  /// Chronologically compares two shifts by date ASC then start time ASC.
+  static int compareShiftsChronologically({
+    required dynamic dateA,
+    required String? startTimeA,
+    required dynamic dateB,
+    required String? startTimeB,
+  }) {
+    DateTime? dtA;
+    if (dateA is DateTime) {
+      dtA = DateTime(dateA.year, dateA.month, dateA.day);
+    } else if (dateA is String && dateA.isNotEmpty) {
+      dtA = DateTime.tryParse(dateA);
+    }
+
+    DateTime? dtB;
+    if (dateB is DateTime) {
+      dtB = DateTime(dateB.year, dateB.month, dateB.day);
+    } else if (dateB is String && dateB.isNotEmpty) {
+      dtB = DateTime.tryParse(dateB);
+    }
+
+    if (dtA != null && dtB != null) {
+      final comp = dtA.compareTo(dtB);
+      if (comp != 0) return comp;
+    }
+
+    final startA = startTimeA ?? '';
+    final startB = startTimeB ?? '';
+    return startA.compareTo(startB);
+  }
+
   static TimeOfDay _parseTime(String? timeStr) {
     if (timeStr == null || timeStr.trim().isEmpty || timeStr == 'N/A') {
       return const TimeOfDay(hour: 0, minute: 0);

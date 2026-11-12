@@ -1,3 +1,4 @@
+import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:assab/features/cashier_my_shifts/data/repository/cashier_my_shifts_repo.dart';
 import 'package:injectable/injectable.dart';
 
@@ -114,15 +115,28 @@ class CashierMyShiftsCubit extends SafeCubit<CashierMyShiftsState> {
           pending: state.pending.copyWith(isLoading: false, failure: f),
         ),
       ),
-      success: (items) => emit(
-        state.copyWith(
-          pending: state.pending.copyWith(
-            isLoading: false,
-            items: items.map((e) => e.toEntity()).toList(),
-            hasMore: pendingPaginator.hasMore,
+      success: (items) {
+        final filteredEntities = items
+            .map((e) => e.toEntity())
+            .where((e) => ShiftStartWindowHelper.isWithin7DayWindow(e.date))
+            .toList()
+          ..sort((a, b) => ShiftStartWindowHelper.compareShiftsChronologically(
+                dateA: a.date,
+                startTimeA: a.startTime,
+                dateB: b.date,
+                startTimeB: b.startTime,
+              ));
+
+        emit(
+          state.copyWith(
+            pending: state.pending.copyWith(
+              isLoading: false,
+              items: filteredEntities,
+              hasMore: pendingPaginator.hasMore,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
