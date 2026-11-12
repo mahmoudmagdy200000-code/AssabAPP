@@ -16,6 +16,7 @@ class DatedTemplateSlot {
   final String startTime;
   final String endTime;
   final String shiftDate;
+  final String? cashierShiftId;
   final String? cashierId;
   final String? cashierName;
   final String status; // 'not_started', 'in_progress', 'completed'
@@ -27,6 +28,7 @@ class DatedTemplateSlot {
     required this.startTime,
     required this.endTime,
     this.shiftDate = '2026-11-15',
+    this.cashierShiftId,
     this.cashierId,
     this.cashierName,
     this.status = 'not_started',
@@ -42,6 +44,7 @@ class DatedTemplateSlot {
     String? startTime,
     String? endTime,
     String? shiftDate,
+    String? cashierShiftId,
     String? cashierId,
     String? cashierName,
     String? status,
@@ -53,6 +56,7 @@ class DatedTemplateSlot {
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       shiftDate: shiftDate ?? this.shiftDate,
+      cashierShiftId: cashierShiftId ?? this.cashierShiftId,
       cashierId: cashierId ?? this.cashierId,
       cashierName: cashierName ?? this.cashierName,
       status: status ?? this.status,
@@ -190,45 +194,62 @@ class _DatedShiftAssignmentScreenState
         final templatesList = data['templates'] as List<dynamic>? ?? [];
         final rosterMap = data['roster'] as Map<String, dynamic>? ?? {};
 
-        final Set<String> distinctDates = {};
+        // Generate all dates in the requested range [_startDate, _endDate]
+        final List<String> allDates = [];
+        try {
+          final start = DateTime.parse(_startDate);
+          final end = DateTime.parse(_endDate);
+          var curr = start;
+          while (!curr.isAfter(end)) {
+            final dStr =
+                "${curr.year}-${curr.month.toString().padLeft(2, '0')}-${curr.day.toString().padLeft(2, '0')}";
+            allDates.add(dStr);
+            curr = curr.add(const Duration(days: 1));
+          }
+        } catch (_) {
+          allDates.add(_startDate);
+        }
+
         for (final key in rosterMap.keys) {
           final parts = key.toString().split('_');
-          if (parts.isNotEmpty) {
-            distinctDates.add(parts[0]);
+          if (parts.isNotEmpty && !allDates.contains(parts[0])) {
+            allDates.add(parts[0]);
           }
         }
-        if (distinctDates.isEmpty && templatesList.isNotEmpty) {
-          distinctDates.add(_startDate);
-        }
+        allDates.sort();
 
-        final sortedDates = distinctDates.toList()..sort();
         final List<DatedTemplateSlot> parsedSlots = [];
 
-        for (final dateStr in sortedDates) {
-          for (final t in templatesList) {
-            final tId = t['id'].toString();
-            final tName = t['name']?.toString() ?? 'قالب وردية';
-            final sTime =
-                (t['start_time']?.toString() ?? '08:00:00').substring(0, 5);
-            final eTime =
-                (t['end_time']?.toString() ?? '16:00:00').substring(0, 5);
+        // If templatesList is empty for this branch, parsedSlots remains empty leading to empty_roster_state
+        if (templatesList.isNotEmpty) {
+          for (final dateStr in allDates) {
+            for (final t in templatesList) {
+              final tId = t['id'].toString();
+              final tName = t['name']?.toString() ?? 'قالب وردية';
+              final sTime =
+                  (t['start_time']?.toString() ?? '08:00:00').substring(0, 5);
+              final eTime =
+                  (t['end_time']?.toString() ?? '16:00:00').substring(0, 5);
 
-            final key = '${dateStr}_$tId';
-            final rEntry = rosterMap[key] as Map<String, dynamic>?;
-            final isAssigned = rEntry?['cashier_id'] != null;
+              final key = '${dateStr}_$tId';
+              final rEntry = rosterMap[key] as Map<String, dynamic>?;
+              final isAssigned = rEntry?['cashier_id'] != null;
 
-            parsedSlots.add(DatedTemplateSlot(
-              templateId: tId,
-              templateName: tName,
-              startTime: sTime,
-              endTime: eTime,
-              shiftDate: dateStr,
-              cashierId: rEntry?['cashier_id']?.toString(),
-              cashierName: rEntry?['cashier_name']?.toString(),
-              status: rEntry?['status']?.toString() ?? 'not_started',
-              hasFinancialEvidence: rEntry?['has_financial_evidence'] as bool? ??
-                  (!(rEntry?['can_swap'] as bool? ?? true) && isAssigned),
-            ));
+              parsedSlots.add(DatedTemplateSlot(
+                templateId: tId,
+                templateName: tName,
+                startTime: sTime,
+                endTime: eTime,
+                shiftDate: dateStr,
+                cashierShiftId: rEntry?['cashier_shift_id']?.toString() ??
+                    rEntry?['id']?.toString(),
+                cashierId: rEntry?['cashier_id']?.toString(),
+                cashierName: rEntry?['cashier_name']?.toString(),
+                status: rEntry?['status']?.toString() ?? 'not_started',
+                hasFinancialEvidence: rEntry?['has_financial_evidence'] as bool? ??
+                    (!(rEntry?['can_swap'] as bool? ?? true) && isAssigned),
+              ));
+            }
           }
         }
 
@@ -534,122 +555,22 @@ class _DatedShiftAssignmentScreenState
     });
   }
 
-  void _showAssignCashierDialog(DatedTemplateSlot slot) async {
-    List<Map<String, dynamic>> cashiersList = [];
-
-    if (widget.onFetchAvailableCashiers != null) {
-      try {
-        cashiersList = await widget.onFetchAvailableCashiers!();
-      } catch (_) {}
-    } else if (_effectiveDio != null) {
-      try {
-        final res = await _effectiveDio!.get(
-          '${ApiEndpoint.branchManagerCashiers}/available-cashiers',
-          queryParameters: {
-            'shift_id': slot.templateId,
-            'shift_date': slot.shiftDate,
-          },
-        );
-        final list = res.data['data'] as List<dynamic>? ?? [];
-        cashiersList = list.map((c) => {
-          'id': c['id']?.toString() ?? '',
-          'name': c['name']?.toString() ?? 'كاشير مصرح',
-        }).toList();
-      } catch (_) {
-        // Fallback default selectable cashiers
-        cashiersList = [
-          {'id': 'csh-10', 'name': 'سعد ناصر الدوسري'},
-          {'id': 'csh-11', 'name': 'فهد عبدالمحسن العتيبي'},
-        ];
-      }
-    } else {
-      cashiersList = [
-        {'id': 'csh-10', 'name': 'سعد ناصر الدوسري'},
-        {'id': 'csh-11', 'name': 'فهد عبدالمحسن العتيبي'},
-      ];
-    }
-
-    if (!mounted) return;
-
+  void _showAssignCashierDialog(DatedTemplateSlot slot) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'اختر كاشيراً لتعيينه',
-                      key: const Key('txt_dialog_assign_title'),
-                      style: AppStyles.s16W600.copyWith(
-                        color: context.customColor.text1,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(ctx),
-                    ),
-                  ],
-                ),
-                Text(
-                  '${slot.templateName} (${slot.shiftDate})',
-                  style: AppStyles.s12W400.copyWith(
-                    color: context.customColor.text3,
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                if (cashiersList.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24.h),
-                    child: Center(
-                      child: Text(
-                        'لا يوجد كاشيرات متاحين حالياً',
-                        style: AppStyles.s14W400.copyWith(
-                          color: context.customColor.text3,
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  ...cashiersList.map((c) {
-                    final cId = c['id'].toString();
-                    final cName = c['name'].toString();
-                    return ListTile(
-                      key: Key('tile_cashier_$cId'),
-                      leading: CircleAvatar(
-                        backgroundColor:
-                            context.theme.primaryColor.withValues(alpha: 0.1),
-                        child: Icon(
-                          Icons.person,
-                          color: context.theme.primaryColor,
-                          size: 20.w,
-                        ),
-                      ),
-                      title: Text(
-                        cName,
-                        style: AppStyles.s14W500.copyWith(
-                          color: context.customColor.text1,
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        _executeAssign(slot, cId, cName);
-                      },
-                    );
-                  }),
-              ],
-            ),
-          ),
+        return _AssignCashierModalContent(
+          slot: slot,
+          effectiveDio: _effectiveDio,
+          onFetchAvailableCashiers: widget.onFetchAvailableCashiers,
+          onCashierSelected: (cId, cName) {
+            _executeAssign(slot, cId, cName);
+          },
         );
       },
     );
@@ -1165,6 +1086,344 @@ class _DatedShiftAssignmentScreenState
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet modal content for selecting an available cashier
+class _AssignCashierModalContent extends StatefulWidget {
+  final DatedTemplateSlot slot;
+  final Dio? effectiveDio;
+  final Future<List<Map<String, dynamic>>> Function()? onFetchAvailableCashiers;
+  final void Function(String cashierId, String cashierName) onCashierSelected;
+
+  const _AssignCashierModalContent({
+    required this.slot,
+    required this.effectiveDio,
+    required this.onFetchAvailableCashiers,
+    required this.onCashierSelected,
+  });
+
+  @override
+  State<_AssignCashierModalContent> createState() =>
+      _AssignCashierModalContentState();
+}
+
+class _AssignCashierModalContentState
+    extends State<_AssignCashierModalContent> {
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<Map<String, dynamic>> _cashiers = [];
+  String? _selectedCashierId;
+  String? _selectedCashierName;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCashiers();
+  }
+
+  Future<void> _fetchCashiers() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _selectedCashierId = null;
+      _selectedCashierName = null;
+    });
+
+    if (widget.onFetchAvailableCashiers != null) {
+      try {
+        final list = await widget.onFetchAvailableCashiers!();
+        if (mounted) {
+          setState(() {
+            _cashiers = list;
+            _isLoading = false;
+          });
+        }
+        return;
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _errorMessage =
+                'تعذر تحميل الكاشيرات المتاحين: ${e.toString().replaceAll("Exception: ", "")}';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+    }
+
+    if (widget.effectiveDio != null) {
+      try {
+        final queryParams = <String, dynamic>{
+          'shift_date': widget.slot.shiftDate,
+        };
+        if (widget.slot.cashierShiftId != null &&
+            widget.slot.cashierShiftId!.isNotEmpty) {
+          queryParams['shift_id'] = widget.slot.cashierShiftId;
+        } else {
+          queryParams['template_id'] = widget.slot.templateId;
+          queryParams['shift_template_id'] = widget.slot.templateId;
+        }
+
+        final res = await widget.effectiveDio!.get(
+          '${ApiEndpoint.branchManagerCashiers}/available-cashiers',
+          queryParameters: queryParams,
+        );
+
+        final list = res.data['data'] as List<dynamic>? ?? [];
+        final parsed = list.map((c) => {
+              'id': c['id']?.toString() ?? '',
+              'name': c['name']?.toString() ?? 'كاشير مصرح',
+              'is_available': c['is_available'] as bool? ??
+                  !(c['disabled'] as bool? ?? false),
+              'disabled': c['disabled'] as bool? ?? false,
+              'reason_disabled': c['reason_disabled']?.toString(),
+            }).toList();
+
+        if (mounted) {
+          setState(() {
+            _cashiers = parsed;
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'تعذر تحميل الكاشيرات المتاحين من الخادم.';
+            _isLoading = false;
+          });
+        }
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _cashiers = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'اختر كاشيراً لتعيينه',
+                      key: const Key('txt_dialog_assign_title'),
+                      style: AppStyles.s16W600.copyWith(
+                        color: context.customColor.text1,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              Text(
+                '${widget.slot.templateName} (${widget.slot.shiftDate})',
+                style: AppStyles.s12W400.copyWith(
+                  color: context.customColor.text3,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              if (_isLoading)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32.h),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      key: const Key('progress_available_cashiers'),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        context.theme.primaryColor,
+                      ),
+                    ),
+                  ),
+                )
+              else if (_errorMessage != null)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24.h),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.red.shade700,
+                          size: 36.w,
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          _errorMessage!,
+                          key: const Key('txt_error_available_cashiers'),
+                          textAlign: TextAlign.center,
+                          style: AppStyles.s13W400.copyWith(
+                            color: Colors.red.shade900,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        ElevatedButton.icon(
+                          key: const Key('btn_retry_available_cashiers'),
+                          onPressed: _fetchCashiers,
+                          icon: const Icon(Icons.refresh, size: 16),
+                          label: const Text('إعادة المحاولة'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (_cashiers.isEmpty)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32.h),
+                  child: Center(
+                    child: Text(
+                      'لا يوجد كاشيرات متاحين حالياً',
+                      key: const Key('txt_empty_available_cashiers'),
+                      style: AppStyles.s14W400.copyWith(
+                        color: context.customColor.text3,
+                      ),
+                    ),
+                  ),
+                )
+              else ...[
+                Flexible(
+                  child: ListView.separated(
+                    key: const Key('list_available_cashiers'),
+                    shrinkWrap: true,
+                    itemCount: _cashiers.length,
+                    separatorBuilder: (_, __) => Divider(height: 1.h),
+                    itemBuilder: (ctx, index) {
+                      final c = _cashiers[index];
+                      final cId = c['id'].toString();
+                      final cName = c['name'].toString();
+                      final isAvailable = (c['is_available'] as bool? ?? true) &&
+                          !(c['disabled'] as bool? ?? false);
+                      final isSelected = _selectedCashierId == cId;
+
+                      return ListTile(
+                        key: Key('tile_cashier_$cId'),
+                        enabled: isAvailable,
+                        selected: isSelected,
+                        selectedTileColor:
+                            context.theme.primaryColor.withValues(alpha: 0.08),
+                        leading: CircleAvatar(
+                          backgroundColor: isAvailable
+                              ? (isSelected
+                                  ? context.theme.primaryColor
+                                  : context.theme.primaryColor
+                                      .withValues(alpha: 0.1))
+                              : Colors.grey.shade200,
+                          child: Icon(
+                            isSelected ? Icons.check : Icons.person,
+                            color: isAvailable
+                                ? (isSelected
+                                    ? Colors.white
+                                    : context.theme.primaryColor)
+                                : Colors.grey,
+                            size: 20.w,
+                          ),
+                        ),
+                        title: Text(
+                          cName,
+                          style: AppStyles.s14W500.copyWith(
+                            color: isAvailable
+                                ? context.customColor.text1
+                                : context.customColor.text3,
+                          ),
+                        ),
+                        subtitle: isAvailable
+                            ? null
+                            : Text(
+                                c['reason_disabled']?.toString() ?? 'غير متاح',
+                                key: Key('tag_unavailable_$cId'),
+                                style: TextStyle(
+                                  color: Colors.red.shade700,
+                                  fontSize: 12.w,
+                                ),
+                              ),
+                        trailing: isAvailable
+                            ? (isSelected
+                                ? Icon(Icons.check_circle,
+                                    color: context.theme.primaryColor)
+                                : null)
+                            : Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  'غير متاح',
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontSize: 11.w,
+                                  ),
+                                ),
+                              ),
+                        onTap: isAvailable
+                            ? () {
+                                setState(() {
+                                  _selectedCashierId = cId;
+                                  _selectedCashierName = cName;
+                                });
+                              }
+                            : null,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    key: const Key('btn_confirm_cashier_assignment'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                    onPressed: _selectedCashierId != null
+                        ? () {
+                            Navigator.pop(context);
+                            widget.onCashierSelected(
+                              _selectedCashierId!,
+                              _selectedCashierName!,
+                            );
+                          }
+                        : null,
+                    child: Text(
+                      'تأكيد التعيين',
+                      style: AppStyles.s14W600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
