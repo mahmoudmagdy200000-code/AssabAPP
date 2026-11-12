@@ -5,6 +5,7 @@ import 'auth_interceptor.dart';
 import 'cancel_token_interceptor.dart';
 import 'dio_logger_interceptor.dart';
 import 'idempotency_interceptor.dart';
+import 'server_time_interceptor.dart';
 
 class DioClient {
   DioClient._();
@@ -28,6 +29,7 @@ class DioClient {
 
     dio.interceptors.addAll([
       ...DioLoggerInterceptor.createInterceptors(),
+      ServerTimeInterceptor(),
       AuthInterceptor(),
       CancelTokenInterceptor(),
       IdempotencyInterceptor(),

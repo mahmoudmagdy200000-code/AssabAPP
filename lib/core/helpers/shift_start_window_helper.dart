@@ -19,9 +19,53 @@ class ShiftStartWindowStatus {
 }
 
 class ShiftStartWindowHelper {
+  static Duration _serverClockSkew = Duration.zero;
+  static bool _isSyncedWithServer = false;
+
+  /// Synchronizes local clock with server time (Asia/Riyadh, UTC+3).
+  static void syncServerTime(DateTime serverDateTime) {
+    final serverUtc = serverDateTime.toUtc();
+    final localUtc = DateTime.now().toUtc();
+    _serverClockSkew = serverUtc.difference(localUtc);
+    _isSyncedWithServer = true;
+  }
+
+  /// Explicitly sets clock skew from raw duration if needed (useful for tests).
+  @visibleForTesting
+  static void setClockSkew(Duration skew) {
+    _serverClockSkew = skew;
+    _isSyncedWithServer = true;
+  }
+
+  /// Resets clock skew back to zero (for clean unit testing).
+  @visibleForTesting
+  static void resetSync() {
+    _serverClockSkew = Duration.zero;
+    _isSyncedWithServer = false;
+  }
+
+  /// Returns whether server time has been synchronized at least once.
+  static bool get isSyncedWithServer => _isSyncedWithServer;
+
+  /// Returns the current synchronized server time in Asia/Riyadh (UTC+3) wall-clock representation.
+  static DateTime get now {
+    final effectiveUtc = DateTime.now().toUtc().add(_serverClockSkew);
+    // Asia/Riyadh is always UTC+3 (no daylight saving time)
+    final riyadh = effectiveUtc.add(const Duration(hours: 3));
+    return DateTime(
+      riyadh.year,
+      riyadh.month,
+      riyadh.day,
+      riyadh.hour,
+      riyadh.minute,
+      riyadh.second,
+      riyadh.millisecond,
+    );
+  }
+
   /// Evaluates whether a cashier shift is currently within its unified start window:
   /// - Opens 2 hours before scheduled start time
-  /// - Closes 2 hours after scheduled end time
+  /// - Closes 2 hours after scheduled end time (strictly disabled at close timestamp)
   /// - Midnight crossing (end_time <= start_time) automatically extends to the following calendar day
   /// - Accepts String ("YYYY-MM-DD") or DateTime for shiftDate
   static ShiftStartWindowStatus evaluate({
@@ -30,7 +74,7 @@ class ShiftStartWindowHelper {
     required String? endTime,
     DateTime? now,
   }) {
-    final current = now ?? DateTime.now();
+    final current = now ?? ShiftStartWindowHelper.now;
 
     DateTime? baseDate;
     if (shiftDate is DateTime) {
@@ -79,7 +123,7 @@ class ShiftStartWindowHelper {
       );
     }
 
-    if (current.isAfter(windowClosesAt)) {
+    if (!current.isBefore(windowClosesAt)) {
       final closesFormatted = _formatTime(windowClosesAt);
       return ShiftStartWindowStatus(
         canStart: false,

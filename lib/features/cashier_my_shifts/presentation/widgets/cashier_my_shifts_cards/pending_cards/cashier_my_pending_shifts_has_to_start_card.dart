@@ -50,7 +50,7 @@ class _CashierMyPendingShiftsHasToStartCardState
   }
 
   void _calculateRemaining() {
-    final now = DateTime.now();
+    final now = ShiftStartWindowHelper.now;
     final status = ShiftStartWindowHelper.evaluate(
       shiftDate: widget.shift.date,
       startTime: widget.shift.startTime,
@@ -67,7 +67,7 @@ class _CashierMyPendingShiftsHasToStartCardState
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final now = DateTime.now();
+      final now = ShiftStartWindowHelper.now;
       final status = ShiftStartWindowHelper.evaluate(
         shiftDate: widget.shift.date,
         startTime: widget.shift.startTime,
@@ -143,7 +143,7 @@ class _CashierMyPendingShiftsHasToStartCardState
                 if (windowStatus.canStart) {
                   secondTitle = 'متاحة للبدء';
                   secondValue = '(النافذة مفتوحة)';
-                } else if (DateTime.now().isBefore(windowStatus.windowOpensAt)) {
+                } else if (ShiftStartWindowHelper.now.isBefore(windowStatus.windowOpensAt)) {
                   secondTitle = formatDuration(value);
                   secondValue = context.tr.toStart;
                 } else {

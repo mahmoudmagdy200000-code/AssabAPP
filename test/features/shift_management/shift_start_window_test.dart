@@ -59,12 +59,20 @@ Widget _buildTestWrapper({
 }
 
 void main() {
+  setUp(() {
+    ShiftStartWindowHelper.resetSync();
+  });
+
+  tearDown(() {
+    ShiftStartWindowHelper.resetSync();
+  });
+
   group('ShiftStartWindowHelper Unit Tests', () {
-    test('Standard shift (10:00 - 12:00) 2-hour window boundary tests', () {
+    test('Standard shift (10:00 - 12:00) 2-hour window boundary tests (closes strictly at 14:00:00)', () {
       final shiftDate = DateTime(2026, 11, 12);
 
-      // 1. Before window (07:59)
-      final early = DateTime(2026, 11, 12, 7, 59);
+      // 1. Before window (07:59:59)
+      final early = DateTime(2026, 11, 12, 7, 59, 59);
       final earlyStatus = ShiftStartWindowHelper.evaluate(
         shiftDate: shiftDate,
         startTime: '10:00',
@@ -74,8 +82,8 @@ void main() {
       expect(earlyStatus.canStart, isFalse);
       expect(earlyStatus.disabledReason, contains('08:00'));
 
-      // 2. Exactly at window open (08:00)
-      final atOpen = DateTime(2026, 11, 12, 8, 0);
+      // 2. Exactly at window open (08:00:00)
+      final atOpen = DateTime(2026, 11, 12, 8, 0, 0);
       final openStatus = ShiftStartWindowHelper.evaluate(
         shiftDate: shiftDate,
         startTime: '10:00',
@@ -85,8 +93,8 @@ void main() {
       expect(openStatus.canStart, isTrue);
       expect(openStatus.disabledReason, isNull);
 
-      // 3. During shift (11:00)
-      final during = DateTime(2026, 11, 12, 11, 0);
+      // 3. During shift (11:00:00)
+      final during = DateTime(2026, 11, 12, 11, 0, 0);
       final duringStatus = ShiftStartWindowHelper.evaluate(
         shiftDate: shiftDate,
         startTime: '10:00',
@@ -95,18 +103,29 @@ void main() {
       );
       expect(duringStatus.canStart, isTrue);
 
-      // 4. Exactly at window close (14:00)
-      final atClose = DateTime(2026, 11, 12, 14, 0);
+      // 4. Before window close (13:59:59) -> still open
+      final beforeClose = DateTime(2026, 11, 12, 13, 59, 59);
+      final beforeCloseStatus = ShiftStartWindowHelper.evaluate(
+        shiftDate: shiftDate,
+        startTime: '10:00',
+        endTime: '12:00',
+        now: beforeClose,
+      );
+      expect(beforeCloseStatus.canStart, isTrue);
+
+      // 5. Exactly at window close (14:00:00) -> strictly disabled!
+      final atClose = DateTime(2026, 11, 12, 14, 0, 0);
       final closeStatus = ShiftStartWindowHelper.evaluate(
         shiftDate: shiftDate,
         startTime: '10:00',
         endTime: '12:00',
         now: atClose,
       );
-      expect(closeStatus.canStart, isTrue);
+      expect(closeStatus.canStart, isFalse, reason: 'Shift must be disabled at 14:00:00 sharp.');
+      expect(closeStatus.disabledReason, contains('14:00'));
 
-      // 5. After window closed (14:01)
-      final after = DateTime(2026, 11, 12, 14, 1);
+      // 6. After window closed (14:01:00)
+      final after = DateTime(2026, 11, 12, 14, 1, 0);
       final afterStatus = ShiftStartWindowHelper.evaluate(
         shiftDate: shiftDate,
         startTime: '10:00',
@@ -117,11 +136,11 @@ void main() {
       expect(afterStatus.disabledReason, contains('14:00'));
     });
 
-    test('Midnight crossing shift (22:00 - 06:00) extends to following day correctly', () {
+    test('Midnight crossing shift (22:00 - 06:00) extends to following day and closes strictly at 08:00:00', () {
       final shiftDate = DateTime(2026, 11, 12);
 
-      // 1. Before window on shift day (19:59 Nov 12)
-      final early = DateTime(2026, 11, 12, 19, 59);
+      // 1. Before window on shift day (19:59:59 Nov 12)
+      final early = DateTime(2026, 11, 12, 19, 59, 59);
       final earlyStatus = ShiftStartWindowHelper.evaluate(
         shiftDate: shiftDate,
         startTime: '22:00',
@@ -131,20 +150,31 @@ void main() {
       expect(earlyStatus.canStart, isFalse);
       expect(earlyStatus.disabledReason, contains('20:00'));
 
-      // 2. Window opens (20:00 Nov 12)
-      final open = DateTime(2026, 11, 12, 20, 0);
+      // 2. Window opens (20:00:00 Nov 12)
+      final open = DateTime(2026, 11, 12, 20, 0, 0);
       expect(ShiftStartWindowHelper.evaluate(shiftDate: shiftDate, startTime: '22:00', endTime: '06:00', now: open).canStart, isTrue);
 
-      // 3. In the middle of night across midnight (03:00 Nov 13)
-      final night = DateTime(2026, 11, 13, 3, 0);
+      // 3. Middle of night across midnight (03:00:00 Nov 13)
+      final night = DateTime(2026, 11, 13, 3, 0, 0);
       expect(ShiftStartWindowHelper.evaluate(shiftDate: shiftDate, startTime: '22:00', endTime: '06:00', now: night).canStart, isTrue);
 
-      // 4. Near close next morning (07:59 Nov 13)
-      final nearClose = DateTime(2026, 11, 13, 7, 59);
+      // 4. Near close next morning (07:59:59 Nov 13) -> still open
+      final nearClose = DateTime(2026, 11, 13, 7, 59, 59);
       expect(ShiftStartWindowHelper.evaluate(shiftDate: shiftDate, startTime: '22:00', endTime: '06:00', now: nearClose).canStart, isTrue);
 
-      // 5. Window closed next morning (08:01 Nov 13)
-      final closed = DateTime(2026, 11, 13, 8, 1);
+      // 5. Exactly at close next morning (08:00:00 Nov 13) -> strictly disabled!
+      final atClose = DateTime(2026, 11, 13, 8, 0, 0);
+      final atCloseStatus = ShiftStartWindowHelper.evaluate(
+        shiftDate: shiftDate,
+        startTime: '22:00',
+        endTime: '06:00',
+        now: atClose,
+      );
+      expect(atCloseStatus.canStart, isFalse, reason: 'Overnight shift must be disabled at 08:00:00 sharp.');
+      expect(atCloseStatus.disabledReason, contains('08:00'));
+
+      // 6. Window closed next morning (08:01:00 Nov 13)
+      final closed = DateTime(2026, 11, 13, 8, 1, 0);
       final closedStatus = ShiftStartWindowHelper.evaluate(
         shiftDate: shiftDate,
         startTime: '22:00',
@@ -153,6 +183,28 @@ void main() {
       );
       expect(closedStatus.canStart, isFalse);
       expect(closedStatus.disabledReason, contains('08:00'));
+    });
+
+    test('Server time synchronization overrides local client clock skew', () {
+      final shiftDate = DateTime(2026, 11, 12);
+
+      // Simulate client clock is set to 13:30 (inside window)
+      // but server says it is actually 14:05 (window closed!)
+      final serverTime = DateTime.parse('2026-11-12T14:05:00+03:00');
+      ShiftStartWindowHelper.syncServerTime(serverTime);
+
+      expect(ShiftStartWindowHelper.isSyncedWithServer, isTrue);
+
+      // Evaluate using default synchronized server time (now = null)
+      final status = ShiftStartWindowHelper.evaluate(
+        shiftDate: shiftDate,
+        startTime: '10:00',
+        endTime: '12:00',
+      );
+
+      // Because server time is past 14:00, button must be disabled despite client clock!
+      expect(status.canStart, isFalse);
+      expect(status.disabledReason, contains('14:00'));
     });
 
     test('Past shift from Nov 10 evaluated on Nov 12 is strictly closed', () {
@@ -225,6 +277,44 @@ void main() {
       expect(appButton.isTransparent, isTrue);
 
       expect(find.text(reason), findsOneWidget);
+    });
+
+    testWidgets('Button auto-updates from enabled to disabled when clock reaches 14:00:00', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+
+      final shiftDate = DateTime(2026, 11, 12);
+      // Sync server time to 13:59:59
+      ShiftStartWindowHelper.syncServerTime(DateTime.parse('2026-11-12T13:59:59+03:00'));
+
+      await tester.pumpWidget(
+        _buildTestWrapper(
+          cubit: _FakeStartCashierShiftCubit(),
+          child: Row(
+            children: [
+              CashierStartShiftButton(
+                shiftId: 'shift-1003',
+                selectedShiftsStatus: CashierShiftsPendingStatus(),
+                shiftDate: shiftDate,
+                startTime: '10:00',
+                endTime: '12:00',
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final buttonFinder = find.byType(AppButton);
+      expect(buttonFinder, findsOneWidget);
+      expect(tester.widget<AppButton>(buttonFinder).enabled, isTrue);
+
+      // Now clock ticks forward to 14:00:00
+      ShiftStartWindowHelper.syncServerTime(DateTime.parse('2026-11-12T14:00:00+03:00'));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<AppButton>(buttonFinder).enabled, isFalse);
+      expect(find.textContaining('14:00'), findsOneWidget);
     });
   });
 
