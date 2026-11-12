@@ -1,3 +1,4 @@
+import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'dart:async';
 
@@ -50,38 +51,35 @@ class _CashierMyPendingShiftsHasToStartCardState
 
   void _calculateRemaining() {
     final now = DateTime.now();
-
-    final parsed = CashierShiftTimeFormatter.parseApiTime(
-      widget.shift.startTime,
-    );
-    if (parsed == null) {
-      remaining = Duration.zero;
-      return;
-    }
-
-    final shiftStart = DateTime(
-      widget.shift.date.year,
-      widget.shift.date.month,
-      widget.shift.date.day,
-      parsed.hour,
-      parsed.minute,
+    final status = ShiftStartWindowHelper.evaluate(
+      shiftDate: widget.shift.date,
+      startTime: widget.shift.startTime,
+      endTime: widget.shift.endTime,
+      now: now,
     );
 
-    remaining = shiftStart.difference(now);
-    if (remaining.isNegative) {
+    if (now.isBefore(status.windowOpensAt)) {
+      remaining = status.windowOpensAt.difference(now);
+    } else {
       remaining = Duration.zero;
     }
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (remaining.inSeconds <= 0) {
-        _timer?.cancel();
-        return;
-      }
+      final now = DateTime.now();
+      final status = ShiftStartWindowHelper.evaluate(
+        shiftDate: widget.shift.date,
+        startTime: widget.shift.startTime,
+        endTime: widget.shift.endTime,
+        now: now,
+      );
 
-      remaining -= const Duration(seconds: 1);
-      remainingNotifier.value = remaining;
+      if (now.isBefore(status.windowOpensAt)) {
+        remainingNotifier.value = status.windowOpensAt.difference(now);
+      } else {
+        remainingNotifier.value = Duration.zero;
+      }
     });
   }
 
@@ -134,6 +132,25 @@ class _CashierMyPendingShiftsHasToStartCardState
             ValueListenableBuilder<Duration>(
               valueListenable: remainingNotifier,
               builder: (_, value, _) {
+                final windowStatus = ShiftStartWindowHelper.evaluate(
+                  shiftDate: widget.shift.date,
+                  startTime: widget.shift.startTime,
+                  endTime: widget.shift.endTime,
+                );
+
+                String secondTitle;
+                String secondValue;
+                if (windowStatus.canStart) {
+                  secondTitle = 'متاحة للبدء';
+                  secondValue = '(النافذة مفتوحة)';
+                } else if (DateTime.now().isBefore(windowStatus.windowOpensAt)) {
+                  secondTitle = formatDuration(value);
+                  secondValue = context.tr.toStart;
+                } else {
+                  secondTitle = 'مغلقة';
+                  secondValue = '(انتهت النافذة)';
+                }
+
                 return buildShiftCardRowWidget(
                   context: context,
                   title: context.tr.start_time,
@@ -143,13 +160,15 @@ class _CashierMyPendingShiftsHasToStartCardState
                   ),
                   firstTitleSvgAsset: AppAssets.clockSvg,
                   hasTwoRows: true,
-                  secondTitle: formatDuration(value),
-                  secondTitleStyle: value.inSeconds > (60 * 5)
-                      ? null
-                      : AppStyles.s12W400.copyWith(
-                          color: context.customColor.error,
-                        ),
-                  secondValue: context.tr.toStart,
+                  secondTitle: secondTitle,
+                  secondTitleStyle: windowStatus.canStart
+                      ? AppStyles.s12W400.copyWith(color: AppColors.primaryLight)
+                      : (value.inSeconds > (60 * 5)
+                          ? null
+                          : AppStyles.s12W400.copyWith(
+                              color: context.customColor.error,
+                            )),
+                  secondValue: secondValue,
                 );
               },
             ),
@@ -233,6 +252,12 @@ class _CashierMyPendingShiftsHasToStartCardState
             ValueListenableBuilder<Duration>(
               valueListenable: remainingNotifier,
               builder: (_, value, _) {
+                final windowStatus = ShiftStartWindowHelper.evaluate(
+                  shiftDate: widget.shift.date,
+                  startTime: widget.shift.startTime,
+                  endTime: widget.shift.endTime,
+                );
+
                 // StartCashierShiftCubit
                 return BlocConsumer<
                   StartCashierShiftCubit,
@@ -255,19 +280,37 @@ class _CashierMyPendingShiftsHasToStartCardState
                     if (state is StartCashierShiftLoading) {
                       return const AppButtonLoading();
                     }
-                    return AppButton(
-                      padding: EdgeInsets.all(15.w),
-                      borderRadius: BorderRadius.circular(12.r),
-                      onClick: () {
-                        context.read<StartCashierShiftCubit>().startShift(
-                          shiftId: widget.shift.id,
-                          actorRole: UserType.cashier,
-                        );
-                      },
-                      text: context.tr.start_shift,
-                      isTransparent: !(value.inSeconds <= 0),
-                      borderColor: context.customColor.border,
-                      enabled: value.inSeconds <= 0,
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppButton(
+                          padding: EdgeInsets.all(15.w),
+                          borderRadius: BorderRadius.circular(12.r),
+                          onClick: () {
+                            if (windowStatus.canStart) {
+                              context.read<StartCashierShiftCubit>().startShift(
+                                shiftId: widget.shift.id,
+                                actorRole: UserType.cashier,
+                              );
+                            }
+                          },
+                          text: context.tr.start_shift,
+                          isTransparent: !windowStatus.canStart,
+                          borderColor: context.customColor.border,
+                          enabled: windowStatus.canStart,
+                        ),
+                        if (!windowStatus.canStart && windowStatus.disabledReason != null) ...[
+                          6.verticalSpace,
+                          Text(
+                            windowStatus.disabledReason!,
+                            style: AppStyles.s10W400.copyWith(color: context.customColor.error),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
                     );
                   },
                 );

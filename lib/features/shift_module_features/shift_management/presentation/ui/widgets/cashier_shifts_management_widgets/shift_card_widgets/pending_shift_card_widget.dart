@@ -1,8 +1,7 @@
+import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
-import 'package:assab/core/routing/app_route_name.dart';
-import 'package:assab/core/services/navigation/navigation_service.dart';
 import 'package:assab/core/utils/app_dialog.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/shift/shift_details/shift_status_ui_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
@@ -16,7 +15,6 @@ import '../../../../../../../../core/constants/app_assets.dart';
 import '../../../../../../../../core/enums/shift_status/shift_status.dart';
 import '../../../../../../../../core/styles/app_colors.dart';
 import '../../../../../../../../core/styles/app_styles.dart';
-import '../../../../../../../../core/widgets/app_button.dart';
 import '../../../../../../../../core/widgets/custom_divider.dart';
 import '../../../../logic/cashier/start_cashier_shift_cubit.dart';
 import '../../shift_details_widgets/see_details_button_widget.dart';
@@ -26,8 +24,15 @@ class PendingShiftCardWidget extends ShiftCardStrategy {
   final ShiftStatus selectedShiftsStatus;
 
   PendingShiftCardWidget({required this.selectedShiftsStatus});
+
   @override
   Widget buildCard(BuildContext context, ShiftEntity shift) {
+    final windowStatus = ShiftStartWindowHelper.evaluate(
+      shiftDate: shift.shiftDate,
+      startTime: shift.shiftTimeDetails.startTime,
+      endTime: shift.shiftTimeDetails.endTime,
+    );
+
     return Container(
       padding: EdgeInsetsGeometry.all(15.w),
       width: 340.w,
@@ -105,66 +110,41 @@ class PendingShiftCardWidget extends ShiftCardStrategy {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (isShiftTodayOrBefore(shift.shiftDate))
-                BlocListener<StartCashierShiftCubit, StartCashierShiftState>(
-                  listener: (context, state) {
-                    final cashierShiftsManagementCubit = context
-                        .read<CashierShiftsManagementCubit>();
-                    if (state is StartCashierShiftSuccess &&
-                        !cashierShiftsManagementCubit
-                            .state
-                            .inProgress
-                            .isLoading &&
-                        !cashierShiftsManagementCubit.state.pending.isLoading) {
-                      // to prevent multiple fetching
+              BlocListener<StartCashierShiftCubit, StartCashierShiftState>(
+                listener: (context, state) {
+                  final cashierShiftsManagementCubit = context
+                      .read<CashierShiftsManagementCubit>();
+                  if (state is StartCashierShiftSuccess &&
+                      !cashierShiftsManagementCubit
+                          .state
+                          .inProgress
+                          .isLoading &&
+                      !cashierShiftsManagementCubit.state.pending.isLoading) {
+                    // to prevent multiple fetching
+                    cashierShiftsManagementCubit.getPendingShifts(
+                      loadMore: false,
+                    );
 
-                      cashierShiftsManagementCubit.getPendingShifts(
-                        loadMore: false,
-                      );
+                    cashierShiftsManagementCubit.getInProgressShifts(
+                      loadMore: false,
+                    );
+                  }
 
-                      cashierShiftsManagementCubit.getInProgressShifts(
-                        loadMore: false,
-                      );
-                    }
-
-                    if (state is StartCashierShiftFailure) {
-                      AppDialog.showErrorDialog(
-                        context: context,
-                        failure: state.failure,
-                      );
-                    }
-                  },
-                  child: CashierStartShiftButton(
-                    shiftId: shift.id,
-                    selectedShiftsStatus: selectedShiftsStatus,
-                    actorRole: UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType(),
-                  ),
-                )
-              else
-                Expanded(
-                  child: AppButton(
-                    padding: EdgeInsets.all(12.w),
-                    borderRadius: BorderRadius.circular(12.r),
-                    onClick: () async {
-                      final result = await NavigationService.I.pushNamed(
-                        AppRouteName.reassignShiftWithoutHandoverScreen,
-                        arguments: {
-                          'shift': shift,
-                          'previousCashier': shift.cashier,
-                          'nextCashier': shift.nextCashier,
-                        },
-                      );
-
-                      if (result == true && context.mounted) {
-                        context
-                            .read<CashierShiftsManagementCubit>()
-                            .getPendingShifts();
-                      }
-                    },
-                    text: context.tr.reassign_shift,
-                    enabled: true,
-                  ),
+                  if (state is StartCashierShiftFailure) {
+                    AppDialog.showErrorDialog(
+                      context: context,
+                      failure: state.failure,
+                    );
+                  }
+                },
+                child: CashierStartShiftButton(
+                  shiftId: shift.id,
+                  selectedShiftsStatus: selectedShiftsStatus,
+                  actorRole: UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType(),
+                  canStart: windowStatus.canStart,
+                  disabledReason: windowStatus.disabledReason,
                 ),
+              ),
               12.horizontalSpace,
               Expanded(child: SeeDetailsButtonWidget(shiftId: shift.id)),
             ],

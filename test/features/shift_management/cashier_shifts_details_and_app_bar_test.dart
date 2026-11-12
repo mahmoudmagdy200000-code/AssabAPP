@@ -5,39 +5,70 @@ import 'package:assab/core/widgets/app_responsive_builder.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_cashier_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_time_details_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/logic/cashier/start_cashier_shift_cubit.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/cashier_shifts_management_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/filters/cashier_shifts_status_impl.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/cashier_shifts_app_bar.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/pending_shift_card_widget.dart';
 import 'package:assab/generated/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+
+class _FakeStartCashierShiftCubit extends Cubit<StartCashierShiftState>
+    implements StartCashierShiftCubit {
+  _FakeStartCashierShiftCubit() : super(StartCashierShiftInitial());
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _FakeCashierShiftsManagementCubit
+    extends Cubit<CashierShiftsManagementState>
+    implements CashierShiftsManagementCubit {
+  _FakeCashierShiftsManagementCubit()
+      : super(CashierShiftsManagementState.initial());
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 Widget _buildTestWrapper({
   required Widget child,
   Locale locale = const Locale('ar', 'EG'),
 }) {
-  return AppResponsiveBuilder(
-    builder: (_) => MaterialApp(
-      theme: ThemeData(
-        extensions: LightTheme.extension,
-        primaryColor: const Color(0xFF1E88E5),
-        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+  return MultiBlocProvider(
+    providers: [
+      BlocProvider<StartCashierShiftCubit>(
+        create: (_) => _FakeStartCashierShiftCubit(),
       ),
-      locale: locale,
-      localizationsDelegates: const [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ar', 'EG'),
-        Locale('ar'),
-        Locale('en'),
-      ],
-      home: Scaffold(body: child),
+      BlocProvider<CashierShiftsManagementCubit>(
+        create: (_) => _FakeCashierShiftsManagementCubit(),
+      ),
+    ],
+    child: AppResponsiveBuilder(
+      builder: (_) => MaterialApp(
+        theme: ThemeData(
+          extensions: LightTheme.extension,
+          primaryColor: const Color(0xFF1E88E5),
+          scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        ),
+        locale: locale,
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('ar', 'EG'),
+          Locale('ar'),
+          Locale('en'),
+        ],
+        home: Scaffold(body: child),
+      ),
     ),
   );
 }

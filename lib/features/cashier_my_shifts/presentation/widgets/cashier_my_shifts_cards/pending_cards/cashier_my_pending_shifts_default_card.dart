@@ -1,3 +1,4 @@
+import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/constants/app_assets.dart';
@@ -21,6 +22,12 @@ class CashierMyPendingShiftsDefaultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final windowStatus = ShiftStartWindowHelper.evaluate(
+      shiftDate: shift.date,
+      startTime: shift.startTime,
+      endTime: shift.endTime,
+    );
+
     return Container(
       margin: EdgeInsetsDirectional.only(bottom: 10.h),
       child: Container(
@@ -91,22 +98,31 @@ class CashierMyPendingShiftsDefaultCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: AppButton(
-                    padding: EdgeInsets.all(15.w),
-                    borderRadius: BorderRadius.circular(12.r),
-                    onClick: () {
-                      // context
-                      //     .read<CashierShiftsManagementCubit>()
-                      //     .startCashierShift(
-                      //   shift.id,
-                      //   selectedShiftsStatus,
-                      // );
-                    },
-                    text: context.tr.start_shift,
-                    isFlexible: true,
-                    isTransparent: true,
-                    borderColor: context.customColor.border,
-                    enabled: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppButton(
+                        padding: EdgeInsets.all(15.w),
+                        borderRadius: BorderRadius.circular(12.r),
+                        onClick: () {},
+                        text: context.tr.start_shift,
+                        isFlexible: true,
+                        isTransparent: !windowStatus.canStart,
+                        borderColor: context.customColor.border,
+                        enabled: windowStatus.canStart,
+                      ),
+                      if (!windowStatus.canStart && windowStatus.disabledReason != null) ...[
+                        4.verticalSpace,
+                        Text(
+                          windowStatus.disabledReason!,
+                          style: AppStyles.s10W400.copyWith(color: context.customColor.error),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 12.horizontalSpace,
