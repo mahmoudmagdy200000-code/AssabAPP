@@ -868,9 +868,9 @@ void main() {
       expect(find.byKey(const Key('txt_dialog_assign_title')), findsOneWidget);
       expect(find.byKey(const Key('tile_cashier_csh-99')), findsOneWidget);
 
-      // Select single-day exception
-      await tester.tap(find.byKey(const Key('radio_single_day_exception')));
-      await tester.pumpAndSettle();
+      // Dated assignment must be the default: clicking confirm creates a real shift.
+      expect(find.text('تعيين فعلي لليوم'), findsOneWidget);
+      expect(find.text('ينشئ وردية فعلية في اليوم المحدد وتظهر للكاشير.'), findsOneWidget);
 
       // Select cashier
       await tester.tap(find.byKey(const Key('tile_cashier_csh-99')));
@@ -1409,8 +1409,10 @@ void main() {
       await tester.tap(find.byKey(const Key('btn_assign_tpl-unassigned')).first);
       await tester.pumpAndSettle();
 
-      // By default, recurring primary assignment radio is selected
-      expect(find.byKey(const Key('radio_recurring_assignment')), findsOneWidget);
+      // Recurring planning remains available, but requires an explicit choice.
+      await tester.tap(find.byKey(const Key('radio_recurring_assignment')));
+      await tester.pumpAndSettle();
+      expect(find.text('تعيين أساسي للأيام القادمة فقط؛ لا ينشئ وردية فعلية للكاشير.'), findsOneWidget);
 
       // Select cashier
       await tester.tap(find.byKey(const Key('tile_cashier_csh-primary-1')));

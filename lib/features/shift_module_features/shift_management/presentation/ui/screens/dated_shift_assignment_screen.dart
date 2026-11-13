@@ -1662,13 +1662,15 @@ class _AssignCashierModalContentState
   List<Map<String, dynamic>> _cashiers = [];
   String? _selectedCashierId;
   String? _selectedCashierName;
-  bool _isRecurring = true;
+  bool _isRecurring = false;
   late TextEditingController _effectiveDateCtrl;
 
   @override
   void initState() {
     super.initState();
-    _isRecurring = !widget.slot.hasActualShift && !widget.slot.isPlanned;
+    // A recurring primary roster is planning only: it does not create a cashier shift.
+    // Default to a dated, actual shift so the assigned cashier sees it in the app.
+    _isRecurring = false;
     _effectiveDateCtrl = TextEditingController(text: widget.slot.shiftDate);
     _fetchCashiers();
   }
@@ -1871,7 +1873,7 @@ class _AssignCashierModalContentState
                                 ),
                                 Expanded(
                                   child: Text(
-                                    'استثناء يوم واحد',
+                                    'تعيين فعلي لليوم',
                                     style: AppStyles.s12W500.copyWith(
                                       color: !_isRecurring
                                           ? context.theme.primaryColor
@@ -1884,6 +1886,14 @@ class _AssignCashierModalContentState
                           ),
                         ),
                       ],
+                    ),
+                    Text(
+                      _isRecurring
+                          ? 'تعيين أساسي للأيام القادمة فقط؛ لا ينشئ وردية فعلية للكاشير.'
+                          : 'ينشئ وردية فعلية في اليوم المحدد وتظهر للكاشير.',
+                      style: AppStyles.s11W400.copyWith(
+                        color: context.customColor.text2,
+                      ),
                     ),
                     if (_isRecurring) ...[
                       SizedBox(height: 6.h),
