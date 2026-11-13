@@ -271,8 +271,8 @@ class CashierShiftsManagementCubit
     updater: (tab) => state.copyWith(pending: tab),
     loadMore: loadMore,
     itemTransform: (entities) {
+      // The server applies the pending window before pagination, including overnight carry-over.
       return entities
-          .where((e) => ShiftStartWindowHelper.isWithin7DayWindow(e.shiftDate))
           .toList()
         ..sort((a, b) => ShiftStartWindowHelper.compareShiftsChronologically(
               dateA: a.shiftDate,

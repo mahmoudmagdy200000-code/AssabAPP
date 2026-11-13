@@ -82,6 +82,7 @@ const List<DatedTemplateSlot> kTestTemplates = [
     templateName: 'الوردية الصباحية - كاشير 1',
     startTime: '08:00',
     endTime: '16:00',
+    cashierShiftId: 'actual-1',
     cashierId: 'csh-1',
     cashierName: 'محمد أحمد السعيد',
     status: 'not_started',
@@ -93,6 +94,7 @@ const List<DatedTemplateSlot> kTestTemplates = [
     templateName: 'الوردية المسائية - كاشير 2',
     startTime: '16:00',
     endTime: '00:00',
+    cashierShiftId: 'actual-2',
     cashierId: 'csh-2',
     cashierName: 'عبدالله إبراهيم محمود',
     status: 'not_started',
@@ -281,7 +283,7 @@ void main() {
       expect(find.byKey(const Key('btn_swap_tpl-protected-2')), findsNothing);
 
       // Protected badge labels visible
-      expect(find.text('وردية بدأت بالفعل'), findsOneWidget);
+      expect(find.text('وردية بدأت أو انتهت'), findsOneWidget);
       expect(find.text('محمي بدليل مالي'), findsOneWidget);
 
       expect(tester.takeException(), isNull);
@@ -357,7 +359,8 @@ void main() {
           templateName: 'وردية الصباح الأولى',
           startTime: '08:00',
           endTime: '16:00',
-          cashierId: 'csh-1',
+          cashierShiftId: 'actual-1',
+    cashierId: 'csh-1',
           cashierName: 'محمد أحمد السعيد',
           status: 'not_started',
         ),
@@ -366,7 +369,8 @@ void main() {
           templateName: 'وردية المساء الثانية',
           startTime: '16:00',
           endTime: '00:00',
-          cashierId: 'csh-2',
+          cashierShiftId: 'actual-2',
+    cashierId: 'csh-2',
           cashierName: 'عبدالله إبراهيم محمود',
           status: 'not_started',
         ),
@@ -499,6 +503,10 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           return ResponseBody.fromString(
             jsonEncode({
@@ -524,6 +532,7 @@ void main() {
                 ],
                 'roster': {
                   '2026-11-15_tpl-1': {
+                    'cashier_shift_id': 'actual-csh-1',
                     'cashier_id': 'csh-1',
                     'cashier_name': 'محمد أحمد السعيد',
                     'status': 'not_started',
@@ -532,6 +541,7 @@ void main() {
                     'can_swap': true,
                   },
                   '2026-11-15_tpl-2': {
+                    'cashier_shift_id': 'actual-csh-2',
                     'cashier_id': 'csh-2',
                     'cashier_name': 'عبدالله إبراهيم محمود',
                     'status': 'not_started',
@@ -563,7 +573,8 @@ void main() {
           );
         }
 
-        return ResponseBody.fromString('{"success": true}', 200);
+        return ResponseBody.fromString('{"success": true, "data": []}', 200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
       });
 
       final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
@@ -624,6 +635,10 @@ void main() {
       String? capturedDate;
 
       final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           return ResponseBody.fromString(
             jsonEncode({
@@ -649,6 +664,7 @@ void main() {
                 ],
                 'roster': {
                   '2026-11-15_tpl-1': {
+                    'cashier_shift_id': 'actual-csh-1',
                     'cashier_id': 'csh-1',
                     'cashier_name': 'كاشير يوم 15 قالب 1',
                     'status': 'not_started',
@@ -657,6 +673,7 @@ void main() {
                     'can_swap': true,
                   },
                   '2026-11-15_tpl-2': {
+                    'cashier_shift_id': 'actual-csh-2',
                     'cashier_id': 'csh-2',
                     'cashier_name': 'كاشير يوم 15 قالب 2',
                     'status': 'not_started',
@@ -665,6 +682,7 @@ void main() {
                     'can_swap': true,
                   },
                   '2026-11-16_tpl-1': {
+                    'cashier_shift_id': 'actual-csh-3',
                     'cashier_id': 'csh-3',
                     'cashier_name': 'كاشير يوم 16 قالب 1',
                     'status': 'not_started',
@@ -673,6 +691,7 @@ void main() {
                     'can_swap': true,
                   },
                   '2026-11-16_tpl-2': {
+                    'cashier_shift_id': 'actual-csh-4',
                     'cashier_id': 'csh-4',
                     'cashier_name': 'كاشير يوم 16 قالب 2',
                     'status': 'not_started',
@@ -705,7 +724,8 @@ void main() {
           );
         }
 
-        return ResponseBody.fromString('{"success": true}', 200);
+        return ResponseBody.fromString('{"success": true, "data": []}', 200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
       });
 
       final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
@@ -754,8 +774,13 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       RequestOptions? recordedAssignReq;
+      bool assignmentSaved = false;
 
       final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           return ResponseBody.fromString(
             jsonEncode({
@@ -775,12 +800,13 @@ void main() {
                 ],
                 'roster': {
                   '2026-11-15_tpl-unassigned': {
-                    'cashier_id': null,
-                    'cashier_name': null,
+                    'cashier_shift_id': assignmentSaved ? 'actual-new' : null,
+                    'cashier_id': assignmentSaved ? 'csh-authorized' : null,
+                    'cashier_name': assignmentSaved ? 'عبدالمحسن فهد التميمي' : null,
                     'status': 'not_started',
                     'shift_date': '2026-11-15',
                     'shift_id': 'tpl-unassigned',
-                    'can_swap': false,
+                    'can_swap': assignmentSaved,
                   },
                 },
               },
@@ -794,6 +820,7 @@ void main() {
 
         if (options.path.contains('assign-shifts')) {
           recordedAssignReq = options;
+          assignmentSaved = true;
           return ResponseBody.fromString(
             jsonEncode({
               'success': true,
@@ -807,7 +834,8 @@ void main() {
           );
         }
 
-        return ResponseBody.fromString('{"success": true}', 200);
+        return ResponseBody.fromString('{"success": true, "data": []}', 200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
       });
 
       final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
@@ -875,6 +903,10 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         return ResponseBody.fromString(
           jsonEncode({
             'success': true,
@@ -957,6 +989,10 @@ void main() {
       RequestOptions? recordedAvailableReq;
 
       final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           final rosterData = <String, dynamic>{
             '2026-11-15_tpl-1': {
@@ -1072,7 +1108,8 @@ void main() {
           );
         }
 
-        return ResponseBody.fromString('{"success": true}', 200);
+        return ResponseBody.fromString('{"success": true, "data": []}', 200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
       });
 
       final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
@@ -1224,6 +1261,10 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       final adapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         return ResponseBody.fromString(
           jsonEncode({
             'success': true,
@@ -1342,7 +1383,8 @@ void main() {
           }
         }
 
-        return ResponseBody.fromString('{"success": true}', 200);
+        return ResponseBody.fromString('{"success": true, "data": []}', 200,
+            headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
       });
 
       final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
@@ -1391,7 +1433,8 @@ void main() {
 
       // Verify UI updated with primary cashier and recurring badge
       expect(find.textContaining('الكاشير الأساسي المعتمد'), findsWidgets);
-      expect(find.text('أساسي'), findsWidgets);
+      expect(find.text('أساسي'), findsNothing);
+      expect(find.textContaining('مخطط فقط'), findsWidgets);
 
       expect(tester.takeException(), isNull);
     });
@@ -1469,6 +1512,10 @@ void main() {
       Map<String, dynamic>? capturedQueryParams;
       final dio = Dio();
       dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           capturedQueryParams = options.queryParameters;
           return ResponseBody.fromString(
@@ -1579,6 +1626,10 @@ void main() {
 
       final dio = Dio();
       dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           return ResponseBody.fromString(
             jsonEncode({
@@ -1639,6 +1690,10 @@ void main() {
 
       final dio = Dio();
       dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           requestedQueries.add(Map<String, dynamic>.from(options.queryParameters));
           if (simulateFailure) {
@@ -1736,6 +1791,10 @@ void main() {
 
       final dio = Dio(BaseOptions(baseUrl: 'https://test.assab.com/api/v1/'));
       dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (simulateFailure) {
           return ResponseBody.fromString(
             jsonEncode({'message': 'Server down'}),
@@ -1792,6 +1851,10 @@ void main() {
 
       final dio = Dio(BaseOptions(baseUrl: 'https://test.assab.com/api/v1/'));
       dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         recordedRequests.add(options);
 
         // Older backend rejects empty params on dated-roster with 422
@@ -1852,6 +1915,10 @@ void main() {
     testWidgets('Session 7 Acceptance: Schedule source metadata displays origin in governance notice', (WidgetTester tester) async {
       final dio = Dio();
       dio.httpClientAdapter = TestHttpAdapter(onFetch: (options) async {
+        if (options.path.endsWith('roster-assignments')) {
+          return ResponseBody.fromString('{"data": []}', 200, headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
+        }
+
         if (options.path.contains('dated-roster')) {
           return ResponseBody.fromString(
             jsonEncode({

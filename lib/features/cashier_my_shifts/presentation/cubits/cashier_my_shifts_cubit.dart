@@ -116,9 +116,9 @@ class CashierMyShiftsCubit extends SafeCubit<CashierMyShiftsState> {
         ),
       ),
       success: (items) {
+        // Keep server-selected overnight shifts; do not filter a paginated response by device date.
         final filteredEntities = items
             .map((e) => e.toEntity())
-            .where((e) => ShiftStartWindowHelper.isWithin7DayWindow(e.date))
             .toList()
           ..sort((a, b) => ShiftStartWindowHelper.compareShiftsChronologically(
                 dateA: a.date,

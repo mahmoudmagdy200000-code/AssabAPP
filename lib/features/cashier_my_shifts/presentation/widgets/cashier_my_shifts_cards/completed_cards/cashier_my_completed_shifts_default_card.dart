@@ -36,10 +36,15 @@ class CashierMyCompletedShiftsDefaultCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  CashierShiftDateFormatter.format(shift.date),
-                  style: AppStyles.s15W600,
+                Expanded(
+                  child: Text(
+                    CashierShiftDateFormatter.format(shift.date),
+                    style: AppStyles.s15W600,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
+                8.horizontalSpace,
                 CardLabelWidget(
                   title: shift.handoverStatus?.status ==
                           CashierMyShiftsHandoverStatus.pending
