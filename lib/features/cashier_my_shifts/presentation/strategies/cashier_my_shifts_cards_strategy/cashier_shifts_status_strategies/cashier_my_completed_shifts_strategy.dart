@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../domain/enums/cashier_my_shifts_handover_status.dart';
 import '../../../../domain/entities/cashier_my_shift_entity.dart';
 import '../../../widgets/cashier_my_shifts_cards/completed_cards/cashier_my_completed_shifts_default_card.dart';
 import '../../../widgets/cashier_my_shifts_cards/completed_cards/cashier_my_completed_shifts_handover_approved_card.dart';
@@ -11,8 +12,10 @@ class CashierMyCompletedShiftsStrategy implements CashierMyShiftsCardsStrategy {
   Widget buildCard(CashierShiftEntity shift) {
     if (shift.handoverTo?.id != null) {
       return CashierMyCompletedShiftsHandoverDetectedCard(shift: shift);
-    } else if (true) {
-      // shift.handoverStatus?.status == CashierMyShiftsHandoverStatus.accepted
+    } else if (shift.handoverStatus?.status ==
+            CashierMyShiftsHandoverStatus.accepted ||
+        shift.handoverStatus?.status ==
+            CashierMyShiftsHandoverStatus.pending) {
       return CashierMyCompletedShiftsHandoverApprovedCard(shift: shift);
     }
     return CashierMyCompletedShiftsDefaultCard(shift: shift);

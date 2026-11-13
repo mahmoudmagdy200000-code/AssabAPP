@@ -1,5 +1,4 @@
 import 'package:assab/core/utils/shift_time_formatter.dart';
-import 'package:intl/intl.dart';
 
 class ProgressEntity {
   final String title;
@@ -23,7 +22,8 @@ class ProgressEntity {
 
     try {
       final now = DateTime.now();
-      final shiftDateObj = DateFormat('yyyy-MM-dd').parse(shiftDate);
+      final shiftDateObj = DateTime.tryParse(shiftDate);
+      if (shiftDateObj == null) return false;
 
       // If shift is in the past, it has ended
       if (shiftDateObj.isBefore(now)) return true;

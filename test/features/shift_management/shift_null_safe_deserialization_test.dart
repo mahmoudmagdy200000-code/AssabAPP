@@ -8,7 +8,6 @@ import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/pendin
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/reassigned/cashier_reassigned_shift_model.dart';
 import 'package:assab/features/cashier_my_shifts/domain/enums/my_shifts_status.dart';
 import 'package:assab/features/cashier_requests/data/models/reassigned_shift_item_model.dart';
-import 'package:assab/features/shift_module_features/shift_management/data/mapper/shift/shift_details/shift_details_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/mapper/shift/shift_mapper.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/cashier_handover_models/cashier_handover_details_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/handover_details_models/handover_details_item_model.dart';

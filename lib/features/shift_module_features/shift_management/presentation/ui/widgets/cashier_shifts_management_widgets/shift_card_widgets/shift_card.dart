@@ -73,13 +73,15 @@ Widget buildShiftCardRowWidget({
             4.horizontalSpace,
           ],
 
-          Text(
-            title,
-            style:
-                titleStyle ??
-                AppStyles.s12W400.copyWith(color: context.customColor.text4),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Flexible(
+            child: Text(
+              title,
+              style:
+                  titleStyle ??
+                  AppStyles.s12W400.copyWith(color: context.customColor.text4),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
 
           2.horizontalSpace,

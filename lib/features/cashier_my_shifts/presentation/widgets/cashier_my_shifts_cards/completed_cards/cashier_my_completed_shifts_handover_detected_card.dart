@@ -9,6 +9,7 @@ import '../../../../../../core/widgets/custom_divider.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/shift_card.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/shift_details_widgets/see_details_button_widget.dart';
 import '../../../../domain/entities/cashier_my_shift_entity.dart';
+import '../../../../domain/enums/cashier_my_shifts_handover_status.dart';
 import '../../../formatter/cashier_shift_date_formatter.dart';
 import '../../../formatter/cashier_shift_time_formatter.dart';
 import '../card_label_widget.dart';
@@ -38,13 +39,24 @@ class CashierMyCompletedShiftsHandoverDetectedCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  CashierShiftDateFormatter.format(shift.date),
-                  style: AppStyles.s15W600,
+                Expanded(
+                  child: Text(
+                    CashierShiftDateFormatter.format(shift.date),
+                    style: AppStyles.s15W600,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
+                8.horizontalSpace,
                 CardLabelWidget(
-                  title: context.tr.completed,
-                  textColor: AppColors.lightGreen,
+                  title: shift.handoverStatus?.status ==
+                          CashierMyShiftsHandoverStatus.pending
+                      ? context.tr.pendingReview
+                      : context.tr.completed,
+                  textColor: shift.handoverStatus?.status ==
+                          CashierMyShiftsHandoverStatus.pending
+                      ? Colors.amber.shade800
+                      : AppColors.lightGreen,
                 ),
               ],
             ),

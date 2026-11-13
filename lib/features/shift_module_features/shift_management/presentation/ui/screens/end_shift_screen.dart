@@ -178,6 +178,7 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                 return Column(
                                   children: [
                                     Expanded(
+                                      flex: (allocationRequired && shortage > 0) ? 1 : 1,
                                       child: state.varianceStrategy?.buildUI(
                                             context,
                                           ) ??
@@ -185,28 +186,33 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                     ),
                                     if (allocationRequired && shortage > 0) ...[
                                       10.verticalSpace,
-                                      CashShortageAllocationWidget(
-                                        shortageAmount: shortage,
-                                        initialAllocations:
-                                            cubit.shortageAllocations,
-                                        candidates: cubit.shortageCandidates,
-                                        isLoadingCandidates:
-                                            cubit.isLoadingCandidates,
-                                        candidatesError:
-                                            cubit.candidatesError,
-                                        onRetryCandidates:
-                                            cubit.fetchShortageCandidates,
-                                        onAllocationsChanged: (allocs) {
-                                          cubit.updateShortageAllocations(allocs);
-                                          setState(() {});
-                                        },
-                                        initialReason: cubit.allocationReason,
-                                        onReasonChanged: (reason) {
-                                          cubit.updateShortageAllocations(
-                                            cubit.shortageAllocations,
-                                            reason,
-                                          );
-                                        },
+                                      Expanded(
+                                        flex: 2,
+                                        child: SingleChildScrollView(
+                                          child: CashShortageAllocationWidget(
+                                            shortageAmount: shortage,
+                                            initialAllocations:
+                                                cubit.shortageAllocations,
+                                            candidates: cubit.shortageCandidates,
+                                            isLoadingCandidates:
+                                                cubit.isLoadingCandidates,
+                                            candidatesError:
+                                                cubit.candidatesError,
+                                            onRetryCandidates:
+                                                cubit.fetchShortageCandidates,
+                                            onAllocationsChanged: (allocs) {
+                                              cubit.updateShortageAllocations(allocs);
+                                              setState(() {});
+                                            },
+                                            initialReason: cubit.allocationReason,
+                                            onReasonChanged: (reason) {
+                                              cubit.updateShortageAllocations(
+                                                cubit.shortageAllocations,
+                                                reason,
+                                              );
+                                            },
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ],
@@ -566,6 +572,7 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                                 );
                                               },
 
+                                        isFlexible: true,
                                         enabled: pagingState.isLastStep
                                             ? (enableButton && cubit.canProceedToEndShift)
                                             : enableButton,

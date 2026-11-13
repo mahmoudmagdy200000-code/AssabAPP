@@ -38,25 +38,35 @@ class CashierShiftsAppBar extends StatelessWidget {
       child: Row(
         children: [
           if (showBackButton) const AppBackButton(),
-          SizedBox(
-            width: showInfoButton ? 200.w : 300.w,
-            child: ListTile(
-              title: Text(
-                title,
-                style: AppStyles.s16W600,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+          Expanded(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: showBackButton ? 8.w : 0,
+                end: showInfoButton ? 8.w : 0,
               ),
-              subtitle: Text(
-                subTitle,
-                style: AppStyles.s12W400.copyWith(
-                  color: context.customColor.text4,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: AppStyles.s16W600,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    subTitle,
+                    style: AppStyles.s12W400.copyWith(
+                      color: context.customColor.text4,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ),
-          if (showInfoButton) ...[
-            const Spacer(),
+          if (showInfoButton)
             AppGestureDetectorButton(
               onTap: () {
                 AppBottomSheet.showModal(context, isScrollControlled: true, (
@@ -107,7 +117,6 @@ class CashierShiftsAppBar extends StatelessWidget {
                 ),
               ),
             ),
-          ],
         ],
       ),
     );
