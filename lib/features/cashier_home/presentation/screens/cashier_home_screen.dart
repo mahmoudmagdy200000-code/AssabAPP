@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/routing/app_route_name.dart';
 import '../../../../core/services/navigation/navigation_service.dart';
-import '../widgets/cashier_empty_widget.dart';
 import '../widgets/cashier_home_bottom_section.dart';
 import '../widgets/cashier_home_top_section.dart';
 
@@ -29,11 +28,6 @@ class CashierHomeScreen extends StatelessWidget {
               child: Column(
                 spacing: 10.h,
                 children: [
-                  CashierEmptyWidget(
-                    image: AppAssets.calendarPng,
-                    title: context.tr.noActiveShift,
-                    desc: context.tr.noActiveShiftDesc,
-                  ),
                   Container(
                     decoration: BoxDecoration(
                       color: context.customColor.reversedTextColor,
