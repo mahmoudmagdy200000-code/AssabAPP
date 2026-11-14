@@ -1,6 +1,7 @@
 import 'package:assab/core/enums/shift_status/shift_handover_status.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/variance_details.dart';
 import 'package:intl/intl.dart';
+import 'package:assab/core/utils/shift_time_formatter.dart';
 
 class HandoverDetailsEntity {
   final String handoverId;
@@ -61,15 +62,7 @@ class HandoverDetailsEntity {
   }
 
   String get formattedHandoverTime {
-    try {
-      final combined = '$handoverDate $handoverTime';
-      final dateTime = DateFormat('yyyy-MM-dd HH:mm:ss').parse(combined);
-
-      return DateFormat('h:mm a').format(dateTime); // 12-hour format with AM/PM
-    } catch (e) {
-      print('Error parsing time: $e');
-      return '-';
-    }
+    return ShiftTimeFormatter.format(handoverTime, fallback: '—');
   }
 
   String _daySuffix(int day) {
