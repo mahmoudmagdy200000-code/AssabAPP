@@ -36,6 +36,36 @@ Widget _buildTestApp(Widget child, {Locale locale = const Locale('ar')}) {
 }
 
 void main() {
+  testWidgets('Friday empty slot defaults to actual dated assignment, not recurrence', (tester) async {
+    tester.view.physicalSize = const Size(820, 1180);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const slot = DatedTemplateSlot(templateId: 'night', templateName: 'الأول', startTime: '22:30', endTime: '00:30', shiftDate: '2026-11-13');
+    String? assignedDate;
+    var recurringCalls = 0;
+    await tester.pumpWidget(_buildTestApp(DatedShiftAssignmentScreen(
+      initialDateRange: '2026-11-13 — 2026-11-19',
+      initialTemplates: const [slot],
+      onFetchRoster: (_, __) async => [slot],
+      onFetchAvailableCashiers: () async => [{'id': 'cashier', 'name': 'يوسف'}],
+      onExecuteAssign: (cashier, template, date) async { assignedDate = date; },
+      onSaveRosterAssignment: (_, __, ___) async { recurringCalls++; },
+    )));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('btn_assign_night')));
+    await tester.pumpAndSettle();
+    final single = tester.widget<Radio<bool>>(find.descendant(of: find.byKey(const Key('radio_single_day_exception')), matching: find.byType(Radio<bool>)));
+    expect(single.groupValue, false);
+    await tester.tap(find.byKey(const Key('tile_cashier_cashier')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('btn_confirm_cashier_assignment')));
+    await tester.pumpAndSettle();
+    expect(assignedDate, '2026-11-13');
+    expect(recurringCalls, 0);
+    expect(tester.takeException(), isNull);
+  });
+
   test(
     'R5 effective owner resolves periods, timestamps, gaps and future records',
     () {

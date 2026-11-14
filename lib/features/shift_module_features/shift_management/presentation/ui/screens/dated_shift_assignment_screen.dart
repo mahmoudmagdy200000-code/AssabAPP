@@ -1662,13 +1662,14 @@ class _AssignCashierModalContentState
   List<Map<String, dynamic>> _cashiers = [];
   String? _selectedCashierId;
   String? _selectedCashierName;
-  bool _isRecurring = true;
+  bool _isRecurring = false;
   late TextEditingController _effectiveDateCtrl;
 
   @override
   void initState() {
     super.initState();
-    _isRecurring = !widget.slot.hasActualShift && !widget.slot.isPlanned;
+    // A dated action creates/reassigns the selected day. Recurrence is explicit.
+    _isRecurring = false;
     _effectiveDateCtrl = TextEditingController(text: widget.slot.shiftDate);
     _fetchCashiers();
   }

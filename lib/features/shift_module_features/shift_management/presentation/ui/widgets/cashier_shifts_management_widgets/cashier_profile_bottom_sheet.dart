@@ -1,3 +1,4 @@
+import '../../screens/dated_shift_assignment_screen.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -554,35 +555,18 @@ Widget _CashierProfileView({
                         AppGestureDetectorButton(
                           onTap: state.isEditing
                               ? cubit.cancelEdit
-                              : () => _openShiftSelector(
-                                  context: context,
-                                  onAction: (shift) {
-                                    cubit.updateShift(shift);
-                                    context
-                                        .read<CashierUpdateCubit>()
-                                        .updateCashier(
-                                          openedFromChangeShiftButton: true,
-                                          newCashier: cubit.state.cashier!,
-                                          originalCashier:
-                                              cubit.state.originalCashier!,
-                                        );
-                                    NavigationService.I.pop();
-                                  },
-                                  initialShiftId:
-                                      (cashier.workingShifts != null &&
-                                          cashier.workingShifts!.isNotEmpty)
-                                      ? (state
-                                                    .cashier
-                                                    ?.workingShifts
-                                                    ?.isNotEmpty ==
-                                                true
-                                            ? state
-                                                  .cashier!
-                                                  .workingShifts![0]
-                                                  .id
-                                            : '-')
-                                      : '',
-                                ),
+                              : () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => const DatedShiftAssignmentScreen(),
+                                    ),
+                                  );
+                                  if (context.mounted) {
+                                    context.read<CashierUpdateCubit>().getCashierDetails(
+                                      cashierId: cashierId,
+                                    );
+                                  }
+                                },
                           child: Container(
                             width: 160.w,
                             padding: EdgeInsets.symmetric(

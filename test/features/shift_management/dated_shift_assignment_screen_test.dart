@@ -1409,8 +1409,10 @@ void main() {
       await tester.tap(find.byKey(const Key('btn_assign_tpl-unassigned')).first);
       await tester.pumpAndSettle();
 
-      // By default, recurring primary assignment radio is selected
+      // Recurrence is explicitly selected; the default assigns the dated slot.
       expect(find.byKey(const Key('radio_recurring_assignment')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('radio_recurring_assignment')));
+      await tester.pumpAndSettle();
 
       // Select cashier
       await tester.tap(find.byKey(const Key('tile_cashier_csh-primary-1')));
@@ -2028,6 +2030,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap confirm button
+      await tester.tap(find.byKey(const Key('radio_recurring_assignment')));
+      await tester.pumpAndSettle();
       final confirmBtn = find.byKey(const Key('btn_confirm_cashier_assignment'));
       expect(confirmBtn, findsOneWidget);
       await tester.tap(confirmBtn);
