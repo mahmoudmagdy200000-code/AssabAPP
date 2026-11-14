@@ -510,6 +510,25 @@ class _DatedShiftAssignmentScreenState
     }
   }
 
+  Future<void> _pickRosterStartDate() async {
+    if (_isLoading) return;
+    final current = DateTime.tryParse(_startDate);
+    if (current == null) return;
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: current,
+      firstDate: DateTime(current.year - 10),
+      lastDate: DateTime(current.year + 10, 12, 31),
+      helpText: 'اختر بداية فترة التعيين (٧ أيام)',
+    );
+    if (!mounted || selected == null || _isLoading) return;
+    // Calendar arithmetic must not depend on DST-length local days.
+    final days = DateTime.utc(selected.year, selected.month, selected.day)
+        .difference(DateTime.utc(current.year, current.month, current.day))
+        .inDays;
+    _shiftDateRange(days);
+  }
+
   void _shiftDateRange(int days) {
     try {
       final s = DateTime.parse(_startDate).add(Duration(days: days));
@@ -1035,44 +1054,36 @@ class _DatedShiftAssignmentScreenState
                   ),
                   SizedBox(width: 6.w),
                   Expanded(
-                    child: Text(
-                      _dateRange,
-                      key: const Key('txt_date_range'),
-                      style: AppStyles.s13W600.copyWith(
-                        color: context.customColor.text1,
+                    child: InkWell(
+                      key: const Key('btn_pick_date_range'),
+                      onTap: _isLoading ? null : _pickRosterStartDate,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          _dateRange,
+                          key: const Key('txt_date_range'),
+                          style: AppStyles.s13W600.copyWith(
+                            color: context.theme.primaryColor,
+                            decoration: TextDecoration.underline,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  InkWell(
+                  IconButton(
                     key: const Key('btn_prev_week'),
-                    onTap: _isLoading ? null : () => _shiftDateRange(-7),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 4.w,
-                        vertical: 2.h,
-                      ),
-                      child: Icon(
-                        Icons.chevron_right,
-                        color: context.customColor.text2,
-                        size: 20.w,
-                      ),
-                    ),
+                    tooltip: 'الأسبوع السابق',
+                    onPressed: _isLoading ? null : () => _shiftDateRange(-7),
+                    icon: const Icon(Icons.chevron_right),
+                    color: context.theme.primaryColor,
                   ),
-                  InkWell(
+                  IconButton(
                     key: const Key('btn_next_week'),
-                    onTap: _isLoading ? null : () => _shiftDateRange(7),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 4.w,
-                        vertical: 2.h,
-                      ),
-                      child: Icon(
-                        Icons.chevron_left,
-                        color: context.customColor.text2,
-                        size: 20.w,
-                      ),
-                    ),
+                    tooltip: 'الأسبوع التالي',
+                    onPressed: _isLoading ? null : () => _shiftDateRange(7),
+                    icon: const Icon(Icons.chevron_left),
+                    color: context.theme.primaryColor,
                   ),
                 ],
               ),

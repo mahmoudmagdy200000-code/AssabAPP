@@ -36,6 +36,38 @@ Widget _buildTestApp(Widget child, {Locale locale = const Locale('ar')}) {
 }
 
 void main() {
+  testWidgets('date range picker selects seven days and refresh preserves selection', (tester) async {
+    tester.view.physicalSize = const Size(820, 1180);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final calls = <String>[];
+    await tester.pumpWidget(_buildTestApp(DatedShiftAssignmentScreen(
+      initialDateRange: '2026-11-08 — 2026-11-14',
+      onFetchRoster: (start, end) async { calls.add('$start/$end'); return []; },
+    )));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('btn_pick_date_range')));
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    await tester.tap(find.text('20').last);
+    final label = MaterialLocalizations.of(tester.element(find.byType(DatePickerDialog))).okButtonLabel;
+    await tester.tap(find.text(label).last);
+    await tester.pumpAndSettle();
+    expect(calls.last, '2026-11-20/2026-11-26');
+    expect(find.text('2026-11-20 — 2026-11-26'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('btn_refresh_roster')));
+    await tester.pumpAndSettle();
+    expect(calls.last, '2026-11-20/2026-11-26');
+    await tester.tap(find.byKey(const Key('btn_next_week')));
+    await tester.pumpAndSettle();
+    expect(calls.last, '2026-11-27/2026-12-03');
+    await tester.tap(find.byKey(const Key('btn_prev_week')));
+    await tester.pumpAndSettle();
+    expect(calls.last, '2026-11-20/2026-11-26');
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Friday empty slot defaults to actual dated assignment, not recurrence', (tester) async {
     tester.view.physicalSize = const Size(820, 1180);
     tester.view.devicePixelRatio = 1;
