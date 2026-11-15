@@ -119,7 +119,7 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
                 buildShiftCardRowWidget(
                   context: context,
                   firstTitleSvgAsset: AppAssets.cash,
-                  title: context.tr.cashCollected,
+                  title: context.tr.cash,
                   value: context
                       .watch<EndShiftCubit>()
                       .cashCollected

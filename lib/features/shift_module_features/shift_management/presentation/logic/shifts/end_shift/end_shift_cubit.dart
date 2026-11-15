@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
+import 'package:assab/core/utils/currency_normalizer.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_request_with_variance.dart';
@@ -420,6 +421,83 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     );
   }
 
+  Future<bool> previewFromSalesInputs({
+    required String totalSales,
+    required String countedCash,
+    required String cardPayments,
+    required List<AggregatorEntity> aggregators,
+    required bool isArabic,
+  }) async {
+    final sales = _parseCloseAmount(totalSales);
+    final counted = _parseCloseAmount(countedCash);
+    final cards = cardPayments.trim().isEmpty
+        ? 0.0
+        : _parseCloseAmount(cardPayments);
+    final appAmounts = aggregators
+        .map((app) => _parseCloseAmount((app.totalAmount ?? 0).toString()))
+        .toList();
+
+    if (sales == null ||
+        counted == null ||
+        cards == null ||
+        appAmounts.contains(null)) {
+      invalidatePreview();
+      emit(
+        EndShiftPreviewFailure(
+          _createValidationFailure(
+            isArabic
+                ? 'أدخل مبالغ صحيحة بالريال وبحد أقصى منزلتين عشريتين.'
+                : 'Enter valid SAR amounts with up to two decimal places.',
+          ),
+        ),
+      );
+      return false;
+    }
+
+    final appHalalas = appAmounts.fold<int>(
+      0,
+      (sum, amount) => sum + (amount! * 100).round(),
+    );
+    final cashSalesHalalas =
+        (sales * 100).round() - (cards * 100).round() - appHalalas;
+    if (cashSalesHalalas < 0) {
+      invalidatePreview();
+      emit(
+        EndShiftPreviewFailure(
+          _createValidationFailure(
+            isArabic
+                ? 'إجمالي مدفوعات البطاقات والتطبيقات لا يمكن أن يتجاوز إجمالي المبيعات.'
+                : 'Card and app payments cannot exceed total sales.',
+          ),
+        ),
+      );
+      return false;
+    }
+
+    setCountedCash(counted);
+    endShiftTotalSalesValuesUpdated(
+      totalSales: sales,
+      cashCollected: cashSalesHalalas / 100,
+      cardPayments: cards,
+      aggregators: aggregators,
+    );
+    return fetchCashReconciliationPreview();
+  }
+
+  static final _closeAmountPattern = RegExp(
+    r'^(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$',
+  );
+
+  static double? _parseCloseAmount(String input) {
+    final normalized = CurrencyNormalizer.sanitizeNumericString(
+      input,
+    ).replaceAll('،', '');
+    if (!_closeAmountPattern.hasMatch(normalized)) return null;
+    final amount = double.tryParse(normalized);
+    // The cashier shift money columns are DECIMAL(12, 2).
+    return amount != null && amount <= 9999999999.99 ? amount : null;
+  }
+
   Future<bool> fetchCashReconciliationPreview() async {
     if (!_isPendingIncomingCashValid) {
       emit(
@@ -530,7 +608,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
       await fetchShortageCandidates();
     }
 
-    return isSuccess;
+    return isSuccess && currentRequestId == _previewRequestId;
   }
 
   void endShiftHandOverValuesUpdated({
@@ -637,7 +715,11 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   double? get varianceAmount {
     final calculatedMethodsTotal = paymentMethodsTotal;
 
-    if (calculatedMethodsTotal == 0) {
+    if (calculatedMethodsTotal == 0 ||
+        CurrencyNormalizer.areAmountsEqual(
+          totalSales,
+          calculatedMethodsTotal,
+        )) {
       return 0;
     }
     if (totalSales > (calculatedMethodsTotal)) {

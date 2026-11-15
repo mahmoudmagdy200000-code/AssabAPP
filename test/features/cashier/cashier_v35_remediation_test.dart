@@ -760,13 +760,12 @@ void main() {
         final totalSalesController = TextEditingController();
         final totalHandoverController = TextEditingController();
         final madaController = TextEditingController();
-        final cashController = TextEditingController();
         final countedCashController = TextEditingController();
         final pendingIncomingController = TextEditingController();
 
         await tester.pumpWidget(
           MaterialApp(
-            theme: AppTheme.light,
+            theme: ThemeData(extensions: LightTheme.extension),
             locale: const Locale('ar'),
             supportedLocales: S.delegate.supportedLocales,
             localizationsDelegates: const [
@@ -796,7 +795,6 @@ void main() {
                           totalSaleSController: totalSalesController,
                           totalHandoverController: totalHandoverController,
                           madaController: madaController,
-                          cashController: cashController,
                           countedCashController: countedCashController,
                           pendingIncomingCashController:
                               pendingIncomingController,
@@ -813,35 +811,39 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
 
-        // 1. Enter Arabic numerals: 115.50 in Arabic digits: \u0661\u0661\u0665\u066B\u0665\u0660
-        countedCashController.text = '\u0661\u0661\u0665\u066B\u0665\u0660';
-        await tester.pump();
-        final parsed = EndShiftCubit.tryParseFinancialAmount(
-          countedCashController.text,
+        final cashField = find.byWidgetPredicate(
+          (widget) =>
+              widget is TextFormField &&
+              widget.controller == countedCashController,
         );
-        expect(parsed, equals(115.50));
-        cubit.setCountedCash(parsed);
-        expect(cubit.countedCash, equals(115.50));
+        final pendingField = find.byWidgetPredicate(
+          (widget) =>
+              widget is TextFormField &&
+              widget.controller == pendingIncomingController,
+        );
+        expect(cashField, findsOneWidget);
+        expect(pendingField.hitTestable(), findsNothing);
+        expect(find.byType(TextFormField), findsNWidgets(3));
 
-        // 2. Enter non-numeric: "abc"
-        countedCashController.text = 'abc';
+        final pendingToggle = find.byType(ExpansionTile);
+        await tester.ensureVisible(pendingToggle);
+        await tester.tap(pendingToggle);
         await tester.pump();
-        final invalidParsed = EndShiftCubit.tryParseFinancialAmount(
-          countedCashController.text,
-        );
-        expect(invalidParsed, isNull);
-        cubit.setCountedCash(invalidParsed);
+        await tester.pump(const Duration(milliseconds: 250));
+        await tester.ensureVisible(pendingField);
+        expect(pendingField.hitTestable(), findsOneWidget);
+
+        await tester.enterText(cashField, '١١٥٫٥٠');
+        await tester.pump();
+        expect(cubit.countedCash, 115.50);
+
+        await tester.enterText(cashField, 'abc');
+        await tester.pump();
         expect(cubit.countedCash, isNull);
 
-        // 3. Enter Pending Incoming Cash: 100.00 in Arabic digits: \u0661\u0660\u0660\u066B\u0660\u0660
-        pendingIncomingController.text = '\u0661\u0660\u0660\u066B\u0660\u0660';
+        await tester.enterText(pendingField, '١٠٠٫٠٠');
         await tester.pump();
-        final pendingParsed = EndShiftCubit.tryParseFinancialAmount(
-          pendingIncomingController.text,
-        );
-        expect(pendingParsed, equals(100.0));
-        cubit.setPendingIncomingCash(pendingParsed);
-        expect(cubit.declaredPendingIncomingCash, equals(100.0));
+        expect(cubit.declaredPendingIncomingCash, 100.0);
       },
     );
   });
@@ -884,7 +886,6 @@ void main() {
             final totalSalesController = TextEditingController();
             final totalHandoverController = TextEditingController();
             final madaController = TextEditingController();
-            final cashController = TextEditingController();
             final countedCashController = TextEditingController();
             final pendingIncomingController = TextEditingController();
 
@@ -920,7 +921,6 @@ void main() {
                               totalSaleSController: totalSalesController,
                               totalHandoverController: totalHandoverController,
                               madaController: madaController,
-                              cashController: cashController,
                               countedCashController: countedCashController,
                               pendingIncomingCashController:
                                   pendingIncomingController,
@@ -961,7 +961,6 @@ void main() {
             final totalSalesController = TextEditingController();
             final totalHandoverController = TextEditingController();
             final madaController = TextEditingController();
-            final cashController = TextEditingController();
             final countedCashController = TextEditingController();
             final pendingIncomingController = TextEditingController();
 
@@ -997,7 +996,6 @@ void main() {
                               totalSaleSController: totalSalesController,
                               totalHandoverController: totalHandoverController,
                               madaController: madaController,
-                              cashController: cashController,
                               countedCashController: countedCashController,
                               pendingIncomingCashController:
                                   pendingIncomingController,

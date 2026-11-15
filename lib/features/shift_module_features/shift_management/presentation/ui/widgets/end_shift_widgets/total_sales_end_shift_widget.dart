@@ -32,7 +32,6 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
   final TextEditingController totalSaleSController;
   final TextEditingController totalHandoverController;
   final TextEditingController madaController;
-  final TextEditingController cashController;
   final TextEditingController countedCashController;
   final TextEditingController? pendingIncomingCashController;
 
@@ -42,7 +41,6 @@ class SalesBreakDownEndShiftWidget extends StatefulWidget {
     required this.totalSaleSController,
     required this.totalHandoverController,
     required this.madaController,
-    required this.cashController,
     required this.countedCashController,
     this.pendingIncomingCashController,
     required this.viewUpload,
@@ -95,6 +93,7 @@ class _SalesBreakDownEndShiftWidget
                           ),
                           maxLength: 30,
                           onChanged: (value) {
+                            context.read<EndShiftCubit>().invalidatePreview();
                             context.read<ValidationCubit>().validateField(
                               'totalSales',
                               value.isNotEmpty,
@@ -197,68 +196,28 @@ class _SalesBreakDownEndShiftWidget
 
                 10.verticalSpace,
 
-                SizedBox(
-                  width: 470.w,
-                  height: 100.h,
+                ContainerCustomTextField(
+                  label: context.tr.cardPayment,
+                  isLabelRequired: false,
+                  pngAssetName: AppAssets.madaPng,
                   child: Row(
                     children: [
                       Expanded(
-                        child: ContainerCustomTextField(
-                          label: context.tr.cash,
-                          isLabelRequired: false,
-                          pngAssetName: AppAssets.cashPng,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: CustomTextField(
-                                  controller: widget.cashController,
-                                  hintText: context.tr.amount,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  maxLength: 30,
-                                  onChanged: (value) {},
-                                ),
-                              ),
-                              AppSvg(
-                                assetName: AppAssets.saudiRiyal,
-                                width: 20.w,
-                                height: 20.h,
-                              ),
-                            ],
+                        child: CustomTextField(
+                          controller: widget.madaController,
+                          hintText: context.tr.amount,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
+                          maxLength: 30,
+                          onChanged: (_) =>
+                              context.read<EndShiftCubit>().invalidatePreview(),
                         ),
                       ),
-
-                      15.horizontalSpace,
-                      Expanded(
-                        child: ContainerCustomTextField(
-                          label: context.tr.mada,
-                          isLabelRequired: false,
-                          pngAssetName: AppAssets.madaPng,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: CustomTextField(
-                                  controller: widget.madaController,
-                                  hintText: context.tr.amount,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  maxLength: 30,
-                                  onChanged: (value) {},
-                                ),
-                              ),
-                              AppSvg(
-                                assetName: AppAssets.saudiRiyal,
-                                width: 20.w,
-                                height: 20.h,
-                              ),
-                            ],
-                          ),
-                        ),
+                      AppSvg(
+                        assetName: AppAssets.saudiRiyal,
+                        width: 20.w,
+                        height: 20.h,
                       ),
                     ],
                   ),
@@ -268,11 +227,6 @@ class _SalesBreakDownEndShiftWidget
                 const CustomDivider(),
                 10.verticalSpace,
 
-                Text(
-                  context.tr.actualCountedCashCashDrawer,
-                  style: AppStyles.s15W500,
-                ),
-                2.verticalSpace,
                 Text(
                   context.tr.enterActualCashInDrawerIndependent,
                   style: AppStyles.s13W500.copyWith(
@@ -340,55 +294,65 @@ class _SalesBreakDownEndShiftWidget
                     ],
                   ),
                 ),
-                Text(context.tr.pendingIncomingCash, style: AppStyles.s15W500),
-                2.verticalSpace,
-                Text(
-                  context.tr.pendingIncomingCashDesc,
-                  style: AppStyles.s13W500.copyWith(
-                    color: context.customColor.text3,
-                  ),
-                ),
-                10.verticalSpace,
-
-                ContainerCustomTextField(
-                  label: context.tr.pendingIncomingCash,
-                  isLabelRequired: false,
-                  pngAssetName: AppAssets.cashPng,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          controller: widget.pendingIncomingCashController,
-                          hintText: '0.00',
-                          error: _pendingIncomingError,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          maxLength: 30,
-                          onChanged: (value) {
-                            final isAr =
-                                Localizations.localeOf(context).languageCode ==
-                                'ar';
-                            final cubit = context.read<EndShiftCubit>();
-                            cubit.validateAndSetPendingIncomingCash(
-                              value,
-                              isArabic: isAr,
-                            );
-                            setState(() {
-                              _pendingIncomingError =
-                                  cubit.pendingIncomingCashError;
-                            });
-                          },
-                        ),
+                if (widget.pendingIncomingCashController != null)
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    maintainState: true,
+                    title: Text(
+                      context.tr.pendingIncomingCash,
+                      style: AppStyles.s15W500,
+                    ),
+                    subtitle: Text(
+                      context.tr.pendingIncomingCashDesc,
+                      style: AppStyles.s13W500.copyWith(
+                        color: context.customColor.text3,
                       ),
-                      AppSvg(
-                        assetName: AppAssets.saudiRiyal,
-                        width: 20.w,
-                        height: 20.h,
+                    ),
+                    children: [
+                      ContainerCustomTextField(
+                        isLabelRequired: false,
+                        pngAssetName: AppAssets.cashPng,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: CustomTextField(
+                                controller:
+                                    widget.pendingIncomingCashController,
+                                hintText: '0.00',
+                                error: _pendingIncomingError,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                maxLength: 30,
+                                onChanged: (value) {
+                                  final isAr =
+                                      Localizations.localeOf(
+                                        context,
+                                      ).languageCode ==
+                                      'ar';
+                                  final cubit = context.read<EndShiftCubit>();
+                                  cubit.validateAndSetPendingIncomingCash(
+                                    value,
+                                    isArabic: isAr,
+                                  );
+                                  setState(() {
+                                    _pendingIncomingError =
+                                        cubit.pendingIncomingCashError;
+                                  });
+                                },
+                              ),
+                            ),
+                            AppSvg(
+                              assetName: AppAssets.saudiRiyal,
+                              width: 20.w,
+                              height: 20.h,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
 
                 const CustomDivider(),
                 15.verticalSpace,
@@ -501,6 +465,9 @@ class _SalesBreakDownEndShiftWidget
                                                   ) ??
                                                   0,
                                             );
+                                        context
+                                            .read<EndShiftCubit>()
+                                            .invalidatePreview();
                                       },
                                     ),
                                   ),

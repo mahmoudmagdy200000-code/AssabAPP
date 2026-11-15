@@ -4214,7 +4214,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Pending Incoming Cash",
     ),
     "pendingIncomingCashDesc": MessageLookupByLibrary.simpleMessage(
-      "Cash from transfers or receipts not yet counted in drawer",
+      "Cash already counted in the drawer from incoming transfers awaiting confirmation.",
     ),
     "pendingInvoice": MessageLookupByLibrary.simpleMessage("Pending Invoice"),
     "pendingNotStarted": MessageLookupByLibrary.simpleMessage(

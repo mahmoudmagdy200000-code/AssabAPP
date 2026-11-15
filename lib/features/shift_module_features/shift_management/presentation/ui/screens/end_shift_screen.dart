@@ -49,7 +49,6 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
   late final TextEditingController _totalSaleSController;
   late final TextEditingController _totalHandoverController;
   late final TextEditingController _madaSController;
-  late final TextEditingController _cashController;
   late final TextEditingController _countedCashController;
   late final TextEditingController _pendingIncomingCashController;
 
@@ -59,7 +58,6 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
     _totalSaleSController = TextEditingController();
     _totalHandoverController = TextEditingController();
     _madaSController = TextEditingController();
-    _cashController = TextEditingController();
     _countedCashController = TextEditingController();
     _pendingIncomingCashController = TextEditingController();
   }
@@ -69,7 +67,6 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
     _totalSaleSController.dispose();
     _totalHandoverController.dispose();
     _madaSController.dispose();
-    _cashController.dispose();
     _countedCashController.dispose();
     _pendingIncomingCashController.dispose();
     super.dispose();
@@ -148,7 +145,6 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                 totalHandoverController:
                                     _totalHandoverController,
                                 madaController: _madaSController,
-                                cashController: _cashController,
                                 countedCashController: _countedCashController,
                                 pendingIncomingCashController:
                                     _pendingIncomingCashController,
@@ -450,41 +446,28 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                                 if (currentIndex == 0) {
                                                   if (cubit.isPreviewLoading) return;
 
-                                                  final counted = double.tryParse(
-                                                    _countedCashController.text.trim(),
-                                                  );
-                                                  cubit.setCountedCash(counted);
-
-                                                  cubit.endShiftTotalSalesValuesUpdated(
-                                                    totalSales:
-                                                        double.tryParse(
-                                                          _totalSaleSController
-                                                              .text,
-                                                        ) ??
-                                                        0,
-                                                    cashCollected:
-                                                        double.tryParse(
-                                                          _cashController
-                                                              .text,
-                                                        ) ??
-                                                        0,
-                                                    cardPayments:
-                                                        double.tryParse(
-                                                          _madaSController
-                                                              .text,
-                                                        ) ??
-                                                        0,
-                                                    aggregators: context
-                                                        .read<
-                                                          AggregatorCubit
-                                                        >()
-                                                        .addedAggregators,
-                                                  );
-
-                                                  // Await server preview calculation
-                                                  final previewSuccess =
-                                                      await cubit
-                                                          .fetchCashReconciliationPreview();
+                                                  final previewSuccess = await cubit
+                                                      .previewFromSalesInputs(
+                                                        totalSales:
+                                                            _totalSaleSController
+                                                                .text,
+                                                        countedCash:
+                                                            _countedCashController
+                                                                .text,
+                                                        cardPayments:
+                                                            _madaSController
+                                                                .text,
+                                                        aggregators: context
+                                                            .read<
+                                                              AggregatorCubit
+                                                            >()
+                                                            .addedAggregators,
+                                                        isArabic:
+                                                            Localizations.localeOf(
+                                                              context,
+                                                            ).languageCode ==
+                                                            'ar',
+                                                      );
                                                   if (!context.mounted) return;
                                                   if (!previewSuccess) {
                                                     // Stay on step 0 if preview failed or is invalid

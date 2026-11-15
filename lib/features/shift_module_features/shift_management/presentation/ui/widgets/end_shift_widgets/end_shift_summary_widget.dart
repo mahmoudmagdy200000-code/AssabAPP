@@ -95,7 +95,7 @@ class EndShiftSummaryWidget extends StatelessWidget {
                     buildShiftCardRowWidget(
                       context: context,
                       firstTitleSvgAsset: AppAssets.cash,
-                      title: context.tr.cashCollected,
+                      title: context.tr.cash,
                       value: context
                           .read<EndShiftCubit>()
                           .cashCollected
