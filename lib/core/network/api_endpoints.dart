@@ -212,6 +212,12 @@ class ApiEndpoint {
   //  =================== Shift Management Endpoints ===================
 
   static const String branchManagerShifts = '${branchManager}shifts';
+
+  // These shift routes accept both cashiers and branch managers.
+  static const String startShiftHandover =
+      '$branchManagerShifts/{shift}/start-handover';
+  static const String shiftHandoverRecipients =
+      '$branchManagerShifts/{shift}/available-recipients';
   static const String shortageAllocationCandidates =
       '$branchManagerShifts/{shift}/shortage-allocation-candidates';
   static const String branchManagerStartShift =
@@ -255,8 +261,6 @@ class ApiEndpoint {
   static const String cashierLogout = '${cashier}logout';
   static const String cashierShifts = '${cashier}shifts';
   static const String cashierStartShift = '$cashierShifts/{shiftId}/start';
-  static const String cashierStartHandover = '$cashierShifts/{shift}/start-handover';
-  static const String cashierAvailableRecipients = '$cashierShifts/{shift}/available-recipients';
   static const String cashierMyInfo = '${cashier}my-info';
   static const String cashierBranchInfo = '${cashier}branch-info';
 

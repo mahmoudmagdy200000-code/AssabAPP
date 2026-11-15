@@ -167,7 +167,7 @@ abstract class ShiftManagementRemoteDataSource {
     @Header('Idempotency-Key') String? idempotencyKey,
   });
 
-  @POST(ApiEndpoint.cashierStartHandover)
+  @POST(ApiEndpoint.startShiftHandover)
   Future<dynamic> handOver({
     @Path('shift') required String shiftId,
     @Body() required HandOverRequest handOverRequest,
@@ -191,7 +191,7 @@ abstract class ShiftManagementRemoteDataSource {
     @Body() HandoverApproveAndRejectBodyRequest? body,
   });
 
-  @GET(ApiEndpoint.cashierAvailableRecipients)
+  @GET(ApiEndpoint.shiftHandoverRecipients)
   Future<AvailableRecipientsResponseModel> getAvailableRecipients({
     @Path('shift') required String shiftId,
   });
