@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../core/di/dependency_injection.dart';
 import '../../../../../../core/extensions/build_context_extensions.dart';
 import '../../../../../../core/extensions/number_extensions.dart';
+import '../../../../../../core/helpers/shared_preferences_helper.dart';
 import '../../../../../../core/network/api_endpoints.dart';
 import '../../../../../../core/styles/app_colors.dart';
 import '../../../../../../core/styles/app_styles.dart';
@@ -1691,6 +1692,155 @@ class _AssignCashierModalContentState
     super.dispose();
   }
 
+  String _formatManagerDisplayName(String rawName) {
+    final trimmed = rawName.trim();
+    if (trimmed.isEmpty) return 'مدير الفرع';
+    if (trimmed.contains('مدير الفرع')) return trimmed;
+    return '$trimmed (مدير الفرع)';
+  }
+
+  bool _isBranchManagerMap(Map<String, dynamic> c) {
+    final role = c['role']?.toString().toLowerCase();
+    final type = c['type']?.toString().toLowerCase();
+    return c['is_branch_manager'] == true ||
+        c['is_manager'] == true ||
+        role == 'branch_manager' ||
+        type == 'branch_manager';
+  }
+
+  Map<String, dynamic>? _asStringDynamicMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> _withBranchManagerOption(
+    List<Map<String, dynamic>> cashiers, {
+    Map<String, dynamic>? responseBody,
+  }) async {
+    String? managerId;
+    String? managerName;
+    String? managerPhone;
+    bool managerAvailable = true;
+    String? managerUnavailableReason;
+
+    final metaMap = _asStringDynamicMap(responseBody?['meta']);
+    final metaManager =
+        _asStringDynamicMap(metaMap?['branch_manager']) ??
+        _asStringDynamicMap(responseBody?['branch_manager']);
+
+    if (metaManager != null) {
+      final candidateId = metaManager['id']?.toString().trim();
+      if (candidateId != null && candidateId.isNotEmpty) {
+        managerId = candidateId;
+        managerName = metaManager['name']?.toString();
+        managerPhone = metaManager['phone']?.toString();
+        final disabled = metaManager['disabled'] as bool? ?? false;
+        managerAvailable =
+            (metaManager['is_available'] as bool? ?? !disabled) && !disabled;
+        managerUnavailableReason = metaManager['reason_disabled']?.toString();
+      }
+    }
+
+    if ((managerId == null || managerId.isEmpty) &&
+        widget.effectiveDio != null) {
+      try {
+        final allRes = await widget.effectiveDio!.get(
+          '${ApiEndpoint.branchManagerCashiers}/all',
+        );
+        if (allRes.statusCode == 200) {
+          final bodyMap = _asStringDynamicMap(allRes.data);
+          final dataMap = _asStringDynamicMap(bodyMap?['data']);
+          final managersList = dataMap?['branch_managers'];
+          if (managersList is List && managersList.isNotEmpty) {
+            final firstManager = _asStringDynamicMap(managersList.first);
+            final candidateId = firstManager?['id']?.toString().trim();
+            if (candidateId != null && candidateId.isNotEmpty) {
+              managerId = candidateId;
+              managerName = firstManager?['name']?.toString();
+              managerPhone = firstManager?['phone']?.toString();
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (managerId == null ||
+        managerId.isEmpty ||
+        managerName == null ||
+        managerName.trim().isEmpty) {
+      try {
+        if (getIt.isRegistered<SharedPreferencesHelper>()) {
+          final prefs = getIt<SharedPreferencesHelper>();
+          final localId = prefs.getString('u_id')?.trim();
+          final localName = prefs.getString('u_name')?.trim();
+          final localPhone = prefs.getString('u_phone')?.trim();
+          if (managerId == null || managerId.isEmpty) {
+            if (localId != null && localId.isNotEmpty) {
+              managerId = localId;
+            }
+          }
+          if ((managerName == null || managerName.trim().isEmpty) &&
+              localName != null &&
+              localName.isNotEmpty) {
+            managerName = localName;
+          }
+          if ((managerPhone == null || managerPhone.isEmpty) &&
+              localPhone != null &&
+              localPhone.isNotEmpty) {
+            managerPhone = localPhone;
+          }
+        }
+      } catch (_) {}
+    }
+
+    final result = cashiers.map((item) => Map<String, dynamic>.from(item)).toList();
+
+    if (managerId != null && managerId.isNotEmpty) {
+      final existingIdx = result.indexWhere(
+        (c) => c['id']?.toString() == managerId,
+      );
+      if (existingIdx >= 0) {
+        final existing = result.removeAt(existingIdx);
+        final rawName = (managerName != null && managerName.trim().isNotEmpty)
+            ? managerName
+            : (existing['name']?.toString() ?? '');
+        existing['name'] = _formatManagerDisplayName(rawName);
+        if ((existing['phone'] == null ||
+                existing['phone'].toString().trim().isEmpty) &&
+            managerPhone != null &&
+            managerPhone.isNotEmpty) {
+          existing['phone'] = managerPhone;
+        }
+        existing['is_branch_manager'] = true;
+        result.insert(0, existing);
+      } else {
+        result.insert(0, {
+          'id': managerId,
+          'name': _formatManagerDisplayName(managerName ?? ''),
+          if (managerPhone != null && managerPhone.isNotEmpty)
+            'phone': managerPhone,
+          'is_available': managerAvailable,
+          'disabled': !managerAvailable,
+          'reason_disabled': managerUnavailableReason,
+          'is_branch_manager': true,
+        });
+      }
+    } else {
+      final flaggedIdx = result.indexWhere(_isBranchManagerMap);
+      if (flaggedIdx >= 0) {
+        final flagged = result.removeAt(flaggedIdx);
+        flagged['name'] = _formatManagerDisplayName(
+          flagged['name']?.toString() ?? '',
+        );
+        flagged['is_branch_manager'] = true;
+        result.insert(0, flagged);
+      }
+    }
+
+    return result;
+  }
+
   Future<void> _fetchCashiers() async {
     setState(() {
       _isLoading = true;
@@ -1701,10 +1851,16 @@ class _AssignCashierModalContentState
 
     if (widget.onFetchAvailableCashiers != null) {
       try {
-        final list = await widget.onFetchAvailableCashiers!();
+        final rawList = await widget.onFetchAvailableCashiers!();
+        final normalized = rawList.map((c) {
+          final m = Map<String, dynamic>.from(c);
+          m['is_branch_manager'] = _isBranchManagerMap(m);
+          return m;
+        }).toList();
+        final enriched = await _withBranchManagerOption(normalized);
         if (mounted) {
           setState(() {
-            _cashiers = list;
+            _cashiers = enriched;
             _isLoading = false;
           });
         }
@@ -1739,24 +1895,31 @@ class _AssignCashierModalContentState
           queryParameters: queryParams,
         );
 
-        final list = res.data['data'] as List<dynamic>? ?? [];
-        final parsed = list
-            .map(
-              (c) => {
-                'id': c['id']?.toString() ?? '',
-                'name': c['name']?.toString() ?? 'كاشير مصرح',
-                'is_available':
-                    c['is_available'] as bool? ??
-                    !(c['disabled'] as bool? ?? false),
-                'disabled': c['disabled'] as bool? ?? false,
-                'reason_disabled': c['reason_disabled']?.toString(),
-              },
-            )
-            .toList();
+        final responseMap = _asStringDynamicMap(res.data);
+        final list = responseMap?['data'] as List<dynamic>? ?? [];
+        final parsed = list.map((raw) {
+          final c = _asStringDynamicMap(raw) ?? <String, dynamic>{};
+          return <String, dynamic>{
+            'id': c['id']?.toString() ?? '',
+            'name': c['name']?.toString() ?? 'كاشير مصرح',
+            if (c['phone'] != null) 'phone': c['phone']?.toString(),
+            'is_available':
+                c['is_available'] as bool? ??
+                !(c['disabled'] as bool? ?? false),
+            'disabled': c['disabled'] as bool? ?? false,
+            'reason_disabled': c['reason_disabled']?.toString(),
+            'is_branch_manager': _isBranchManagerMap(c),
+          };
+        }).toList();
+
+        final enriched = await _withBranchManagerOption(
+          parsed,
+          responseBody: responseMap,
+        );
 
         if (mounted) {
           setState(() {
-            _cashiers = parsed;
+            _cashiers = enriched;
             _isLoading = false;
           });
         }
@@ -2012,6 +2175,7 @@ class _AssignCashierModalContentState
                       final c = _cashiers[index];
                       final cId = c['id'].toString();
                       final cName = c['name'].toString();
+                      final isBranchManager = _isBranchManagerMap(c);
                       final isAvailable =
                           (c['is_available'] as bool? ?? true) &&
                           !(c['disabled'] as bool? ?? false);
@@ -2032,7 +2196,11 @@ class _AssignCashierModalContentState
                                       ))
                               : Colors.grey.shade200,
                           child: Icon(
-                            isSelected ? Icons.check : Icons.person,
+                            isSelected
+                                ? Icons.check
+                                : (isBranchManager
+                                      ? Icons.manage_accounts_rounded
+                                      : Icons.person),
                             color: isAvailable
                                 ? (isSelected
                                       ? Colors.white
@@ -2041,13 +2209,42 @@ class _AssignCashierModalContentState
                             size: 20.w,
                           ),
                         ),
-                        title: Text(
-                          cName,
-                          style: AppStyles.s14W500.copyWith(
-                            color: isAvailable
-                                ? context.customColor.text1
-                                : context.customColor.text3,
-                          ),
+                        title: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6.w,
+                          runSpacing: 4.h,
+                          children: [
+                            Text(
+                              cName,
+                              style: AppStyles.s14W500.copyWith(
+                                color: isAvailable
+                                    ? context.customColor.text1
+                                    : context.customColor.text3,
+                              ),
+                            ),
+                            if (isBranchManager)
+                              Container(
+                                key: Key('tag_branch_manager_$cId'),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 6.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: context.theme.primaryColor.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  'مدير الفرع — حسابي',
+                                  style: TextStyle(
+                                    color: context.theme.primaryColor,
+                                    fontSize: 10.w,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         subtitle: isAvailable
                             ? null
