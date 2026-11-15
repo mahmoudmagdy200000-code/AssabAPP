@@ -104,14 +104,7 @@ extension ShiftStatusUiMapper on ShiftStatusType {
         );
 
       case ShiftStatusType.completed:
-        return AppButton(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
-          borderRadius: BorderRadius.circular(25.r),
-          textColor: context.customColor.text2,
-          enabled: false,
-          onClick: () {},
-          text: context.tr.shiftCompleted,
-        );
+        return _completedShiftIndicator(context);
 
       case ShiftStatusType.inProgress:
         final activeShift = shift!;
@@ -398,14 +391,7 @@ extension ShiftStatusUiMapper on ShiftStatusType {
         );
 
       case ShiftStatusType.completed:
-        return AppButton(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
-          borderRadius: BorderRadius.circular(25.r),
-          textColor: context.customColor.text2,
-          enabled: false,
-          onClick: () {},
-          text: context.tr.shiftCompleted,
-        );
+        return _completedShiftIndicator(context);
 
       case ShiftStatusType.inProgress:
         return AppButton(
@@ -434,4 +420,13 @@ extension ShiftStatusUiMapper on ShiftStatusType {
         return AppButton(onClick: () {}, text: 'see_details');
     }
   }
+
+  Widget _completedShiftIndicator(BuildContext context) => AppButton(
+    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+    borderRadius: BorderRadius.circular(25.r),
+    textColor: context.customColor.text4,
+    enabled: false,
+    onClick: () {},
+    text: context.tr.shiftCompleted,
+  );
 }
