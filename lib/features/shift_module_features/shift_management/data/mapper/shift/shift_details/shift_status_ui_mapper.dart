@@ -20,7 +20,6 @@ import '../../../../../../cashier_requests/presentation/cubits/accept_reassigned
 import '../../../../domain/entity/manager_shift/current_shift/current_shift_entity.dart';
 import '../../../../domain/entity/shift/shift_cashier_entity.dart';
 import '../../../../presentation/logic/shifts/shift_details/shift_details_cubit.dart';
-import '../../../../presentation/ui/widgets/cashier_shifts_management_widgets/cashier_shift_end_gate.dart';
 import '../../../../presentation/ui/widgets/cashier_shifts_management_widgets/end_shift_options_bottom_sheet.dart';
 import '../../../../presentation/ui/widgets/shift_details_widgets/accept_reassigned_shift_sheet_widget.dart';
 
@@ -115,16 +114,17 @@ extension ShiftStatusUiMapper on ShiftStatusType {
 
       case ShiftStatusType.inProgress:
         final activeShift = shift!;
-        Widget endShiftButton(bool hasEnded) => AppButton(
+        final useRegularCloseFlow = isCashier || activeShift.hasEnded;
+        return AppButton(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
           borderRadius: BorderRadius.circular(25.r),
-          background: hasEnded ? AppColors.lightGreen : AppColors.red,
+          background: useRegularCloseFlow ? AppColors.lightGreen : AppColors.red,
           onClick: () {
             AppBottomSheet.showModal(
               context,
               isScrollControlled: true,
               (sheetContext) => EndShiftOptionsBottomSheet(
-                hasEnded: hasEnded,
+                hasEnded: useRegularCloseFlow,
                 shift: activeShift,
                 isOpenedFromShiftDetailsScreen: true,
                 onSuccessEndedOrReassigned: () {
@@ -135,17 +135,8 @@ extension ShiftStatusUiMapper on ShiftStatusType {
               ),
             );
           },
-          enabled: !isCashier || hasEnded,
+          enabled: true,
           text: context.tr.end_shift,
-        );
-
-        if (!isCashier) return endShiftButton(activeShift.hasEnded);
-
-        return CashierShiftEndGate(
-          shiftDate: DateTime.tryParse(activeShift.shiftDate),
-          startTime: activeShift.shiftTimeDetails.startTime,
-          endTime: activeShift.shiftTimeDetails.endTime,
-          builder: endShiftButton,
         );
 
       case ShiftStatusType.reassigned:

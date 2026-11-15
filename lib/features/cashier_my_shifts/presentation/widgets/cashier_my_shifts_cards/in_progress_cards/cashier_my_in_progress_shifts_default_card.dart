@@ -9,7 +9,6 @@ import '../../../../../../core/styles/app_styles.dart';
 import '../../../../../../core/utils/app_bottom_sheet.dart';
 import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/custom_divider.dart';
-import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/cashier_shift_end_gate.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/end_shift_options_bottom_sheet.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/shift_card.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/shift_details_widgets/see_details_button_widget.dart';
@@ -94,34 +93,28 @@ class CashierMyInProgressShiftsDefaultCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: CashierShiftEndGate(
-                    shiftDate: shift.date,
-                    startTime: shift.startTime,
-                    endTime: shift.endTime,
-                    builder: (canEnd) => AppButton(
-                      padding: EdgeInsets.all(15.w),
-                      borderRadius: BorderRadius.circular(12.r),
-                      onClick: () {
-                        AppBottomSheet.showModal(
-                          context,
-                          isScrollControlled: true,
-                          (sheetContext) => EndShiftOptionsBottomSheet(
-                            shiftId: shift.id,
-                            hasEnded: canEnd,
-                            isCashierUserType: true,
-                            onSuccessEndedOrReassigned: () {
-                              if (!context.mounted) return;
-                              final cubit = context
-                                  .read<CashierMyShiftsCubit>();
-                              cubit.getInProgressShifts();
-                              cubit.getCompletedShifts();
-                            },
-                          ),
-                        );
-                      },
-                      text: context.tr.end_shift,
-                      enabled: canEnd,
-                    ),
+                  child: AppButton(
+                    padding: EdgeInsets.all(15.w),
+                    borderRadius: BorderRadius.circular(12.r),
+                    onClick: () {
+                      AppBottomSheet.showModal(
+                        context,
+                        isScrollControlled: true,
+                        (sheetContext) => EndShiftOptionsBottomSheet(
+                          shiftId: shift.id,
+                          hasEnded: true,
+                          isCashierUserType: true,
+                          onSuccessEndedOrReassigned: () {
+                            if (!context.mounted) return;
+                            final cubit = context.read<CashierMyShiftsCubit>();
+                            cubit.getInProgressShifts();
+                            cubit.getCompletedShifts();
+                          },
+                        ),
+                      );
+                    },
+                    text: context.tr.end_shift,
+                    enabled: true,
                   ),
                 ),
                 12.horizontalSpace,
