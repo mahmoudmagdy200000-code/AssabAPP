@@ -696,7 +696,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'cashier/shifts/${shiftId}/start-handover',
+            'branch-manager/shifts/${shiftId}/start-handover',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -813,7 +813,7 @@ class _ShiftManagementRemoteDataSource
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'cashier/shifts/${shiftId}/available-recipients',
+            'branch-manager/shifts/${shiftId}/available-recipients',
             queryParameters: queryParameters,
             data: _data,
           )
