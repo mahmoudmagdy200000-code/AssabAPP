@@ -1,3 +1,4 @@
+import 'package:assab/core/utils/shift_time_formatter.dart';
 import 'package:flutter/material.dart';
 
 class ShiftStartWindowStatus {
@@ -47,11 +48,14 @@ class ShiftStartWindowHelper {
   /// Returns whether server time has been synchronized at least once.
   static bool get isSyncedWithServer => _isSyncedWithServer;
 
+  // UTC representation of Riyadh calendar fields, independent of device DST.
+  static DateTime get _riyadhWallTime => DateTime.now().toUtc().add(
+    _serverClockSkew + const Duration(hours: 3),
+  );
+
   /// Returns the current synchronized server time in Asia/Riyadh (UTC+3) wall-clock representation.
   static DateTime get now {
-    final effectiveUtc = DateTime.now().toUtc().add(_serverClockSkew);
-    // Asia/Riyadh is always UTC+3 (no daylight saving time)
-    final riyadh = effectiveUtc.add(const Duration(hours: 3));
+    final riyadh = _riyadhWallTime;
     return DateTime(
       riyadh.year,
       riyadh.month,
@@ -61,6 +65,30 @@ class ShiftStartWindowHelper {
       riyadh.second,
       riyadh.millisecond,
     );
+  }
+
+  /// Whether the scheduled end on the branch calendar has been reached.
+  /// [riyadhNow] uses UTC fields to represent a Riyadh wall-clock time.
+  static bool hasReachedScheduledEnd({
+    required DateTime? shiftDate,
+    required String startTime,
+    required String endTime,
+    DateTime? riyadhNow,
+  }) {
+    if (shiftDate == null) return false;
+    final start = ShiftTimeFormatter.parseApiTime(startTime);
+    final end = ShiftTimeFormatter.parseApiTime(endTime);
+    if (start == null || end == null) return false;
+
+    final scheduledEnd = DateTime.utc(
+      shiftDate.year,
+      shiftDate.month,
+      shiftDate.day + (end.isAfter(start) ? 0 : 1),
+      end.hour,
+      end.minute,
+      end.second,
+    );
+    return !(riyadhNow ?? _riyadhWallTime).isBefore(scheduledEnd);
   }
 
   /// Evaluates whether a cashier shift is currently within its unified start window:
