@@ -3678,6 +3678,6 @@
   "dailyCloseFinalSubmitted": "Final daily close submitted for review",
   "submittingDailyClose": "Submitting daily close...",
   "pendingIncomingCash": "Pending Incoming Cash",
-  "pendingIncomingCashDesc": "Cash from transfers or receipts not yet counted in drawer",
+  "pendingIncomingCashDesc": "Cash already counted in the drawer from incoming transfers awaiting confirmation.",
   "vatNotSpecified": "VAT (Unspecified / N/A)"
 }

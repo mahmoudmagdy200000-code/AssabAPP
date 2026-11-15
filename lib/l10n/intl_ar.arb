@@ -3683,6 +3683,6 @@
   "dailyCloseFinalSubmitted": "تم إرسال اليومية النهائية للمراجعة",
   "submittingDailyClose": "جارٍ إرسال اليومية...",
   "pendingIncomingCash": "النقد الوارد المعلق",
-  "pendingIncomingCashDesc": "نقد من تحويلات أو استلامات لم يُعد بعد في الدرج",
+  "pendingIncomingCashDesc": "النقد المعدود في الدرج من تحويلات واردة بانتظار تأكيد الاستلام.",
   "vatNotSpecified": "ضريبة القيمة المضافة (غير محددة)"
 }

@@ -4153,7 +4153,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "النقد الوارد المعلق",
     ),
     "pendingIncomingCashDesc": MessageLookupByLibrary.simpleMessage(
-      "نقد من تحويلات أو استلامات لم يُعد بعد في الدرج",
+      "النقد المعدود في الدرج من تحويلات واردة بانتظار تأكيد الاستلام.",
     ),
     "pendingInvoice": MessageLookupByLibrary.simpleMessage("فاتورة معلقة"),
     "pendingNotStarted": MessageLookupByLibrary.simpleMessage("معلق (لم يبدأ)"),

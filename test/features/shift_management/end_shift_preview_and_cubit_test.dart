@@ -7,6 +7,7 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_request.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/variance_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/aggregator_entites.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/end_shift/end_shift_cubit.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -112,6 +113,23 @@ void main() {
       supportingFiles: [],
     );
 
+    const deliveryApp = AggregatorEntity(
+      id: 'delivery-1',
+      name: 'Delivery',
+      code: 'delivery',
+      logo: '',
+      description: '',
+      commissionRate: 0,
+      commissionPercentage: '',
+      status: AggregatorStatusEntity(value: true, label: '', color: ''),
+      integrationType: '',
+      hasIntegration: false,
+      branchesCount: 1,
+      enabledBranchesCount: 1,
+      createdAt: '',
+      totalAmount: 0.20,
+    );
+
     setUp(() {
       repository = MockShiftManagementRepository();
       cubit = EndShiftCubit(repository, 'shift-100', null);
@@ -166,7 +184,7 @@ void main() {
     });
 
     test(
-      'Shortage preview sets allocationRequired: true with exact shortage',
+      'One cash input derives sales cash and still requires allocation of the drawer shortage',
       () async {
         repository.onPreview =
             ({
@@ -177,25 +195,39 @@ void main() {
               double? pendingIncomingCash,
               List<EndShiftAggregatorModel>? aggregators,
             }) async {
+              expect(totalSales, 110.30);
+              expect(countedCash, 30);
+              expect(cardPayments, 70.10);
+              expect(aggregators!.single.amount, 0.20);
               return ApiResult.success({
                 'success': true,
                 'data': {
                   'cash_reconciliation': {
-                    'counted_cash': 550.0,
-                    'expected_cash': 600.0,
-                    'cash_variance': -50.0,
+                    'counted_cash': 30.0,
+                    'expected_cash': 40.0,
+                    'cash_variance': -10.0,
                     'cash_variance_type': 'shortage',
                     'pending_incoming_cash': 0.0,
                     'confirmed_opening_cash': 0.0,
                   },
-                  'shortage_to_allocate': 50.0,
+                  'shortage_to_allocate': 10.0,
                   'allocation_required': true,
                 },
               });
             };
 
-        cubit.setCountedCash(550.0);
-        await cubit.fetchCashReconciliationPreview();
+        expect(
+          await cubit.previewFromSalesInputs(
+            totalSales: '١١٠٫٣٠',
+            countedCash: '٣٠',
+            cardPayments: '٧٠٫١٠',
+            aggregators: [deliveryApp],
+            isArabic: true,
+          ),
+          isTrue,
+        );
+        expect(cubit.cashCollected, 40);
+        expect(cubit.varianceAmount, 0);
 
         expect(
           cubit.state,
@@ -209,14 +241,11 @@ void main() {
             ? cubit.previewData!['data'] as Map<String, dynamic>
             : cubit.previewData!;
         expect(previewMap['allocation_required'], isTrue);
-        expect(previewMap['shortage_to_allocate'], equals(50.0));
-        expect(
-          previewMap['cash_reconciliation']['counted_cash'],
-          equals(550.0),
-        );
+        expect(previewMap['shortage_to_allocate'], equals(10.0));
+        expect(previewMap['cash_reconciliation']['counted_cash'], equals(30.0));
         expect(
           previewMap['cash_reconciliation']['cash_variance'],
-          equals(-50.0),
+          equals(-10.0),
         );
         expect(cubit.previewStale, isFalse);
 
@@ -224,32 +253,89 @@ void main() {
         await cubit.endShift(variance: emptyVariance, isThereVariance: false);
         expect(cubit.state, isA<EndShiftFailure>());
 
-        // Providing allocations that do NOT sum to 50.0 fails
+        // Providing allocations that do NOT sum to 10.0 fails
         cubit.updateShortageAllocations([
           const CashShortageAllocation(
             responsibleType: 'cashier',
             responsibleId: '1',
-            amount: 30.0,
+            amount: 6.0,
           ),
         ]);
         await cubit.endShift(variance: emptyVariance, isThereVariance: false);
         expect(cubit.state, isA<EndShiftFailure>());
 
-        // Providing allocations that sum to 50.0 succeeds
+        // Providing allocations that sum to 10.0 succeeds
         cubit.updateShortageAllocations([
           const CashShortageAllocation(
             responsibleType: 'cashier',
             responsibleId: '1',
-            amount: 30.0,
+            amount: 6.0,
           ),
           const CashShortageAllocation(
             responsibleType: 'branch_manager',
             responsibleId: '2',
-            amount: 20.0,
+            amount: 4.0,
           ),
         ]);
+        repository.onEndShift =
+            ({required shiftId, required endShiftRequest}) async {
+              final fields = Map.fromEntries(
+                (await endShiftRequest.toFormData()).fields,
+              );
+              expect(fields['cash_collected'], '40.0');
+              expect(fields['counted_cash'], '30.00');
+              expect(endShiftRequest.shortageAllocations, hasLength(2));
+              return ApiResult.success(null);
+            };
         await cubit.endShift(variance: emptyVariance, isThereVariance: false);
         expect(cubit.state, isA<EndShiftSuccess>());
+      },
+    );
+
+    test(
+      'Payment details at halala precision can match sales with zero cash',
+      () async {
+        expect(
+          await cubit.previewFromSalesInputs(
+            totalSales: '0.30',
+            countedCash: '0',
+            cardPayments: '0.10',
+            aggregators: [deliveryApp],
+            isArabic: false,
+          ),
+          isTrue,
+        );
+        expect(cubit.countedCash, 0);
+        expect(cubit.cashCollected, 0);
+        expect(cubit.varianceAmount, 0);
+      },
+    );
+
+    test(
+      'Payment details exceeding sales are rejected before preview',
+      () async {
+        repository.onPreview =
+            ({
+              required shiftId,
+              required totalSales,
+              required countedCash,
+              cardPayments,
+              pendingIncomingCash,
+              aggregators,
+            }) async => fail('Invalid payment details reached the API');
+
+        expect(
+          await cubit.previewFromSalesInputs(
+            totalSales: '0.29',
+            countedCash: '0',
+            cardPayments: '0.10',
+            aggregators: [deliveryApp],
+            isArabic: false,
+          ),
+          isFalse,
+        );
+        expect(cubit.state, isA<EndShiftPreviewFailure>());
+        expect(cubit.previewStale, isTrue);
       },
     );
 

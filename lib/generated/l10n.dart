@@ -27527,10 +27527,10 @@ class S {
     );
   }
 
-  /// `Cash from transfers or receipts not yet counted in drawer`
+  /// `Cash already counted in the drawer from incoming transfers awaiting confirmation.`
   String get pendingIncomingCashDesc {
     return Intl.message(
-      'Cash from transfers or receipts not yet counted in drawer',
+      'Cash already counted in the drawer from incoming transfers awaiting confirmation.',
       name: 'pendingIncomingCashDesc',
       desc: '',
       args: [],
