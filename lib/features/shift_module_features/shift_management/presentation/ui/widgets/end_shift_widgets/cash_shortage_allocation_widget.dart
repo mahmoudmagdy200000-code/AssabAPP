@@ -5,6 +5,7 @@ import 'package:assab/core/styles/app_styles.dart';
 import 'package:assab/core/widgets/custom_divider.dart';
 import 'package:assab/core/widgets/custom_text_field.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
+import 'package:assab/core/errors/l10n/error_messages.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class CashShortageAllocationWidget extends StatefulWidget {
   final List<CashShortageAllocation> initialAllocations;
   final ValueChanged<List<CashShortageAllocation>> onAllocationsChanged;
   final String? initialReason;
+  final bool isReasonRequired;
   final ValueChanged<String?>? onReasonChanged;
   final List<ShortageAllocationCandidate> candidates;
   final bool isLoadingCandidates;
@@ -25,6 +27,7 @@ class CashShortageAllocationWidget extends StatefulWidget {
     this.initialAllocations = const [],
     required this.onAllocationsChanged,
     this.initialReason,
+    this.isReasonRequired = false,
     this.onReasonChanged,
     this.candidates = const [],
     this.isLoadingCandidates = false,
@@ -380,7 +383,12 @@ class _CashShortageAllocationWidgetState
           // Reason input
           CustomTextField(
             controller: _reasonController,
-            hintText: tr.shortageReasonOptional,
+            hintText: widget.isReasonRequired
+                ? ErrorMessages.resolve(
+                    ErrorMessageKey.shortageReasonRequired,
+                    Localizations.localeOf(context).languageCode,
+                  )
+                : tr.shortageReasonOptional,
             maxLength: 500,
             onChanged: (val) {
               widget.onReasonChanged?.call(

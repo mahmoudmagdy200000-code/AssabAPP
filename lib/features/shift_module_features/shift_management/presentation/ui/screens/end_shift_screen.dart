@@ -201,10 +201,12 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                               setState(() {});
                                             },
                                             initialReason: cubit.allocationReason,
+                                            isReasonRequired:
+                                                cubit.requiresShortageAllocationReason,
                                             onReasonChanged: (reason) {
                                               cubit.updateShortageAllocations(
                                                 cubit.shortageAllocations,
-                                                reason,
+                                                reason ?? '',
                                               );
                                             },
                                           ),
@@ -302,13 +304,6 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
                                         false;
 
                                     return totalSales && countedCash;
-                                  }
-
-                                  if (pagingState.isLastStep) {
-                                    final cubit = context.read<EndShiftCubit>();
-                                    if (!cubit.canProceedToEndShift) {
-                                      return false;
-                                    }
                                   }
 
                                   return state.enableButton;

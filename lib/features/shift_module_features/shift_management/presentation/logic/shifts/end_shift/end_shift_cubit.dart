@@ -3,7 +3,11 @@ import 'dart:io';
 
 import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
+import 'package:assab/core/errors/l10n/error_locale_resolver.dart';
+import 'package:assab/core/errors/l10n/error_messages.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
+import 'package:assab/core/services/user_type_service.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/utils/currency_normalizer.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/cash_shortage_allocation.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
@@ -61,10 +65,11 @@ class EndShiftPreviewInvalidated extends EndShiftState {}
 
 class EndShiftAllocationsUpdated extends EndShiftState {
   final List<CashShortageAllocation> allocations;
-  const EndShiftAllocationsUpdated({required this.allocations});
+  final String? reason;
+  const EndShiftAllocationsUpdated({required this.allocations, this.reason});
 
   @override
-  List<Object?> get props => [allocations];
+  List<Object?> get props => [allocations, reason];
 }
 
 class EndShiftCandidatesLoading extends EndShiftState {
@@ -196,6 +201,11 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   int get previewRequestId => _previewRequestId;
   List<CashShortageAllocation> get shortageAllocations => _shortageAllocations;
   String? get allocationReason => _allocationReason;
+  bool get requiresShortageAllocationReason =>
+      (UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType()) ==
+      UserType.branchManager;
+  bool get _missingRequiredAllocationReason =>
+      requiresShortageAllocationReason && (_allocationReason?.isEmpty ?? true);
   bool get isSubmitting => _isSubmitting;
   List<ShortageAllocationCandidate> get shortageCandidates =>
       _shortageCandidates;
@@ -226,7 +236,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
         (previewMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
 
     if (allocationRequired && shortageToAllocate > 0) {
-      if (_shortageAllocations.isEmpty) {
+      if (_shortageAllocations.isEmpty || _missingRequiredAllocationReason) {
         return false;
       }
       final shortageHalalas = (shortageToAllocate * 100).round();
@@ -366,8 +376,25 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     } else {
       _shortageAllocations = allocations;
     }
-    if (reason != null) _allocationReason = reason;
-    emit(EndShiftAllocationsUpdated(allocations: _shortageAllocations));
+    if (reason != null) _allocationReason = reason.trim();
+    emit(
+      EndShiftAllocationsUpdated(
+        allocations: _shortageAllocations,
+        reason: _allocationReason,
+      ),
+    );
+  }
+
+  bool _validateAllocationReason(bool allocationRequired) {
+    if (!allocationRequired || !_missingRequiredAllocationReason) return true;
+    emit(
+      EndShiftFailure(
+        _createValidationFailure(
+          ErrorLocaleResolver.resolve(ErrorMessageKey.shortageReasonRequired),
+        ),
+      ),
+    );
+    return false;
   }
 
   Future<void> fetchShortageCandidates() async {
@@ -802,6 +829,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     final shortageToAllocate =
         (previewMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
 
+    if (!_validateAllocationReason(allocationRequired)) return;
     if (allocationRequired) {
       final shortageHalalas = (shortageToAllocate * 100).round();
       final allocatedHalalas = _shortageAllocations.fold<int>(
@@ -929,6 +957,7 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     final shortageToAllocate =
         (previewMap['shortage_to_allocate'] as num?)?.toDouble() ?? 0.0;
 
+    if (!_validateAllocationReason(allocationRequired)) return;
     if (allocationRequired) {
       final shortageHalalas = (shortageToAllocate * 100).round();
       final allocatedHalalas = _shortageAllocations.fold<int>(

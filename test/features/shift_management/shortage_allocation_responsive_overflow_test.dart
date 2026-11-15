@@ -6,9 +6,12 @@ import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/responsive/app_responsive.dart';
 import 'package:assab/core/services/image_picker/image_picker_service.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/services/user_type_service.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/theme/light_theme.dart';
 import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/future_api_result.dart';
+import 'package:assab/core/widgets/app_button.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/data_source/shift_management_remote_data_source.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/end_shift_aggregator_model.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/shift/shortage_allocation_candidate.dart';
@@ -163,8 +166,12 @@ void main() {
 
   group('MT-26: Small Screens (320x640 & 360x740) & Keyboard Insets Overflow Tests on Production Screens', () {
     testWidgets(
-      'EndShiftScreen at 320x640 with 280px keyboard open: can scroll, select candidate, enter amount, and add without overflow',
+      'Manager can allocate a shortage and must provide a reason before closing on a small screen',
       (tester) async {
+        final previousRole = UserTypeService.selectedUserType;
+        UserTypeService.selectedUserType = UserType.branchManager;
+        addTearDown(() => UserTypeService.selectedUserType = previousRole);
+
         tester.view.physicalSize = const Size(320 * 2, 640 * 2);
         tester.view.devicePixelRatio = 2.0;
         tester.view.viewInsets = const FakeViewPadding(bottom: 280 * 2);
@@ -189,7 +196,19 @@ void main() {
             child: MultiBlocProvider(
               providers: [
                 BlocProvider.value(value: pagingCubit),
-                BlocProvider(create: (_) => ValidationCubit(requiredFields: {'totalSales'})),
+                BlocProvider(
+                  create: (_) => ValidationCubit(requiredFields: {'totalSales'})
+                    ..validateFieldAndStoreValue(
+                      fieldName: 'totalSales',
+                      value: '100',
+                      isValid: true,
+                    )
+                    ..validateFieldAndStoreValue(
+                      fieldName: 'countedCash',
+                      value: '70',
+                      isValid: true,
+                    ),
+                ),
                 BlocProvider.value(value: endShiftCubit),
                 BlocProvider(create: (_) => ChooseEmployeeCubit()),
                 BlocProvider(create: (_) => getIt<AggregatorCubit>()),
@@ -258,6 +277,26 @@ void main() {
         expect(endShiftCubit.shortageAllocations.first.responsibleId, '10');
         expect(endShiftCubit.shortageAllocations.first.amount, 30.0);
         expect(find.text('مكتملة'), findsOneWidget);
+
+        final endButton = find.widgetWithText(AppButton, 'إنهاء الوردية');
+        expect(tester.widget<AppButton>(endButton).enabled, isFalse);
+        final reasonField = find.widgetWithText(
+          TextField,
+          'أدخل سبب العجز النقدي (إلزامي).',
+        );
+        await tester.scrollUntilVisible(
+          reasonField,
+          50,
+          scrollable: allocScrollable,
+        );
+        await tester.enterText(reasonField, '  فرق بعد عد الدرج  ');
+        await tester.pump();
+        expect(endShiftCubit.allocationReason, 'فرق بعد عد الدرج');
+        expect(tester.widget<AppButton>(endButton).enabled, isTrue);
+
+        await tester.enterText(reasonField, '');
+        await tester.pump();
+        expect(tester.widget<AppButton>(endButton).enabled, isFalse);
 
         expect(tester.takeException(), isNull, reason: 'Expected no RenderFlex overflow or error on EndShiftScreen 320x640 with keyboard');
 
