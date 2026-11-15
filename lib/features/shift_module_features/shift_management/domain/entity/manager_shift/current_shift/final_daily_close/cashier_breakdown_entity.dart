@@ -53,12 +53,6 @@ class CashierBreakdownEntity {
       (deliveryAppPayments - initialDeliveryAppPayments).abs() > 0.001 ||
       (totalSales - initialTotalSales).abs() > 0.001;
 
-  /// Strictly for UI display. Must NEVER be serialized as the write payload `sales`.
-  double get cashierTotal {
-    return (cashCollected + cardPayments + deliveryAppPayments) -
-        (variance.abs());
-  }
-
   CashierBreakdownEntity copyWith({
     List<Map<String, dynamic>>? aggregators,
     String? cashierId,

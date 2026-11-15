@@ -1,3 +1,15 @@
+import 'package:assab/features/shift_module_features/shift_management/data/mapper/manager_shift/manager_shift_mapper.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/manager_shift_model.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/current_shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/progress_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/final_handover_widgets/final_handover_widget.dart';
+import 'package:assab/core/theme/app_theme.dart';
+import 'package:assab/core/widgets/app_responsive_builder.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/end_manager_shift_widgets/final_daily_close_widgets/final_daily_close_table_widget.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/end_manager_shift_widgets/final_daily_close_widgets/table_cells_widgets/final_daily_close_bottom_center_table_cell_widget.dart';
+import 'package:assab/generated/l10n.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:assab/core/routing/app_route_name.dart';
@@ -106,7 +118,153 @@ FinalDailyCloseLoadedOrUpdated _workday(List<CashierBreakdownEntity> rows) {
       cashiers: cashiers, totals: TotalsEntity.fromCashiers(cashiers));
 }
 
+Widget _managerWorkdayTestApp(Widget child) => AppResponsiveBuilder(
+  builder: (context) => MaterialApp(
+    theme: AppTheme.light,
+    locale: const Locale('en'),
+    localizationsDelegates: const [
+      S.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: S.delegate.supportedLocales,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  ),
+);
+
+CurrentShiftEntity _completedManagerWorkday({required bool canSubmit}) {
+  final shift = ManagerShiftModel.fromJson({
+    'id': 'qa-workday',
+    'shift_date': '2026-11-15',
+    'status': 'completed',
+    'status_label': 'Completed',
+    'shift_details': {
+      'assigned_to': 'QA Manager',
+      'assigned_by': 'QA Admin',
+      'store_branch': 'QA Handover Branch',
+      'branch_id': 'qa-branch',
+      'start_time': '18:00',
+      'end_time': '19:52',
+      'final_approval_by': 'QA Accountant',
+      'manager_name': 'QA Manager',
+      'manager_id': 'qa-manager',
+    },
+    'handoffs_summary': {
+      'total_handovers': 1,
+      'approved': 1,
+      'pending': 0,
+      'rejected': 0,
+      'rejected_final': 0,
+      'total_amount': 35,
+      'total_variance': 5,
+      'all_received': true,
+    },
+    'final_handover': {
+      'handover_amount': 35,
+      'status': 'pending',
+      'handover_from': 'QA Manager',
+      'handover_to': 'QA Accountant',
+      'handover_date': '2026-11-15',
+      'handover_time': '19:52:00',
+      'current_time': '19:52:00',
+      'current_time_setting': 'today',
+      'variance_type': 'shortage',
+    },
+    'available_actions': {
+      'can_start': false,
+      'can_end': false,
+      'can_submit_daily_report': canSubmit,
+      'can_reopen': false,
+      'can_approve_handovers': false,
+      'can_reject_handovers': false,
+    },
+    'timestamps': <String, dynamic>{},
+  }).toEntity();
+
+  return CurrentShiftEntity(
+    shift: shift,
+    progress: ProgressEntity(
+      title: 'Completed',
+      description: '',
+      status: 'completed',
+      startTime: null,
+      endTime: null,
+      progressPercentage: 100,
+    ),
+    handover: [],
+  );
+}
+
 void main() {
+  testWidgets('Pending handover shows daily report submission only when allowed', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _managerWorkdayTestApp(
+        FinalHandoverWidget(
+          currentManagerShift: _completedManagerWorkday(canSubmit: true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Final Daily Close Submission'), findsOneWidget);
+    expect(find.text('Waiting for approval from QA Accountant.'), findsNothing);
+
+    await tester.pumpWidget(
+      _managerWorkdayTestApp(
+        FinalHandoverWidget(
+          currentManagerShift: _completedManagerWorkday(canSubmit: false),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Final Daily Close Submission'), findsNothing);
+    expect(find.text('Waiting for approval from QA Accountant.'), findsOneWidget);
+  });
+
+
+  testWidgets('Manager table displays gross sales separately from the shortage', (
+    tester,
+  ) async {
+    final cubit = FinalDailyCloseCubit(_MockShiftManagementRepo());
+    addTearDown(cubit.close);
+    final workday = _workday([
+      CashierBreakdownEntity(
+        cashierId: 'qa-cashier',
+        cashierName: 'QA Cashier A',
+        cashCollected: 40,
+        cardPayments: 80,
+        deliveryAppPayments: 0,
+        variance: 5,
+        totalSales: 120,
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      _managerWorkdayTestApp(
+        BlocProvider.value(
+          value: cubit,
+          child: FinalDailyCloseTableWidget(
+            cashiersBreakdowns: workday.cashiers,
+            totals: workday.totals,
+            isEnabled: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final rowTotal = tester.widget<FinalDailyCloseBottomCenterTableCellWidget>(
+      find.byType(FinalDailyCloseBottomCenterTableCellWidget),
+    );
+    expect(rowTotal.text, '120.0');
+    expect(find.text('120.0'), findsWidgets);
+    expect(find.text('115.0'), findsNothing);
+    expect(find.text('5.0'), findsWidgets);
+    expect(find.text('Cash Sales'), findsOneWidget);
+  });
+
   group('Manager Daily Close - Variance Gating & Serialization Tests', () {
     test('CashierBreakdownRequestModel serializes correctly and omits variance completely', () {
       const model = CashierBreakdownRequestModel(

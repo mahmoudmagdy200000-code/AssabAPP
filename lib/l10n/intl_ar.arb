@@ -568,6 +568,7 @@
   "totalSales": "إجمالي المبيعات",
   "deliveryApps": "تطبيقات التوصيل",
   "cardPayment": "الدفع بالبطاقة",
+  "managerDailyCashSales": "المبيعات النقدية",
   "cashCollected": "النقدية المجمعة",
   "handover": "التسليم",
   "handoverTo": "تسليم إلى",
@@ -1688,15 +1689,7 @@
       }
     }
   },
-  "yourFinalHandoverHasBeenSubmittedForReview": "لقد تم إرسال الوردية الخاص بك للمراجعة النهائية.\nسيتم إعلامك بمجرد موافقة {AccountantName} على تسليمك أو رفضه.\nلا يمكن إجراء المزيد من التغييرات على سجلات اليوم.",
-  "@yourFinalHandoverHasBeenSubmittedForReview": {
-    "description": "Desc",
-    "placeholders": {
-      "AccountantName": {
-        "type": "String"
-      }
-    }
-  },
+  "cashHandoverRecordedSubmitDailyReport": "تم تسجيل التسليم النقدي. افتح التسليم النهائي لإرسال تقرير يوم العمل للمحاسب.",
   "businessDateClosed": "تاريخ العمل مغلق",
   "businessDate": "تاريخ العمل:",
   "myHandoverSummary": "ملخص التسليم الخاص بي",

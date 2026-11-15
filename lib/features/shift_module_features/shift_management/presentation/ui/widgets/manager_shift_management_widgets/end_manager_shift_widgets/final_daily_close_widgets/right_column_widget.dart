@@ -98,7 +98,7 @@ class RightColumnWidget extends StatelessWidget {
                   ),
 
                 FinalDailyCloseEndBottomTableCellWidget(
-                  text: totals.totalOfTotals.toString(),
+                  text: totals.totalSales.toString(),
                 ),
               ],
             ),

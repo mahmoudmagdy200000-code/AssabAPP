@@ -90,7 +90,7 @@ class LeftColumnWidget extends StatelessWidget {
                   ),
                   child: SvgWithTitleCellWidget(
                     svgAssetName: AppAssets.cash,
-                    title: context.tr.cashCollected,
+                    title: context.tr.managerDailyCashSales,
                   ),
                 ),
 

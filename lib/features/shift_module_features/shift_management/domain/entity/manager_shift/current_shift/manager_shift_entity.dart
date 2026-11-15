@@ -11,6 +11,7 @@ class ManagerShiftEntity {
   final ManagerShiftDetailsEntity shiftDetails;
   final FinalHandoverEntity finalHandover;
   final TimestampsEntity timestamps;
+  final bool canSubmitDailyReport;
 
   ManagerShiftEntity({
     required this.id,
@@ -19,5 +20,6 @@ class ManagerShiftEntity {
     required this.shiftDetails,
     required this.finalHandover,
     required this.timestamps,
+    this.canSubmitDailyReport = false,
   });
 }

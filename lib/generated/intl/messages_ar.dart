@@ -359,10 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m144(cashierName) =>
       "لقد تم إرسال طلب التصحيح الخاص بك إلى ${cashierName}.";
 
-  static String m145(AccountantName) =>
-      "لقد تم إرسال الوردية الخاص بك للمراجعة النهائية.\nسيتم إعلامك بمجرد موافقة ${AccountantName} على تسليمك أو رفضه.\nلا يمكن إجراء المزيد من التغييرات على سجلات اليوم.";
-
-  static String m146(Amount) => "تم تحويل ${Amount} إلى عهدة الفرع بنجاح.";
+  static String m145(Amount) => "تم تحويل ${Amount} إلى عهدة الفرع بنجاح.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1025,6 +1022,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cashHandoverRecordedDesc": MessageLookupByLibrary.simpleMessage(
       "تمت إضافة المبلغ بالريال السعودي إلى رصيد عهدة مدير الفرع وتم تسجيله في سجل الدفع الخاص بك.",
+    ),
+    "cashHandoverRecordedSubmitDailyReport": MessageLookupByLibrary.simpleMessage(
+      "تم تسجيل التسليم النقدي. افتح التسليم النهائي لإرسال تقرير يوم العمل للمحاسب.",
     ),
     "cashHandovers": MessageLookupByLibrary.simpleMessage("تسليمات نقدية"),
     "cashOrPaymentHandedOver": MessageLookupByLibrary.simpleMessage(
@@ -3291,6 +3291,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "manager": MessageLookupByLibrary.simpleMessage("مدير"),
     "managerComment": MessageLookupByLibrary.simpleMessage("تعليق المدير"),
+    "managerDailyCashSales": MessageLookupByLibrary.simpleMessage(
+      "المبيعات النقدية",
+    ),
     "managerNameSubmittedThisItemReturnRequestForReviewAndApproval": m62,
     "managerNameSubmittedThisOrderRequestForReviewAndApproval": m63,
     "managerSubmittedDailyInventory": m64,
@@ -6637,7 +6640,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "yourFinalHandoverHasBeenSubmitted": MessageLookupByLibrary.simpleMessage(
       "لقد تم تسليمك النهائي. سيتم إعلامك بمجرد قيام المحاسب بمراجعة ذلك، ولا يلزم اتخاذ أي إجراء آخر في الوقت الحالي.",
     ),
-    "yourFinalHandoverHasBeenSubmittedForReview": m145,
     "yourHandoverRequestHasBeenSent": MessageLookupByLibrary.simpleMessage(
       "لقد تم إرسال طلب التسليم الخاص بك. سيتم إعلامك عندما يقبلون ذلك.",
     ),
@@ -6693,7 +6695,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "لقد نجحت في تصعيد رفض الإرجاع. سيقوم مدير العلامة التجارية أو الفريق المالي بمراجعة الأمر والرد عليك.",
         ),
-    "youveSuccessfullyTransferredAmountToBranchCustody": m146,
+    "youveSuccessfullyTransferredAmountToBranchCustody": m145,
     "zakattaxes": MessageLookupByLibrary.simpleMessage("الزكاة/الضرائب:"),
     "zone": MessageLookupByLibrary.simpleMessage("المنطقة"),
     "zoneApproved": MessageLookupByLibrary.simpleMessage(

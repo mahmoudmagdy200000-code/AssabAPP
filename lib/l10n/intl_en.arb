@@ -568,6 +568,7 @@
   "totalSales": "Total sales",
   "deliveryApps": "Delivery Apps",
   "cardPayment": "Card Payment",
+  "managerDailyCashSales": "Cash Sales",
   "cashCollected": "Cash Collected",
   "handover": "Handover",
   "handoverTo": "Hand Over To",
@@ -1683,15 +1684,7 @@
       }
     }
   },
-  "yourFinalHandoverHasBeenSubmittedForReview": "Your shift has been submitted for final review.\nYou’ll be notified once {AccountantName} approves or rejects your handover.\nNo further changes can be made to today’s records.",
-  "@yourFinalHandoverHasBeenSubmittedForReview": {
-    "description": "Desc",
-    "placeholders": {
-      "AccountantName": {
-        "type": "String"
-      }
-    }
-  },
+  "cashHandoverRecordedSubmitDailyReport": "Cash handover recorded. Open Final Handover to submit the daily report for accountant review.",
   "businessDateClosed": "Business Date closed",
   "businessDate": "Business Date:",
   "myHandoverSummary": "My Handover Summary",

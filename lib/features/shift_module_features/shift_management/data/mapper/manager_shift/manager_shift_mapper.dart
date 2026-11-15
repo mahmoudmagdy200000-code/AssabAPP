@@ -13,5 +13,6 @@ extension ShiftMapper on ManagerShiftModel {
     shiftDetails: shiftDetails.toEntity(),
     finalHandover: finalHandover.toEntity(),
     timestamps: timestamps.toEntity(),
+    canSubmitDailyReport: availableActions.canSubmitDailyReport,
   );
 }

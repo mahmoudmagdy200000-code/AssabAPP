@@ -3799,6 +3799,16 @@ class S {
     );
   }
 
+  /// `Cash Sales`
+  String get managerDailyCashSales {
+    return Intl.message(
+      'Cash Sales',
+      name: 'managerDailyCashSales',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Cash Collected`
   String get cashCollected {
     return Intl.message(
@@ -11699,13 +11709,13 @@ class S {
     );
   }
 
-  /// `Your shift has been submitted for final review.\nYou’ll be notified once {AccountantName} approves or rejects your handover.\nNo further changes can be made to today’s records.`
-  String yourFinalHandoverHasBeenSubmittedForReview(String AccountantName) {
+  /// `Cash handover recorded. Open Final Handover to submit the daily report for accountant review.`
+  String get cashHandoverRecordedSubmitDailyReport {
     return Intl.message(
-      'Your shift has been submitted for final review.\nYou’ll be notified once $AccountantName approves or rejects your handover.\nNo further changes can be made to today’s records.',
-      name: 'yourFinalHandoverHasBeenSubmittedForReview',
-      desc: 'Desc',
-      args: [AccountantName],
+      'Cash handover recorded. Open Final Handover to submit the daily report for accountant review.',
+      name: 'cashHandoverRecordedSubmitDailyReport',
+      desc: '',
+      args: [],
     );
   }
 

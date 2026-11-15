@@ -191,7 +191,7 @@ class FinalDailyCloseTableWidget extends StatelessWidget {
                                 ),
 
                               FinalDailyCloseBottomCenterTableCellWidget(
-                                text: cashier.cashierTotal.toString(),
+                                text: cashier.totalSales.toString(),
                               ),
                               SizedBox(
                                 width: 90.w,
