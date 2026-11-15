@@ -2041,6 +2041,254 @@ void main() {
       expect(find.textContaining('جدول التعيينات المتكررة غير مرحل على قاعدة البيانات'), findsOneWidget);
       expect(find.text('تعذر حفظ التعيين المتكرر: خطأ في الاتصال بالخادم.'), findsNothing);
     });
+
+    testWidgets(
+      'Branch manager appears at top of assign modal via /cashiers/all and can self-assign single day',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        RequestOptions? recordedAssignReq;
+        bool managerAssigned = false;
+
+        final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+        dio.httpClientAdapter = TestHttpAdapter(
+          onFetch: (options) async {
+            if (options.path.endsWith('roster-assignments')) {
+              return ResponseBody.fromString(
+                jsonEncode({'success': true, 'data': []}),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            if (options.path.contains('dated-roster')) {
+              return ResponseBody.fromString(
+                jsonEncode({
+                  'success': true,
+                  'data': {
+                    'branch_id': 'branch-1',
+                    'start_date': '2026-11-15',
+                    'end_date': '2026-11-15',
+                    'templates': [
+                      {
+                        'id': 'tpl-self-1',
+                        'name': 'وردية الصباح',
+                        'start_time': '08:00:00',
+                        'end_time': '16:00:00',
+                      },
+                    ],
+                    'roster': managerAssigned
+                        ? {
+                            '2026-11-15_tpl-self-1': {
+                              'cashier_shift_id': 'shift-self-1',
+                              'cashier_id': 'bm-self-1',
+                              'cashier_name': 'طارق المنصور',
+                              'status': 'not_started',
+                              'shift_date': '2026-11-15',
+                              'shift_id': 'tpl-self-1',
+                              'can_swap': true,
+                            },
+                          }
+                        : {},
+                  },
+                }),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            if (options.path.contains('available-cashiers')) {
+              return ResponseBody.fromString(
+                jsonEncode({
+                  'success': true,
+                  'data': [
+                    {'id': 'c-1', 'name': 'يوسف الدوسري'},
+                  ],
+                }),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            if (options.path.endsWith('cashiers/all')) {
+              return ResponseBody.fromString(
+                jsonEncode({
+                  'success': true,
+                  'data': {
+                    'branch_managers': [
+                      {
+                        'id': 'bm-self-1',
+                        'name': 'طارق المنصور',
+                        'phone': '0550001122',
+                      },
+                    ],
+                    'cashiers': [
+                      {'id': 'c-1', 'name': 'يوسف الدوسري'},
+                    ],
+                  },
+                }),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            if (options.path.contains('assign-shifts')) {
+              recordedAssignReq = options;
+              managerAssigned = true;
+              return ResponseBody.fromString(
+                jsonEncode({'success': true, 'data': {}}),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            return ResponseBody.fromString(
+              jsonEncode({'success': true, 'data': []}),
+              200,
+              headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+            );
+          },
+        );
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            DatedShiftAssignmentScreen(
+              dio: dio,
+              initialDateRange: '2026-11-15 — 2026-11-15',
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('btn_assign_tpl-self-1')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('tile_cashier_bm-self-1')), findsOneWidget);
+        expect(find.byKey(const Key('tag_branch_manager_bm-self-1')), findsOneWidget);
+        expect(find.text('طارق المنصور (مدير الفرع)'), findsOneWidget);
+        expect(find.byKey(const Key('tile_cashier_c-1')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('tile_cashier_bm-self-1')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('btn_confirm_cashier_assignment')));
+        await tester.pumpAndSettle();
+
+        expect(recordedAssignReq, isNotNull);
+        expect(recordedAssignReq!.data['cashier_id'], 'bm-self-1');
+        expect(recordedAssignReq!.data['shift_ids'], ['tpl-self-1']);
+        expect(recordedAssignReq!.data['shift_date'], '2026-11-15');
+        expect(find.text('طارق المنصور'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Branch manager from available-cashiers meta.branch_manager can be selected for recurring roster assignment',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        RequestOptions? recordedRosterPost;
+
+        final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+        dio.httpClientAdapter = TestHttpAdapter(
+          onFetch: (options) async {
+            if (options.path.endsWith('roster-assignments') &&
+                options.method == 'POST') {
+              recordedRosterPost = options;
+              return ResponseBody.fromString(
+                jsonEncode({'success': true, 'data': []}),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            if (options.path.endsWith('roster-assignments')) {
+              return ResponseBody.fromString(
+                jsonEncode({'success': true, 'data': []}),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            if (options.path.contains('dated-roster')) {
+              return ResponseBody.fromString(
+                jsonEncode({
+                  'success': true,
+                  'data': {
+                    'branch_id': 'branch-1',
+                    'start_date': '2026-11-15',
+                    'end_date': '2026-11-15',
+                    'templates': [
+                      {
+                        'id': 'tpl-self-rec',
+                        'name': 'وردية المساء',
+                        'start_time': '16:00:00',
+                        'end_time': '00:00:00',
+                      },
+                    ],
+                    'roster': {},
+                  },
+                }),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            if (options.path.contains('available-cashiers')) {
+              return ResponseBody.fromString(
+                jsonEncode({
+                  'success': true,
+                  'data': [
+                    {'id': 'c-1', 'name': 'يوسف الدوسري'},
+                  ],
+                  'meta': {
+                    'branch_manager': {
+                      'id': 'bm-meta-1',
+                      'name': 'فهد مدير الفرع',
+                      'is_available': true,
+                      'disabled': false,
+                      'is_branch_manager': true,
+                    },
+                  },
+                }),
+                200,
+                headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+              );
+            }
+            return ResponseBody.fromString(
+              jsonEncode({'success': true, 'data': []}),
+              200,
+              headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+            );
+          },
+        );
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            DatedShiftAssignmentScreen(
+              dio: dio,
+              initialDateRange: '2026-11-15 — 2026-11-15',
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('btn_assign_tpl-self-rec')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('tile_cashier_bm-meta-1')), findsOneWidget);
+        expect(find.byKey(const Key('tag_branch_manager_bm-meta-1')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('radio_recurring_assignment')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('tile_cashier_bm-meta-1')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('btn_confirm_cashier_assignment')));
+        await tester.pumpAndSettle();
+
+        expect(recordedRosterPost, isNotNull);
+        final assignments = recordedRosterPost!.data['assignments'] as List;
+        expect(assignments.first['cashier_id'], 'bm-meta-1');
+        expect(assignments.first['shift_id'], 'tpl-self-rec');
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }
 
