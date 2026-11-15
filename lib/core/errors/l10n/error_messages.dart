@@ -8,6 +8,8 @@ enum ErrorMessageKey {
   forbidden,
   validationFailed,
   notFound,
+  salesReportLocked,
+  shortageReasonRequired,
   serverError,
   sessionExpired,
   connectionClosed,
@@ -55,6 +57,14 @@ class ErrorMessages {
     ErrorMessageKey.notFound: {
       'en': 'The requested item could not be found.',
       'ar': 'لم يتم العثور على العنصر المطلوب.',
+    },
+    ErrorMessageKey.salesReportLocked: {
+      'en': 'The sales report is locked. Check the workday report status before trying again.',
+      'ar': 'تقرير المبيعات مقفول للتعديل. راجع حالة تقرير يوم العمل قبل المحاولة مرة أخرى.',
+    },
+    ErrorMessageKey.shortageReasonRequired: {
+      'en': 'Enter a reason for the cash shortage (required).',
+      'ar': 'أدخل سبب العجز النقدي (إلزامي).',
     },
     ErrorMessageKey.serverError: {
       'en': 'A server error occurred. Please try again later.',

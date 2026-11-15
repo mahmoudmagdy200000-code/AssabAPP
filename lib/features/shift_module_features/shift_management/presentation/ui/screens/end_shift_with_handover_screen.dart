@@ -252,10 +252,12 @@ class _EndShiftWithHandoverScreenState
                                               setState(() {});
                                             },
                                             initialReason: cubit.allocationReason,
+                                            isReasonRequired:
+                                                cubit.requiresShortageAllocationReason,
                                             onReasonChanged: (reason) {
                                               cubit.updateShortageAllocations(
                                                 cubit.shortageAllocations,
-                                                reason,
+                                                reason ?? '',
                                               );
                                             },
                                           ),
@@ -364,13 +366,6 @@ class _EndShiftWithHandoverScreenState
                                         false;
 
                                     return totalSales && countedCash;
-                                  }
-
-                                  if (pagingState.isLastStep) {
-                                    final cubit = context.read<EndShiftCubit>();
-                                    if (!cubit.canProceedToEndShift) {
-                                      return false;
-                                    }
                                   }
 
                                   if (pagingState.totalSteps == 3) {

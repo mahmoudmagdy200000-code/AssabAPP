@@ -9,6 +9,33 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('A locked shift report displays a translated workday message', () {
+    final request = RequestOptions(path: '/api/v1/branch-manager/shifts/1/end');
+    final response = Response(
+      requestOptions: request,
+      statusCode: 409,
+      data: {
+        'success': false,
+        'message': 'REPORT_REOPEN_REQUIRED',
+        'code': 'REPORT_REOPEN_REQUIRED',
+      },
+    );
+    final error = DioException.badResponse(
+      statusCode: 409,
+      requestOptions: request,
+      response: response,
+    );
+
+    final failure = ApiErrorHandler.handle(error, StackTrace.current);
+
+    expect(failure.statusCode, 409);
+    expect(failure.error.getErrorMessage, contains('sales report is locked'));
+    expect(
+      ErrorMessages.resolve(ErrorMessageKey.salesReportLocked, 'ar'),
+      contains('تقرير المبيعات مقفول للتعديل'),
+    );
+  });
+
   group('ApiErrorHandler connectivity & distinction tests', () {
     test(
       'Actual network down (errno 101 / network is unreachable) maps to noInternet error',

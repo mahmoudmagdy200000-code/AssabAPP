@@ -166,10 +166,15 @@ class ApiErrorHandler {
 
     String serverMessage(ErrorMessageKey fallback) {
       final topMessage = mapData?['message']?.toString().trim();
+      final nestedMessage = nestedErrorMap?['message']?.toString().trim();
+      final code = mapData?['code'] ?? nestedErrorMap?['code'];
+      if (statusCode == ApiStatusCode.conflict &&
+          (code ?? topMessage ?? nestedMessage) == 'REPORT_REOPEN_REQUIRED') {
+        return _msg(ErrorMessageKey.salesReportLocked);
+      }
       if (topMessage != null && topMessage.isNotEmpty) {
         return topMessage;
       }
-      final nestedMessage = nestedErrorMap?['message']?.toString().trim();
       if (nestedMessage != null && nestedMessage.isNotEmpty) {
         return nestedMessage;
       }
