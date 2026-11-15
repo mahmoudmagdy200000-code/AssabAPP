@@ -27,6 +27,11 @@ class FinalHandoverWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shift = currentManagerShift.shift;
+    final handover = shift.finalHandover;
+    final needsCorrection = handover.status == FinalHandOverStatus.rejected;
+    final canSubmitDailyReport = shift.canSubmitDailyReport;
+
     return CashierInfoContainerWidget(
       children: [
         Row(
@@ -39,10 +44,9 @@ class FinalHandoverWidget extends StatelessWidget {
               alignment: Alignment.center,
               padding: EdgeInsets.all(3.w),
               child: Text(
-                currentManagerShift.shift.finalHandover.status.label,
+                handover.status.label,
                 style: AppStyles.s12W500.copyWith(
-                  color:
-                      currentManagerShift.shift.finalHandover.status.textColor,
+                  color: handover.status.textColor,
                 ),
               ),
             ),
@@ -55,8 +59,7 @@ class FinalHandoverWidget extends StatelessWidget {
           firstTitleSvgAsset: AppAssets.cash,
           firstValueSvgAsset: AppAssets.saudiRiyal,
           hasSpaceBetweenTitleAndValue: true,
-          value: currentManagerShift.shift.finalHandover.handoverAmount
-              .toStringAsFixed(2),
+          value: handover.handoverAmount.toStringAsFixed(2),
         ),
 
         1.verticalSpace,
@@ -65,9 +68,7 @@ class FinalHandoverWidget extends StatelessWidget {
           title: context.tr.handoverFrom,
           firstTitleSvgAsset: AppAssets.personSvg,
           hasSpaceBetweenTitleAndValue: true,
-          value:
-              currentManagerShift.shift.finalHandover.handoverFrom ??
-              context.tr.no_name,
+          value: handover.handoverFrom,
         ),
 
         1.verticalSpace,
@@ -85,9 +86,7 @@ class FinalHandoverWidget extends StatelessWidget {
           title: context.tr.accountantName,
           firstTitleSvgAsset: AppAssets.personSvg,
           hasSpaceBetweenTitleAndValue: true,
-          value:
-              currentManagerShift.shift.finalHandover.handoverTo ??
-              context.tr.no_name,
+          value: handover.handoverTo,
         ),
 
         1.verticalSpace,
@@ -96,9 +95,7 @@ class FinalHandoverWidget extends StatelessWidget {
           title: context.tr.handoverDate,
           firstTitleSvgAsset: AppAssets.calendar,
           hasSpaceBetweenTitleAndValue: true,
-          value:
-              currentManagerShift.shift.finalHandover.formattedHandoverDate ??
-              '0000-00-00',
+          value: handover.formattedHandoverDate,
         ),
 
         1.verticalSpace,
@@ -107,118 +104,74 @@ class FinalHandoverWidget extends StatelessWidget {
           title: context.tr.handoverTime,
           firstTitleSvgAsset: AppAssets.clockSvg,
           hasSpaceBetweenTitleAndValue: true,
-          value:
-              currentManagerShift.shift.finalHandover.formattedHandoverTime ??
-              '00:00',
+          value: handover.formattedHandoverTime,
         ),
 
         1.verticalSpace,
-        Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
-          decoration: BoxDecoration(
-            color: currentManagerShift.shift.finalHandover.status.cardColor,
-          ),
-          child: Text(
-            currentManagerShift.shift.finalHandover.status.text(
-              currentManagerShift.shift.finalHandover.handoverTo,
-              currentManagerShift.shift.finalHandover.formattedHandoverDate,
+        if (!canSubmitDailyReport || needsCorrection)
+          Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
+            decoration: BoxDecoration(color: handover.status.cardColor),
+            child: Text(
+              handover.status.text(
+                handover.handoverTo,
+                handover.formattedHandoverDate,
+              ),
+              textAlign: TextAlign.center,
+              style: AppStyles.s13W500.copyWith(
+                color: handover.status.textColor,
+              ),
             ),
-            textAlign: TextAlign.center,
-            style: AppStyles.s13W500.copyWith(
-              color: currentManagerShift.shift.finalHandover.status.textColor,
-            ),
           ),
-        ),
 
         const CustomDivider(),
 
-        currentManagerShift.shift.finalHandover.status ==
-                FinalHandOverStatus.rejected
-            ? Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      onClick: () {
-                        NavigationService.I.pushNamed(
-                          AppRouteName.updateManagerFinalDailyCloseScreen,
-                          arguments: {
-                            'manager_workday_id': currentManagerShift.shift.id,
-                            'branchName': currentManagerShift
-                                .shift
-                                .shiftDetails
-                                .storeBranch,
-                            'managerCubit': context.read<ManagerShiftCubit>(),
-                          },
-                        );
-                      },
-                      enabled: true,
-                      borderRadius: BorderRadius.circular(10.r),
-                      padding: EdgeInsets.symmetric(vertical: 15.h),
-                      text: context.tr.makeCorrections,
-                    ),
-                  ),
-
-                  10.horizontalSpace,
-
-                  Expanded(
-                    child: AppButton(
-                      onClick: () {
-                        AppBottomSheet.showModal(
-                          context,
-                          (context) => BlocProvider(
-                            create: (context) =>
-                                getIt<FinalDailyCloseCubit>()..getDailyClose(managerWorkdayId: currentManagerShift.shift.id),
-                            child: FinalHandoverSummaryWidget(
-                              currentTimeSetting: currentManagerShift
-                                  .shift
-                                  .finalHandover
-                                  .currentTimeSetting,
-                              handoverDate: currentManagerShift
-                                  .shift
-                                  .finalHandover
-                                  .handoverDate,
-                            ),
-                          ),
-                          isScrollControlled: true,
-                        );
-                      },
-                      enabled: true,
-                      isTransparent: true,
-                      borderRadius: BorderRadius.circular(10.r),
-                      padding: EdgeInsets.symmetric(vertical: 15.h),
-                      text: context.tr.seeDetails,
-                    ),
-                  ),
-                ],
-              )
-            : AppButton(
-                onClick: () {
-                  AppBottomSheet.showModal(
-                    context,
-                    (context) => BlocProvider(
-                      create: (context) =>
-                          getIt<FinalDailyCloseCubit>()..getDailyClose(managerWorkdayId: currentManagerShift.shift.id),
-                      child: FinalHandoverSummaryWidget(
-                        currentTimeSetting: currentManagerShift
-                            .shift
-                            .finalHandover
-                            .currentTimeSetting,
-                        handoverDate: currentManagerShift
-                            .shift
-                            .finalHandover
-                            .handoverDate,
-                      ),
-                    ),
-                    isScrollControlled: true,
-                  );
+        if (needsCorrection || canSubmitDailyReport) ...[
+          AppButton(
+            onClick: () async {
+              final managerCubit = context.read<ManagerShiftCubit>();
+              await NavigationService.I.pushNamed(
+                AppRouteName.updateManagerFinalDailyCloseScreen,
+                arguments: {
+                  'manager_workday_id': shift.id,
+                  'branchName': shift.shiftDetails.storeBranch,
+                  'managerCubit': managerCubit,
                 },
-                enabled: true,
-                isTransparent: true,
-                borderRadius: BorderRadius.circular(10.r),
-                padding: EdgeInsets.symmetric(vertical: 15.h),
-                text: context.tr.seeDetails,
+              );
+              if (context.mounted) await managerCubit.getCurrentShift();
+            },
+            enabled: true,
+            borderRadius: BorderRadius.circular(10.r),
+            padding: EdgeInsets.symmetric(vertical: 15.h),
+            text: needsCorrection
+                ? context.tr.makeCorrections
+                : context.tr.submitDailyCloseFinal,
+          ),
+          10.verticalSpace,
+        ],
+        AppButton(
+          onClick: () {
+            AppBottomSheet.showModal(
+              context,
+              (context) => BlocProvider(
+                create: (context) =>
+                    getIt<FinalDailyCloseCubit>()
+                      ..getDailyClose(managerWorkdayId: shift.id),
+                child: FinalHandoverSummaryWidget(
+                  currentTimeSetting: handover.currentTimeSetting,
+                  handoverDate: handover.handoverDate,
+                ),
               ),
+              isScrollControlled: true,
+            );
+          },
+          enabled: true,
+          isTransparent: true,
+          borderRadius: BorderRadius.circular(10.r),
+          padding: EdgeInsets.symmetric(vertical: 15.h),
+          text: context.tr.seeDetails,
+        ),
       ],
     );
   }

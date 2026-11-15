@@ -27,9 +27,4 @@ class TotalsEntity {
       totalSales: cashiers.fold(0, (sum, c) => sum + c.totalSales),
     );
   }
-
-  double get totalOfTotals {
-    return (totalCashCollected + totalCardPayments + totalDeliveryApps) -
-        totalVariance;
-  }
 }

@@ -366,10 +366,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m144(cashierName) =>
       "Your correction request has been sent to ${cashierName}.";
 
-  static String m145(AccountantName) =>
-      "Your shift has been submitted for final review.\nYou’ll be notified once ${AccountantName} approves or rejects your handover.\nNo further changes can be made to today’s records.";
-
-  static String m146(Amount) =>
+  static String m145(Amount) =>
       "You’ve successfully transferred ${Amount} to Branch Custody.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1037,6 +1034,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cashHandoverRecordedDesc": MessageLookupByLibrary.simpleMessage(
       "Amount SAR has been added to the branch manager’s custody balance and logged in your payment history.",
+    ),
+    "cashHandoverRecordedSubmitDailyReport": MessageLookupByLibrary.simpleMessage(
+      "Cash handover recorded. Open Final Handover to submit the daily report for accountant review.",
     ),
     "cashHandovers": MessageLookupByLibrary.simpleMessage("Cash Handovers"),
     "cashOrPaymentHandedOver": MessageLookupByLibrary.simpleMessage(
@@ -3364,6 +3364,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "manager": MessageLookupByLibrary.simpleMessage("Manager"),
     "managerComment": MessageLookupByLibrary.simpleMessage("Manager’s Comment"),
+    "managerDailyCashSales": MessageLookupByLibrary.simpleMessage("Cash Sales"),
     "managerNameSubmittedThisItemReturnRequestForReviewAndApproval": m62,
     "managerNameSubmittedThisOrderRequestForReviewAndApproval": m63,
     "managerSubmittedDailyInventory": m64,
@@ -6789,7 +6790,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "yourFinalHandoverHasBeenSubmitted": MessageLookupByLibrary.simpleMessage(
       "Your final handover has been submitted. You’ll be notified once the accountant reviews it, no further action needed for now.",
     ),
-    "yourFinalHandoverHasBeenSubmittedForReview": m145,
     "yourHandoverRequestHasBeenSent": MessageLookupByLibrary.simpleMessage(
       "Your handover request has been sent. You will be notified when they accept it.",
     ),
@@ -6849,7 +6849,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "You’ve successfully escalated the return rejection. The brand manager or finance team will review and get back to you.",
         ),
-    "youveSuccessfullyTransferredAmountToBranchCustody": m146,
+    "youveSuccessfullyTransferredAmountToBranchCustody": m145,
     "zakattaxes": MessageLookupByLibrary.simpleMessage("Zakat/Taxes:"),
     "zone": MessageLookupByLibrary.simpleMessage("Zone"),
     "zoneApproved": MessageLookupByLibrary.simpleMessage("Zone approved"),
