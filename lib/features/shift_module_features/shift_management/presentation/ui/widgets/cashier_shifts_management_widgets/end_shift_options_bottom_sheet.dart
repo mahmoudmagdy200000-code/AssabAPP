@@ -47,39 +47,44 @@ class EndShiftOptionsBottomSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(context.tr.end_shift, style: AppStyles.s18W600),
-                10.verticalSpace,
-                Text(
-                  context.tr.endShiftOptionDesc,
-                  style: AppStyles.s14W400.copyWith(
-                    color: context.customColor.text4,
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      Text(context.tr.end_shift, style: AppStyles.s18W600),
+                      10.verticalSpace,
+                      Text(
+                        context.tr.endShiftOptionDesc,
+                        style: AppStyles.s14W400.copyWith(
+                          color: context.customColor.text4,
+                        ),
+                      ),
+
+                      EndShiftOptionWidget(
+                        isSelected:
+                            state.selectedOption == EndShiftOption.withoutHandover,
+                        assetName: AppAssets.noShiftsFoundSvg,
+                        title: context.tr.endShiftOnly,
+                        desc: context.tr.endShiftOnlyDesc,
+                        onTap: () {
+                          context.read<EndShiftOptionCubit>().selectWithoutHandover();
+                        },
+                      ),
+                      15.verticalSpace,
+                      EndShiftOptionWidget(
+                        isSelected:
+                            state.selectedOption == EndShiftOption.withHandover,
+                        assetName: AppAssets.endShiftWithHandover,
+                        title: context.tr.endShiftAndHandover,
+                        desc: context.tr.endShiftAndHandoverDesc,
+                        onTap: () {
+                          context.read<EndShiftOptionCubit>().selectWithHandover();
+                        },
+                      ),
+                    ],
                   ),
                 ),
-
-                EndShiftOptionWidget(
-                  isSelected:
-                      state.selectedOption == EndShiftOption.withoutHandover,
-                  assetName: AppAssets.noShiftsFoundSvg,
-                  title: context.tr.endShiftOnly,
-                  desc: context.tr.endShiftOnlyDesc,
-                  onTap: () {
-                    context.read<EndShiftOptionCubit>().selectWithoutHandover();
-                  },
-                ),
-                15.verticalSpace,
-                EndShiftOptionWidget(
-                  isSelected:
-                      state.selectedOption == EndShiftOption.withHandover,
-                  assetName: AppAssets.endShiftWithHandover,
-                  title: context.tr.endShiftAndHandover,
-                  desc: context.tr.endShiftAndHandoverDesc,
-                  onTap: () {
-                    context.read<EndShiftOptionCubit>().selectWithHandover();
-                  },
-                ),
-
-                const Spacer(),
-
+                10.verticalSpace,
                 AppButton(
                   padding: EdgeInsets.symmetric(
                     horizontal: 20.w,
