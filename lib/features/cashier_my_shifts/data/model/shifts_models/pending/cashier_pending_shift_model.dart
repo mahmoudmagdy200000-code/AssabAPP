@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../../../domain/enums/my_shifts_status.dart';
+import '../../../converters/opening_balance_converter.dart';
 import '../cashier_my_shift_actions_model.dart';
 import '../cashier_shifts_user_model.dart';
 
@@ -20,8 +21,8 @@ class CashierPendingShiftModel {
   @JsonKey(name: 'end_time')
   final String endTime;
 
-  @JsonKey(name: 'opening_balance')
-  final int openingBalance;
+  @JsonKey(name: 'opening_balance', fromJson: openingBalanceFromJson)
+  final double? openingBalance;
 
   @JsonKey(name: 'cash_given')
   final int cashGiven;
@@ -52,6 +53,9 @@ class CashierPendingShiftModel {
   @JsonKey(name: 'can_start')
   final bool canStart;
 
+  @JsonKey(name: 'start_disabled_reason')
+  final String? startDisabledReason;
+
   final CashierPendingShiftActionsModel actions;
 
   const CashierPendingShiftModel({
@@ -72,6 +76,7 @@ class CashierPendingShiftModel {
     required this.assignedByUserType,
     required this.isNextShift,
     required this.canStart,
+    this.startDisabledReason,
     required this.actions,
   });
 

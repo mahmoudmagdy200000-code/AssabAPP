@@ -101,9 +101,10 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
                     ShiftDetailsRowWidget(
                       iconSVGAsset: AppAssets.cash,
                       title: context.tr.cash_given,
-                      value: shift.openingBalance == null
-                          ? context.tr.not_recorded_yet
-                          : shift.openingBalance.toString(),
+                      value: formatOpeningBalanceDisplay(
+                        context,
+                        shift.openingBalance,
+                      ),
                     ),
                   ],
                 ),
@@ -215,6 +216,22 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
             value: shift.handoverAmount.toString(),
           ),
 
+          if (computeRemainingCashAfterHandover(
+                cashCollected: shift.cashCollected,
+                handoverAmount: shift.handoverAmount,
+              )
+              case final remainingCash?) ...[
+            const CustomDivider(),
+            buildShiftCardRowWidget(
+              context: context,
+              title: context.tr.remainingAmount,
+              firstTitleSvgAsset: AppAssets.cash,
+              firstValueSvgAsset: AppAssets.saudiRiyal,
+              hasSpaceBetweenTitleAndValue: true,
+              value: remainingCash.toStringAsFixed(2),
+            ),
+          ],
+
           const CustomDivider(),
           buildShiftCardRowWidget(
             context: context,
@@ -307,8 +324,7 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
           buildShiftCardRowWidget(
             context: context,
             title: context.tr.handoverTo,
-            firstTitleSvgAsset: AppAssets.cash,
-            firstValueSvgAsset: AppAssets.saudiRiyal,
+            firstTitleSvgAsset: AppAssets.personSvg,
             hasSpaceBetweenTitleAndValue: true,
             value: shift.handoverTo?.name ?? context.tr.no_name,
           ),
@@ -317,8 +333,7 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
           buildShiftCardRowWidget(
             context: context,
             title: context.tr.next_cashier,
-            firstTitleSvgAsset: AppAssets.cash,
-            firstValueSvgAsset: AppAssets.saudiRiyal,
+            firstTitleSvgAsset: AppAssets.personSvg,
             hasSpaceBetweenTitleAndValue: true,
             value: shift.nextCashier?.name ?? context.tr.no_name,
           ),

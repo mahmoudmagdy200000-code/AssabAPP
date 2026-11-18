@@ -69,6 +69,18 @@ class CashierMyInProgressShiftsDefaultCard extends StatelessWidget {
 
             buildShiftCardRowWidget(
               context: context,
+              firstTitleSvgAsset: AppAssets.cash,
+              title: context.tr.openingBalance,
+              value: formatOpeningBalanceDisplay(context, shift.openingBalance),
+              firstValueSvgAsset: shift.openingBalance == null
+                  ? null
+                  : AppAssets.saudiRiyal,
+            ),
+
+            12.verticalSpace,
+
+            buildShiftCardRowWidget(
+              context: context,
               title: context.tr.closing_balance,
               firstTitleSvgAsset: AppAssets.cash,
               value: (shift.closingBalance ?? 0).toString(),

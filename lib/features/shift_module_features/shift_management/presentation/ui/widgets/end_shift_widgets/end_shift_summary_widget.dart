@@ -148,12 +148,18 @@ class EndShiftSummaryWidget extends StatelessWidget {
                     buildShiftCardRowWidget(
                       context: context,
                       firstTitleSvgAsset: AppAssets.cash,
-                      value: context
-                          .read<EndShiftCubit>()
-                          .cashGiven
-                          .toStringAsFixed(2),
+                      value: formatOpeningBalanceDisplay(
+                        context,
+                        context.read<EndShiftCubit>().openingBalanceForDisplay,
+                      ),
                       title: context.tr.cash_given,
-                      firstValueSvgAsset: AppAssets.saudiRiyal,
+                      firstValueSvgAsset:
+                          context
+                                  .read<EndShiftCubit>()
+                                  .openingBalanceForDisplay ==
+                              null
+                          ? null
+                          : AppAssets.saudiRiyal,
                       hasSpaceBetweenTitleAndValue: true,
                     ),
                   ],
@@ -213,9 +219,10 @@ class EndShiftSummaryWidget extends StatelessWidget {
                           context: context,
                           firstTitleSvgAsset: AppAssets.cash,
                           title: context.tr.varianceType,
-                          value: context
-                              .read<EndShiftCubit>()
-                              .cashVarianceType!,
+                          value: formatCashVarianceTypeDisplay(
+                            context,
+                            context.read<EndShiftCubit>().cashVarianceType!,
+                          ),
                           hasSpaceBetweenTitleAndValue: true,
                         ),
                       if (context.read<EndShiftCubit>().confirmedOpeningCash !=
@@ -224,10 +231,10 @@ class EndShiftSummaryWidget extends StatelessWidget {
                           context: context,
                           firstTitleSvgAsset: AppAssets.cash,
                           title: context.tr.openingBalanceTitle,
-                          value: context
-                              .read<EndShiftCubit>()
-                              .confirmedOpeningCash!
-                              .toStringAsFixed(2),
+                          value: formatOpeningBalanceDisplay(
+                            context,
+                            context.read<EndShiftCubit>().confirmedOpeningCash,
+                          ),
                           firstValueSvgAsset: AppAssets.saudiRiyal,
                           hasSpaceBetweenTitleAndValue: true,
                         ),

@@ -10,11 +10,13 @@ class CashierShiftEntity {
   final MyShiftStatusType status;
   final String startTime;
   final String endTime;
-  final int? openingBalance;
+  final double? openingBalance;
   final int? closingBalance;
   final String? nextCashier;
   final CashierUserObjectEntity? assignedTo;
   final bool? isNextShift;
+  final bool? canStart;
+  final String? startDisabledReason;
   final int? variance;
   final int? cashGiven;
   final bool canBeAccepted;
@@ -42,6 +44,8 @@ class CashierShiftEntity {
     this.reassignedBy,
     this.openingBalance,
     this.isNextShift,
+    this.canStart,
+    this.startDisabledReason,
     this.closingBalance,
     this.cashFrom,
     this.handoverTo,

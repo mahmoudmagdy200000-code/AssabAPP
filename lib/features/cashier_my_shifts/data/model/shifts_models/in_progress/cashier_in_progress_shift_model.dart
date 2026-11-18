@@ -22,7 +22,7 @@ class CashierInProgressShiftModel {
   final String? actualStartTime;
 
   @JsonKey(name: 'opening_balance', fromJson: openingBalanceFromJson)
-  final int? openingBalance;
+  final double? openingBalance;
 
   @JsonKey(name: 'closing_balance')
   final int closingBalance;

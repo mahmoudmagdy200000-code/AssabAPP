@@ -18,7 +18,7 @@ class CashierMyPendingShiftsStrategy implements CashierMyShiftsCardsStrategy {
         create: (context) => getIt<StartCashierShiftCubit>(),
         child: CashierMyPendingShiftsHasToStartCard(shift: shift),
       );
-    } else if (shift.openingBalance != 0) {
+    } else if (shift.openingBalance != null && shift.openingBalance != 0) {
       return CashierMyPendingShiftsWithOpeningBalanceCard(shift: shift);
     } else if (shift.handoverTo?.id != null) {
       return CashierMyPendingShiftsWithHandoverCard(shift: shift);

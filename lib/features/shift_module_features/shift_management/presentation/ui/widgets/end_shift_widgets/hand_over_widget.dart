@@ -450,19 +450,21 @@ class HandOverWidget extends StatelessWidget {
 
                                                       10.horizontalSpace,
 
-                                                      CashierNameAndBranch(
-                                                        Name: cashier.name,
-                                                        BranchName:
-                                                            cashier.isSuggested
-                                                            ? (cashier.suggestionReason ??
-                                                                  'Next scheduled cashier (auto-handover)')
-                                                            : (cashier.disabled &&
-                                                                  cashier.reasonDisabled !=
-                                                                      null)
-                                                            ? cashier
-                                                                  .reasonDisabled!
-                                                            : cashier
-                                                                  .branchName,
+                                                      Expanded(
+                                                        child: CashierNameAndBranch(
+                                                          Name: cashier.name,
+                                                          BranchName:
+                                                              cashier.isSuggested
+                                                              ? (cashier.suggestionReason ??
+                                                                    'Next scheduled cashier (auto-handover)')
+                                                              : (cashier.disabled &&
+                                                                    cashier.reasonDisabled !=
+                                                                        null)
+                                                              ? cashier
+                                                                    .reasonDisabled!
+                                                              : cashier
+                                                                    .branchName,
+                                                        ),
                                                       ),
                                                     ],
                                                   ),

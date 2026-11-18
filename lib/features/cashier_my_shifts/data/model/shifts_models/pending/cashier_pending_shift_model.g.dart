@@ -15,7 +15,7 @@ CashierPendingShiftModel _$CashierPendingShiftModelFromJson(
   statusLabel: (json['status_label'] as String?) ?? '',
   startTime: (json['start_time'] as String?) ?? '',
   endTime: (json['end_time'] as String?) ?? '',
-  openingBalance: (json['opening_balance'] as num?)?.toInt() ?? 0,
+  openingBalance: openingBalanceFromJson(json['opening_balance']),
   cashGiven: (json['cash_given'] as num?)?.toInt() ?? 0,
   variance: (json['variance'] as num?)?.toInt() ?? 0,
   cashFrom: CashierShiftUserModel.tryFromJson(json['cash_from']),
@@ -26,6 +26,7 @@ CashierPendingShiftModel _$CashierPendingShiftModelFromJson(
   assignedByUserType: (json['assigned_by_user_type'] as String?) ?? '',
   isNextShift: json['is_next_shift'] as bool? ?? false,
   canStart: json['can_start'] as bool? ?? false,
+  startDisabledReason: json['start_disabled_reason'] as String?,
   actions: json['actions'] is Map<String, dynamic>
       ? CashierPendingShiftActionsModel.fromJson(
           json['actions'] as Map<String, dynamic>,
@@ -56,6 +57,7 @@ Map<String, dynamic> _$CashierPendingShiftModelToJson(
   'assigned_by_user_type': instance.assignedByUserType,
   'is_next_shift': instance.isNextShift,
   'can_start': instance.canStart,
+  'start_disabled_reason': instance.startDisabledReason,
   'actions': instance.actions,
 };
 

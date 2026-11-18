@@ -13,10 +13,12 @@ class HandoverAcceptedSheetWidget extends StatelessWidget {
     super.key,
     required this.shiftId,
     this.isManager = false,
+    this.receiptId,
   });
 
   final String shiftId;
   final bool isManager;
+  final String? receiptId;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,19 @@ class HandoverAcceptedSheetWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: AppStyles.s13W400.copyWith(color: context.customColor.text4),
             ),
+
+            if (receiptId != null && receiptId!.isNotEmpty) ...[
+              10.verticalSpace,
+              SelectableText(
+                Localizations.localeOf(context).languageCode.startsWith('en')
+                    ? 'Receipt ID: $receiptId'
+                    : 'رقم الإيصال: $receiptId',
+                textAlign: TextAlign.center,
+                style: AppStyles.s12W500.copyWith(
+                  color: context.customColor.text1,
+                ),
+              ),
+            ],
 
             60.verticalSpace,
 

@@ -318,6 +318,7 @@ class _AcceptHandoverSheetWidgetModalSheetWidgetState
                             (context) => HandoverAcceptedSheetWidget(
                               shiftId: widget.shiftId,
                               isManager: _effectiveRole == UserType.branchManager,
+                              receiptId: state.receiptId,
                             ),
                           );
                           widget.successFunction();

@@ -80,9 +80,10 @@ class PendingShiftCardWidget extends ShiftCardStrategy {
             context: context,
             firstTitleSvgAsset: AppAssets.cash,
             title: context.tr.openingBalance,
-            value: shift.openingBalance == 0
-                ? context.tr.not_recorded_yet
-                : shift.openingBalance.toString(),
+            value: formatOpeningBalanceDisplay(context, shift.openingBalance),
+            firstValueSvgAsset: shift.openingBalance == null
+                ? null
+                : AppAssets.saudiRiyal,
           ),
           12.verticalSpace,
 

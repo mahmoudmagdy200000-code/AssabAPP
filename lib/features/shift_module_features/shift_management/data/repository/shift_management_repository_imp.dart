@@ -13,6 +13,7 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/cashier_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/cashier_handover_details_entity/cashier_handover_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/current_shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/historical_final_handover_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/end_shift_response_entites/manager_shift_update_data_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_status_details_entities/handover_status_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/variance_details/handover_variance_details_entity.dart';
@@ -384,7 +385,7 @@ class ShiftManagementRepositoryImp
     String? transferAttemptId,
   }) async {
     return execute(() async {
-      await _remoteDataSource.approveHandover(
+      final response = await _remoteDataSource.approveHandover(
         shiftId: shiftId,
         handoverApproveAndRejectBodyRequest:
             HandoverApproveAndRejectBodyRequest(
@@ -393,7 +394,16 @@ class ShiftManagementRepositoryImp
               transferAttemptId: transferAttemptId,
             ),
       );
-      return true;
+      if (response is Map<String, dynamic>) {
+        final data = response['data'];
+        if (data is Map<String, dynamic>) {
+          final approvalDetails = data['approval_details'];
+          if (approvalDetails is Map<String, dynamic>) {
+            return approvalDetails['receipt_id']?.toString();
+          }
+        }
+      }
+      return null;
     });
   }
 
@@ -667,6 +677,44 @@ class ShiftManagementRepositoryImp
         // If the candidates endpoint fails or returns 404, fail closed.
         rethrow;
       }
+    });
+  }
+
+  FutureApiResult<HistoricalFinalHandoverEntity?> getHistoricalFinalHandoverByDate(
+    String date,
+  ) async {
+    return execute(() async {
+      final historyRes = await _remoteDataSource.getWorkdayHistory(
+        date: date,
+        dateFrom: date,
+        dateTo: date,
+        perPage: 5,
+      );
+      final List<dynamic> historyList =
+          historyRes is Map && historyRes['data'] is List
+              ? historyRes['data'] as List
+              : const [];
+      if (historyList.isEmpty) {
+        return null;
+      }
+
+      final first = historyList.first;
+      final firstMap = first is Map<String, dynamic>
+          ? first
+          : Map<String, dynamic>.from(first as Map);
+      final shiftId = (firstMap['id'] ?? '').toString();
+      if (shiftId.isEmpty) {
+        return null;
+      }
+
+      final detailRes = await _remoteDataSource.getHistoricalFinalHandover(
+        shiftId: shiftId,
+      );
+      final dataMap = detailRes is Map && detailRes['data'] is Map
+          ? Map<String, dynamic>.from(detailRes['data'] as Map)
+          : <String, dynamic>{};
+
+      return HistoricalFinalHandoverEntity.fromApiPayload(dataMap);
     });
   }
 }

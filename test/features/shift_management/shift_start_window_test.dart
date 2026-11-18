@@ -380,6 +380,7 @@ void main() {
         openingBalance: 0,
         cashGiven: 0,
         variance: 0,
+        isNextShift: true,
       );
 
       await tester.pumpWidget(

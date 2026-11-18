@@ -250,4 +250,17 @@ abstract class ShiftManagementRemoteDataSource {
   Future<CashierResponseModel> getCashierDetails({
     @Path('cashier') required String cashierId,
   });
+
+  @GET('${ApiEndpoint.branchWorkDayMgmt}/history')
+  Future<dynamic> getWorkdayHistory({
+    @Query('date') String? date,
+    @Query('date_from') String? dateFrom,
+    @Query('date_to') String? dateTo,
+    @Query('per_page') int? perPage,
+  });
+
+  @GET('${ApiEndpoint.branchWorkDayMgmt}/final-handover/{shiftId}')
+  Future<dynamic> getHistoricalFinalHandover({
+    @Path('shiftId') required String shiftId,
+  });
 }

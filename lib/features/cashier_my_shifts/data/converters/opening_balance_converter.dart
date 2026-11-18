@@ -1,12 +1,10 @@
-int? openingBalanceFromJson(dynamic value) {
+double? openingBalanceFromJson(dynamic value) {
   if (value == null) return null;
 
-  if (value is int) return value;
-
-  if (value is num) return value.toInt();
+  if (value is num) return value.toDouble();
 
   if (value is String) {
-    return int.tryParse(value);
+    return double.tryParse(value.trim());
   }
 
   return null;

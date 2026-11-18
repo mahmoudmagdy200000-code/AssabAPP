@@ -78,7 +78,7 @@ class ApproveAndRejectHandoverCubit
     handle(
       result,
       failure: (failure) => emit(HandoverActionFailure(failure)),
-      success: (success) => emit(HandoverActionSuccess()),
+      success: (receiptId) => emit(HandoverActionSuccess(receiptId: receiptId?.toString())),
     );
   }
 
@@ -121,7 +121,7 @@ class ApproveAndRejectHandoverCubit
     handle(
       result,
       failure: (failure) => emit(HandoverActionFailure(failure)),
-      success: (success) => emit(HandoverActionSuccess()),
+      success: (_) => emit(HandoverActionSuccess()),
     );
   }
 
@@ -151,7 +151,7 @@ class ApproveAndRejectHandoverCubit
     handle(
       result,
       failure: (failure) => emit(HandoverActionFailure(failure)),
-      success: (success) => emit(HandoverActionSuccess()),
+      success: (_) => emit(HandoverActionSuccess()),
     );
   }
 
@@ -294,7 +294,7 @@ class ApproveAndRejectHandoverCubit
     handle(
       result,
       failure: (failure) => emit(HandoverActionFailure(failure)),
-      success: (success) => emit(HandoverActionSuccess()),
+      success: (_) => emit(HandoverActionSuccess()),
     );
   }
 
@@ -316,7 +316,7 @@ class ApproveAndRejectHandoverCubit
     handle(
       result,
       failure: (failure) => emit(HandoverActionFailure(failure)),
-      success: (success) => emit(HandoverActionSuccess()),
+      success: (_) => emit(HandoverActionSuccess()),
     );
   }
 }
