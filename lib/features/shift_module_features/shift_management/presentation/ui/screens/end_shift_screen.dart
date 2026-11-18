@@ -96,14 +96,13 @@ class _EndShiftScreenState extends State<EndShiftScreen> {
         children: [
           ShiftManagementFromAppBar(text: context.tr.end_shift),
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.theme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30.r),
-                  topRight: Radius.circular(30.r),
-                ),
+            child: Material(
+              color: context.theme.scaffoldBackgroundColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30.r),
+                topRight: Radius.circular(30.r),
               ),
+              clipBehavior: Clip.antiAlias,
               child: AppPaddingWidget(
                 child: Column(
                   children: [
