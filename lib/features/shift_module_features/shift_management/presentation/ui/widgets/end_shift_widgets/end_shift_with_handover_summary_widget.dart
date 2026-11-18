@@ -192,7 +192,6 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
             10.verticalSpace,
 
             SummarizeCardWidget(
-              height: 140.h,
               children: [
                 Text(
                   context.tr.handoverDetails,
@@ -210,6 +209,21 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
                   firstValueSvgAsset: AppAssets.saudiRiyal,
                   hasSpaceBetweenTitleAndValue: true,
                 ),
+
+                if (computeRemainingCashAfterHandover(
+                      cashCollected: context.watch<EndShiftCubit>().cashCollected,
+                      handoverAmount:
+                          context.watch<EndShiftCubit>().handOverAmount,
+                    )
+                    case final remainingCash?)
+                  buildShiftCardRowWidget(
+                    context: context,
+                    firstTitleSvgAsset: AppAssets.cash,
+                    value: remainingCash.toStringAsFixed(2),
+                    title: context.tr.remainingAmount,
+                    firstValueSvgAsset: AppAssets.saudiRiyal,
+                    hasSpaceBetweenTitleAndValue: true,
+                  ),
 
                 buildShiftCardRowWidget(
                   context: context,
@@ -278,7 +292,10 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
                       context: context,
                       firstTitleSvgAsset: AppAssets.cash,
                       title: context.tr.varianceType,
-                      value: context.watch<EndShiftCubit>().cashVarianceType!,
+                      value: formatCashVarianceTypeDisplay(
+                        context,
+                        context.watch<EndShiftCubit>().cashVarianceType!,
+                      ),
                       hasSpaceBetweenTitleAndValue: true,
                     ),
                   if (context.watch<EndShiftCubit>().confirmedOpeningCash !=

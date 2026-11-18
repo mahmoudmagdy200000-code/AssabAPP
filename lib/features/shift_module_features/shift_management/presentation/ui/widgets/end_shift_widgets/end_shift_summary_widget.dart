@@ -219,9 +219,10 @@ class EndShiftSummaryWidget extends StatelessWidget {
                           context: context,
                           firstTitleSvgAsset: AppAssets.cash,
                           title: context.tr.varianceType,
-                          value: context
-                              .read<EndShiftCubit>()
-                              .cashVarianceType!,
+                          value: formatCashVarianceTypeDisplay(
+                            context,
+                            context.read<EndShiftCubit>().cashVarianceType!,
+                          ),
                           hasSpaceBetweenTitleAndValue: true,
                         ),
                       if (context.read<EndShiftCubit>().confirmedOpeningCash !=

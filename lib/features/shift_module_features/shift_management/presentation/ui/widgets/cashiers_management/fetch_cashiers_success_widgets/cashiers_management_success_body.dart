@@ -61,13 +61,15 @@ class CashiersManagementSuccessBody extends StatelessWidget {
 
                   10.horizontalSpace,
 
-                  CashierNameAndBranch(
-                    Name: cashiers[index].name,
-                    BranchName: cashiers[index].branch.name,
-                    ShiftCount: cashiers[index].shiftsCount,
+                  Expanded(
+                    child: CashierNameAndBranch(
+                      Name: cashiers[index].name,
+                      BranchName: cashiers[index].branch.name,
+                      ShiftCount: cashiers[index].shiftsCount,
+                    ),
                   ),
 
-                  const Spacer(),
+                  8.horizontalSpace,
 
                   if (cashiers[index].status != CashierStatus.pending)
                     Container(

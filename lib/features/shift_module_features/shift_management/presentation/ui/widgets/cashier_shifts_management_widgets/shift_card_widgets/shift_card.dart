@@ -14,6 +14,31 @@ String formatOpeningBalanceDisplay(BuildContext context, num? openingBalance) {
   return CurrencyNormalizer.formatSar(openingBalance);
 }
 
+/// Formats backend `cash_variance_type` enum for Arabic RTL while preserving
+/// canonical lowercase English identifiers (`balanced`, `shortage`, `surplus`).
+String formatCashVarianceTypeDisplay(BuildContext context, String rawType) {
+  final normalized = rawType.trim().toLowerCase();
+  if (Localizations.localeOf(context).languageCode != 'ar') return rawType;
+  return switch (normalized) {
+    'balanced' => 'متوازن',
+    'shortage' => context.tr.shortage,
+    'surplus' => context.tr.surplus,
+    _ => rawType,
+  };
+}
+
+/// Computes positive remaining cash in custody after a partial handover (halala-safe).
+double? computeRemainingCashAfterHandover({
+  required double? cashCollected,
+  required double? handoverAmount,
+}) {
+  if (cashCollected == null || handoverAmount == null) return null;
+  final remainingHalalas =
+      (cashCollected * 100).round() - (handoverAmount * 100).round();
+  if (remainingHalalas <= 0) return null;
+  return remainingHalalas / 100.0;
+}
+
 abstract class ShiftCardStrategy {
   Widget buildCard(BuildContext context, ShiftEntity shift);
 }

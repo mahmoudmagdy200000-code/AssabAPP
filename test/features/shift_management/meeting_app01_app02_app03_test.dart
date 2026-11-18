@@ -1,4 +1,7 @@
+import 'package:assab/core/constants/app_assets.dart';
+import 'package:assab/core/cubits/add_item/add_item_cubit.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/enums/shift_status/shift_status_type.dart';
 import 'package:assab/core/helpers/paginator.dart';
 import 'package:assab/core/helpers/shift_start_window_helper.dart';
@@ -8,6 +11,9 @@ import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/future_api_result.dart';
 import 'package:assab/core/widgets/app_button.dart';
 import 'package:assab/core/widgets/app_responsive_builder.dart';
+import 'package:assab/core/widgets/app_svg.dart';
+import 'package:assab/features/cashier_my_shifts/presentation/widgets/cashier_my_shifts_cards/in_progress_cards/cashier_my_in_progress_shifts_default_card.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/cashier_name_and_branch_details.dart';
 import 'package:assab/features/branch_manager_requests/data/models/handovers_response.dart';
 import 'package:assab/features/branch_manager_requests/presentation/cubit/get_handovers/get_handovers_cubit.dart';
 import 'package:assab/features/branch_manager_requests/presentation/cubit/get_handovers/get_handovers_state.dart';
@@ -32,6 +38,7 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/current_shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/progress_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_to_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_cashier_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_time_details_entity.dart';
@@ -52,6 +59,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeRemoteDataSource implements ShiftManagementRemoteDataSource {
   @override
@@ -736,6 +744,194 @@ void main() {
 
       expect(find.byType(FinalHandoverWidget), findsOneWidget);
       expect(find.byType(DropdownButton<String>), findsNothing);
+    });
+  });
+
+  group('Emulator-observed fixes (Items 2-5)', () {
+    testWidgets('Item 2: CashierMyInProgressShiftsDefaultCard displays 0.00 / 10.00 / غير متاح', (tester) async {
+      for (final (double? bal, String expectedText) in [
+        (0.0, '0.00'),
+        (10.0, '10.00'),
+        (null, 'غير متاح'),
+      ]) {
+        final entity = CashierShiftEntity(
+          id: 'in-prog-${bal ?? 'null'}',
+          date: DateTime(2026, 11, 18),
+          status: MyShiftStatusType.inProgress,
+          startTime: '15:00',
+          endTime: '23:59',
+          openingBalance: bal,
+          closingBalance: 0,
+          nextCashier: 'Manager',
+        );
+
+        await tester.pumpWidget(
+          _wrapTestApp(
+            locale: const Locale('ar'),
+            child: SingleChildScrollView(
+              child: CashierMyInProgressShiftsDefaultCard(shift: entity),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('الرصيد الافتتاحي:'), findsOneWidget);
+        expect(find.text(expectedText), findsOneWidget);
+      }
+    });
+
+    test('Item 3: Repeated configureDependencies after getIt.reset does not throw duplicate AddItemCubit', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({});
+      await getIt.reset(dispose: true);
+      await configureDependencies();
+      expect(getIt.isRegistered<AddItemCubit>(), isTrue);
+
+      await getIt.reset(dispose: true);
+      await configureDependencies();
+      expect(getIt.isRegistered<AddItemCubit>(), isTrue);
+      await getIt.reset(dispose: true);
+    });
+
+    testWidgets('Item 4: Long BranchManager recipient name wraps inside Expanded CashierNameAndBranch without overflow', (tester) async {
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('ar'),
+          child: const SizedBox(
+            width: 300,
+            child: Row(
+              children: [
+                SizedBox(width: 40, height: 35),
+                SizedBox(width: 10),
+                Expanded(
+                  child: CashierNameAndBranch(
+                    Name: 'مدير شاورما الأصيل — فرع الروضة (Branch Manager)',
+                    BranchName: 'شاورما الأصيل — فرع الروضة الرئيسي الممتد',
+                  ),
+                ),
+                SizedBox(width: 24, height: 24),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(
+        find.text('مدير شاورما الأصيل — فرع الروضة (Branch Manager)'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Item 5: Arabic RTL summary shows متوازن (not balanced) + المتبقي 20.00 on partial handover only; SalesAndHandoverTab removes riyal icon from people & shows المتبقي', (tester) async {
+      // Case A: Partial handover 70 out of 90 cashCollected -> shows المتبقي 20.00 and متوازن
+      final repoPartial = _MockEndShiftRepo();
+      final cubitPartial = EndShiftCubit(
+        repoPartial,
+        'shift-partial',
+        _makeShiftEntity(openingBalance: 0.0, status: ShiftStatusType.inProgress),
+      );
+      addTearDown(cubitPartial.close);
+
+      await cubitPartial.previewFromSalesInputs(
+        totalSales: '200',
+        countedCash: '90',
+        cardPayments: '110',
+        aggregators: const [],
+        isArabic: true,
+      );
+      cubitPartial.handOverAmount = 70.0;
+
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('ar'),
+          providers: [BlocProvider<EndShiftCubit>.value(value: cubitPartial)],
+          child: const EndShiftWithHandoverSummaryWidget(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('متوازن'), findsOneWidget);
+      expect(find.text('balanced'), findsNothing);
+      expect(find.text('المتبقي'), findsOneWidget);
+      expect(find.text('20.00'), findsOneWidget);
+
+      // Case B: Full handover 90 out of 90 -> hides المتبقي
+      cubitPartial.handOverAmount = 90.0;
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('ar'),
+          providers: [BlocProvider<EndShiftCubit>.value(value: cubitPartial)],
+          child: const EndShiftWithHandoverSummaryWidget(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('المتبقي'), findsNothing);
+
+      // Case C: SalesAndHandoverTabWidget shows المتبقي 20.00 and no Saudi Riyal SVG on handoverTo / next_cashier
+      final shiftDetails = ShiftEntity(
+        id: 'shift-details-2b',
+        shiftDate: '2026-11-18',
+        shiftDateFormatted: '18 Nov, 2026',
+        status: ShiftStatusType.completed,
+        totalSales: 200.0,
+        cashCollected: 90.0,
+        cardPayment: 110.0,
+        deliveryApps: 0.0,
+        vatAmount: 26.09,
+        openingBalance: 0.0,
+        closingBalance: 70.0,
+        handoverAmount: 70.0,
+        variance: 0.0,
+        cashier: ShiftCashierEntity(id: 'c1', name: 'كاشير 1'),
+        nextCashier: ShiftCashierEntity(
+          id: 'm1',
+          name: 'مدير شاورما الأصيل — فرع الروضة (Branch Manager)',
+        ),
+        handoverTo: const HandoverToEntity(
+          id: 'm1',
+          name: 'مدير شاورما الأصيل — فرع الروضة',
+          type: 'branch_manager',
+          email: 'bm@test.sa',
+        ),
+        shiftTimeDetails: ShiftTimeDetailsEntity(
+          startTime: '15:00',
+          endTime: '23:59',
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('ar'),
+          child: Builder(
+            builder: (ctx) => SalesAndHandoverTabWidget(
+              allowScroll: true,
+            ).buildTabContent(ctx, shift: shiftDetails),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('المتبقي'), findsOneWidget);
+      expect(find.text('20.00'), findsOneWidget);
+
+      final handoverToFinder = find.text('مدير شاورما الأصيل — فرع الروضة');
+      expect(handoverToFinder, findsOneWidget);
+      final handoverToRow = find.ancestor(
+        of: handoverToFinder,
+        matching: find.byType(Row),
+      ).first;
+      expect(
+        find.descendant(
+          of: handoverToRow,
+          matching: find.byWidgetPredicate(
+            (w) => w is AppSvg && w.assetName == AppAssets.saudiRiyal,
+          ),
+        ),
+        findsNothing,
+      );
     });
   });
 }

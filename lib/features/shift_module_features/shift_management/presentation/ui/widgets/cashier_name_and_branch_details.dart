@@ -20,11 +20,20 @@ class CashierNameAndBranch extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
-        Text(Name, style: AppStyles.s15W500),
+        Text(
+          Name,
+          style: AppStyles.s15W500,
+          softWrap: true,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
 
         Text(
           BranchName,
           style: AppStyles.s11W500.copyWith(color: context.customColor.text3),
+          softWrap: true,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
 
         if (ShiftCount != null)

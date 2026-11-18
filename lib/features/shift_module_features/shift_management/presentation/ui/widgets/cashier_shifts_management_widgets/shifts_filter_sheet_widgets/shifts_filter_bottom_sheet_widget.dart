@@ -539,9 +539,11 @@ Widget openNextCashierSelector(BuildContext context) {
 
                                         10.horizontalSpace,
 
-                                        CashierNameAndBranch(
-                                          Name: cashier.name,
-                                          BranchName: cashier.branchName,
+                                        Expanded(
+                                          child: CashierNameAndBranch(
+                                            Name: cashier.name,
+                                            BranchName: cashier.branchName,
+                                          ),
                                         ),
                                       ],
                                     ),

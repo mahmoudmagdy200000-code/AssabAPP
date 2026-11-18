@@ -95,7 +95,8 @@ Future<void> initializeApp() async {
     AppLogger.log('Orientation setup failed ($e) — continuing.', tag: 'initializeApp');
   }
 
-  // 2. Dependency injection: essential core setup
+  // 2. Dependency injection: reset before configuring so Retry after a timeout never hits duplicate registrations
+  await getIt.reset(dispose: true);
   await configureDependencies();
 
   // 3. Optional services and fast local auth check with individual timeouts
