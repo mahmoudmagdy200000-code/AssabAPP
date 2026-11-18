@@ -46,10 +46,18 @@ class IWasResponsibleVarianceStrategyUi extends VarianceUiStrategy {
                   buildShiftCardRowWidget(
                     context: context,
                     firstTitleSvgAsset: AppAssets.cash,
-                    value: (context.read<EndShiftCubit>().cashGiven)
-                        .toStringAsFixed(2),
+                    value: formatOpeningBalanceDisplay(
+                      context,
+                      context.read<EndShiftCubit>().openingBalanceForDisplay,
+                    ),
                     title: context.tr.cash_given,
-                    firstValueSvgAsset: AppAssets.saudiRiyal,
+                    firstValueSvgAsset:
+                        context
+                                .read<EndShiftCubit>()
+                                .openingBalanceForDisplay ==
+                            null
+                        ? null
+                        : AppAssets.saudiRiyal,
                     hasSpaceBetweenTitleAndValue: true,
                   ),
                 ],
@@ -189,10 +197,18 @@ class MeAndOrVarianceStrategyUi extends VarianceUiStrategy {
                   buildShiftCardRowWidget(
                     context: context,
                     firstTitleSvgAsset: AppAssets.cash,
-                    value: (context.read<EndShiftCubit>().cashGiven)
-                        .toStringAsFixed(2),
+                    value: formatOpeningBalanceDisplay(
+                      context,
+                      context.read<EndShiftCubit>().openingBalanceForDisplay,
+                    ),
                     title: context.tr.cash_given,
-                    firstValueSvgAsset: AppAssets.saudiRiyal,
+                    firstValueSvgAsset:
+                        context
+                                .read<EndShiftCubit>()
+                                .openingBalanceForDisplay ==
+                            null
+                        ? null
+                        : AppAssets.saudiRiyal,
                     hasSpaceBetweenTitleAndValue: true,
                   ),
                 ],
@@ -401,10 +417,18 @@ class OtherFactorVarianceStrategyUi extends VarianceUiStrategy {
                   buildShiftCardRowWidget(
                     context: context,
                     firstTitleSvgAsset: AppAssets.cash,
-                    value: (context.read<EndShiftCubit>().cashGiven)
-                        .toStringAsFixed(2),
+                    value: formatOpeningBalanceDisplay(
+                      context,
+                      context.read<EndShiftCubit>().openingBalanceForDisplay,
+                    ),
                     title: context.tr.cash_given,
-                    firstValueSvgAsset: AppAssets.saudiRiyal,
+                    firstValueSvgAsset:
+                        context
+                                .read<EndShiftCubit>()
+                                .openingBalanceForDisplay ==
+                            null
+                        ? null
+                        : AppAssets.saudiRiyal,
                     hasSpaceBetweenTitleAndValue: true,
                   ),
                 ],
@@ -599,10 +623,18 @@ class MixedFactorVarianceStrategyUi extends VarianceUiStrategy {
                   buildShiftCardRowWidget(
                     context: context,
                     firstTitleSvgAsset: AppAssets.cash,
-                    value: (context.read<EndShiftCubit>().cashGiven)
-                        .toStringAsFixed(2),
+                    value: formatOpeningBalanceDisplay(
+                      context,
+                      context.read<EndShiftCubit>().openingBalanceForDisplay,
+                    ),
                     title: context.tr.cash_given,
-                    firstValueSvgAsset: AppAssets.saudiRiyal,
+                    firstValueSvgAsset:
+                        context
+                                .read<EndShiftCubit>()
+                                .openingBalanceForDisplay ==
+                            null
+                        ? null
+                        : AppAssets.saudiRiyal,
                     hasSpaceBetweenTitleAndValue: true,
                   ),
                 ],

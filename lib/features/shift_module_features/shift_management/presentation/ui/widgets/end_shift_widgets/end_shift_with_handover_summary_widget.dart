@@ -24,10 +24,45 @@ class EndShiftWithHandoverSummaryWidget extends StatelessWidget {
       child: AppPaddingWidget(
         right: 5.w,
         left: 5.w,
-        child:
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary(
               aggregators: context.watch<EndShiftCubit>().aggregators,
             ),
+            if (context.watch<EndShiftCubit>().confirmedOpeningCash == null) ...[
+              10.verticalSpace,
+              SummarizeCardWidget(
+                height: 90.h,
+                children: [
+                  Text(
+                    context.tr.openingBalanceTitle,
+                    style: AppStyles.s14W500.copyWith(
+                      color: context.customColor.text1,
+                    ),
+                  ),
+                  buildShiftCardRowWidget(
+                    context: context,
+                    firstTitleSvgAsset: AppAssets.cash,
+                    value: formatOpeningBalanceDisplay(
+                      context,
+                      context.watch<EndShiftCubit>().openingBalanceForDisplay,
+                    ),
+                    title: context.tr.cash_given,
+                    firstValueSvgAsset:
+                        context
+                                .watch<EndShiftCubit>()
+                                .openingBalanceForDisplay ==
+                            null
+                        ? null
+                        : AppAssets.saudiRiyal,
+                    hasSpaceBetweenTitleAndValue: true,
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -252,10 +287,10 @@ class SalesBreakDownAndHandOverAmountWidgetForEndShiftWithHandoverSummary
                       context: context,
                       firstTitleSvgAsset: AppAssets.cash,
                       title: context.tr.openingBalanceTitle,
-                      value: context
-                          .watch<EndShiftCubit>()
-                          .confirmedOpeningCash!
-                          .toStringAsFixed(2),
+                      value: formatOpeningBalanceDisplay(
+                        context,
+                        context.watch<EndShiftCubit>().confirmedOpeningCash,
+                      ),
                       firstValueSvgAsset: AppAssets.saudiRiyal,
                       hasSpaceBetweenTitleAndValue: true,
                     ),

@@ -11,7 +11,7 @@ extension CashierInProgressShiftMapper on CashierInProgressShiftModel {
       startTime: startTime,
       endTime: endTime,
       closingBalance: closingBalance ?? 0,
-      openingBalance: openingBalance ?? 0,
+      openingBalance: openingBalance,
       nextCashier: nextCashier,
       isNextShift: false,
     );

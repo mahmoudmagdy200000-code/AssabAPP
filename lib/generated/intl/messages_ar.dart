@@ -6162,6 +6162,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unauthorized_error_desc": MessageLookupByLibrary.simpleMessage(
       "غير مصرح لك بتنفيذ هذا الإجراء. الرجاء تسجيل الدخول مرة أخرى.",
     ),
+    "unavailable": MessageLookupByLibrary.simpleMessage("غير متاح"),
     "underMaintenance": MessageLookupByLibrary.simpleMessage("تحت الصيانة"),
     "understandTheDifferenceBetweenYourMoneyAndProfits":
         MessageLookupByLibrary.simpleMessage("افهم الفرق بين أموالك وأرباحك"),

@@ -6301,6 +6301,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unauthorized_error_desc": MessageLookupByLibrary.simpleMessage(
       "You are not authorized to perform this action. Please log in again.",
     ),
+    "unavailable": MessageLookupByLibrary.simpleMessage("Unavailable"),
     "underMaintenance": MessageLookupByLibrary.simpleMessage(
       "Under Maintenance",
     ),

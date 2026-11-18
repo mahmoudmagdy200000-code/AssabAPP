@@ -15,7 +15,7 @@ CashierPendingShiftModel _$CashierPendingShiftModelFromJson(
   statusLabel: (json['status_label'] as String?) ?? '',
   startTime: (json['start_time'] as String?) ?? '',
   endTime: (json['end_time'] as String?) ?? '',
-  openingBalance: (json['opening_balance'] as num?)?.toInt() ?? 0,
+  openingBalance: openingBalanceFromJson(json['opening_balance']),
   cashGiven: (json['cash_given'] as num?)?.toInt() ?? 0,
   variance: (json['variance'] as num?)?.toInt() ?? 0,
   cashFrom: CashierShiftUserModel.tryFromJson(json['cash_from']),

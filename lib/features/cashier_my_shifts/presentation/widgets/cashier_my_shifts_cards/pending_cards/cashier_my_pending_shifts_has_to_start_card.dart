@@ -178,9 +178,13 @@ class _CashierMyPendingShiftsHasToStartCardState
               context: context,
               firstTitleSvgAsset: AppAssets.cash,
               title: context.tr.openingBalance,
-              value: widget.shift.openingBalance == 0
-                  ? context.tr.not_recorded_yet
-                  : widget.shift.openingBalance.toString(),
+              value: formatOpeningBalanceDisplay(
+                context,
+                widget.shift.openingBalance,
+              ),
+              firstValueSvgAsset: widget.shift.openingBalance == null
+                  ? null
+                  : AppAssets.saudiRiyal,
             ),
 
             12.verticalSpace,

@@ -760,7 +760,10 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
 
   set varianceAmount(double value) {}
 
-  double get cashGiven => _cashGiven;
+  double? get openingBalanceForDisplay =>
+      confirmedOpeningCash ?? shift?.openingBalance;
+
+  double get cashGiven => openingBalanceForDisplay ?? _cashGiven;
 
   double get totalSales => _totalSales;
 

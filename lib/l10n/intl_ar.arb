@@ -497,6 +497,7 @@
   "totalGroupedInvoice": "إجمالي الفاتورة المجمعة",
   "attachments": "المرفقات",
   "not_recorded_yet": "لم يتم تسجيلها بعد",
+  "unavailable": "غير متاح",
   "start_time": "وقت البدء:",
   "end_time": "وقت الانتهاء:",
   "end": "النهاية:",

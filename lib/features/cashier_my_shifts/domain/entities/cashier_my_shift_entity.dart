@@ -10,7 +10,7 @@ class CashierShiftEntity {
   final MyShiftStatusType status;
   final String startTime;
   final String endTime;
-  final int? openingBalance;
+  final double? openingBalance;
   final int? closingBalance;
   final String? nextCashier;
   final CashierUserObjectEntity? assignedTo;

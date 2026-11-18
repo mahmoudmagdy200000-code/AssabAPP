@@ -101,9 +101,10 @@ class SalesAndHandoverTabWidget implements ShiftTabStrategy {
                     ShiftDetailsRowWidget(
                       iconSVGAsset: AppAssets.cash,
                       title: context.tr.cash_given,
-                      value: shift.openingBalance == null
-                          ? context.tr.not_recorded_yet
-                          : shift.openingBalance.toString(),
+                      value: formatOpeningBalanceDisplay(
+                        context,
+                        shift.openingBalance,
+                      ),
                     ),
                   ],
                 ),

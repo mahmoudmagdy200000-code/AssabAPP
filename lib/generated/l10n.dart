@@ -3504,6 +3504,11 @@ class S {
     );
   }
 
+  /// `Unavailable`
+  String get unavailable {
+    return Intl.message('Unavailable', name: 'unavailable', desc: '', args: []);
+  }
+
   /// `Start time:`
   String get start_time {
     return Intl.message('Start time:', name: 'start_time', desc: '', args: []);

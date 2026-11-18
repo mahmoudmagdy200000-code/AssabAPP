@@ -1,10 +1,18 @@
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
+import 'package:assab/core/utils/currency_normalizer.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../../../core/styles/app_styles.dart';
 import '../../../../../../../../core/widgets/app_svg.dart';
 import '../../../../../domain/entity/shift/shift_entity.dart';
+
+/// Formats a shift's opening cash balance without conflating valid `0.00`
+/// with missing/unconfirmed `null` (`unavailable` / «غير متاح»).
+String formatOpeningBalanceDisplay(BuildContext context, num? openingBalance) {
+  if (openingBalance == null) return context.tr.unavailable;
+  return CurrencyNormalizer.formatSar(openingBalance);
+}
 
 abstract class ShiftCardStrategy {
   Widget buildCard(BuildContext context, ShiftEntity shift);

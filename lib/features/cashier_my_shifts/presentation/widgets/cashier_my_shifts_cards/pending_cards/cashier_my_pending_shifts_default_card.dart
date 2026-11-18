@@ -129,10 +129,8 @@ class _CashierMyPendingShiftsDefaultCardState
             buildShiftCardRowWidget(
               context: context,
               title: context.tr.openingBalance,
-              value: shift.openingBalance == 0
-                  ? context.tr.not_recorded_yet
-                  : shift.openingBalance.toString(),
-              firstValueSvgAsset: shift.openingBalance == 0
+              value: formatOpeningBalanceDisplay(context, shift.openingBalance),
+              firstValueSvgAsset: shift.openingBalance == null
                   ? null
                   : AppAssets.saudiRiyal,
             ),
