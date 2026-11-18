@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/constants/app_assets.dart';
@@ -7,7 +5,6 @@ import '../../../../../../core/extensions/build_context_extensions.dart';
 import '../../../../../../core/extensions/number_extensions.dart';
 import '../../../../../../core/styles/app_colors.dart';
 import '../../../../../../core/styles/app_styles.dart';
-import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/custom_divider.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/shift_card.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/shift_details_widgets/see_details_button_widget.dart';
@@ -15,75 +12,15 @@ import '../../../../domain/entities/cashier_my_shift_entity.dart';
 import '../../../formatter/cashier_shift_date_formatter.dart';
 import '../../../formatter/cashier_shift_time_formatter.dart';
 import '../card_label_widget.dart';
+import 'pending_start_button_section.dart';
 
-class CashierMyPendingShiftsDefaultCard extends StatefulWidget {
+class CashierMyPendingShiftsDefaultCard extends StatelessWidget {
   const CashierMyPendingShiftsDefaultCard({super.key, required this.shift});
 
   final CashierShiftEntity shift;
 
   @override
-  State<CashierMyPendingShiftsDefaultCard> createState() =>
-      _CashierMyPendingShiftsDefaultCardState();
-}
-
-class _CashierMyPendingShiftsDefaultCardState
-    extends State<CashierMyPendingShiftsDefaultCard> {
-  Timer? _timer;
-  late ShiftStartWindowStatus _windowStatus;
-
-  @override
-  void initState() {
-    super.initState();
-    _evaluateWindow();
-    _startTimer();
-  }
-
-  @override
-  void didUpdateWidget(CashierMyPendingShiftsDefaultCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.shift.date != oldWidget.shift.date ||
-        widget.shift.startTime != oldWidget.shift.startTime ||
-        widget.shift.endTime != oldWidget.shift.endTime) {
-      _evaluateWindow();
-    }
-  }
-
-  void _evaluateWindow() {
-    _windowStatus = ShiftStartWindowHelper.evaluate(
-      shiftDate: widget.shift.date,
-      startTime: widget.shift.startTime,
-      endTime: widget.shift.endTime,
-    );
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final updated = ShiftStartWindowHelper.evaluate(
-        shiftDate: widget.shift.date,
-        startTime: widget.shift.startTime,
-        endTime: widget.shift.endTime,
-      );
-      if (updated.canStart != _windowStatus.canStart ||
-          updated.disabledReason != _windowStatus.disabledReason) {
-        if (mounted) {
-          setState(() {
-            _windowStatus = updated;
-          });
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final shift = widget.shift;
-    final windowStatus = _windowStatus;
 
     return Container(
       margin: EdgeInsetsDirectional.only(bottom: 10.h),
@@ -151,33 +88,12 @@ class _CashierMyPendingShiftsDefaultCardState
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      AppButton(
-                        padding: EdgeInsets.all(15.w),
-                        borderRadius: BorderRadius.circular(12.r),
-                        onClick: () {},
-                        text: context.tr.start_shift,
-                        isFlexible: true,
-                        isTransparent: !windowStatus.canStart,
-                        borderColor: context.customColor.border,
-                        enabled: windowStatus.canStart,
-                      ),
-                      if (!windowStatus.canStart && windowStatus.disabledReason != null) ...[
-                        4.verticalSpace,
-                        Text(
-                          windowStatus.disabledReason!,
-                          style: AppStyles.s10W400.copyWith(color: context.customColor.error),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
+                  child: PendingStartButtonSection(
+                    shift: shift,
+                    isFlexible: true,
                   ),
                 ),
                 12.horizontalSpace,

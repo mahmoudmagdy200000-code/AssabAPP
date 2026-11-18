@@ -53,6 +53,9 @@ class CashierPendingShiftModel {
   @JsonKey(name: 'can_start')
   final bool canStart;
 
+  @JsonKey(name: 'start_disabled_reason')
+  final String? startDisabledReason;
+
   final CashierPendingShiftActionsModel actions;
 
   const CashierPendingShiftModel({
@@ -73,6 +76,7 @@ class CashierPendingShiftModel {
     required this.assignedByUserType,
     required this.isNextShift,
     required this.canStart,
+    this.startDisabledReason,
     required this.actions,
   });
 

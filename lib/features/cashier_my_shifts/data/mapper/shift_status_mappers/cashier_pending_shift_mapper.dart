@@ -14,6 +14,8 @@ extension CashierPendingShiftMapper on CashierPendingShiftModel {
       openingBalance: openingBalance,
       nextCashier: nextCashier,
       isNextShift: isNextShift,
+      canStart: canStart,
+      startDisabledReason: startDisabledReason,
       handoverTo: handoverTo?.toEntity(),
       variance: variance,
       cashGiven: cashGiven,

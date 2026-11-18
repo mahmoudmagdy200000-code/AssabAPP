@@ -27,6 +27,9 @@ class HandoversResponseItem {
   final String variance;
   final num varianceAmount;
   final String cashFrom;
+  final String? handoverToId;
+  final String? handoverToName;
+  final String? receiptId;
   final String? acceptanceMessage;
   final String? responsibilityReviewedAt;
   final bool? isIncoming;
@@ -42,6 +45,9 @@ class HandoversResponseItem {
     required this.variance,
     required this.varianceAmount,
     required this.cashFrom,
+    this.handoverToId,
+    this.handoverToName,
+    this.receiptId,
     required this.acceptanceMessage,
     this.responsibilityReviewedAt,
     this.isIncoming,
@@ -60,6 +66,9 @@ class HandoversResponseItem {
       variance: (json['variance'] ?? '').toString(),
       varianceAmount: json['variance_amount'] is num ? (json['variance_amount'] as num) : (num.tryParse(json['variance_amount']?.toString() ?? '') ?? 0),
       cashFrom: (json['cash_from'] ?? 'N/A').toString(),
+      handoverToId: json['handover_to_id']?.toString(),
+      handoverToName: json['handover_to_name'] as String?,
+      receiptId: json['receipt_id']?.toString(),
       acceptanceMessage: json['acceptance_message'] as String?,
       isIncoming: json['is_incoming'] as bool?,
       isOutgoing: json['is_outgoing'] as bool?,

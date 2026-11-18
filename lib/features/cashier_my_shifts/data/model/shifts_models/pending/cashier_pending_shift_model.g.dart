@@ -26,6 +26,7 @@ CashierPendingShiftModel _$CashierPendingShiftModelFromJson(
   assignedByUserType: (json['assigned_by_user_type'] as String?) ?? '',
   isNextShift: json['is_next_shift'] as bool? ?? false,
   canStart: json['can_start'] as bool? ?? false,
+  startDisabledReason: json['start_disabled_reason'] as String?,
   actions: json['actions'] is Map<String, dynamic>
       ? CashierPendingShiftActionsModel.fromJson(
           json['actions'] as Map<String, dynamic>,
@@ -56,6 +57,7 @@ Map<String, dynamic> _$CashierPendingShiftModelToJson(
   'assigned_by_user_type': instance.assignedByUserType,
   'is_next_shift': instance.isNextShift,
   'can_start': instance.canStart,
+  'start_disabled_reason': instance.startDisabledReason,
   'actions': instance.actions,
 };
 

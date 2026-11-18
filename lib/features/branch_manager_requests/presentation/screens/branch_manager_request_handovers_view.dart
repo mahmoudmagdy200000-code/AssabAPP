@@ -1,3 +1,5 @@
+import 'package:assab/core/routing/app_route_name.dart';
+import 'package:assab/core/services/navigation/navigation_service.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
@@ -145,6 +147,18 @@ class _BranchManagerRequestHandoversViewState
                         title: context.tr.cashFrom,
                         value: orders[index].cashFrom,
                       ),
+                      if (orders[index].receiptId != null &&
+                          orders[index].receiptId!.isNotEmpty)
+                        _buildRowItem(
+                          context: context,
+                          asset: AppAssets.clockSvg,
+                          title: Localizations.localeOf(context)
+                                  .languageCode
+                                  .startsWith('en')
+                              ? 'Receipt ID'
+                              : 'رقم الإيصال',
+                          value: orders[index].receiptId!,
+                        ),
                       if (orders[index].status != HandoverStatus.pending)
                         Container(
                           width: double.infinity,
@@ -239,33 +253,27 @@ class _BranchManagerRequestHandoversViewState
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 8.h),
                             child: Text(
-                              context.tr.waitingForYourApproval,
+                              Localizations.localeOf(context)
+                                      .languageCode
+                                      .startsWith('en')
+                                  ? 'Awaiting confirmation from designated recipient'
+                                  : 'بانتظار اعتماد المستلم المحدد',
                               textAlign: TextAlign.center,
                               style: AppStyles.s13W500.copyWith(
                                 color: context.customColor.text2,
                               ),
                             ),
                           ),
-                      if (orders[index].status == HandoverStatus.rejected)
+                      if (orders[index].status == HandoverStatus.rejected ||
+                          orders[index].status == HandoverStatus.rejectedFinal)
                         AppButton(
                           onClick: () {
-                            AppBottomSheet.showModal(
-                              context,
-                              (sheetContext) => BlocProvider(
-                                create: (sheetContext) =>
-                                    getIt<ApproveAndRejectHandoverCubit>(),
-                                child: AcceptHandoverSheetWidget(
-                                  shiftId: orders[index].id,
-                                  cashFrom: orders[index].cashFrom,
-                                  cashGiven: orders[index].cashGiven == null ? '' : CurrencyNormalizer.formatSar(orders[index].cashGiven!),
-                                  variance: orders[index].variance,
-                                  actorRole: _effectiveRole ?? UserType.branchManager,
-                                  successFunction: () {
-                                    _getHandovers(loadMore: false);
-                                  },
-                                ),
-                              ),
-                              isScrollControlled: true,
+                            NavigationService.I.pushNamed(
+                              AppRouteName.shiftDetailsScreen,
+                              arguments: {
+                                'shiftId': orders[index].id,
+                                'isNavigatedFromCashier': false,
+                              },
                             );
                           },
                           text: context.tr.seeDetails,

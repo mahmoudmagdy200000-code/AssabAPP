@@ -1,3 +1,4 @@
+import 'package:assab/core/cubits/paging_cubit/paging_cubit.dart';
 import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'dart:async';
@@ -11,16 +12,17 @@ import '../../../../../../core/extensions/number_extensions.dart';
 import '../../../../../../core/styles/app_colors.dart';
 import '../../../../../../core/styles/app_styles.dart';
 import '../../../../../../core/utils/app_dialog.dart';
-import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_button_loading.dart';
 import '../../../../../../core/widgets/custom_divider.dart';
 import '../../../../../shift_module_features/shift_management/presentation/logic/cashier/start_cashier_shift_cubit.dart';
 import '../../../../../shift_module_features/shift_management/presentation/ui/widgets/cashier_shifts_management_widgets/shift_card_widgets/shift_card.dart';
 import '../../../../domain/entities/cashier_my_shift_entity.dart';
+import '../../../../domain/enums/my_shifts_status.dart';
 import '../../../cubits/cashier_my_shifts_cubit.dart';
 import '../../../formatter/cashier_shift_date_formatter.dart';
 import '../../../formatter/cashier_shift_time_formatter.dart';
 import '../card_label_widget.dart';
+import 'pending_start_button_section.dart';
 
 class CashierMyPendingShiftsHasToStartCard extends StatefulWidget {
   const CashierMyPendingShiftsHasToStartCard({super.key, required this.shift});
@@ -132,23 +134,29 @@ class _CashierMyPendingShiftsHasToStartCardState
             ValueListenableBuilder<Duration>(
               valueListenable: remainingNotifier,
               builder: (_, value, _) {
+                final lang = Localizations.localeOf(context).languageCode;
+                final isEn = lang.toLowerCase().startsWith('en');
                 final windowStatus = ShiftStartWindowHelper.evaluate(
                   shiftDate: widget.shift.date,
                   startTime: widget.shift.startTime,
                   endTime: widget.shift.endTime,
+                  languageCode: lang,
                 );
 
                 String secondTitle;
                 String secondValue;
-                if (windowStatus.canStart) {
-                  secondTitle = 'متاحة للبدء';
-                  secondValue = '(النافذة مفتوحة)';
+                if (widget.shift.status == MyShiftStatusType.reassigned) {
+                  secondTitle = isEn ? 'Acceptance required' : 'يتطلب القبول';
+                  secondValue = isEn ? '(Reassigned)' : '(معاد إسنادها)';
+                } else if (windowStatus.canStart) {
+                  secondTitle = isEn ? 'Ready to start' : 'متاحة للبدء';
+                  secondValue = isEn ? '(Window open)' : '(النافذة مفتوحة)';
                 } else if (ShiftStartWindowHelper.now.isBefore(windowStatus.windowOpensAt)) {
                   secondTitle = formatDuration(value);
                   secondValue = context.tr.toStart;
                 } else {
-                  secondTitle = 'مغلقة';
-                  secondValue = '(انتهت النافذة)';
+                  secondTitle = isEn ? 'Closed' : 'مغلقة';
+                  secondValue = isEn ? '(Window ended)' : '(انتهت النافذة)';
                 }
 
                 return buildShiftCardRowWidget(
@@ -256,12 +264,6 @@ class _CashierMyPendingShiftsHasToStartCardState
             ValueListenableBuilder<Duration>(
               valueListenable: remainingNotifier,
               builder: (_, value, _) {
-                final windowStatus = ShiftStartWindowHelper.evaluate(
-                  shiftDate: widget.shift.date,
-                  startTime: widget.shift.startTime,
-                  endTime: widget.shift.endTime,
-                );
-
                 // StartCashierShiftCubit
                 return BlocConsumer<
                   StartCashierShiftCubit,
@@ -273,6 +275,9 @@ class _CashierMyPendingShiftsHasToStartCardState
                       context
                           .read<CashierMyShiftsCubit>()
                           .getInProgressShifts();
+                      try {
+                        context.read<PagingCubit>().goToStep(1);
+                      } catch (_) {}
                     } else if (state is StartCashierShiftFailure) {
                       AppDialog.showErrorDialog(
                         context: context,
@@ -284,37 +289,14 @@ class _CashierMyPendingShiftsHasToStartCardState
                     if (state is StartCashierShiftLoading) {
                       return const AppButtonLoading();
                     }
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        AppButton(
-                          padding: EdgeInsets.all(15.w),
-                          borderRadius: BorderRadius.circular(12.r),
-                          onClick: () {
-                            if (windowStatus.canStart) {
-                              context.read<StartCashierShiftCubit>().startShift(
-                                shiftId: widget.shift.id,
-                                actorRole: UserType.cashier,
-                              );
-                            }
-                          },
-                          text: context.tr.start_shift,
-                          isTransparent: !windowStatus.canStart,
-                          borderColor: context.customColor.border,
-                          enabled: windowStatus.canStart,
-                        ),
-                        if (!windowStatus.canStart && windowStatus.disabledReason != null) ...[
-                          6.verticalSpace,
-                          Text(
-                            windowStatus.disabledReason!,
-                            style: AppStyles.s10W400.copyWith(color: context.customColor.error),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
+                    return PendingStartButtonSection(
+                      shift: widget.shift,
+                      onStartPressed: () {
+                        context.read<StartCashierShiftCubit>().startShift(
+                          shiftId: widget.shift.id,
+                          actorRole: UserType.cashier,
+                        );
+                      },
                     );
                   },
                 );

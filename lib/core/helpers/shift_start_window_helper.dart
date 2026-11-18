@@ -73,8 +73,10 @@ class ShiftStartWindowHelper {
     required String? startTime,
     required String? endTime,
     DateTime? now,
+    String languageCode = 'ar',
   }) {
     final current = now ?? ShiftStartWindowHelper.now;
+    final isEn = languageCode.toLowerCase().startsWith('en');
 
     DateTime? baseDate;
     if (shiftDate is DateTime) {
@@ -115,7 +117,9 @@ class ShiftStartWindowHelper {
       final opensFormatted = _formatTime(windowOpensAt);
       return ShiftStartWindowStatus(
         canStart: false,
-        disabledReason: 'تفتح نافذة البدء الساعة $opensFormatted',
+        disabledReason: isEn
+            ? 'Start window opens at $opensFormatted'
+            : 'تفتح نافذة البدء الساعة $opensFormatted',
         windowOpensAt: windowOpensAt,
         windowClosesAt: windowClosesAt,
         scheduledStart: scheduledStart,
@@ -127,7 +131,9 @@ class ShiftStartWindowHelper {
       final closesFormatted = _formatTime(windowClosesAt);
       return ShiftStartWindowStatus(
         canStart: false,
-        disabledReason: 'انتهت نافذة بدء الوردية (أُغلقت $closesFormatted)',
+        disabledReason: isEn
+            ? 'Shift start window has ended (closed at $closesFormatted)'
+            : 'انتهت نافذة بدء الوردية (أُغلقت $closesFormatted)',
         windowOpensAt: windowOpensAt,
         windowClosesAt: windowClosesAt,
         scheduledStart: scheduledStart,
@@ -143,6 +149,74 @@ class ShiftStartWindowHelper {
       scheduledStart: scheduledStart,
       scheduledEnd: scheduledEnd,
     );
+  }
+
+  /// Resolves unified pending-shift start eligibility from shift order, acceptance state,
+  /// time window, and server rules, returning a localized reason when disabled.
+  static ({bool canStart, String? reason, ShiftStartWindowStatus windowStatus})
+      resolvePendingStartEligibility({
+    required dynamic shiftDate,
+    required String? startTime,
+    required String? endTime,
+    required bool isNextShift,
+    bool isReassigned = false,
+    bool? serverCanStart,
+    String? serverDisabledReason,
+    DateTime? now,
+    String languageCode = 'ar',
+  }) {
+    final isEn = languageCode.toLowerCase().startsWith('en');
+    final windowStatus = evaluate(
+      shiftDate: shiftDate,
+      startTime: startTime,
+      endTime: endTime,
+      now: now,
+      languageCode: languageCode,
+    );
+
+    if (isReassigned) {
+      return (
+        canStart: false,
+        reason: isEn
+            ? 'Shift reassignment must be accepted first'
+            : 'يجب قبول تكليف الوردية أولاً',
+        windowStatus: windowStatus,
+      );
+    }
+
+    if (!isNextShift) {
+      return (
+        canStart: false,
+        reason: isEn
+            ? 'Not this shift’s turn yet — start the earlier shift first'
+            : 'لم يحن دور الوردية بعد؛ يرجى بدء الوردية السابقة أولاً',
+        windowStatus: windowStatus,
+      );
+    }
+
+    if (!windowStatus.canStart) {
+      return (
+        canStart: false,
+        reason: windowStatus.disabledReason,
+        windowStatus: windowStatus,
+      );
+    }
+
+    if (serverCanStart == false) {
+      return (
+        canStart: false,
+        reason: (!isEn &&
+                serverDisabledReason != null &&
+                serverDisabledReason.trim().isNotEmpty)
+            ? serverDisabledReason.trim()
+            : (isEn
+                ? 'This shift cannot be started yet'
+                : 'تعذّر بدء هذه الوردية حاليًا'),
+        windowStatus: windowStatus,
+      );
+    }
+
+    return (canStart: true, reason: null, windowStatus: windowStatus);
   }
 
   /// Returns whether a given shiftDate (DateTime or String "YYYY-MM-DD") falls

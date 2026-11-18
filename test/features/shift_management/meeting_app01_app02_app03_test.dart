@@ -1,8 +1,11 @@
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/cubits/add_item/add_item_cubit.dart';
+import 'package:assab/core/cubits/paging_cubit/paging_cubit.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/enums/shift_status/shift_status_type.dart';
+import 'package:assab/core/errors/api_error_model.dart';
+import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/helpers/paginator.dart';
 import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
@@ -12,8 +15,12 @@ import 'package:assab/core/utils/future_api_result.dart';
 import 'package:assab/core/widgets/app_button.dart';
 import 'package:assab/core/widgets/app_responsive_builder.dart';
 import 'package:assab/core/widgets/app_svg.dart';
+import 'package:assab/features/cashier_my_shifts/presentation/cubits/cashier_my_shifts_cubit.dart';
+import 'package:assab/features/cashier_my_shifts/presentation/cubits/cashier_my_shifts_state.dart';
 import 'package:assab/features/cashier_my_shifts/presentation/widgets/cashier_my_shifts_cards/in_progress_cards/cashier_my_in_progress_shifts_default_card.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/historical_final_handover_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/cashier_name_and_branch_details.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/final_handover_widgets/historical_final_handover_sheet_widget.dart';
 import 'package:assab/features/branch_manager_requests/data/models/handovers_response.dart';
 import 'package:assab/features/branch_manager_requests/presentation/cubit/get_handovers/get_handovers_cubit.dart';
 import 'package:assab/features/branch_manager_requests/presentation/cubit/get_handovers/get_handovers_state.dart';
@@ -23,7 +30,6 @@ import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/in_pro
 import 'package:assab/features/cashier_my_shifts/data/model/shifts_models/pending/cashier_pending_shift_model.dart';
 import 'package:assab/features/cashier_my_shifts/domain/entities/cashier_my_shift_entity.dart';
 import 'package:assab/features/cashier_my_shifts/domain/enums/my_shifts_status.dart';
-import 'package:assab/features/cashier_my_shifts/presentation/strategies/cashier_my_shifts_cards_strategy/cashier_shifts_status_strategies/cashier_my_pending_shifts_strategy.dart';
 import 'package:assab/features/cashier_my_shifts/presentation/widgets/cashier_my_shifts_cards/pending_cards/cashier_my_pending_shifts_default_card.dart';
 import 'package:assab/features/cashier_my_shifts/presentation/widgets/cashier_my_shifts_cards/pending_cards/cashier_my_pending_shifts_has_to_start_card.dart';
 import 'package:assab/features/cashier_my_shifts/presentation/widgets/cashier_my_shifts_cards/pending_cards/cashier_my_pending_shifts_with_opening_balance_card.dart';
@@ -111,6 +117,7 @@ class _FakeStartCashierShiftCubit extends Cubit<StartCashierShiftState>
   _FakeStartCashierShiftCubit() : super(StartCashierShiftInitial());
 
   int startShiftCalls = 0;
+  String? lastShiftId;
 
   @override
   Future<void> startShift({
@@ -118,6 +125,29 @@ class _FakeStartCashierShiftCubit extends Cubit<StartCashierShiftState>
     UserType? actorRole,
   }) async {
     startShiftCalls++;
+    lastShiftId = shiftId;
+    emit(StartCashierShiftSuccess());
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _FakeCashierMyShiftsCubit extends Cubit<CashierMyShiftsState>
+    implements CashierMyShiftsCubit {
+  _FakeCashierMyShiftsCubit() : super(CashierMyShiftsState.initial());
+
+  int pendingReloads = 0;
+  int inProgressReloads = 0;
+
+  @override
+  Future<void> getPendingShifts({bool loadMore = false}) async {
+    pendingReloads++;
+  }
+
+  @override
+  Future<void> getInProgressShifts() async {
+    inProgressReloads++;
   }
 
   @override
@@ -540,79 +570,148 @@ void main() {
     });
   });
 
-  group('APP-03 (Read-only repros): Document current behavior without altering lifecycle rules', () {
-    testWidgets('HN-01: Default pending shift card renders active Start Shift inside window with no-op onClick; opening-balance card disables Start Shift', (tester) async {
+  group('APP-03 Approved fixes (HN-01, HN-04, HN-05)', () {
+    testWidgets('HN-01: Eligible next shift starts and switches to In Progress; outside-window & non-next shifts disable with AR/EN reasons', (tester) async {
       final now = DateTime.now();
-      final start = now.subtract(const Duration(minutes: 10));
-      final end = now.add(const Duration(hours: 2));
+      final startOpen = now.subtract(const Duration(minutes: 10));
+      final endOpen = now.add(const Duration(hours: 2));
       String hhmm(DateTime d) =>
           '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-      // Verify test shift window is indeed open right now.
-      final windowStatus = ShiftStartWindowHelper.evaluate(
+      final windowOpen = ShiftStartWindowHelper.evaluate(
         shiftDate: now,
-        startTime: hhmm(start),
-        endTime: hhmm(end),
+        startTime: hhmm(startOpen),
+        endTime: hhmm(endOpen),
         now: now,
       );
-      if (windowStatus.canStart) {
-        final defaultShift = CashierShiftEntity(
-          id: 'non-next-1',
+
+      // 1. Eligible shift inside window starts & switches tab to In Progress (step 1)
+      if (windowOpen.canStart) {
+        final eligible = CashierShiftEntity(
+          id: 'eligible-1',
           date: DateTime(now.year, now.month, now.day),
           status: MyShiftStatusType.pending,
-          startTime: hhmm(start),
-          endTime: hhmm(end),
+          startTime: hhmm(startOpen),
+          endTime: hhmm(endOpen),
+          openingBalance: 0,
+          isNextShift: true,
+          canStart: true,
+        );
+        final laterTurnDefault = CashierShiftEntity(
+          id: 'later-turn-1',
+          date: DateTime(now.year, now.month, now.day),
+          status: MyShiftStatusType.pending,
+          startTime: hhmm(startOpen),
+          endTime: hhmm(endOpen),
           openingBalance: 0,
           isNextShift: false,
+          canStart: false,
         );
-        final withBalanceShift = CashierShiftEntity(
-          id: 'non-next-2',
+        final laterTurnWithBal = CashierShiftEntity(
+          id: 'later-turn-2',
           date: DateTime(now.year, now.month, now.day),
           status: MyShiftStatusType.pending,
-          startTime: hhmm(start),
-          endTime: hhmm(end),
+          startTime: hhmm(startOpen),
+          endTime: hhmm(endOpen),
           openingBalance: 50,
           isNextShift: false,
+          canStart: false,
         );
 
         final fakeStartCubit = _FakeStartCashierShiftCubit();
-        final strategy = CashierMyPendingShiftsStrategy();
-        expect(strategy.buildCard(defaultShift), isA<CashierMyPendingShiftsDefaultCard>());
-        expect(
-          strategy.buildCard(withBalanceShift),
-          isA<CashierMyPendingShiftsWithOpeningBalanceCard>(),
-        );
+        final fakeMyShiftsCubit = _FakeCashierMyShiftsCubit();
+        final pagingCubit = PagingCubit(totalSteps: 4);
+        addTearDown(pagingCubit.close);
+        addTearDown(fakeMyShiftsCubit.close);
 
         await tester.pumpWidget(
           _wrapTestApp(
             locale: const Locale('en'),
-            providers: [BlocProvider<StartCashierShiftCubit>.value(value: fakeStartCubit)],
+            providers: [
+              BlocProvider<StartCashierShiftCubit>.value(value: fakeStartCubit),
+              BlocProvider<CashierMyShiftsCubit>.value(value: fakeMyShiftsCubit),
+              BlocProvider<PagingCubit>.value(value: pagingCubit),
+            ],
             child: Column(
               children: [
-                CashierMyPendingShiftsDefaultCard(shift: defaultShift),
-                CashierMyPendingShiftsWithOpeningBalanceCard(shift: withBalanceShift),
+                CashierMyPendingShiftsHasToStartCard(shift: eligible),
+                CashierMyPendingShiftsDefaultCard(shift: laterTurnDefault),
+                CashierMyPendingShiftsWithOpeningBalanceCard(shift: laterTurnWithBal),
               ],
             ),
           ),
         );
         await tester.pump();
 
-        final startButtons = tester.widgetList<AppButton>(
-          find.byWidgetPredicate((w) => w is AppButton && w.text == 'Start Shift'),
-        ).toList();
-        expect(startButtons, hasLength(2));
-        // Card 1: enabled == true yet onClick is empty () {}, never calls startShift
-        expect(startButtons[0].enabled, isTrue);
-        startButtons[0].onClick();
-        expect(fakeStartCubit.startShiftCalls, 0);
-        // Card 2 (openingBalance != 0 & isNextShift == false): hardcoded enabled: false
-        expect(startButtons[1].enabled, isFalse);
+        final buttons = tester
+            .widgetList<AppButton>(
+              find.byWidgetPredicate((w) => w is AppButton && w.text == 'Start Shift'),
+            )
+            .toList();
+        expect(buttons, hasLength(3));
+        expect(buttons[0].enabled, isTrue);
+        expect(buttons[1].enabled, isFalse);
+        expect(buttons[2].enabled, isFalse);
+        expect(
+          find.text('Not this shift’s turn yet — start the earlier shift first'),
+          findsNWidgets(2),
+        );
+
+        await tester.tap(find.byWidget(buttons[0]));
+        await tester.pump();
+
+        expect(fakeStartCubit.startShiftCalls, 1);
+        expect(fakeStartCubit.lastShiftId, 'eligible-1');
+        expect(fakeMyShiftsCubit.pendingReloads, 1);
+        expect(fakeMyShiftsCubit.inProgressReloads, 1);
+        expect(pagingCubit.state.currentIndex, 1);
       }
+
+      // 2. Outside window (future date) shows localized AR and EN disabled reasons
+      final futureDate = now.add(const Duration(days: 2));
+      final outsideShift = CashierShiftEntity(
+        id: 'outside-window-1',
+        date: DateTime(futureDate.year, futureDate.month, futureDate.day),
+        status: MyShiftStatusType.pending,
+        startTime: '18:00',
+        endTime: '23:00',
+        openingBalance: 0,
+        isNextShift: true,
+        canStart: false,
+        startDisabledReason: 'تفتح نافذة البدء الساعة 16:00',
+      );
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('ar'),
+          providers: [
+            BlocProvider<StartCashierShiftCubit>.value(
+              value: _FakeStartCashierShiftCubit(),
+            ),
+          ],
+          child: CashierMyPendingShiftsHasToStartCard(shift: outsideShift),
+        ),
+      );
+      await tester.pump();
+      expect(find.textContaining('تفتح نافذة البدء الساعة'), findsOneWidget);
+
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('en'),
+          providers: [
+            BlocProvider<StartCashierShiftCubit>.value(
+              value: _FakeStartCashierShiftCubit(),
+            ),
+          ],
+          child: CashierMyPendingShiftsHasToStartCard(shift: outsideShift),
+        ),
+      );
+      await tester.pump();
+      expect(find.textContaining('Start window opens at'), findsOneWidget);
     });
 
-    testWidgets('HN-04: BranchManagerRequestHandoversView hides Accept/Reject when backend HandoverSummaryResource returns can_be_accepted: false', (tester) async {
-      final pendingHandoverFromBackend = HandoversResponseItem.fromJson({
-        'id': 'handover-1',
+    testWidgets('HN-04: BranchManagerRequestHandoversView renders Accept/Reject when can_be_accepted is true, hides them when false, and shows Receipt ID', (tester) async {
+      final pendingActionable = HandoversResponseItem.fromJson({
+        'id': 'handover-actionable',
         'shift_date': '2026-11-18',
         'shift_date_iso': '2026-11-18',
         'status': 'pending',
@@ -621,14 +720,46 @@ void main() {
         'variance_amount': 0,
         'cash_from': 'Ahmed Cashier',
         'acceptance_message': null,
-        // HandoverSummaryResource.php:28-35 checks `$authUser instanceof Cashier`,
-        // yielding false for BranchManager even when handed over to BranchManager.
+        'is_incoming': true,
+        'is_outgoing': false,
+        'can_be_accepted': true,
+      });
+      final approvedWithReceipt = HandoversResponseItem.fromJson({
+        'id': 'handover-approved',
+        'shift_date': '2026-11-18',
+        'shift_date_iso': '2026-11-18',
+        'status': 'approved',
+        'cash_given': 90,
+        'variance': 'balanced',
+        'variance_amount': 0,
+        'cash_from': 'Ahmed Cashier',
+        'receipt_id': 'RCPT-90-XYZ',
+        'responsibility_reviewed_at': '2026-11-18 12:00:00',
+        'acceptance_message': null,
+        'is_incoming': true,
+        'is_outgoing': false,
+        'can_be_accepted': false,
+      });
+      final otherRecipientPending = HandoversResponseItem.fromJson({
+        'id': 'handover-other',
+        'shift_date': '2026-11-18',
+        'shift_date_iso': '2026-11-18',
+        'status': 'pending',
+        'cash_given': 70,
+        'variance': 'balanced',
+        'variance_amount': 0,
+        'cash_from': 'Sara Cashier',
+        'acceptance_message': null,
         'is_incoming': false,
         'is_outgoing': false,
         'can_be_accepted': false,
       });
 
-      final cubit = _MockGetHandoversCubit([pendingHandoverFromBackend]);
+      final cubit = _MockGetHandoversCubit([
+        pendingActionable,
+        approvedWithReceipt,
+        otherRecipientPending,
+      ]);
       final validationCubit = ValidationCubit(requiredFields: const {});
       addTearDown(cubit.close);
       addTearDown(validationCubit.close);
@@ -661,12 +792,20 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Accept'), findsNothing);
-      expect(find.text('Reject'), findsNothing);
-      expect(find.text(S.current.waitingForYourApproval), findsOneWidget);
+      expect(find.text(S.current.acceptHandover), findsOneWidget);
+      expect(find.text(S.current.rejectHandover), findsOneWidget);
+      expect(find.text('RCPT-90-XYZ'), findsOneWidget);
+
+      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Awaiting confirmation from designated recipient'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('HN-05: ManagerMainScreenFinalHandoverTabWidget binds strictly to today currentManagerShift with no historical shift selector', (tester) async {
+    testWidgets('HN-05: ManagerMainScreenFinalHandoverTabWidget adds Previous Final Handovers button and sheet handles data, empty state, and 403 error', (tester) async {
       final todayCompletedShift = ManagerShiftModel.fromJson({
         'id': 'mgr-today',
         'shift_date': '2026-11-18',
@@ -743,7 +882,86 @@ void main() {
       await tester.pump();
 
       expect(find.byType(FinalHandoverWidget), findsOneWidget);
-      expect(find.byType(DropdownButton<String>), findsNothing);
+      expect(find.text('Previous Final Handovers'), findsOneWidget);
+
+      // Case 1: Known date renders Read-Only historical record
+      final sampleRecord = HistoricalFinalHandoverEntity(
+        shiftId: 'hist-1',
+        shiftDate: '2026-11-10',
+        shiftStatus: 'completed',
+        branchName: 'Al Olaya Branch',
+        managerName: 'Manager A',
+        handoverAmount: 200.0,
+        handoverStatus: 'accepted',
+        handoverFrom: 'Manager A',
+        handoverTo: 'Accountant 1',
+        handoverDate: '2026-11-10',
+        handoverTime: '22:10:00',
+        handoverNotes: 'Evening close ok',
+        variance: 0.0,
+        totalSales: 500.0,
+        netSales: 434.78,
+        vatAmount: 65.22,
+        cashCollected: 200.0,
+        cardPayments: 300.0,
+        aggregatorPayments: 0.0,
+        dailyCloseSubmitted: true,
+        cashierBreakdown: const [],
+      );
+
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('en'),
+          child: HistoricalFinalHandoverSheetWidget(
+            key: const ValueKey('known'),
+            initialDate: DateTime(2026, 11, 10),
+            loader: (_) async => ApiResult.success(sampleRecord),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Read Only'), findsOneWidget);
+      expect(find.text('Al Olaya Branch • 2026-11-10'), findsOneWidget);
+      expect(find.text('200.00'), findsWidgets);
+      expect(find.text('500.00'), findsOneWidget);
+
+      // Case 2: Date with no handover renders empty state
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('en'),
+          child: HistoricalFinalHandoverSheetWidget(
+            key: const ValueKey('empty'),
+            initialDate: DateTime(2026, 11, 5),
+            loader: (_) async => ApiResult.success(null),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('No final handover recorded for this date'), findsOneWidget);
+
+      // Case 3: Cross-branch / unauthorized 403 renders failure cleanly
+      await tester.pumpWidget(
+        _wrapTestApp(
+          locale: const Locale('en'),
+          child: HistoricalFinalHandoverSheetWidget(
+            key: const ValueKey('error'),
+            initialDate: DateTime(2026, 11, 10),
+            loader: (_) async => ApiResult.failure(
+              ServerFailure(
+                error: LocalErrorModel(message: 'Forbidden scope'),
+                icon: Icons.error_outline,
+                statusCode: 403,
+                stackTrace: StackTrace.empty,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Forbidden scope'), findsOneWidget);
     });
   });
 

@@ -6,7 +6,11 @@ sealed class ApproveAndRejectHandoverState {}
 final class ApproveAndRejectHandoverInitial
     extends ApproveAndRejectHandoverState {}
 
-final class HandoverActionSuccess extends ApproveAndRejectHandoverState {}
+final class HandoverActionSuccess extends ApproveAndRejectHandoverState {
+  HandoverActionSuccess({this.receiptId});
+
+  final String? receiptId;
+}
 
 final class HandoverActionLoading extends ApproveAndRejectHandoverState {}
 
