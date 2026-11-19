@@ -44,6 +44,7 @@ import 'package:assab/features/shift_module_features/shift_management/domain/ent
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_handover_outcome_status.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/add_cashier/add_cashier_cubit.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/logic/cashier/start_cashier_shift_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/manager_shift/end_manager_shift/end_manager_shift_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/end_shift/end_shift_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/screens/add_cashier_screen.dart';
@@ -717,6 +718,7 @@ class AppRouter {
                   param2: isCashier ?? false,
                 ),
               ),
+              BlocProvider(create: (context) => getIt<StartCashierShiftCubit>()),
               BlocProvider(create: (context) => PagingCubit(totalSteps: 3)),
             ],
             child: const ShiftDetailsScreen(),

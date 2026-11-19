@@ -506,9 +506,20 @@ class ShiftManagementRepositoryImp
     });
   }
 
-  FutureApiResult startShiftByManager(String shiftId) async {
+  FutureApiResult startShiftByManager(
+    String shiftId, {
+    String? lateStartReason,
+  }) async {
     return execute(() async {
-      await _remoteDataSource.startShiftByManager(shiftId: shiftId);
+      final trimmedReason = lateStartReason?.trim();
+      if (trimmedReason != null && trimmedReason.isNotEmpty) {
+        await _remoteDataSource.startLateShiftByManager(
+          shiftId: shiftId,
+          body: {'late_start_reason': trimmedReason},
+        );
+      } else {
+        await _remoteDataSource.startShiftByManager(shiftId: shiftId);
+      }
       return true;
     });
   }

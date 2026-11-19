@@ -35,6 +35,15 @@ extension ShiftModelMapper on ShiftModel {
       nextCashier: nextCashier?.toEntity(),
       reassignment: reassignment?.toEntity(),
       handoverAmount: 0,
+      canStart: canStart,
+      canStartNormal: canStartNormal,
+      canStartLate: canStartLate,
+      isLateStart: isLateStart,
+      requiresManagerAuthorization: requiresManagerAuthorization,
+      isNextShift: isNextShift,
+      windowPhase: windowPhase,
+      startDisabledReason: startDisabledReason,
+      startDisabledCode: startDisabledCode,
     );
   }
 }
@@ -85,6 +94,15 @@ extension ShiftDetailsModelMapper on ShiftDetailsModel {
               ?.map((e) => e.toEntity())
               .fold(0.0, (sum, item) => (sum ?? 0) + item.amount) ??
           0,
+      canStart: canStart,
+      canStartNormal: canStartNormal,
+      canStartLate: canStartLate,
+      isLateStart: isLateStart,
+      requiresManagerAuthorization: requiresManagerAuthorization,
+      isNextShift: isNextShift,
+      windowPhase: windowPhase,
+      startDisabledReason: startDisabledReason,
+      startDisabledCode: startDisabledCode,
     );
   }
 }

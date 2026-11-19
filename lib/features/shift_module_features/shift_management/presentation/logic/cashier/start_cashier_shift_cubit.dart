@@ -44,6 +44,26 @@ class StartCashierShiftCubit extends SafeCubit<StartCashierShiftState> {
     );
   }
 
+  /// Branch Manager authorizes a late-start recovery after the normal ±2h window:
+  /// POST /api/v1/branch-manager/shifts/start-by-manager/{shiftId}
+  Future<void> startLateShiftByManager({
+    required String shiftId,
+    String? lateStartReason,
+  }) async {
+    emit(StartCashierShiftLoading(shiftId));
+
+    final result = await _repository.startShiftByManager(
+      shiftId,
+      lateStartReason: lateStartReason,
+    );
+
+    handle(
+      result,
+      failure: (f) => emit(StartCashierShiftFailure(f)),
+      success: (shift) => emit(StartCashierShiftSuccess()),
+    );
+  }
+
   /// Dispatches the start shift request according to the authenticated actor's validated role
   /// or explicit command context, failing closed if the role is absent or unknown.
   Future<void> startShift({

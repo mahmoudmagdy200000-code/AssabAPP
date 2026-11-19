@@ -1,22 +1,47 @@
 import 'package:flutter/material.dart';
 
+enum ShiftWindowPhase { beforeOpen, normal, late, expired }
+
 class ShiftStartWindowStatus {
   final bool canStart;
+  final bool isLateStart;
+  final bool canLateStart;
+  final ShiftWindowPhase windowPhase;
   final String? disabledReason;
   final DateTime windowOpensAt;
   final DateTime windowClosesAt;
+  final DateTime normalOpensAt;
+  final DateTime normalClosesAt;
+  final DateTime lateClosesAt;
   final DateTime scheduledStart;
   final DateTime scheduledEnd;
 
   const ShiftStartWindowStatus({
     required this.canStart,
+    this.isLateStart = false,
+    this.canLateStart = false,
+    this.windowPhase = ShiftWindowPhase.normal,
     this.disabledReason,
     required this.windowOpensAt,
     required this.windowClosesAt,
+    DateTime? normalOpensAt,
+    DateTime? normalClosesAt,
+    DateTime? lateClosesAt,
     required this.scheduledStart,
     required this.scheduledEnd,
-  });
+  })  : normalOpensAt = normalOpensAt ?? windowOpensAt,
+        normalClosesAt = normalClosesAt ?? windowClosesAt,
+        lateClosesAt = lateClosesAt ?? windowClosesAt;
 }
+
+typedef StartEligibilityResult = ({
+  bool canStart,
+  bool canStartLate,
+  bool isLateStart,
+  bool requiresManagerAuthorization,
+  String? reason,
+  ShiftStartWindowStatus windowStatus,
+});
 
 class ShiftStartWindowHelper {
   static Duration _serverClockSkew = Duration.zero;
@@ -111,31 +136,63 @@ class ShiftStartWindowHelper {
     }
 
     final windowOpensAt = scheduledStart.subtract(const Duration(hours: 2));
-    final windowClosesAt = scheduledEnd.add(const Duration(hours: 2));
+    final normalClosesAt = scheduledStart.add(const Duration(hours: 2));
+    final nextMidnight = DateTime(baseDate.year, baseDate.month, baseDate.day + 1);
+    final endPlusGrace = scheduledEnd.add(const Duration(hours: 2));
+    final lateClosesAt = endPlusGrace.isAfter(nextMidnight) ? endPlusGrace : nextMidnight;
+    final effectiveLateClose = normalClosesAt.isAfter(lateClosesAt) ? normalClosesAt : lateClosesAt;
 
     if (current.isBefore(windowOpensAt)) {
       final opensFormatted = _formatTime(windowOpensAt);
       return ShiftStartWindowStatus(
         canStart: false,
+        windowPhase: ShiftWindowPhase.beforeOpen,
         disabledReason: isEn
             ? 'Start window opens at $opensFormatted'
             : 'تفتح نافذة البدء الساعة $opensFormatted',
         windowOpensAt: windowOpensAt,
-        windowClosesAt: windowClosesAt,
+        windowClosesAt: normalClosesAt,
+        normalOpensAt: windowOpensAt,
+        normalClosesAt: normalClosesAt,
+        lateClosesAt: effectiveLateClose,
         scheduledStart: scheduledStart,
         scheduledEnd: scheduledEnd,
       );
     }
 
-    if (!current.isBefore(windowClosesAt)) {
-      final closesFormatted = _formatTime(windowClosesAt);
+    if (current.isAfter(normalClosesAt)) {
+      if (current.isBefore(effectiveLateClose)) {
+        final normalClosedFormatted = _formatTime(normalClosesAt);
+        return ShiftStartWindowStatus(
+          canStart: false,
+          isLateStart: true,
+          canLateStart: true,
+          windowPhase: ShiftWindowPhase.late,
+          disabledReason: isEn
+              ? 'Starting after the scheduled window (closed at $normalClosedFormatted). Manager authorization may be required.'
+              : 'تجاوزت الوردية نافذة البدء الطبيعية (أُغلقت في $normalClosedFormatted)؛ يتطلب البدء المتأخر موافقة مدير الفرع',
+          windowOpensAt: windowOpensAt,
+          windowClosesAt: normalClosesAt,
+          normalOpensAt: windowOpensAt,
+          normalClosesAt: normalClosesAt,
+          lateClosesAt: effectiveLateClose,
+          scheduledStart: scheduledStart,
+          scheduledEnd: scheduledEnd,
+        );
+      }
+
+      final closesFormatted = _formatTime(effectiveLateClose);
       return ShiftStartWindowStatus(
         canStart: false,
+        windowPhase: ShiftWindowPhase.expired,
         disabledReason: isEn
             ? 'Shift start window has ended (closed at $closesFormatted)'
-            : 'انتهت نافذة بدء الوردية (أُغلقت $closesFormatted)',
+            : 'انتهت نافذة بدء الوردية (أُغلقت في $closesFormatted)',
         windowOpensAt: windowOpensAt,
-        windowClosesAt: windowClosesAt,
+        windowClosesAt: normalClosesAt,
+        normalOpensAt: windowOpensAt,
+        normalClosesAt: normalClosesAt,
+        lateClosesAt: effectiveLateClose,
         scheduledStart: scheduledStart,
         scheduledEnd: scheduledEnd,
       );
@@ -143,25 +200,35 @@ class ShiftStartWindowHelper {
 
     return ShiftStartWindowStatus(
       canStart: true,
+      windowPhase: ShiftWindowPhase.normal,
       disabledReason: null,
       windowOpensAt: windowOpensAt,
-      windowClosesAt: windowClosesAt,
+      windowClosesAt: normalClosesAt,
+      normalOpensAt: windowOpensAt,
+      normalClosesAt: normalClosesAt,
+      lateClosesAt: effectiveLateClose,
       scheduledStart: scheduledStart,
       scheduledEnd: scheduledEnd,
     );
   }
 
-  /// Resolves unified pending-shift start eligibility from shift order, acceptance state,
-  /// time window, and server rules, returning a localized reason when disabled.
-  static ({bool canStart, String? reason, ShiftStartWindowStatus windowStatus})
-      resolvePendingStartEligibility({
+  /// Resolves unified start eligibility using authoritative backend fields first
+  /// (consistent across My Shifts List, Shift Details, and Start action), falling
+  /// back to local ±2h window evaluation only when server flags are absent.
+  static StartEligibilityResult resolveStartEligibility({
     required dynamic shiftDate,
     required String? startTime,
     required String? endTime,
-    required bool isNextShift,
+    bool isNextShift = true,
     bool isReassigned = false,
+    bool isBranchManager = false,
     bool? serverCanStart,
+    bool? serverCanStartLate,
+    bool? serverIsLateStart,
+    bool? requiresManagerAuthorization,
+    String? serverWindowPhase,
     String? serverDisabledReason,
+    String? serverDisabledCode,
     DateTime? now,
     String languageCode = 'ar',
   }) {
@@ -174,9 +241,19 @@ class ShiftStartWindowHelper {
       languageCode: languageCode,
     );
 
+    final resolvedIsLateStart = serverIsLateStart ??
+        (serverWindowPhase == 'late' || windowStatus.isLateStart);
+    final resolvedCanStartLate =
+        serverCanStartLate ?? (isBranchManager && resolvedIsLateStart);
+    final resolvedRequiresManagerAuth = requiresManagerAuthorization ??
+        (!isBranchManager && resolvedIsLateStart);
+
     if (isReassigned) {
       return (
         canStart: false,
+        canStartLate: false,
+        isLateStart: resolvedIsLateStart,
+        requiresManagerAuthorization: resolvedRequiresManagerAuth,
         reason: isEn
             ? 'Shift reassignment must be accepted first'
             : 'يجب قبول تكليف الوردية أولاً',
@@ -184,12 +261,43 @@ class ShiftStartWindowHelper {
       );
     }
 
-    if (!isNextShift) {
+    // Backend-authoritative eligibility decision when provided
+    if (serverCanStart != null) {
+      if (serverCanStart) {
+        return (
+          canStart: true,
+          canStartLate: resolvedCanStartLate,
+          isLateStart: resolvedIsLateStart,
+          requiresManagerAuthorization: resolvedRequiresManagerAuth,
+          reason: null,
+          windowStatus: windowStatus,
+        );
+      }
+
       return (
         canStart: false,
-        reason: isEn
-            ? 'Not this shift’s turn yet — start the earlier shift first'
-            : 'لم يحن دور الوردية بعد؛ يرجى بدء الوردية السابقة أولاً',
+        canStartLate: resolvedCanStartLate,
+        isLateStart: resolvedIsLateStart,
+        requiresManagerAuthorization: resolvedRequiresManagerAuth,
+        reason: _localizeDisabledReason(
+          isEn: isEn,
+          code: serverDisabledCode,
+          serverReason: serverDisabledReason,
+          isNextShift: isNextShift,
+          windowStatus: windowStatus,
+        ),
+        windowStatus: windowStatus,
+      );
+    }
+
+    // Offline / fallback client evaluation (legacy callers without serverCanStart)
+    if (resolvedIsLateStart && isBranchManager && windowStatus.canLateStart) {
+      return (
+        canStart: true,
+        canStartLate: true,
+        isLateStart: true,
+        requiresManagerAuthorization: false,
+        reason: null,
         windowStatus: windowStatus,
       );
     }
@@ -197,26 +305,136 @@ class ShiftStartWindowHelper {
     if (!windowStatus.canStart) {
       return (
         canStart: false,
+        canStartLate: false,
+        isLateStart: resolvedIsLateStart,
+        requiresManagerAuthorization: resolvedRequiresManagerAuth,
         reason: windowStatus.disabledReason,
         windowStatus: windowStatus,
       );
     }
 
-    if (serverCanStart == false) {
+    if (!isNextShift) {
       return (
         canStart: false,
-        reason: (!isEn &&
-                serverDisabledReason != null &&
-                serverDisabledReason.trim().isNotEmpty)
-            ? serverDisabledReason.trim()
-            : (isEn
-                ? 'This shift cannot be started yet'
-                : 'تعذّر بدء هذه الوردية حاليًا'),
+        canStartLate: false,
+        isLateStart: resolvedIsLateStart,
+        requiresManagerAuthorization: resolvedRequiresManagerAuth,
+        reason: isEn
+            ? 'An earlier active shift must be started first.'
+            : 'يجب بدء الوردية السابقة المتاحة أولاً',
         windowStatus: windowStatus,
       );
     }
 
-    return (canStart: true, reason: null, windowStatus: windowStatus);
+    return (
+      canStart: true,
+      canStartLate: resolvedCanStartLate,
+      isLateStart: resolvedIsLateStart,
+      requiresManagerAuthorization: resolvedRequiresManagerAuth,
+      reason: null,
+      windowStatus: windowStatus,
+    );
+  }
+
+  /// Backward-compatible wrapper preserved for existing call sites.
+  static ({bool canStart, String? reason, ShiftStartWindowStatus windowStatus})
+      resolvePendingStartEligibility({
+    required dynamic shiftDate,
+    required String? startTime,
+    required String? endTime,
+    required bool isNextShift,
+    bool isReassigned = false,
+    bool? serverCanStart,
+    String? serverDisabledReason,
+    String? serverDisabledCode,
+    bool? serverIsLateStart,
+    String? serverWindowPhase,
+    bool isBranchManager = false,
+    DateTime? now,
+    String languageCode = 'ar',
+  }) {
+    final resolved = resolveStartEligibility(
+      shiftDate: shiftDate,
+      startTime: startTime,
+      endTime: endTime,
+      isNextShift: isNextShift,
+      isReassigned: isReassigned,
+      isBranchManager: isBranchManager,
+      serverCanStart: serverCanStart,
+      serverIsLateStart: serverIsLateStart,
+      serverWindowPhase: serverWindowPhase,
+      serverDisabledReason: serverDisabledReason,
+      serverDisabledCode: serverDisabledCode,
+      now: now,
+      languageCode: languageCode,
+    );
+    return (
+      canStart: resolved.canStart,
+      reason: resolved.reason,
+      windowStatus: resolved.windowStatus,
+    );
+  }
+
+  static String _localizeDisabledReason({
+    required bool isEn,
+    required String? code,
+    required String? serverReason,
+    required bool isNextShift,
+    required ShiftStartWindowStatus windowStatus,
+  }) {
+    switch (code) {
+      case 'BEFORE_WINDOW':
+        return isEn
+            ? 'Start window opens at ${_formatTime(windowStatus.normalOpensAt)}'
+            : (serverReason ?? 'تفتح نافذة البدء الساعة ${_formatTime(windowStatus.normalOpensAt)}');
+      case 'LATE_START_REQUIRES_MANAGER':
+        return isEn
+            ? 'Starting after the scheduled window. Manager authorization may be required.'
+            : (serverReason ??
+                'تجاوزت الوردية نافذة البدء الطبيعية؛ يتطلب البدء المتأخر موافقة مدير الفرع');
+      case 'PREVIOUS_ACTIVE_SHIFT_PENDING':
+        return isEn
+            ? 'An earlier active shift must be started first.'
+            : (serverReason ?? 'يجب بدء الوردية السابقة المتاحة أولاً');
+      case 'WORKDAY_FINALIZED':
+        return isEn
+            ? 'Cannot start because this workday is finalized.'
+            : (serverReason ?? 'لا يمكن بدء الوردية لأن يوم العمل مقفل ومُعتمد');
+      case 'SCHEDULE_INACTIVE':
+        return isEn
+            ? 'This shift belongs to an updated or inactive schedule.'
+            : (serverReason ?? 'تنتمي هذه الوردية إلى جدول ورديات محدث أو غير نشط');
+      case 'OPERATIONAL_OWNER_ALREADY_ACTIVE':
+        return isEn
+            ? 'Cannot start because another shift is active.'
+            : (serverReason ?? 'لا يمكن بدء الوردية لأن هناك وردية أخرى نشطة حالياً');
+      case 'SHIFT_START_WINDOW_EXPIRED':
+        return isEn
+            ? 'Shift start window has ended (closed at ${_formatTime(windowStatus.lateClosesAt)})'
+            : (serverReason ?? 'انتهت نافذة بدء الوردية');
+      case 'ASSIGNMENT_ACCEPTANCE_REQUIRED':
+        return isEn
+            ? 'Shift reassignment must be accepted first'
+            : (serverReason ?? 'يجب قبول تكليف الوردية أولاً');
+      default:
+        if (!isEn && serverReason != null && serverReason.trim().isNotEmpty) {
+          return serverReason.trim();
+        }
+        if (windowStatus.windowPhase == ShiftWindowPhase.beforeOpen ||
+            windowStatus.windowPhase == ShiftWindowPhase.late ||
+            windowStatus.windowPhase == ShiftWindowPhase.expired) {
+          return windowStatus.disabledReason ??
+              (isEn ? 'This shift cannot be started yet' : 'تعذّر بدء هذه الوردية حاليًا');
+        }
+        if (!isNextShift) {
+          return isEn
+              ? 'An earlier active shift must be started first.'
+              : 'يجب بدء الوردية السابقة المتاحة أولاً';
+        }
+        return isEn
+            ? 'This shift cannot be started yet'
+            : 'تعذّر بدء هذه الوردية حاليًا';
+    }
   }
 
   /// Returns whether a given shiftDate (DateTime or String "YYYY-MM-DD") falls

@@ -52,6 +52,15 @@ class ShiftEntity {
   final ShiftStatusType status;
   final List<VarianceDetailsEntity>? varianceDetails;
   final AssignedByEntity? assignedBy;
+  final bool? canStart;
+  final bool? canStartNormal;
+  final bool? canStartLate;
+  final bool? isLateStart;
+  final bool? requiresManagerAuthorization;
+  final bool? isNextShift;
+  final String? windowPhase;
+  final String? startDisabledReason;
+  final String? startDisabledCode;
 
   ShiftEntity({
     required this.id,
@@ -93,6 +102,15 @@ class ShiftEntity {
     this.actualStartTime,
     this.actualEndTime,
     this.varianceDetails,
+    this.canStart,
+    this.canStartNormal,
+    this.canStartLate,
+    this.isLateStart,
+    this.requiresManagerAuthorization,
+    this.isNextShift,
+    this.windowPhase,
+    this.startDisabledReason,
+    this.startDisabledCode,
   });
 
   String get formattedHandedOverDateTime {

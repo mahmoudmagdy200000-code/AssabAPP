@@ -2,11 +2,16 @@ import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/enums/shift_status/shift_status_type.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
+import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:assab/core/routing/app_route_name.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart' as auth_role;
 import 'package:assab/core/styles/app_styles.dart';
+import 'package:assab/core/utils/app_dialog.dart';
 import 'package:assab/core/widgets/app_button.dart';
+import 'package:assab/core/widgets/app_button_loading.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/reassignment_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/presentation/logic/cashier/start_cashier_shift_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/manager_shift/manager_shift_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -77,12 +82,97 @@ extension ShiftStatusUiMapper on ShiftStatusType {
   }) {
     switch (this) {
       case ShiftStatusType.pending:
+        if (isCashier) {
+          final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+          final eligibility = ShiftStartWindowHelper.resolveStartEligibility(
+            shiftDate: shift?.shiftDate,
+            startTime: shift?.shiftTimeDetails.startTime,
+            endTime: shift?.shiftTimeDetails.endTime,
+            isNextShift: shift?.isNextShift ?? true,
+            isBranchManager: false,
+            serverCanStart: shift?.canStart,
+            serverCanStartLate: shift?.canStartLate,
+            serverIsLateStart: shift?.isLateStart,
+            requiresManagerAuthorization: shift?.requiresManagerAuthorization,
+            serverWindowPhase: shift?.windowPhase,
+            serverDisabledReason: shift?.startDisabledReason,
+            serverDisabledCode: shift?.startDisabledCode,
+            languageCode: lang,
+          );
+
+          StartCashierShiftCubit? startCubit;
+          try {
+            startCubit = context.read<StartCashierShiftCubit>();
+          } catch (_) {}
+
+          Widget buildPendingButton(bool isLoading) {
+            if (isLoading) {
+              return const AppButtonLoading();
+            }
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppButton(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                  borderRadius: BorderRadius.circular(25.r),
+                  textColor: context.customColor.text2,
+                  enabled: eligibility.canStart,
+                  isTransparent: !eligibility.canStart,
+                  borderColor: context.customColor.border,
+                  background: AppColors.primaryLight,
+                  onClick: () {
+                    if (!eligibility.canStart || startCubit == null) return;
+                    startCubit.startShift(
+                      shiftId: shiftId,
+                      actorRole: auth_role.UserType.cashier,
+                    );
+                  },
+                  text: context.tr.start_shift,
+                ),
+                if (!eligibility.canStart && eligibility.reason != null) ...[
+                  8.verticalSpace,
+                  Text(
+                    eligibility.reason!,
+                    style: AppStyles.s12W400.copyWith(
+                      color: context.customColor.error,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
+            );
+          }
+
+          if (startCubit == null) {
+            return buildPendingButton(false);
+          }
+
+          return BlocConsumer<StartCashierShiftCubit, StartCashierShiftState>(
+            listener: (ctx, state) {
+              if (state is StartCashierShiftSuccess) {
+                try {
+                  ctx.read<ShiftDetailsCubit>().getShiftDetails();
+                } catch (_) {}
+              } else if (state is StartCashierShiftFailure) {
+                AppDialog.showErrorDialog(
+                  context: ctx,
+                  failure: state.failure,
+                );
+              }
+            },
+            builder: (_, state) => buildPendingButton(
+              state is StartCashierShiftLoading && state.loadingShiftId == shiftId,
+            ),
+          );
+        }
+
         return AppButton(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
           borderRadius: BorderRadius.circular(25.r),
           // isTransparent: true,
           textColor: context.customColor.text2,
-          enabled: isCashier ? false : true,
+          enabled: true,
           background: AppColors.primaryLight,
           onClick: () async {
             final result = await NavigationService.I.pushNamed(
@@ -99,7 +189,7 @@ extension ShiftStatusUiMapper on ShiftStatusType {
               context.read<ShiftDetailsCubit>().getShiftDetails();
             }
           },
-          text: isCashier ? context.tr.start_shift : context.tr.reassign_shift,
+          text: context.tr.reassign_shift,
         );
 
       case ShiftStatusType.completed:

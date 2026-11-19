@@ -25,14 +25,19 @@ class PendingStartButtonSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
-    final eligibility = ShiftStartWindowHelper.resolvePendingStartEligibility(
+    final eligibility = ShiftStartWindowHelper.resolveStartEligibility(
       shiftDate: shift.date,
       startTime: shift.startTime,
       endTime: shift.endTime,
       isNextShift: shift.isNextShift ?? false,
       isReassigned: shift.status == MyShiftStatusType.reassigned,
       serverCanStart: shift.canStart,
+      serverCanStartLate: shift.canStartLate,
+      serverIsLateStart: shift.isLateStart,
+      requiresManagerAuthorization: shift.requiresManagerAuthorization,
+      serverWindowPhase: shift.windowPhase,
       serverDisabledReason: shift.startDisabledReason,
+      serverDisabledCode: shift.startDisabledCode,
       now: now,
       languageCode: lang,
     );

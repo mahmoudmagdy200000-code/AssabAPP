@@ -136,21 +136,37 @@ class _CashierMyPendingShiftsHasToStartCardState
               builder: (_, value, _) {
                 final lang = Localizations.localeOf(context).languageCode;
                 final isEn = lang.toLowerCase().startsWith('en');
-                final windowStatus = ShiftStartWindowHelper.evaluate(
+                final eligibility = ShiftStartWindowHelper.resolveStartEligibility(
                   shiftDate: widget.shift.date,
                   startTime: widget.shift.startTime,
                   endTime: widget.shift.endTime,
+                  isNextShift: widget.shift.isNextShift ?? false,
+                  isReassigned: widget.shift.status == MyShiftStatusType.reassigned,
+                  serverCanStart: widget.shift.canStart,
+                  serverCanStartLate: widget.shift.canStartLate,
+                  serverIsLateStart: widget.shift.isLateStart,
+                  requiresManagerAuthorization:
+                      widget.shift.requiresManagerAuthorization,
+                  serverWindowPhase: widget.shift.windowPhase,
+                  serverDisabledReason: widget.shift.startDisabledReason,
+                  serverDisabledCode: widget.shift.startDisabledCode,
                   languageCode: lang,
                 );
+                final windowStatus = eligibility.windowStatus;
 
                 String secondTitle;
                 String secondValue;
                 if (widget.shift.status == MyShiftStatusType.reassigned) {
                   secondTitle = isEn ? 'Acceptance required' : 'يتطلب القبول';
                   secondValue = isEn ? '(Reassigned)' : '(معاد إسنادها)';
-                } else if (windowStatus.canStart) {
+                } else if (eligibility.canStart) {
                   secondTitle = isEn ? 'Ready to start' : 'متاحة للبدء';
                   secondValue = isEn ? '(Window open)' : '(النافذة مفتوحة)';
+                } else if (eligibility.isLateStart ||
+                    windowStatus.windowPhase == ShiftWindowPhase.late) {
+                  secondTitle = isEn ? 'Late recovery' : 'بدء متأخر';
+                  secondValue =
+                      isEn ? '(Manager approval)' : '(موافقة المدير)';
                 } else if (ShiftStartWindowHelper.now.isBefore(windowStatus.windowOpensAt)) {
                   secondTitle = formatDuration(value);
                   secondValue = context.tr.toStart;
@@ -169,7 +185,7 @@ class _CashierMyPendingShiftsHasToStartCardState
                   firstTitleSvgAsset: AppAssets.clockSvg,
                   hasTwoRows: true,
                   secondTitle: secondTitle,
-                  secondTitleStyle: windowStatus.canStart
+                  secondTitleStyle: eligibility.canStart
                       ? AppStyles.s12W400.copyWith(color: AppColors.primaryLight)
                       : (value.inSeconds > (60 * 5)
                           ? null

@@ -27,6 +27,13 @@ CashierPendingShiftModel _$CashierPendingShiftModelFromJson(
   isNextShift: json['is_next_shift'] as bool? ?? false,
   canStart: json['can_start'] as bool? ?? false,
   startDisabledReason: json['start_disabled_reason'] as String?,
+  startDisabledCode: json['start_disabled_code'] as String?,
+  windowPhase: json['window_phase'] as String?,
+  canStartNormal: json['can_start_normal'] as bool?,
+  canStartLate: json['can_start_late'] as bool?,
+  isLateStart: json['is_late_start'] as bool?,
+  requiresManagerAuthorization:
+      json['requires_manager_authorization'] as bool?,
   actions: json['actions'] is Map<String, dynamic>
       ? CashierPendingShiftActionsModel.fromJson(
           json['actions'] as Map<String, dynamic>,
@@ -58,6 +65,12 @@ Map<String, dynamic> _$CashierPendingShiftModelToJson(
   'is_next_shift': instance.isNextShift,
   'can_start': instance.canStart,
   'start_disabled_reason': instance.startDisabledReason,
+  'start_disabled_code': instance.startDisabledCode,
+  'window_phase': instance.windowPhase,
+  'can_start_normal': instance.canStartNormal,
+  'can_start_late': instance.canStartLate,
+  'is_late_start': instance.isLateStart,
+  'requires_manager_authorization': instance.requiresManagerAuthorization,
   'actions': instance.actions,
 };
 

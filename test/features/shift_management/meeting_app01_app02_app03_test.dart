@@ -653,7 +653,7 @@ void main() {
         expect(buttons[1].enabled, isFalse);
         expect(buttons[2].enabled, isFalse);
         expect(
-          find.text('Not this shift’s turn yet — start the earlier shift first'),
+          find.text('An earlier active shift must be started first.'),
           findsNWidgets(2),
         );
 

@@ -179,6 +179,12 @@ abstract class ShiftManagementRemoteDataSource {
   @POST(ApiEndpoint.branchManagerStartShift)
   Future startShiftByManager({@Path('shiftId') required String shiftId});
 
+  @POST(ApiEndpoint.branchManagerStartShift)
+  Future startLateShiftByManager({
+    @Path('shiftId') required String shiftId,
+    @Body() Map<String, dynamic>? body,
+  });
+
   @POST('${ApiEndpoint.cashierShifts}/{shift}/handover/accept')
   Future acceptCashierHandover({
     @Path('shift') required String shiftId,

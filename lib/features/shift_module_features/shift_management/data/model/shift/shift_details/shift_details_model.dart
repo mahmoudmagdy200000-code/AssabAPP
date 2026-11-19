@@ -179,6 +179,16 @@ class ShiftDetailsModel {
 
   final String? varianceReason;
 
+  final bool? canStart;
+  final bool? canStartNormal;
+  final bool? canStartLate;
+  final bool? isLateStart;
+  final bool? requiresManagerAuthorization;
+  final bool? isNextShift;
+  final String? windowPhase;
+  final String? startDisabledReason;
+  final String? startDisabledCode;
+
   ShiftDetailsModel({
     required this.id,
     required this.shiftDate,
@@ -217,6 +227,15 @@ class ShiftDetailsModel {
     this.previousCashier,
     this.reassignReason,
     this.varianceReason,
+    this.canStart,
+    this.canStartNormal,
+    this.canStartLate,
+    this.isLateStart,
+    this.requiresManagerAuthorization,
+    this.isNextShift,
+    this.windowPhase,
+    this.startDisabledReason,
+    this.startDisabledCode,
   });
 
   factory ShiftDetailsModel.fromJson(
@@ -284,6 +303,16 @@ class ShiftDetailsModel {
     previousCashier: json['previous_cashier'] as String?,
     reassignReason: json['reassign_reason'] as String?,
     varianceReason: json['variance_reason'] as String?,
+    canStart: json['can_start'] as bool?,
+    canStartNormal: json['can_start_normal'] as bool?,
+    canStartLate: json['can_start_late'] as bool?,
+    isLateStart: json['is_late_start'] as bool?,
+    requiresManagerAuthorization:
+        json['requires_manager_authorization'] as bool?,
+    isNextShift: json['is_next_shift'] as bool?,
+    windowPhase: json['window_phase'] as String?,
+    startDisabledReason: json['start_disabled_reason'] as String?,
+    startDisabledCode: json['start_disabled_code'] as String?,
   );
 
   Map<String, dynamic> toJson() {

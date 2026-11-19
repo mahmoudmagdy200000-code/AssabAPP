@@ -56,6 +56,24 @@ class CashierPendingShiftModel {
   @JsonKey(name: 'start_disabled_reason')
   final String? startDisabledReason;
 
+  @JsonKey(name: 'start_disabled_code')
+  final String? startDisabledCode;
+
+  @JsonKey(name: 'window_phase')
+  final String? windowPhase;
+
+  @JsonKey(name: 'can_start_normal')
+  final bool? canStartNormal;
+
+  @JsonKey(name: 'can_start_late')
+  final bool? canStartLate;
+
+  @JsonKey(name: 'is_late_start')
+  final bool? isLateStart;
+
+  @JsonKey(name: 'requires_manager_authorization')
+  final bool? requiresManagerAuthorization;
+
   final CashierPendingShiftActionsModel actions;
 
   const CashierPendingShiftModel({
@@ -77,6 +95,12 @@ class CashierPendingShiftModel {
     required this.isNextShift,
     required this.canStart,
     this.startDisabledReason,
+    this.startDisabledCode,
+    this.windowPhase,
+    this.canStartNormal,
+    this.canStartLate,
+    this.isLateStart,
+    this.requiresManagerAuthorization,
     required this.actions,
   });
 

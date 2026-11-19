@@ -161,7 +161,12 @@ class CashierMyReassignedToYouShiftsCard extends StatelessWidget {
                 ),
 
                 12.horizontalSpace,
-                Expanded(child: SeeDetailsButtonWidget(shiftId: shift.id)),
+                Expanded(
+                  child: SeeDetailsButtonWidget(
+                    shiftId: shift.id,
+                    isCashier: true,
+                  ),
+                ),
               ],
             ),
           ],

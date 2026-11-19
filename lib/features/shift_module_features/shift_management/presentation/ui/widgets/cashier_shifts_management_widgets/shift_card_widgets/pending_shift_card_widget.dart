@@ -1,5 +1,6 @@
 import 'package:assab/core/helpers/shift_start_window_helper.dart';
 import 'package:assab/core/services/user_type_service.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/utils/app_dialog.dart';
@@ -27,10 +28,23 @@ class PendingShiftCardWidget extends ShiftCardStrategy {
 
   @override
   Widget buildCard(BuildContext context, ShiftEntity shift) {
-    final windowStatus = ShiftStartWindowHelper.evaluate(
+    final effectiveRole =
+        UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType();
+    final isManager = effectiveRole == UserType.branchManager;
+    final eligibility = ShiftStartWindowHelper.resolveStartEligibility(
       shiftDate: shift.shiftDate,
       startTime: shift.shiftTimeDetails.startTime,
       endTime: shift.shiftTimeDetails.endTime,
+      isNextShift: shift.isNextShift ?? true,
+      isBranchManager: isManager,
+      serverCanStart: shift.canStart,
+      serverCanStartLate: shift.canStartLate,
+      serverIsLateStart: shift.isLateStart,
+      requiresManagerAuthorization: shift.requiresManagerAuthorization,
+      serverWindowPhase: shift.windowPhase,
+      serverDisabledReason: shift.startDisabledReason,
+      serverDisabledCode: shift.startDisabledCode,
+      languageCode: Localizations.localeOf(context).languageCode,
     );
 
     return Container(
@@ -46,7 +60,15 @@ class PendingShiftCardWidget extends ShiftCardStrategy {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(shift.shiftDateFormatted, style: AppStyles.s15W600),
+              Expanded(
+                child: Text(
+                  shift.shiftDateFormatted,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppStyles.s15W600,
+                ),
+              ),
+              8.horizontalSpace,
               Container(
                 padding: EdgeInsetsDirectional.only(
                   start: 10.w,
@@ -141,16 +163,28 @@ class PendingShiftCardWidget extends ShiftCardStrategy {
                 child: CashierStartShiftButton(
                   shiftId: shift.id,
                   selectedShiftsStatus: selectedShiftsStatus,
-                  actorRole: UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType(),
-                  canStart: windowStatus.canStart,
-                  disabledReason: windowStatus.disabledReason,
+                  actorRole: effectiveRole,
+                  canStart: eligibility.canStart,
+                  serverCanStart: shift.canStart,
+                  canStartLate: shift.canStartLate,
+                  isLateStart: shift.isLateStart,
+                  requiresManagerAuthorization: shift.requiresManagerAuthorization,
+                  isNextShift: shift.isNextShift,
+                  windowPhase: shift.windowPhase,
+                  disabledReason: eligibility.reason,
+                  startDisabledCode: shift.startDisabledCode,
                   shiftDate: shift.shiftDate,
                   startTime: shift.shiftTimeDetails.startTime,
                   endTime: shift.shiftTimeDetails.endTime,
                 ),
               ),
               12.horizontalSpace,
-              Expanded(child: SeeDetailsButtonWidget(shiftId: shift.id)),
+              Expanded(
+                child: SeeDetailsButtonWidget(
+                  shiftId: shift.id,
+                  isCashier: effectiveRole == UserType.cashier,
+                ),
+              ),
             ],
           ),
         ],

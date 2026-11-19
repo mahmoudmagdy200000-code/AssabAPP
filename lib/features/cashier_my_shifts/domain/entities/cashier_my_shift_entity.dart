@@ -17,6 +17,12 @@ class CashierShiftEntity {
   final bool? isNextShift;
   final bool? canStart;
   final String? startDisabledReason;
+  final String? startDisabledCode;
+  final String? windowPhase;
+  final bool? canStartNormal;
+  final bool? canStartLate;
+  final bool? isLateStart;
+  final bool? requiresManagerAuthorization;
   final int? variance;
   final int? cashGiven;
   final bool canBeAccepted;
@@ -46,6 +52,12 @@ class CashierShiftEntity {
     this.isNextShift,
     this.canStart,
     this.startDisabledReason,
+    this.startDisabledCode,
+    this.windowPhase,
+    this.canStartNormal,
+    this.canStartLate,
+    this.isLateStart,
+    this.requiresManagerAuthorization,
     this.closingBalance,
     this.cashFrom,
     this.handoverTo,
