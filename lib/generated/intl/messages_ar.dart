@@ -1537,6 +1537,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "dailyCloseFinalSubmitted": MessageLookupByLibrary.simpleMessage(
       "تم إرسال اليومية النهائية للمراجعة",
     ),
+    "dailyCloseLiabilityApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "لا يمكن إرسال الإغلاق النهائي قبل اعتماد مسؤولية العجز. راجع توزيع العجز المعلّق واعتمده ثم أعد المحاولة.",
+    ),
+    "pendingLiabilityApprovalBadge": MessageLookupByLibrary.simpleMessage(
+      "اعتماد مسؤولية العجز معلّق",
+    ),
+    "reviewAndApproveLiability": MessageLookupByLibrary.simpleMessage(
+      "مراجعة واعتماد مسؤولية العجز",
+    ),
+    "approveLiabilityDialogTitle": MessageLookupByLibrary.simpleMessage(
+      "اعتماد مسؤولية العجز",
+    ),
+    "approveLiabilityDialogBody": MessageLookupByLibrary.simpleMessage(
+      "تأكيد اعتماد المدير لتوزيع مسؤولية عجز الوردية حتى يمكن إرسال الإغلاق اليومي.",
+    ),
+    "approveLiabilitySelfShareNote": MessageLookupByLibrary.simpleMessage(
+      "يتضمن هذا التوزيع حصة مسؤولية مسندة إليك كمدير فرع. أكّد للاعتماد الصريح على حصتك.",
+    ),
+    "liabilityApprovedSuccess": MessageLookupByLibrary.simpleMessage(
+      "تم اعتماد مسؤولية العجز بنجاح. يمكنك الآن إرسال الإغلاق اليومي النهائي.",
+    ),
+    "approveLiabilityAction": MessageLookupByLibrary.simpleMessage("اعتماد"),
     "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
       "تم حفظ تعديلات اليومية.",
     ),

@@ -32,6 +32,16 @@ class CashierBreakdownModel {
   @JsonKey(name: 'sales')
   final double? sales;
 
+  /// Read-only liability approval metadata from backend canonical daily close summary.
+  @JsonKey(name: 'liability_approval_status', includeToJson: false)
+  final String? liabilityApprovalStatus;
+
+  @JsonKey(name: 'liability_allocation_version', includeToJson: false)
+  final int? liabilityAllocationVersion;
+
+  @JsonKey(name: 'liability_has_manager_self_share', includeToJson: false)
+  final bool? liabilityHasManagerSelfShare;
+
   const CashierBreakdownModel({
     required this.cashierId,
     this.cashierShiftId,
@@ -42,6 +52,9 @@ class CashierBreakdownModel {
     this.deliveryAppPayments,
     this.variance,
     this.sales,
+    this.liabilityApprovalStatus,
+    this.liabilityAllocationVersion,
+    this.liabilityHasManagerSelfShare,
   });
 
   factory CashierBreakdownModel.fromJson(Map<String, dynamic> json) =>

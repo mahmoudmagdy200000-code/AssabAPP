@@ -1575,6 +1575,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "dailyCloseFinalSubmitted": MessageLookupByLibrary.simpleMessage(
       "Final daily close submitted for review",
     ),
+    "dailyCloseLiabilityApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "Final daily close is blocked until the shift shortage responsibility is approved. Review the pending liability and try again.",
+    ),
+    "pendingLiabilityApprovalBadge": MessageLookupByLibrary.simpleMessage(
+      "Pending Liability Approval",
+    ),
+    "reviewAndApproveLiability": MessageLookupByLibrary.simpleMessage(
+      "Review & Approve Pending Liability",
+    ),
+    "approveLiabilityDialogTitle": MessageLookupByLibrary.simpleMessage(
+      "Approve Shortage Liability",
+    ),
+    "approveLiabilityDialogBody": MessageLookupByLibrary.simpleMessage(
+      "Confirm manager approval of the shift shortage responsibility allocation so daily close can proceed.",
+    ),
+    "approveLiabilitySelfShareNote": MessageLookupByLibrary.simpleMessage(
+      "This allocation includes a responsibility share assigned to you as Branch Manager. Confirm to approve your share explicitly.",
+    ),
+    "liabilityApprovedSuccess": MessageLookupByLibrary.simpleMessage(
+      "Shortage liability approved. You can now submit the final daily close.",
+    ),
+    "approveLiabilityAction": MessageLookupByLibrary.simpleMessage("Approve"),
     "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
       "Daily close modifications have been saved.",
     ),

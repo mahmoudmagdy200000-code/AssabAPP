@@ -23,6 +23,9 @@ extension CashierBreakdownMapper on CashierBreakdownModel {
       initialCardPayments: card,
       initialDeliveryAppPayments: delivery,
       initialTotalSales: total,
+      liabilityApprovalStatus: liabilityApprovalStatus,
+      liabilityAllocationVersion: liabilityAllocationVersion,
+      liabilityHasManagerSelfShare: liabilityHasManagerSelfShare ?? false,
     );
   }
 }

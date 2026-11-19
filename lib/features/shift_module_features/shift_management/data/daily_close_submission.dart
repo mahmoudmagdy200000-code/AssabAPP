@@ -101,10 +101,23 @@ class DailyCloseServerError {
   final String? code;
   final String? message;
 
+  bool get isLiabilityApprovalRequired {
+    final normalizedCode = code?.trim().toUpperCase();
+    final normalizedMsg = message?.trim().toUpperCase();
+    return normalizedCode == 'LIABILITY_APPROVAL_REQUIRED' ||
+        normalizedMsg == 'LIABILITY_APPROVAL_REQUIRED';
+  }
+
   String formatted({required String fallback}) {
     final cleanMsg = message?.trim();
     final cleanCode = code?.trim();
-    if (cleanCode != null && cleanCode.isNotEmpty && cleanMsg != null && cleanMsg.isNotEmpty) {
+    if (cleanCode != null &&
+        cleanCode.isNotEmpty &&
+        cleanMsg != null &&
+        cleanMsg.isNotEmpty) {
+      if (cleanMsg.toUpperCase() == cleanCode.toUpperCase()) {
+        return cleanMsg;
+      }
       return '$cleanMsg ($cleanCode)';
     }
     if (cleanMsg != null && cleanMsg.isNotEmpty) {
@@ -114,6 +127,16 @@ class DailyCloseServerError {
       return cleanCode;
     }
     return fallback;
+  }
+
+  String localizedMessage({
+    required String liabilityApprovalMessage,
+    required String fallback,
+  }) {
+    if (isLiabilityApprovalRequired) {
+      return liabilityApprovalMessage;
+    }
+    return formatted(fallback: fallback);
   }
 }
 
@@ -495,5 +518,33 @@ class DailyCloseSubmission {
   Future<void> resolveSubmitted(String workdayId) async {
     if (!hasCurrentActor) throw StateError('Account changed.');
     await _clearIntent(workdayId);
+  }
+
+  /// Calls the existing S1-07/S1-10 branch-manager shortage liability approval
+  /// endpoint after explicit user confirmation. Never invoked silently.
+  Future<void> approvePendingLiability({
+    required String cashierShiftId,
+    required int version,
+    required int expectedRevision,
+    required bool explicitSelfShare,
+  }) async {
+    if (!hasCurrentActor ||
+        branchId.isEmpty ||
+        cashierShiftId.isEmpty ||
+        version < 1 ||
+        expectedRevision < 1) {
+      throw StateError('Authorized manager context and liability metadata are required.');
+    }
+    await _dio.post(
+      'branch-manager/shifts/$cashierShiftId/liability/approve',
+      data: {
+        'version': version,
+        'expected_revision': expectedRevision,
+        'explicit_self_share': explicitSelfShare,
+      },
+      options: Options(
+        headers: {'Idempotency-Key': IdempotencyScopeManager.generateUuidV4()},
+      ),
+    );
   }
 }

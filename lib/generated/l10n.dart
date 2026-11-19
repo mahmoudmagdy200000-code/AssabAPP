@@ -27681,6 +27681,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Final daily close is blocked until the shift shortage responsibility is approved. Review the pending liability and try again.`
+  String get dailyCloseLiabilityApprovalRequired {
+    return Intl.message(
+      'Final daily close is blocked until the shift shortage responsibility is approved. Review the pending liability and try again.',
+      name: 'dailyCloseLiabilityApprovalRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending Liability Approval`
+  String get pendingLiabilityApprovalBadge {
+    return Intl.message(
+      'Pending Liability Approval',
+      name: 'pendingLiabilityApprovalBadge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review & Approve Pending Liability`
+  String get reviewAndApproveLiability {
+    return Intl.message(
+      'Review & Approve Pending Liability',
+      name: 'reviewAndApproveLiability',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approve Shortage Liability`
+  String get approveLiabilityDialogTitle {
+    return Intl.message(
+      'Approve Shortage Liability',
+      name: 'approveLiabilityDialogTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm manager approval of the shift shortage responsibility allocation so daily close can proceed.`
+  String get approveLiabilityDialogBody {
+    return Intl.message(
+      'Confirm manager approval of the shift shortage responsibility allocation so daily close can proceed.',
+      name: 'approveLiabilityDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This allocation includes a responsibility share assigned to you as Branch Manager. Confirm to approve your share explicitly.`
+  String get approveLiabilitySelfShareNote {
+    return Intl.message(
+      'This allocation includes a responsibility share assigned to you as Branch Manager. Confirm to approve your share explicitly.',
+      name: 'approveLiabilitySelfShareNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shortage liability approved. You can now submit the final daily close.`
+  String get liabilityApprovedSuccess {
+    return Intl.message(
+      'Shortage liability approved. You can now submit the final daily close.',
+      name: 'liabilityApprovedSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approve`
+  String get approveLiabilityAction {
+    return Intl.message(
+      'Approve',
+      name: 'approveLiabilityAction',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

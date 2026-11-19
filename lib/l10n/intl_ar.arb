@@ -3700,5 +3700,13 @@
     }
   },
   "couldNotVerifyPendingClosures": "تعذر التحقق من الإقفالات اليومية المعلقة. أعد المحاولة قبل الإرسال.",
-  "couldNotVerifyWorkdayStatus": "تعذر التحقق من حالة يوم العمل من الخادم."
+  "couldNotVerifyWorkdayStatus": "تعذر التحقق من حالة يوم العمل من الخادم.",
+  "dailyCloseLiabilityApprovalRequired": "لا يمكن إرسال الإغلاق النهائي قبل اعتماد مسؤولية العجز. راجع توزيع العجز المعلّق واعتمده ثم أعد المحاولة.",
+  "pendingLiabilityApprovalBadge": "اعتماد مسؤولية العجز معلّق",
+  "reviewAndApproveLiability": "مراجعة واعتماد مسؤولية العجز",
+  "approveLiabilityDialogTitle": "اعتماد مسؤولية العجز",
+  "approveLiabilityDialogBody": "تأكيد اعتماد المدير لتوزيع مسؤولية عجز الوردية حتى يمكن إرسال الإغلاق اليومي.",
+  "approveLiabilitySelfShareNote": "يتضمن هذا التوزيع حصة مسؤولية مسندة إليك كمدير فرع. أكّد للاعتماد الصريح على حصتك.",
+  "liabilityApprovedSuccess": "تم اعتماد مسؤولية العجز بنجاح. يمكنك الآن إرسال الإغلاق اليومي النهائي.",
+  "approveLiabilityAction": "اعتماد"
 }
