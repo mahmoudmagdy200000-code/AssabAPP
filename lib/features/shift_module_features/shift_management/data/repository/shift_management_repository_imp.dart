@@ -731,8 +731,11 @@ class ShiftManagementRepositoryImp
         throw StateError('Unverified manager actor.');
       }
       final allRows = <Map<String, dynamic>>[];
+      final seenPageSignatures = <String>{};
+      final seenNextLinks = <String>{};
       var page = 1;
-      var lastPage = 1;
+      int? lastPage;
+      var hasMore = false;
 
       do {
         final historyRes = await _remoteDataSource.getWorkdayHistory(
@@ -742,39 +745,79 @@ class ShiftManagementRepositoryImp
         if (historyRes is! Map || historyRes['data'] is! List) {
           throw StateError('Invalid workday history response on page $page.');
         }
+
         final pageList = historyRes['data'] as List;
+        final pageIds = <String>[];
         for (final row in pageList) {
           if (row is Map) {
-            allRows.add(
-              row is Map<String, dynamic>
-                  ? row
-                  : Map<String, dynamic>.from(row),
-            );
+            final normalized = row is Map<String, dynamic>
+                ? row
+                : Map<String, dynamic>.from(row);
+            allRows.add(normalized);
+            pageIds.add((normalized['id'] ?? '').toString());
           }
+        }
+
+        final signature = pageIds.join('|');
+        if (pageIds.isNotEmpty && !seenPageSignatures.add(signature)) {
+          throw StateError(
+            'Repeated workday history page data encountered at page $page.',
+          );
         }
 
         final meta = historyRes['meta'];
         if (meta is Map) {
+          final rawCurrent = meta['current_page'];
+          if (rawCurrent != null) {
+            final parsedCurrent = rawCurrent is int
+                ? rawCurrent
+                : int.tryParse(rawCurrent.toString());
+            if (parsedCurrent == null || parsedCurrent != page) {
+              throw StateError(
+                'Workday history page mismatch: expected $page, got $rawCurrent.',
+              );
+            }
+          }
+
           final rawLast = meta['last_page'];
           final parsedLast = rawLast is int
               ? rawLast
               : int.tryParse(rawLast?.toString() ?? '');
-          if (parsedLast != null && parsedLast >= page) {
-            lastPage = parsedLast;
-          } else {
-            lastPage = page;
+          if (parsedLast == null || parsedLast < 1) {
+            throw StateError(
+              'Invalid workday history pagination metadata on page $page.',
+            );
           }
+          if (pageList.isEmpty && page < parsedLast) {
+            throw StateError(
+              'Unexpected empty workday history page $page before last page $parsedLast.',
+            );
+          }
+          lastPage = parsedLast;
+          hasMore = page < lastPage;
         } else {
           final links = historyRes['links'];
-          final hasNext = links is Map && links['next'] != null;
-          lastPage = hasNext ? page + 1 : page;
+          final rawNext = links is Map ? links['next']?.toString() : null;
+          final nextLink = rawNext?.trim();
+          if (nextLink != null && nextLink.isNotEmpty) {
+            if (pageList.isEmpty) {
+              throw StateError(
+                'Non-advancing empty workday history page at page $page.',
+              );
+            }
+            if (!seenNextLinks.add(nextLink)) {
+              throw StateError(
+                'Repeated workday history pagination link at page $page.',
+              );
+            }
+            hasMore = true;
+          } else {
+            hasMore = false;
+          }
         }
-        page++;
-      } while (page <= lastPage && page <= 100);
 
-      if (page <= lastPage) {
-        throw StateError('Workday history pagination exceeded safety limit.');
-      }
+        page++;
+      } while (hasMore);
 
       final items = allRows
           .map(PendingDailyClosureItem.fromHistoryJson)

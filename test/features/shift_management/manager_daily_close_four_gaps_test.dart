@@ -1294,5 +1294,256 @@ void main() {
         },
       );
     }
+
+    testWidgets(
+      'Item 3 (>100 pages): discovers oldest pending day on page 101 ahead of page 1, blocks both normal submit & replay, fails closed on page 101 error and on repeated page, recovers on retry',
+      (tester) async {
+        tester.view.physicalSize = const Size(430, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        SharedPreferences.setMockInitialValues({'u_id': 'mgr-1'});
+        final adapter = _TrackingAdapter();
+        final dio = Dio(BaseOptions(baseUrl: 'https://example.test/api/v1/'))
+          ..httpClientAdapter = adapter;
+
+        var failPage101 = false;
+        var repeatPage2 = false;
+        final requestedPages = <int?>[];
+
+        final remote = _TestRemoteDataSource();
+        remote.onGetWorkdayHistory = ({int? perPage, int? page}) async {
+          requestedPages.add(page);
+          final p = page ?? 1;
+          if (p == 101 && failPage101) {
+            throw DioException.connectionError(
+              requestOptions: RequestOptions(
+                path: 'branch-manager/workday/history',
+              ),
+              reason: 'page-101-timeout',
+            );
+          }
+          if (p == 1) {
+            return {
+              'data': [
+                _historyRow(
+                  id: 'day-newer-p1',
+                  date: '2026-11-18',
+                  managerId: 'mgr-1',
+                  submitted: false,
+                  revision: 4,
+                ),
+                for (var i = 1; i < 50; i++)
+                  _historyRow(
+                    id: 'closed-p1-$i',
+                    date: '2026-11-10',
+                    managerId: 'mgr-1',
+                    submitted: true,
+                  ),
+              ],
+              'meta': {'current_page': 1, 'last_page': 101},
+            };
+          }
+          if (p == 2 && repeatPage2) {
+            // Duplicate of page 1 content -> must fail closed instead of looping/trusting partial rows.
+            return {
+              'data': [
+                _historyRow(
+                  id: 'day-newer-p1',
+                  date: '2026-11-18',
+                  managerId: 'mgr-1',
+                  submitted: false,
+                  revision: 4,
+                ),
+                for (var i = 1; i < 50; i++)
+                  _historyRow(
+                    id: 'closed-p1-$i',
+                    date: '2026-11-10',
+                    managerId: 'mgr-1',
+                    submitted: true,
+                  ),
+              ],
+              'meta': {'current_page': 2, 'last_page': 101},
+            };
+          }
+          if (p == 101) {
+            return {
+              'data': [
+                _historyRow(
+                  id: 'day-oldest-p101',
+                  date: '2026-08-01',
+                  managerId: 'mgr-1',
+                  submitted: false,
+                  revision: 1,
+                ),
+              ],
+              'meta': {'current_page': 101, 'last_page': 101},
+            };
+          }
+          final dayIndex = (p - 2) * 50;
+          return {
+            'data': [
+              for (var i = 0; i < 50; i++)
+                _historyRow(
+                  id: 'closed-p$p-$i',
+                  date:
+                      '2026-09-${(28 - ((dayIndex + i) % 28)).toString().padLeft(2, '0')}',
+                  managerId: 'mgr-1',
+                  submitted: true,
+                ),
+            ],
+            'meta': {'current_page': p, 'last_page': 101},
+          };
+        };
+
+        remote.onGetDailyClose = ({String? managerWorkdayId, String? workday}) async {
+          return _dailyClosePayload(
+            workdayId: 'day-newer-p1',
+            businessDate: '2026-11-18',
+            managerId: 'mgr-1',
+            branchId: 'branch-1',
+            revision: 4,
+            submitted: false,
+          );
+        };
+
+        final repo = ShiftManagementRepositoryImp(remote);
+        getIt.registerSingleton<Dio>(dio);
+        getIt.registerSingleton<ShiftManagementRepositoryImp>(repo);
+
+        // A) Repeated page 2 fails closed.
+        repeatPage2 = true;
+        final repeatedRes = await repo.getPendingDailyClosures(
+          actorId: 'mgr-1',
+          branchId: 'branch-1',
+        );
+        repeatedRes.when(
+          failure: (_) {},
+          success: (_) => fail('Expected repeated page to fail closed'),
+        );
+        repeatPage2 = false;
+
+        // B) Page 101 failure fails closed cleanly and UI Retry recovers to discover page 101 oldest day.
+        failPage101 = true;
+        await tester.pumpWidget(
+          _wrapTestApp(
+            locale: const Locale('en'),
+            child: PendingDailyClosuresSectionWidget(
+              currentManagerShift: _makeTodayShift(
+                id: 'day-today',
+                date: '2026-11-19',
+              ),
+              loadPending: () => repo.getPendingDailyClosures(
+                actorId: 'mgr-1',
+                branchId: 'branch-1',
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Retry'), findsOneWidget);
+        expect(find.text('2026-11-18'), findsNothing);
+
+        failPage101 = false;
+        requestedPages.clear();
+        await tester.tap(find.text('Retry'));
+        await tester.pumpAndSettle();
+
+        expect(requestedPages.length, 101);
+        expect(requestedPages.first, 1);
+        expect(requestedPages.last, 101);
+        expect(find.text('2026-08-01'), findsOneWidget);
+        expect(find.text('2026-11-18'), findsOneWidget);
+        expect(find.textContaining('2026-08-01'), findsWidgets);
+
+        // C) Normal submit on newer Nov 18 (p1) is blocked by oldest Aug 01 on page 101 -> 0 POSTs.
+        final managerCubit = ManagerShiftCubit(repo)
+          ..managerShift = _makeTodayShift(
+            id: 'day-newer-p1',
+            date: '2026-11-18',
+          );
+        final dailyCubit = FinalDailyCloseCubit(repo);
+        final endManagerCubit = EndAndUpdateManagerShiftCubit(repo);
+        addTearDown(managerCubit.close);
+        addTearDown(dailyCubit.close);
+        addTearDown(endManagerCubit.close);
+        await dailyCubit.getDailyClose(managerWorkdayId: 'day-newer-p1');
+
+        await tester.pumpWidget(
+          MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: managerCubit),
+              BlocProvider.value(value: dailyCubit),
+              BlocProvider.value(value: endManagerCubit),
+            ],
+            child: _wrapTestApp(
+              appKey: const ValueKey('p101-normal-block'),
+              locale: const Locale('en'),
+              scrollable: false,
+              child: const UpdateManagerFinalDailyCloseScreen(
+                key: ValueKey('p101-normal-screen'),
+                branchName: 'Assab Main Branch',
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('2026-08-01'), findsOneWidget);
+        await tester.ensureVisible(find.text('Final Daily Close Submission'));
+        await tester.tap(find.text('Final Daily Close Submission'));
+        await tester.pump();
+        expect(adapter.submitPosts, isEmpty);
+
+        // D) Replay path ('Refresh Daily Close Status') on unresolved Nov 18 ALSO blocked by p101 -> 0 extra POSTs!
+        final prefs = await SharedPreferences.getInstance();
+        final submission = DailyCloseSubmission(
+          dio,
+          prefs,
+          actorId: 'mgr-1',
+          branchId: 'branch-1',
+        );
+        await tester.runAsync(() async {
+          adapter.failNextPost = true;
+          await expectLater(
+            submission.submit('day-newer-p1', 4),
+            throwsA(isA<DioException>()),
+          );
+        });
+        expect(adapter.submitPosts.length, 1);
+
+        await tester.pumpWidget(
+          MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: managerCubit),
+              BlocProvider.value(value: dailyCubit),
+              BlocProvider.value(value: endManagerCubit),
+            ],
+            child: _wrapTestApp(
+              appKey: const ValueKey('p101-replay-block'),
+              locale: const Locale('en'),
+              scrollable: false,
+              child: const UpdateManagerFinalDailyCloseScreen(
+                key: ValueKey('p101-replay-screen'),
+                branchName: 'Assab Main Branch',
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.ensureVisible(find.text('Refresh Daily Close Status'));
+        await tester.tap(find.text('Refresh Daily Close Status'));
+        await tester.pumpAndSettle();
+
+        expect(adapter.submitPosts.length, 1);
+        expect(submission.hasUnresolved('day-newer-p1'), true);
+        expect(find.textContaining('2026-08-01'), findsWidgets);
+      },
+    );
   });
 }
