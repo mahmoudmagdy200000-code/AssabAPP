@@ -20,7 +20,16 @@ class EndShiftLoading extends EndShiftState {
   const EndShiftLoading({super.varianceStrategy});
 }
 
-class EndShiftSuccess extends EndShiftState {}
+class EndShiftSuccess extends EndShiftState {
+  const EndShiftSuccess({
+    this.handoverOutcome = ShiftHandoverOutcomeStatus.unknown,
+  });
+
+  final ShiftHandoverOutcomeStatus handoverOutcome;
+
+  @override
+  List<Object?> get props => [handoverOutcome];
+}
 
 class EndShiftHandOverValuesUpdated extends EndShiftState {
   final double handOverAmount;

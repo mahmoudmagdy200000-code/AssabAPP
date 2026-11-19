@@ -1,3 +1,56 @@
+import 'package:assab/core/errors/api_failure.dart';
+import 'package:intl/intl.dart';
+
+enum DailyCloseEligibilityStatus {
+  eligible,
+  blockedByOlderWorkday,
+  verificationFailed,
+}
+
+class DailyCloseWorkdayEligibility {
+  const DailyCloseWorkdayEligibility._({
+    required this.status,
+    this.blockingWorkdayId,
+    this.blockingShiftDate,
+    this.failure,
+  });
+
+  const DailyCloseWorkdayEligibility.eligible()
+    : this._(status: DailyCloseEligibilityStatus.eligible);
+
+  const DailyCloseWorkdayEligibility.blockedByOlder({
+    required String blockingWorkdayId,
+    required String blockingShiftDate,
+  }) : this._(
+         status: DailyCloseEligibilityStatus.blockedByOlderWorkday,
+         blockingWorkdayId: blockingWorkdayId,
+         blockingShiftDate: blockingShiftDate,
+       );
+
+  const DailyCloseWorkdayEligibility.unverified([ApiFailure? failure])
+    : this._(
+        status: DailyCloseEligibilityStatus.verificationFailed,
+        failure: failure,
+      );
+
+  final DailyCloseEligibilityStatus status;
+  final String? blockingWorkdayId;
+  final String? blockingShiftDate;
+  final ApiFailure? failure;
+
+  bool get isEligible => status == DailyCloseEligibilityStatus.eligible;
+
+  String localizedBlockingDate(String languageCode) {
+    final raw = blockingShiftDate;
+    if (raw == null || raw.isEmpty) return '';
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return raw;
+    final locale = languageCode.startsWith('ar') ? 'ar' : 'en';
+    final friendly = DateFormat('d MMM', locale).format(parsed);
+    return '$friendly ($raw)';
+  }
+}
+
 class PendingDailyClosureItem {
   const PendingDailyClosureItem({
     required this.id,
@@ -78,18 +131,17 @@ class PendingDailyClosureItem {
     required String currentBranchId,
     String? excludeWorkdayId,
   }) {
+    if (currentActorId.trim().isEmpty) {
+      return const [];
+    }
     final filtered = items.where((item) {
       if (item.id.isEmpty || item.shiftDate.isEmpty) return false;
       if (excludeWorkdayId != null && item.id == excludeWorkdayId) return false;
       if (!item.isEligibleForSubmission) return false;
-      if (currentActorId.isNotEmpty &&
-          item.managerId.isNotEmpty &&
-          item.managerId != currentActorId) {
+      if (item.managerId != currentActorId) {
         return false;
       }
-      if (currentBranchId.isNotEmpty &&
-          item.branchId.isNotEmpty &&
-          item.branchId != currentBranchId) {
+      if (currentBranchId.isNotEmpty && item.branchId != currentBranchId) {
         return false;
       }
       return true;
@@ -97,5 +149,32 @@ class PendingDailyClosureItem {
 
     filtered.sort((a, b) => a.shiftDate.compareTo(b.shiftDate));
     return filtered;
+  }
+
+  static DailyCloseWorkdayEligibility evaluateWorkday({
+    required String workdayId,
+    String? businessDate,
+    required List<PendingDailyClosureItem> orderedPending,
+    ApiFailure? loadFailure,
+  }) {
+    if (loadFailure != null) {
+      return DailyCloseWorkdayEligibility.unverified(loadFailure);
+    }
+    if (orderedPending.isEmpty) {
+      return const DailyCloseWorkdayEligibility.eligible();
+    }
+    final oldest = orderedPending.first;
+    if (oldest.id == workdayId) {
+      return const DailyCloseWorkdayEligibility.eligible();
+    }
+    if (businessDate != null &&
+        businessDate.isNotEmpty &&
+        oldest.shiftDate.compareTo(businessDate) > 0) {
+      return const DailyCloseWorkdayEligibility.eligible();
+    }
+    return DailyCloseWorkdayEligibility.blockedByOlder(
+      blockingWorkdayId: oldest.id,
+      blockingShiftDate: oldest.shiftDate,
+    );
   }
 }

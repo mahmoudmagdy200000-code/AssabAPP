@@ -1,5 +1,6 @@
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/widgets/app_svg.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_handover_outcome_status.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/arguments/shift_arguments.dart';
 import 'package:flutter/material.dart';
 
@@ -18,10 +19,12 @@ class HandoverSuccessWidget extends StatelessWidget {
     // required this.isNavigatedFromCashier,
     required this.shiftArguments,
     this.isOpenedFromShiftDetailsScreen = false,
+    this.handoverOutcome = ShiftHandoverOutcomeStatus.unknown,
   });
 
   final bool isOpenedFromShiftDetailsScreen;
   final ShiftArguments shiftArguments;
+  final ShiftHandoverOutcomeStatus handoverOutcome;
 
   @override
   Widget build(BuildContext context) {
@@ -45,16 +48,32 @@ class HandoverSuccessWidget extends StatelessWidget {
                 40.verticalSpace,
 
                 Text(
-                  context.tr.handoverRecipientApproval,
+                  switch (handoverOutcome) {
+                    ShiftHandoverOutcomeStatus.accepted =>
+                      context.tr.handoverReceiptConfirmed,
+                    ShiftHandoverOutcomeStatus.pending =>
+                      context.tr.handoverRecipientApproval,
+                    ShiftHandoverOutcomeStatus.unknown =>
+                      context.tr.handoverSubmittedVerifyDetailsTitle,
+                  },
                   style: AppStyles.s18W500,
                 ),
 
                 20.verticalSpace,
 
                 Text(
-                  context.tr.handOverDesc(
-                    shiftArguments.nextCashier ?? context.tr.no_name,
-                  ),
+                  switch (handoverOutcome) {
+                    ShiftHandoverOutcomeStatus.accepted =>
+                      context.tr.handoverReceiptConfirmedDesc(
+                        shiftArguments.nextCashier ?? context.tr.no_name,
+                      ),
+                    ShiftHandoverOutcomeStatus.pending =>
+                      context.tr.handOverDesc(
+                        shiftArguments.nextCashier ?? context.tr.no_name,
+                      ),
+                    ShiftHandoverOutcomeStatus.unknown =>
+                      context.tr.handoverOutcomeUnconfirmedCheckDetails,
+                  },
                   style: AppStyles.s14W400.copyWith(
                     color: context.customColor.text3,
                   ),

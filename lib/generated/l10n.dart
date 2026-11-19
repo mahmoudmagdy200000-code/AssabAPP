@@ -27611,6 +27611,76 @@ class S {
       args: [],
     );
   }
+
+  /// `Cash Custody Receipt Confirmed`
+  String get handoverReceiptConfirmed {
+    return Intl.message(
+      'Cash Custody Receipt Confirmed',
+      name: 'handoverReceiptConfirmed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cash custody receipt has been confirmed by {cashierName}.`
+  String handoverReceiptConfirmedDesc(Object cashierName) {
+    return Intl.message(
+      'Cash custody receipt has been confirmed by $cashierName.',
+      name: 'handoverReceiptConfirmedDesc',
+      desc: '',
+      args: [cashierName],
+    );
+  }
+
+  /// `Handover Submitted`
+  String get handoverSubmittedVerifyDetailsTitle {
+    return Intl.message(
+      'Handover Submitted',
+      name: 'handoverSubmittedVerifyDetailsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Handover status could not be confirmed from the server response. Check the details to verify.`
+  String get handoverOutcomeUnconfirmedCheckDetails {
+    return Intl.message(
+      'Handover status could not be confirmed from the server response. Check the details to verify.',
+      name: 'handoverOutcomeUnconfirmedCheckDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close {dateLabel} first.`
+  String closeWorkdayDateFirst(Object dateLabel) {
+    return Intl.message(
+      'Close $dateLabel first.',
+      name: 'closeWorkdayDateFirst',
+      desc: '',
+      args: [dateLabel],
+    );
+  }
+
+  /// `Could not verify pending daily closures. Retry before submitting.`
+  String get couldNotVerifyPendingClosures {
+    return Intl.message(
+      'Could not verify pending daily closures. Retry before submitting.',
+      name: 'couldNotVerifyPendingClosures',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not verify the workday status from the server.`
+  String get couldNotVerifyWorkdayStatus {
+    return Intl.message(
+      'Could not verify the workday status from the server.',
+      name: 'couldNotVerifyWorkdayStatus',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

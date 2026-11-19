@@ -39,8 +39,10 @@ import 'package:assab/features/reset_password/presentation/screens/create_new_pa
 import 'package:assab/features/reset_password/presentation/screens/reset_password_with_email_screen.dart';
 import 'package:assab/features/reset_password/presentation/screens/reset_password_with_phone_screen.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/handover_details_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/pending_daily_closure_item.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_cashier_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_handover_outcome_status.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/add_cashier/add_cashier_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/manager_shift/end_manager_shift/end_manager_shift_cubit.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/shifts/end_shift/end_shift_cubit.dart';
@@ -1080,12 +1082,16 @@ class AppRouter {
         final shift = args['shiftArguments'] as ShiftArguments;
         final isOpenedFromShiftDetailsScreen =
             args['isOpenedFromShiftDetailsScreen'] as bool?;
+        final handoverOutcome =
+            args['handoverOutcome'] as ShiftHandoverOutcomeStatus? ??
+                ShiftHandoverOutcomeStatus.unknown;
 
         return MaterialPageRoute(
           builder: (context) => HandoverSuccessWidget(
             shiftArguments: shift,
             isOpenedFromShiftDetailsScreen:
                 isOpenedFromShiftDetailsScreen ?? false,
+            handoverOutcome: handoverOutcome,
           ),
         );
 
@@ -1125,6 +1131,8 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>;
         final branchName = args['branchName'] as String;
         final managerCubit = args['managerCubit'] as ManagerShiftCubit;
+        final initialEligibility =
+            args['initialEligibility'] as DailyCloseWorkdayEligibility?;
 
         return MaterialPageRoute(
           builder: (context) => MultiBlocProvider(
@@ -1137,7 +1145,10 @@ class AppRouter {
               ),
               BlocProvider.value(value: managerCubit),
             ],
-            child: UpdateManagerFinalDailyCloseScreen(branchName: branchName),
+            child: UpdateManagerFinalDailyCloseScreen(
+              branchName: branchName,
+              initialEligibility: initialEligibility,
+            ),
           ),
         );
       case AppRouteName.inventoryScreen:

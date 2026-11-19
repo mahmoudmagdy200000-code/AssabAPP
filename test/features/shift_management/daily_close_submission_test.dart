@@ -192,12 +192,18 @@ void main() {
       var serverSubmitted = false;
       final result = await action.reconcile(
         'workday',
-        currentRevision: 7,
-        refreshAndVerifySubmitted: () async {
+        refreshWorkday: () async {
           if (adapter.requests.length >= 2) {
             serverSubmitted = true;
           }
-          return serverSubmitted;
+          return DailyCloseFreshRead(
+            readSucceeded: true,
+            workdayId: 'workday',
+            managerId: 'manager-1',
+            branchId: 'branch-1',
+            serverSubmitted: serverSubmitted,
+            reportRevision: 7,
+          );
         },
       );
 
@@ -228,10 +234,16 @@ void main() {
       var checks = 0;
       final result = await action.reconcile(
         'workday',
-        currentRevision: 7,
-        refreshAndVerifySubmitted: () async {
+        refreshWorkday: () async {
           checks++;
-          return checks >= 2;
+          return DailyCloseFreshRead(
+            readSucceeded: true,
+            workdayId: 'workday',
+            managerId: 'manager-1',
+            branchId: 'branch-1',
+            serverSubmitted: checks >= 2,
+            reportRevision: 7,
+          );
         },
       );
 
@@ -265,8 +277,14 @@ void main() {
       };
       final result = await action.reconcile(
         'workday',
-        currentRevision: 7,
-        refreshAndVerifySubmitted: () async => false,
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'workday',
+          managerId: 'manager-1',
+          branchId: 'branch-1',
+          serverSubmitted: false,
+          reportRevision: 7,
+        ),
       );
 
       expect(result.status, DailyCloseReconcileStatus.pending);
@@ -285,11 +303,173 @@ void main() {
 
     final result = await action.reconcile(
       'workday',
-      currentRevision: 7,
-      refreshAndVerifySubmitted: () async => true,
+      refreshWorkday: () async => const DailyCloseFreshRead(
+        readSucceeded: true,
+        workdayId: 'workday',
+        managerId: 'manager-1',
+        branchId: 'branch-1',
+        serverSubmitted: true,
+        reportRevision: 7,
+      ),
     );
 
     expect(result.status, DailyCloseReconcileStatus.unverifiedActor);
     expect(action.hasUnresolved('workday'), true);
   });
+
+  test(
+    'Gap 4 Row 1: fresh GET confirms workday already submitted -> clears intent with 0 extra POSTs',
+    () async {
+      adapter.fail = true;
+      await expectLater(
+        action.submit('workday', 4),
+        throwsA(isA<DioException>()),
+      );
+      expect(adapter.requests.length, 1);
+
+      adapter.fail = false;
+      final result = await action.reconcile(
+        'workday',
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'workday',
+          managerId: 'manager-1',
+          branchId: 'branch-1',
+          serverSubmitted: true,
+          reportRevision: 5,
+        ),
+      );
+
+      expect(result.status, DailyCloseReconcileStatus.confirmed);
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('workday'), false);
+    },
+  );
+
+  test(
+    'Gap 4 Row 3: fresh GET returns open with changed revision (4 -> 5) -> 0 POSTs and retains intent',
+    () async {
+      adapter.fail = true;
+      await expectLater(
+        action.submit('workday', 4),
+        throwsA(isA<DioException>()),
+      );
+      expect(adapter.requests.length, 1);
+
+      adapter.fail = false;
+      final result = await action.reconcile(
+        'workday',
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'workday',
+          managerId: 'manager-1',
+          branchId: 'branch-1',
+          serverSubmitted: false,
+          reportRevision: 5,
+        ),
+      );
+
+      expect(result.status, DailyCloseReconcileStatus.revisionChangedAmbiguous);
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('workday'), true);
+    },
+  );
+
+  test(
+    'Gap 4 Row 4a: fresh GET failure or incomplete data -> 0 POSTs and retains intent',
+    () async {
+      adapter.fail = true;
+      await expectLater(
+        action.submit('workday', 4),
+        throwsA(isA<DioException>()),
+      );
+      expect(adapter.requests.length, 1);
+
+      adapter.fail = false;
+      final failedRead = await action.reconcile(
+        'workday',
+        refreshWorkday: () async =>
+            const DailyCloseFreshRead(readSucceeded: false),
+      );
+      expect(failedRead.status, DailyCloseReconcileStatus.verificationFailed);
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('workday'), true);
+
+      final incompleteRead = await action.reconcile(
+        'workday',
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'workday',
+          managerId: 'manager-1',
+          branchId: 'branch-1',
+          serverSubmitted: false,
+          reportRevision: null,
+        ),
+      );
+      expect(incompleteRead.status, DailyCloseReconcileStatus.verificationFailed);
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('workday'), true);
+    },
+  );
+
+  test(
+    'Gap 4 Row 4b: branch mismatch or account change mid-GET -> 0 POSTs and retains intent',
+    () async {
+      adapter.fail = true;
+      await expectLater(
+        action.submit('workday', 4),
+        throwsA(isA<DioException>()),
+      );
+      expect(adapter.requests.length, 1);
+
+      adapter.fail = false;
+      final wrongBranch = await action.reconcile(
+        'workday',
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'workday',
+          managerId: 'manager-1',
+          branchId: 'branch-99',
+          serverSubmitted: true,
+          reportRevision: 4,
+        ),
+      );
+      expect(wrongBranch.status, DailyCloseReconcileStatus.verificationFailed);
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('workday'), true);
+
+      final wrongWorkday = await action.reconcile(
+        'workday',
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'other-workday',
+          managerId: 'manager-1',
+          branchId: 'branch-1',
+          serverSubmitted: false,
+          reportRevision: 4,
+        ),
+      );
+      expect(wrongWorkday.status, DailyCloseReconcileStatus.verificationFailed);
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('workday'), true);
+
+      final switchedAccount = await action.reconcile(
+        'workday',
+        refreshWorkday: () async {
+          await prefs.setString('u_id', 'manager-2');
+          return const DailyCloseFreshRead(
+            readSucceeded: true,
+            workdayId: 'workday',
+            managerId: 'manager-1',
+            branchId: 'branch-1',
+            serverSubmitted: true,
+            reportRevision: 4,
+          );
+        },
+      );
+      expect(switchedAccount.status, DailyCloseReconcileStatus.unverifiedActor);
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('workday'), true);
+    },
+  );
 }

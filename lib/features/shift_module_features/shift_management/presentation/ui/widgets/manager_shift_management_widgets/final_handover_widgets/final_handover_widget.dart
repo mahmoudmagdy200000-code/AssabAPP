@@ -9,10 +9,12 @@ import '../../../../../../../../core/constants/app_assets.dart';
 import '../../../../../../../../core/di/dependency_injection.dart';
 import '../../../../../../../../core/extensions/build_context_extensions.dart';
 import '../../../../../../../../core/extensions/number_extensions.dart';
+import '../../../../../../../../core/styles/app_colors.dart';
 import '../../../../../../../../core/styles/app_styles.dart';
 import '../../../../../../../../core/widgets/app_button.dart';
 import '../../../../../../../../core/widgets/custom_divider.dart';
 import '../../../../../domain/entity/manager_shift/current_shift/current_shift_entity.dart';
+import '../../../../../domain/entity/manager_shift/pending_daily_closure_item.dart';
 import '../../../../logic/manager_shift/final_daily_close/final_daily_close_cubit.dart';
 import '../../../../logic/manager_shift/manager_shift_cubit.dart';
 import '../../../../mappers/manager_shift_mapper/final_handover_status_ui_mapper.dart';
@@ -21,9 +23,46 @@ import '../../cashier_shifts_management_widgets/shift_card_widgets/shift_card.da
 import 'final_handover_summary_widget.dart';
 
 class FinalHandoverWidget extends StatelessWidget {
-  const FinalHandoverWidget({super.key, required this.currentManagerShift});
+  const FinalHandoverWidget({
+    super.key,
+    required this.currentManagerShift,
+    this.eligibility,
+    this.isLoadingEligibility = false,
+    this.onRetryEligibility,
+    this.onReturnedFromSubmission,
+    this.onOpenDailyClose,
+  });
 
   final CurrentShiftEntity currentManagerShift;
+  final DailyCloseWorkdayEligibility? eligibility;
+  final bool isLoadingEligibility;
+  final VoidCallback? onRetryEligibility;
+  final Future<void> Function()? onReturnedFromSubmission;
+  final Future<void> Function(String workdayId, DailyCloseWorkdayEligibility? eligibility)?
+      onOpenDailyClose;
+
+  Future<void> _openWorkdayScreen(BuildContext context) async {
+    final shift = currentManagerShift.shift;
+    if (onOpenDailyClose != null) {
+      await onOpenDailyClose!(shift.id, eligibility);
+      await onReturnedFromSubmission?.call();
+      return;
+    }
+    final managerCubit = context.read<ManagerShiftCubit>();
+    await NavigationService.I.pushNamed(
+      AppRouteName.updateManagerFinalDailyCloseScreen,
+      arguments: {
+        'manager_workday_id': shift.id,
+        'branchName': shift.shiftDetails.storeBranch,
+        'managerCubit': managerCubit,
+        'initialEligibility': eligibility,
+      },
+    );
+    if (context.mounted) {
+      await managerCubit.getCurrentShift();
+      await onReturnedFromSubmission?.call();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,20 +167,73 @@ class FinalHandoverWidget extends StatelessWidget {
         const CustomDivider(),
 
         if (needsCorrection || canSubmitDailyReport) ...[
+          if (isLoadingEligibility)
+            Padding(
+              padding: EdgeInsets.only(bottom: 8.h),
+              child: const Center(child: CircularProgressIndicator()),
+            )
+          else if (eligibility != null && !eligibility!.isEligible) ...[
+            Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: eligibility!.status == DailyCloseEligibilityStatus.verificationFailed
+                    ? Colors.red.shade50
+                    : Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    eligibility!.status ==
+                            DailyCloseEligibilityStatus.blockedByOlderWorkday
+                        ? context.tr.closeWorkdayDateFirst(
+                            eligibility!.localizedBlockingDate(
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                          )
+                        : (eligibility!.failure?.error.message ??
+                              context.tr.couldNotVerifyPendingClosures),
+                    style: AppStyles.s12W500.copyWith(
+                      color: eligibility!.status ==
+                              DailyCloseEligibilityStatus.verificationFailed
+                          ? AppColors.red
+                          : Colors.orange.shade900,
+                    ),
+                  ),
+                  if (eligibility!.status ==
+                          DailyCloseEligibilityStatus.verificationFailed &&
+                      onRetryEligibility != null) ...[
+                    6.verticalSpace,
+                    AppButton(
+                      onClick: onRetryEligibility!,
+                      enabled: true,
+                      isTransparent: true,
+                      borderRadius: BorderRadius.circular(8.r),
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      text: context.tr.retryLoadPendingClosures,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            8.verticalSpace,
+            AppButton(
+              onClick: () => _openWorkdayScreen(context),
+              enabled: true,
+              isTransparent: true,
+              borderColor: context.customColor.border,
+              textColor: context.customColor.text1,
+              borderRadius: BorderRadius.circular(10.r),
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              text: context.tr.seeDetails,
+            ),
+            8.verticalSpace,
+          ],
           AppButton(
-            onClick: () async {
-              final managerCubit = context.read<ManagerShiftCubit>();
-              await NavigationService.I.pushNamed(
-                AppRouteName.updateManagerFinalDailyCloseScreen,
-                arguments: {
-                  'manager_workday_id': shift.id,
-                  'branchName': shift.shiftDetails.storeBranch,
-                  'managerCubit': managerCubit,
-                },
-              );
-              if (context.mounted) await managerCubit.getCurrentShift();
-            },
-            enabled: true,
+            onClick: () => _openWorkdayScreen(context),
+            enabled: !isLoadingEligibility &&
+                (eligibility == null || eligibility!.isEligible),
             borderRadius: BorderRadius.circular(10.r),
             padding: EdgeInsets.symmetric(vertical: 15.h),
             text: needsCorrection

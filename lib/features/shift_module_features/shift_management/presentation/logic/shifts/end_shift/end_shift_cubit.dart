@@ -17,6 +17,7 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/end_shift_aggregator_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_handover_outcome_status.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/end_shift_widgets/end_shift_with_hand_over_summary_strategy/variance_summary_strategy_factory.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -938,7 +939,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     }
     handle(
       result,
-      success: (_) => emit(EndShiftSuccess()),
+      success: (outcome) => emit(
+        EndShiftSuccess(
+          handoverOutcome: outcome is ShiftHandoverOutcomeStatus
+              ? outcome
+              : ShiftHandoverOutcomeStatus.fromApiPayload(outcome),
+        ),
+      ),
       failure: (f) => emit(EndShiftFailure(f)),
     );
   }
@@ -1070,7 +1077,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     }
     handle(
       result,
-      success: (_) => emit(EndShiftSuccess()),
+      success: (outcome) => emit(
+        EndShiftSuccess(
+          handoverOutcome: outcome is ShiftHandoverOutcomeStatus
+              ? outcome
+              : ShiftHandoverOutcomeStatus.fromApiPayload(outcome),
+        ),
+      ),
       failure: (f) => emit(EndShiftFailure(f)),
     );
   }

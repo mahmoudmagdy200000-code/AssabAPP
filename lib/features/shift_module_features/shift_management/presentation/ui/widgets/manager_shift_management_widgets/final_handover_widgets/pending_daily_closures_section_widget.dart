@@ -25,11 +25,21 @@ class PendingDailyClosuresSectionWidget extends StatefulWidget {
     required this.currentManagerShift,
     this.loadPending,
     this.onOpenClosure,
+    this.sharedAllPending,
+    this.sharedLoading,
+    this.sharedFailure,
+    this.onRetryShared,
+    this.onAfterClosureReturned,
   });
 
   final CurrentShiftEntity currentManagerShift;
   final FutureApiResult<List<PendingDailyClosureItem>> Function()? loadPending;
   final Future<void> Function(PendingDailyClosureItem item)? onOpenClosure;
+  final List<PendingDailyClosureItem>? sharedAllPending;
+  final bool? sharedLoading;
+  final ApiFailure? sharedFailure;
+  final VoidCallback? onRetryShared;
+  final Future<void> Function()? onAfterClosureReturned;
 
   @override
   State<PendingDailyClosuresSectionWidget> createState() =>
@@ -42,22 +52,34 @@ class _PendingDailyClosuresSectionWidgetState
   ApiFailure? _failure;
   List<PendingDailyClosureItem> _items = const [];
 
+  bool get _usesSharedState =>
+      widget.sharedLoading != null ||
+      widget.sharedFailure != null ||
+      widget.sharedAllPending != null;
+
   @override
   void initState() {
     super.initState();
-    _fetch();
+    if (!_usesSharedState) {
+      _fetch();
+    }
   }
 
   @override
   void didUpdateWidget(covariant PendingDailyClosuresSectionWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentManagerShift.shift.id !=
-        widget.currentManagerShift.shift.id) {
+    if (!_usesSharedState &&
+        oldWidget.currentManagerShift.shift.id !=
+            widget.currentManagerShift.shift.id) {
       _fetch();
     }
   }
 
   Future<void> _fetch() async {
+    if (_usesSharedState) {
+      widget.onRetryShared?.call();
+      return;
+    }
     setState(() {
       _loading = true;
       _failure = null;
@@ -87,11 +109,13 @@ class _PendingDailyClosuresSectionWidgetState
     return getIt<ShiftManagementRepositoryImp>().getPendingDailyClosures(
       actorId: actorId,
       branchId: branchId,
-      excludeWorkdayId: widget.currentManagerShift.shift.id,
     );
   }
 
-  Future<void> _openItem(PendingDailyClosureItem item) async {
+  Future<void> _openItem(
+    PendingDailyClosureItem item,
+    DailyCloseWorkdayEligibility eligibility,
+  ) async {
     if (widget.onOpenClosure != null) {
       await widget.onOpenClosure!(item);
       await _fetch();
@@ -107,25 +131,38 @@ class _PendingDailyClosuresSectionWidgetState
         'manager_workday_id': item.id,
         'branchName': branchName,
         'managerCubit': managerCubit,
+        'initialEligibility': eligibility,
       },
     );
     if (!mounted) return;
     await managerCubit.getCurrentShift();
-    await _fetch();
+    if (widget.onAfterClosureReturned != null) {
+      await widget.onAfterClosureReturned!();
+    } else {
+      await _fetch();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isEn = Localizations.localeOf(context).languageCode.startsWith('en');
+    final isLoading = _usesSharedState ? (widget.sharedLoading ?? false) : _loading;
+    final failure = _usesSharedState ? widget.sharedFailure : _failure;
+    final allPending = _usesSharedState
+        ? (widget.sharedAllPending ?? const <PendingDailyClosureItem>[])
+        : _items;
+    final visibleItems = allPending
+        .where((e) => e.id != widget.currentManagerShift.shift.id)
+        .toList();
 
-    if (_loading) {
+    if (isLoading) {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 8.h),
         child: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_failure != null) {
+    if (failure != null) {
       return CashierInfoContainerWidget(
         children: [
           Text(
@@ -134,7 +171,7 @@ class _PendingDailyClosuresSectionWidgetState
           ),
           6.verticalSpace,
           Text(
-            _failure!.error.message ?? context.tr.dailyCloseRejectedByServer,
+            failure.error.message ?? context.tr.couldNotVerifyPendingClosures,
             style: AppStyles.s12W400.copyWith(color: AppColors.red),
           ),
           8.verticalSpace,
@@ -150,7 +187,7 @@ class _PendingDailyClosuresSectionWidgetState
       );
     }
 
-    if (_items.isEmpty) {
+    if (visibleItems.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -172,7 +209,7 @@ class _PendingDailyClosuresSectionWidgetState
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
-                '${_items.length}',
+                '${visibleItems.length}',
                 style: AppStyles.s12W600.copyWith(
                   color: Colors.orange.shade800,
                 ),
@@ -186,14 +223,23 @@ class _PendingDailyClosuresSectionWidgetState
           style: AppStyles.s12W400.copyWith(color: context.customColor.text3),
         ),
         const CustomDivider(),
-        for (var i = 0; i < _items.length; i++) ...[
-          _PendingClosureCard(
-            item: _items[i],
-            isOldestAllowed: i == 0,
-            isEn: isEn,
-            onSubmit: () => _openItem(_items[i]),
-          ),
-          if (i < _items.length - 1) const CustomDivider(),
+        for (var i = 0; i < visibleItems.length; i++) ...[
+          () {
+            final item = visibleItems[i];
+            final eligibility = PendingDailyClosureItem.evaluateWorkday(
+              workdayId: item.id,
+              businessDate: item.shiftDate,
+              orderedPending: allPending,
+            );
+            return _PendingClosureCard(
+              item: item,
+              eligibility: eligibility,
+              isEn: isEn,
+              onSubmit: () => _openItem(item, eligibility),
+              onViewDetails: () => _openItem(item, eligibility),
+            );
+          }(),
+          if (i < visibleItems.length - 1) const CustomDivider(),
         ],
       ],
     );
@@ -203,15 +249,17 @@ class _PendingDailyClosuresSectionWidgetState
 class _PendingClosureCard extends StatelessWidget {
   const _PendingClosureCard({
     required this.item,
-    required this.isOldestAllowed,
+    required this.eligibility,
     required this.isEn,
     required this.onSubmit,
+    required this.onViewDetails,
   });
 
   final PendingDailyClosureItem item;
-  final bool isOldestAllowed;
+  final DailyCloseWorkdayEligibility eligibility;
   final bool isEn;
   final VoidCallback onSubmit;
+  final VoidCallback onViewDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -263,17 +311,33 @@ class _PendingClosureCard extends StatelessWidget {
               ),
           ],
         ),
-        if (!isOldestAllowed) ...[
+        if (!eligibility.isEligible) ...[
           6.verticalSpace,
           Text(
-            context.tr.closeOldestPendingWorkdayFirst,
+            eligibility.status ==
+                    DailyCloseEligibilityStatus.blockedByOlderWorkday
+                ? context.tr.closeWorkdayDateFirst(
+                    eligibility.localizedBlockingDate(
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                  )
+                : context.tr.couldNotVerifyPendingClosures,
             style: AppStyles.s12W400.copyWith(color: Colors.orange.shade800),
+          ),
+          6.verticalSpace,
+          AppButton(
+            onClick: onViewDetails,
+            enabled: true,
+            isTransparent: true,
+            borderRadius: BorderRadius.circular(8.r),
+            padding: EdgeInsets.symmetric(vertical: 8.h),
+            text: context.tr.seeDetails,
           ),
         ],
         8.verticalSpace,
         AppButton(
           onClick: onSubmit,
-          enabled: isOldestAllowed,
+          enabled: eligibility.isEligible,
           borderRadius: BorderRadius.circular(8.r),
           padding: EdgeInsets.symmetric(vertical: 10.h),
           text: context.tr.submitDailyCloseFinal,

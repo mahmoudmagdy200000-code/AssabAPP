@@ -3683,5 +3683,22 @@
   "pendingDailyClosuresSubtitle": "أيام عمل مكتملة سابقة ما زالت تحتاج إرسال الإقفال اليومي النهائي.",
   "closeOldestPendingWorkdayFirst": "أقفل يوم العمل الأقدم المعلّق أولاً.",
   "dailyCloseRejectedByServer": "رفض السيرفر إرسال الإقفال اليومي.",
-  "retryLoadPendingClosures": "إعادة المحاولة"
+  "retryLoadPendingClosures": "إعادة المحاولة",
+  "handoverReceiptConfirmed": "تم تأكيد استلام العهدة",
+  "handoverReceiptConfirmedDesc": "تم تأكيد استلام العهدة النقدية بواسطة {cashierName}.",
+  "@handoverReceiptConfirmedDesc": {
+    "placeholders": {
+      "cashierName": {}
+    }
+  },
+  "handoverSubmittedVerifyDetailsTitle": "تم إرسال التسليم",
+  "handoverOutcomeUnconfirmedCheckDetails": "تعذر تأكيد حالة استلام العهدة من استجابة الخادم. يرجى مراجعة التفاصيل للتحقق.",
+  "closeWorkdayDateFirst": "أقفل يوم {dateLabel} أولًا.",
+  "@closeWorkdayDateFirst": {
+    "placeholders": {
+      "dateLabel": {}
+    }
+  },
+  "couldNotVerifyPendingClosures": "تعذر التحقق من الإقفالات اليومية المعلقة. أعد المحاولة قبل الإرسال.",
+  "couldNotVerifyWorkdayStatus": "تعذر التحقق من حالة يوم العمل من الخادم."
 }

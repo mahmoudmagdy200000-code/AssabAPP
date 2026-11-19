@@ -26,6 +26,7 @@ import '../../../../../core/utils/future_api_result.dart';
 import '../../domain/entity/check_email_entity.dart';
 import '../../domain/entity/manager_shift/end_shift_response_entites/manager_shift_end_data_entity.dart';
 import '../../domain/entity/shift/shift_entity.dart';
+import '../../domain/entity/shift/shift_handover_outcome_status.dart';
 import '../../domain/enums/user_type.dart';
 import '../../presentation/mappers/manager_shift_mapper/end_shift_response_entites_mappers/manager_shift_end_data_mapper.dart';
 import '../data_source/shift_management_remote_data_source.dart';
@@ -323,12 +324,12 @@ class ShiftManagementRepositoryImp
     EndShiftRequestWithHandOver endShiftRequestWithVariance,
   ) async {
     return execute(() async {
-      await _remoteDataSource.endShiftWithHandOver(
+      final response = await _remoteDataSource.endShiftWithHandOver(
         shiftId: id,
         data: await endShiftRequestWithVariance.toFormData(),
       );
 
-      return true;
+      return ShiftHandoverOutcomeStatus.fromApiPayload(response);
     });
   }
 
@@ -512,7 +513,7 @@ class ShiftManagementRepositoryImp
     });
   }
 
-  FutureApiResult handOver({
+  FutureApiResult<ShiftHandoverOutcomeStatus> handOver({
     required String shiftId,
     required String cashierId,
     required bool isManager,
@@ -532,7 +533,7 @@ class ShiftManagementRepositoryImp
           handoverNotes: note,
         ),
       );
-      return response;
+      return ShiftHandoverOutcomeStatus.fromApiPayload(response);
     });
   }
 
@@ -723,22 +724,60 @@ class ShiftManagementRepositoryImp
     required String actorId,
     required String branchId,
     String? excludeWorkdayId,
+    int perPage = 50,
   }) async {
     return execute(() async {
-      final historyRes = await _remoteDataSource.getWorkdayHistory(perPage: 50);
-      final List<dynamic> historyList =
-          historyRes is Map && historyRes['data'] is List
-              ? historyRes['data'] as List
-              : const [];
-      final items = historyList
-          .whereType<Map>()
-          .map(
-            (row) => PendingDailyClosureItem.fromHistoryJson(
+      if (actorId.trim().isEmpty) {
+        throw StateError('Unverified manager actor.');
+      }
+      final allRows = <Map<String, dynamic>>[];
+      var page = 1;
+      var lastPage = 1;
+
+      do {
+        final historyRes = await _remoteDataSource.getWorkdayHistory(
+          perPage: perPage,
+          page: page,
+        );
+        if (historyRes is! Map || historyRes['data'] is! List) {
+          throw StateError('Invalid workday history response on page $page.');
+        }
+        final pageList = historyRes['data'] as List;
+        for (final row in pageList) {
+          if (row is Map) {
+            allRows.add(
               row is Map<String, dynamic>
                   ? row
                   : Map<String, dynamic>.from(row),
-            ),
-          )
+            );
+          }
+        }
+
+        final meta = historyRes['meta'];
+        if (meta is Map) {
+          final rawLast = meta['last_page'];
+          final parsedLast = rawLast is int
+              ? rawLast
+              : int.tryParse(rawLast?.toString() ?? '');
+          if (parsedLast != null && parsedLast >= page) {
+            lastPage = parsedLast;
+          } else {
+            lastPage = page;
+          }
+        } else {
+          final links = historyRes['links'];
+          final hasNext = links is Map && links['next'] != null;
+          lastPage = hasNext ? page + 1 : page;
+        }
+        page++;
+      } while (page <= lastPage && page <= 100);
+
+      if (page <= lastPage) {
+        throw StateError('Workday history pagination exceeded safety limit.');
+      }
+
+      final items = allRows
+          .map(PendingDailyClosureItem.fromHistoryJson)
           .toList();
 
       return PendingDailyClosureItem.filterAndOrderPending(

@@ -9,7 +9,67 @@ enum DailyCloseReconcileStatus {
   confirmed,
   rejected,
   pending,
+  revisionChangedAmbiguous,
+  verificationFailed,
   unverifiedActor,
+}
+
+class DailyCloseFreshRead {
+  const DailyCloseFreshRead({
+    required this.readSucceeded,
+    this.workdayId,
+    this.managerId,
+    this.branchId,
+    this.serverSubmitted,
+    this.reportRevision,
+  });
+
+  final bool readSucceeded;
+  final String? workdayId;
+  final String? managerId;
+  final String? branchId;
+  final bool? serverSubmitted;
+  final int? reportRevision;
+
+  bool hasMatchingIdentity({
+    required String expectedWorkdayId,
+    required String expectedManagerId,
+    required String expectedBranchId,
+  }) {
+    return readSucceeded &&
+        workdayId == expectedWorkdayId &&
+        managerId == expectedManagerId &&
+        branchId == expectedBranchId &&
+        serverSubmitted != null;
+  }
+
+  bool isVerifiedSubmitted({
+    required String expectedWorkdayId,
+    required String expectedManagerId,
+    required String expectedBranchId,
+  }) {
+    return hasMatchingIdentity(
+          expectedWorkdayId: expectedWorkdayId,
+          expectedManagerId: expectedManagerId,
+          expectedBranchId: expectedBranchId,
+        ) &&
+        serverSubmitted == true;
+  }
+
+  bool isVerifiedOpen({
+    required String expectedWorkdayId,
+    required String expectedManagerId,
+    required String expectedBranchId,
+  }) {
+    return hasMatchingIdentity(
+          expectedWorkdayId: expectedWorkdayId,
+          expectedManagerId: expectedManagerId,
+          expectedBranchId: expectedBranchId,
+        ) &&
+        serverSubmitted == false &&
+        reportRevision != null &&
+        reportRevision! > 0;
+  }
 }
 
 class DailyCloseReconcileResult {
@@ -217,15 +277,14 @@ class DailyCloseSubmission {
     }
   }
 
-  /// Safely reconciles an unresolved submission intent:
-  /// 1) Reads server state by exact workday UUID. If submitted, clears intent.
-  /// 2) If unsubmitted and revision matches, replays the exact saved payload/key ONCE.
-  /// 3) Surfaces definitive validation rejections and clears the rolled-back intent.
-  /// 4) Retains intent on ambiguous/in-progress/5xx outcomes without generating new keys.
+  /// Safely reconciles an unresolved submission intent using the fresh GET snapshot:
+  /// 1) Confirmed submitted for same workday/manager/branch -> clear intent, 0 POSTs.
+  /// 2) Verified open with fresh reportRevision == saved revision -> replay ONCE with saved key.
+  /// 3) Verified open with changed reportRevision (ambiguous prior attempt) -> keep intent, 0 POSTs.
+  /// 4) Read failed, incomplete data, or actor/branch/workday mismatch -> keep intent, 0 POSTs.
   Future<DailyCloseReconcileResult> reconcile(
     String workdayId, {
-    required int? currentRevision,
-    required Future<bool> Function() refreshAndVerifySubmitted,
+    required Future<DailyCloseFreshRead> Function() refreshWorkday,
   }) async {
     if (!hasCurrentActor) {
       return const DailyCloseReconcileResult(
@@ -233,11 +292,39 @@ class DailyCloseSubmission {
       );
     }
 
-    final verifiedBeforeReplay = await refreshAndVerifySubmitted();
-    if (verifiedBeforeReplay) {
+    final DailyCloseFreshRead fresh;
+    try {
+      fresh = await refreshWorkday();
+    } catch (_) {
+      return const DailyCloseReconcileResult(
+        status: DailyCloseReconcileStatus.verificationFailed,
+      );
+    }
+
+    if (!hasCurrentActor) {
+      return const DailyCloseReconcileResult(
+        status: DailyCloseReconcileStatus.unverifiedActor,
+      );
+    }
+
+    if (fresh.isVerifiedSubmitted(
+      expectedWorkdayId: workdayId,
+      expectedManagerId: actorId,
+      expectedBranchId: branchId,
+    )) {
       await resolveSubmitted(workdayId);
       return const DailyCloseReconcileResult(
         status: DailyCloseReconcileStatus.confirmed,
+      );
+    }
+
+    if (!fresh.hasMatchingIdentity(
+      expectedWorkdayId: workdayId,
+      expectedManagerId: actorId,
+      expectedBranchId: branchId,
+    )) {
+      return const DailyCloseReconcileResult(
+        status: DailyCloseReconcileStatus.verificationFailed,
       );
     }
 
@@ -254,16 +341,27 @@ class DailyCloseSubmission {
       );
     }
 
+    if (!fresh.isVerifiedOpen(
+      expectedWorkdayId: workdayId,
+      expectedManagerId: actorId,
+      expectedBranchId: branchId,
+    )) {
+      return const DailyCloseReconcileResult(
+        status: DailyCloseReconcileStatus.verificationFailed,
+      );
+    }
+
     final savedRevision = saved['revision'] is int
         ? saved['revision'] as int
         : int.tryParse(saved['revision']?.toString() ?? '');
     if (savedRevision == null || savedRevision < 1 || saved['key'] is! String) {
       return const DailyCloseReconcileResult(
-        status: DailyCloseReconcileStatus.pending,
+        status: DailyCloseReconcileStatus.verificationFailed,
       );
     }
 
-    if (currentRevision != null && savedRevision != currentRevision) {
+    final freshRevision = fresh.reportRevision!;
+    if (freshRevision != savedRevision) {
       final lastStatus = saved['lastStatus'] is int
           ? saved['lastStatus'] as int
           : int.tryParse(saved['lastStatus']?.toString() ?? '');
@@ -281,35 +379,59 @@ class DailyCloseSubmission {
         );
       }
       return const DailyCloseReconcileResult(
-        status: DailyCloseReconcileStatus.pending,
+        status: DailyCloseReconcileStatus.revisionChangedAmbiguous,
       );
     }
 
     // Single safe replay using the exact saved key & revision (no loop, no new key).
     try {
       await submit(workdayId, savedRevision);
-      final verifiedAfterReplay = await refreshAndVerifySubmitted();
-      if (verifiedAfterReplay) {
+      final afterReplay = await refreshWorkday();
+      if (!hasCurrentActor) {
+        return const DailyCloseReconcileResult(
+          status: DailyCloseReconcileStatus.unverifiedActor,
+        );
+      }
+      if (afterReplay.isVerifiedSubmitted(
+        expectedWorkdayId: workdayId,
+        expectedManagerId: actorId,
+        expectedBranchId: branchId,
+      )) {
         await resolveSubmitted(workdayId);
         return const DailyCloseReconcileResult(
           status: DailyCloseReconcileStatus.confirmed,
         );
       }
-      return const DailyCloseReconcileResult(
-        status: DailyCloseReconcileStatus.pending,
+      return DailyCloseReconcileResult(
+        status: afterReplay.hasMatchingIdentity(
+              expectedWorkdayId: workdayId,
+              expectedManagerId: actorId,
+              expectedBranchId: branchId,
+            )
+            ? DailyCloseReconcileStatus.pending
+            : DailyCloseReconcileStatus.verificationFailed,
       );
     } on DioException catch (e) {
       final parsed = extractServerError(e);
       if (isAlreadyCommittedSignal(parsed)) {
-        final verifiedNow = await refreshAndVerifySubmitted();
-        if (verifiedNow) {
+        final afterSignal = await refreshWorkday();
+        if (!hasCurrentActor) {
+          return const DailyCloseReconcileResult(
+            status: DailyCloseReconcileStatus.unverifiedActor,
+          );
+        }
+        if (afterSignal.isVerifiedSubmitted(
+          expectedWorkdayId: workdayId,
+          expectedManagerId: actorId,
+          expectedBranchId: branchId,
+        )) {
           await resolveSubmitted(workdayId);
           return const DailyCloseReconcileResult(
             status: DailyCloseReconcileStatus.confirmed,
           );
         }
         return DailyCloseReconcileResult(
-          status: DailyCloseReconcileStatus.pending,
+          status: DailyCloseReconcileStatus.verificationFailed,
           statusCode: parsed.statusCode,
           errorCode: parsed.code,
           message: parsed.message,

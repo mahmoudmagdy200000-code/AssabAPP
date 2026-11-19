@@ -498,7 +498,7 @@ class _ShiftManagementRemoteDataSource
   }
 
   @override
-  Future<void> endShiftWithHandOver({
+  Future<dynamic> endShiftWithHandOver({
     required String shiftId,
     required FormData data,
   }) async {
@@ -506,7 +506,7 @@ class _ShiftManagementRemoteDataSource
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = data;
-    final _options = _setStreamType<void>(
+    final _options = _setStreamType<dynamic>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -516,7 +516,9 @@ class _ShiftManagementRemoteDataSource
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    await _dio.fetch<void>(_options);
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
   }
 
   @override
@@ -1093,6 +1095,7 @@ class _ShiftManagementRemoteDataSource
     String? dateFrom,
     String? dateTo,
     int? perPage,
+    int? page,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
@@ -1100,6 +1103,7 @@ class _ShiftManagementRemoteDataSource
       r'date_from': dateFrom,
       r'date_to': dateTo,
       r'per_page': perPage,
+      r'page': page,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};

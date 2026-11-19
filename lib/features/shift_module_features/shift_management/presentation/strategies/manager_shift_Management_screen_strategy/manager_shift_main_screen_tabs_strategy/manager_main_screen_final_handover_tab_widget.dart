@@ -1,14 +1,22 @@
+import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/enums/shift_status/shift_status_type.dart';
+import 'package:assab/core/errors/api_error_model.dart';
+import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/routing/app_route_name.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/app_bottom_sheet.dart';
+import 'package:assab/core/utils/future_api_result.dart';
 import 'package:assab/core/widgets/app_button.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/current_shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/progress_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/pending_daily_closure_item.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/manager_shift/manager_shift_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../../../core/extensions/build_context_extensions.dart';
 import '../../../../../../../core/styles/app_colors.dart';
@@ -23,22 +31,150 @@ class ManagerMainScreenFinalHandoverTabWidget
   final String shiftDate;
   final ShiftStatusType shiftStatus;
   final CurrentShiftEntity currentManagerShift;
+  final FutureApiResult<List<PendingDailyClosureItem>> Function({
+    required String actorId,
+    required String branchId,
+  })?
+  loadPendingClosures;
+  final Future<void> Function(
+    String workdayId,
+    DailyCloseWorkdayEligibility? eligibility,
+  )?
+  onOpenDailyClose;
+
   ManagerMainScreenFinalHandoverTabWidget({
     required this.shiftDate,
     required this.shiftStatus,
     required this.currentManagerShift,
+    this.loadPendingClosures,
+    this.onOpenDailyClose,
   });
 
   @override
   Widget buildTabContent(BuildContext context) {
-    ProgressEntity progress = currentManagerShift.progress;
+    return _ManagerFinalHandoverTabContent(
+      shiftDate: shiftDate,
+      shiftStatus: shiftStatus,
+      currentManagerShift: currentManagerShift,
+      loadPendingClosures: loadPendingClosures,
+      onOpenDailyClose: onOpenDailyClose,
+    );
+  }
+}
+
+class _ManagerFinalHandoverTabContent extends StatefulWidget {
+  const _ManagerFinalHandoverTabContent({
+    required this.shiftDate,
+    required this.shiftStatus,
+    required this.currentManagerShift,
+    this.loadPendingClosures,
+    this.onOpenDailyClose,
+  });
+
+  final String shiftDate;
+  final ShiftStatusType shiftStatus;
+  final CurrentShiftEntity currentManagerShift;
+  final FutureApiResult<List<PendingDailyClosureItem>> Function({
+    required String actorId,
+    required String branchId,
+  })?
+  loadPendingClosures;
+  final Future<void> Function(
+    String workdayId,
+    DailyCloseWorkdayEligibility? eligibility,
+  )?
+  onOpenDailyClose;
+
+  @override
+  State<_ManagerFinalHandoverTabContent> createState() =>
+      _ManagerFinalHandoverTabContentState();
+}
+
+class _ManagerFinalHandoverTabContentState
+    extends State<_ManagerFinalHandoverTabContent> {
+  bool _loading = true;
+  ApiFailure? _failure;
+  List<PendingDailyClosureItem> _allPending = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAllPending();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ManagerFinalHandoverTabContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentManagerShift.shift.id !=
+            widget.currentManagerShift.shift.id ||
+        oldWidget.shiftDate != widget.shiftDate ||
+        oldWidget.shiftStatus != widget.shiftStatus) {
+      _fetchAllPending();
+    }
+  }
+
+  Future<void> _fetchAllPending() async {
+    setState(() {
+      _loading = true;
+      _failure = null;
+    });
+
+    final ApiResult<List<PendingDailyClosureItem>> result;
+    final prefs = await SharedPreferences.getInstance();
+    final actorId = prefs.getString('u_id') ?? '';
+    final branchId = widget.currentManagerShift.shift.shiftDetails.branchId;
+
+    if (widget.loadPendingClosures != null) {
+      result = await widget.loadPendingClosures!(
+        actorId: actorId,
+        branchId: branchId,
+      );
+    } else if (getIt.isRegistered<ShiftManagementRepositoryImp>()) {
+      result = await getIt<ShiftManagementRepositoryImp>()
+          .getPendingDailyClosures(actorId: actorId, branchId: branchId);
+    } else {
+      result = ApiResult<List<PendingDailyClosureItem>>.failure(
+        ServerFailure(
+          error: LocalErrorModel(
+            message: 'Pending closures verification is unavailable.',
+          ),
+          icon: Icons.error_outline,
+          statusCode: 500,
+          stackTrace: StackTrace.current,
+        ),
+      );
+    }
+
+    if (!mounted) return;
+    result.when(
+      failure: (failure) => setState(() {
+        _loading = false;
+        _failure = failure;
+      }),
+      success: (items) => setState(() {
+        _loading = false;
+        _allPending = items;
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ProgressEntity progress = widget.currentManagerShift.progress;
     final isEn = Localizations.localeOf(context).languageCode.startsWith('en');
 
+    final todayEligibility = PendingDailyClosureItem.evaluateWorkday(
+      workdayId: widget.currentManagerShift.shift.id,
+      businessDate: widget.currentManagerShift.shift.shiftDate,
+      orderedPending: _allPending,
+      loadFailure: _failure,
+    );
+
     final Widget todaySection;
-    if (shiftStatus == ShiftStatusType.pending) {
+    if (widget.shiftStatus == ShiftStatusType.pending) {
       todaySection = NoFinalHanOverWidget(
         progress: progress,
-        shiftDate: shiftDate,
+        shiftDate: widget.shiftDate,
         title: context.tr.shiftNotStarted,
         firstSubTitle: context.tr.uHaventStartedYourShiftYet,
         secondSubTitle: context.tr.uNeedToBeginTheShift,
@@ -48,31 +184,39 @@ class ManagerMainScreenFinalHandoverTabWidget
           context.read<ManagerShiftCubit>().startManagerShift();
         },
       );
-    } else if (shiftStatus == ShiftStatusType.inProgress) {
+    } else if (widget.shiftStatus == ShiftStatusType.inProgress) {
       todaySection = NoFinalHanOverWidget(
         progress: progress,
-        shiftDate: shiftDate,
+        shiftDate: widget.shiftDate,
         title: context.tr.EndShiftFirst,
         firstSubTitle: context.tr.youNeedToEndYourShiftBeforeFinalHandOver,
         secondSubTitle: context.tr.wrapUpYourShiftActivities,
         buttonText: context.tr.end_shift,
-        buttonColor: progress.hasEnded(shiftDate: shiftDate)
+        buttonColor: progress.hasEnded(shiftDate: widget.shiftDate)
             ? AppColors.lightGreen
             : AppColors.red,
         buttonOnTap: () {
           NavigationService.I.pushNamed(
             AppRouteName.endManagerShiftScreen,
             arguments: {
-              'handovers': currentManagerShift.handover,
-              'managerName': currentManagerShift.shift.shiftDetails.managerName,
+              'handovers': widget.currentManagerShift.handover,
+              'managerName':
+                  widget.currentManagerShift.shift.shiftDetails.managerName,
               'managerCubit': context.read<ManagerShiftCubit>(),
-              'serverCanEnd': currentManagerShift.canEnd,
+              'serverCanEnd': widget.currentManagerShift.canEnd,
             },
           );
         },
       );
     } else {
-      todaySection = FinalHandoverWidget(currentManagerShift: currentManagerShift);
+      todaySection = FinalHandoverWidget(
+        currentManagerShift: widget.currentManagerShift,
+        eligibility: todayEligibility,
+        isLoadingEligibility: _loading,
+        onRetryEligibility: _fetchAllPending,
+        onReturnedFromSubmission: _fetchAllPending,
+        onOpenDailyClose: widget.onOpenDailyClose,
+      );
     }
 
     return Column(
@@ -82,7 +226,23 @@ class ManagerMainScreenFinalHandoverTabWidget
         todaySection,
         12.verticalSpace,
         PendingDailyClosuresSectionWidget(
-          currentManagerShift: currentManagerShift,
+          currentManagerShift: widget.currentManagerShift,
+          sharedAllPending: _allPending,
+          sharedLoading: _loading,
+          sharedFailure: _failure,
+          onRetryShared: _fetchAllPending,
+          onAfterClosureReturned: _fetchAllPending,
+          onOpenClosure: widget.onOpenDailyClose == null
+              ? null
+              : (item) => widget.onOpenDailyClose!(
+                  item.id,
+                  PendingDailyClosureItem.evaluateWorkday(
+                    workdayId: item.id,
+                    businessDate: item.shiftDate,
+                    orderedPending: _allPending,
+                    loadFailure: _failure,
+                  ),
+                ),
         ),
         12.verticalSpace,
         AppButton(

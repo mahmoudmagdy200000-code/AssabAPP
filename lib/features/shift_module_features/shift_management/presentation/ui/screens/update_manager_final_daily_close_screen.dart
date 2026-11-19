@@ -1,12 +1,18 @@
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
+import 'package:assab/core/errors/api_error_model.dart';
+import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/app_dialog.dart';
+import 'package:assab/core/utils/future_api_result.dart';
 import 'package:assab/core/widgets/app_button_loading.dart';
 import 'package:assab/core/widgets/app_scaffold.dart';
+import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/final_daily_close/cashier_breakdown_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/final_daily_close/totals_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/pending_daily_closure_item.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/logic/manager_shift/end_manager_shift/end_manager_shift_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,10 +34,18 @@ import '../widgets/manager_shift_management_widgets/end_manager_shift_widgets/fi
 
 class UpdateManagerFinalDailyCloseScreen extends StatefulWidget {
   final String branchName;
+  final DailyCloseWorkdayEligibility? initialEligibility;
+  final FutureApiResult<List<PendingDailyClosureItem>> Function({
+    required String actorId,
+    required String branchId,
+  })?
+  loadPendingClosures;
 
   const UpdateManagerFinalDailyCloseScreen({
     super.key,
     required this.branchName,
+    this.initialEligibility,
+    this.loadPendingClosures,
   });
 
   @override
@@ -40,13 +54,109 @@ class UpdateManagerFinalDailyCloseScreen extends StatefulWidget {
 }
 
 class _UpdateManagerFinalDailyCloseScreenState
-    extends State<UpdateManagerFinalDailyCloseScreen> {
+    extends State<UpdateManagerFinalDailyCloseScreen>
+    with WidgetsBindingObserver {
   late String draftManagerWorkdayId;
   late List<CashierBreakdownEntity> draftCashiersBreakdowns;
   late TotalsEntity draftTotals;
   late List<AggregatorFinalDailyCloseEntity> draftAggregators;
   bool _submittingFinal = false;
   String? _lastSubmissionRejection;
+  DailyCloseWorkdayEligibility? _eligibility;
+  bool _loadingEligibility = false;
+  String? _verifiedEligibilityWorkdayId;
+
+  Future<DailyCloseWorkdayEligibility> _fetchEligibility(
+    FinalDailyCloseLoadedOrUpdated snapshot,
+  ) async {
+    final workdayId = snapshot.managerWorkdayId;
+    final managerId = snapshot.managerId;
+    final branchId = snapshot.branchId;
+    if (workdayId == null ||
+        workdayId.isEmpty ||
+        managerId == null ||
+        managerId.isEmpty ||
+        branchId == null ||
+        branchId.isEmpty) {
+      return const DailyCloseWorkdayEligibility.unverified();
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final currentUid = prefs.getString('u_id') ?? '';
+    if (currentUid != managerId) {
+      return const DailyCloseWorkdayEligibility.unverified();
+    }
+
+    final ApiResult<List<PendingDailyClosureItem>> res;
+    if (widget.loadPendingClosures != null) {
+      res = await widget.loadPendingClosures!(
+        actorId: managerId,
+        branchId: branchId,
+      );
+    } else if (getIt.isRegistered<ShiftManagementRepositoryImp>()) {
+      res = await getIt<ShiftManagementRepositoryImp>()
+          .getPendingDailyClosures(actorId: managerId, branchId: branchId);
+    } else {
+      res = ApiResult<List<PendingDailyClosureItem>>.failure(
+        ServerFailure(
+          error: LocalErrorModel(
+            message: 'Pending closures verification is unavailable.',
+          ),
+          icon: Icons.error_outline,
+          statusCode: 500,
+          stackTrace: StackTrace.current,
+        ),
+      );
+    }
+
+    return res.when(
+      failure: (failure) => DailyCloseWorkdayEligibility.unverified(failure),
+      success: (items) => PendingDailyClosureItem.evaluateWorkday(
+        workdayId: workdayId,
+        businessDate: snapshot.businessDate,
+        orderedPending: items,
+      ),
+    );
+  }
+
+  Future<void> _verifyEligibilityFor(
+    FinalDailyCloseLoadedOrUpdated snapshot, {
+    bool force = false,
+  }) async {
+    final id = snapshot.managerWorkdayId;
+    if (id == null || id.isEmpty) return;
+    if (!force &&
+        _verifiedEligibilityWorkdayId == id &&
+        (_loadingEligibility || _eligibility != null)) {
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _verifiedEligibilityWorkdayId = id;
+        _loadingEligibility = true;
+      });
+    }
+    final eligibility = await _fetchEligibility(snapshot);
+    if (!mounted || _verifiedEligibilityWorkdayId != id) return;
+    setState(() {
+      _eligibility = eligibility;
+      _loadingEligibility = false;
+    });
+  }
+
+  Future<void> _refreshWorkdayAndEligibility(
+    FinalDailyCloseLoadedOrUpdated snapshot,
+  ) async {
+    final id = snapshot.managerWorkdayId;
+    if (id == null || id.isEmpty) return;
+    await context.read<FinalDailyCloseCubit>().getDailyClose(
+      managerWorkdayId: id,
+    );
+    if (!mounted) return;
+    final current = context.read<FinalDailyCloseCubit>().state;
+    if (current is FinalDailyCloseLoadedOrUpdated) {
+      await _verifyEligibilityFor(current, force: true);
+    }
+  }
 
   bool _isVerifiedSubmitted(
     FinalDailyCloseState state, {
@@ -62,7 +172,13 @@ class _UpdateManagerFinalDailyCloseScreenState
   }
 
   Future<void> _submitFinal(FinalDailyCloseLoadedOrUpdated snapshot) async {
-    if (_submittingFinal || !snapshot.canSubmitFinal || snapshot.isSubmitted) {
+    if (_submittingFinal ||
+        _loadingEligibility ||
+        !snapshot.canSubmitFinal ||
+        snapshot.isSubmitted) {
+      return;
+    }
+    if (_eligibility == null || !_eligibility!.isEligible) {
       return;
     }
     final agreed = await showDialog<bool>(
@@ -89,7 +205,35 @@ class _UpdateManagerFinalDailyCloseScreenState
       _submittingFinal = true;
       _lastSubmissionRejection = null;
     });
+    // Always re-verify oldest-pending eligibility right before sending POST so
+    // stale-open screens never submit a blocked newer workday.
+    final freshEligibility = await _fetchEligibility(snapshot);
+    if (!mounted) return;
+    if (!freshEligibility.isEligible) {
+      final lang = Localizations.localeOf(context).languageCode;
+      final blockedMsg =
+          freshEligibility.status ==
+              DailyCloseEligibilityStatus.blockedByOlderWorkday
+          ? context.tr.closeWorkdayDateFirst(
+              freshEligibility.localizedBlockingDate(lang),
+            )
+          : (freshEligibility.failure?.error.message ??
+                context.tr.couldNotVerifyPendingClosures);
+      setState(() {
+        _submittingFinal = false;
+        _eligibility = freshEligibility;
+        _lastSubmissionRejection = blockedMsg;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(blockedMsg)));
+      return;
+    }
     final workdayId = snapshot.managerWorkdayId!;
+    if (workdayId.isEmpty) {
+      setState(() => _submittingFinal = false);
+      return;
+    }
     Object? error;
     DailyCloseSubmission? action;
     try {
@@ -163,15 +307,22 @@ class _UpdateManagerFinalDailyCloseScreenState
     });
     final outcome = await action.reconcile(
       id,
-      currentRevision: snapshot.managerReportRevision,
-      refreshAndVerifySubmitted: () async {
+      refreshWorkday: () async {
         await daily.getDailyClose(managerWorkdayId: id);
-        if (!mounted) return false;
-        return _isVerifiedSubmitted(
-          daily.state,
-          workdayId: id,
-          managerId: snapshot.managerId!,
-          branchId: snapshot.branchId!,
+        if (!mounted) {
+          return const DailyCloseFreshRead(readSucceeded: false);
+        }
+        final refreshedState = daily.state;
+        if (refreshedState is! FinalDailyCloseLoadedOrUpdated) {
+          return const DailyCloseFreshRead(readSucceeded: false);
+        }
+        return DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: refreshedState.managerWorkdayId,
+          managerId: refreshedState.managerId,
+          branchId: refreshedState.branchId,
+          serverSubmitted: refreshedState.serverSubmitted,
+          reportRevision: refreshedState.managerReportRevision,
         );
       },
     );
@@ -190,9 +341,13 @@ class _UpdateManagerFinalDailyCloseScreenState
         ).formatted(fallback: context.tr.dailyCloseRejectedByServer);
         snackMessage = rejectionBanner;
         break;
+      case DailyCloseReconcileStatus.verificationFailed:
+      case DailyCloseReconcileStatus.unverifiedActor:
+        snackMessage = context.tr.couldNotVerifyWorkdayStatus;
+        break;
       case DailyCloseReconcileStatus.none:
       case DailyCloseReconcileStatus.pending:
-      case DailyCloseReconcileStatus.unverifiedActor:
+      case DailyCloseReconcileStatus.revisionChangedAmbiguous:
         snackMessage = context.tr.resultUnconfirmedContactAccountant;
         break;
     }
@@ -208,10 +363,43 @@ class _UpdateManagerFinalDailyCloseScreenState
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _eligibility = widget.initialEligibility;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final state = context.read<FinalDailyCloseCubit>().state;
+      if (state is FinalDailyCloseLoadedOrUpdated) {
+        _verifyEligibilityFor(state, force: true);
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final state = context.read<FinalDailyCloseCubit>().state;
+    if (state is FinalDailyCloseLoadedOrUpdated &&
+        state.managerWorkdayId != _verifiedEligibilityWorkdayId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _verifyEligibilityFor(state, force: true);
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      final dailyState = context.read<FinalDailyCloseCubit>().state;
+      if (dailyState is FinalDailyCloseLoadedOrUpdated) {
+        _verifyEligibilityFor(dailyState, force: true);
+      }
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -254,25 +442,27 @@ class _UpdateManagerFinalDailyCloseScreenState
               children: [
                 const AppBackButton(isTransparent: true),
                 12.horizontalSpace,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.tr.editFinalSubmission,
-                      softWrap: true,
-                      style: AppStyles.s20W400.copyWith(
-                        color: context.customColor.reversedTextColor,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.tr.editFinalSubmission,
+                        softWrap: true,
+                        style: AppStyles.s20W400.copyWith(
+                          color: context.customColor.reversedTextColor,
+                        ),
                       ),
-                    ),
 
-                    Text(
-                      widget.branchName,
-                      softWrap: true,
-                      style: AppStyles.s15W400.copyWith(
-                        color: context.customColor.reversedTextColor,
+                      Text(
+                        widget.branchName,
+                        softWrap: true,
+                        style: AppStyles.s15W400.copyWith(
+                          color: context.customColor.reversedTextColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -314,10 +504,20 @@ class _UpdateManagerFinalDailyCloseScreenState
                             14.verticalSpace,
                             Column(
                               children: [
-                                BlocBuilder<
+                                BlocConsumer<
                                   FinalDailyCloseCubit,
                                   FinalDailyCloseState
                                 >(
+                                  listener: (context, state) {
+                                    if (state is FinalDailyCloseLoadedOrUpdated) {
+                                      _verifyEligibilityFor(
+                                        state,
+                                        force:
+                                            _verifiedEligibilityWorkdayId !=
+                                            state.managerWorkdayId,
+                                      );
+                                    }
+                                  },
                                   builder: (context, state) {
                                     if (state is FinalDailyCloseFetchLoading) {
                                       return Container(
@@ -557,6 +757,7 @@ class _UpdateManagerFinalDailyCloseScreenState
                         if (state is! FinalDailyCloseLoadedOrUpdated) {
                           return const SizedBox.shrink();
                         }
+                        final lang = Localizations.localeOf(context).languageCode;
                         return FutureBuilder<SharedPreferences>(
                           future: SharedPreferences.getInstance(),
                           builder: (context, prefsSnapshot) {
@@ -598,9 +799,103 @@ class _UpdateManagerFinalDailyCloseScreenState
                                 context.tr.dailyCloseFinalSubmitted,
                               );
                             }
+                            final eligibility = _eligibility;
+                            final isBlockedByOlder =
+                                eligibility?.status ==
+                                DailyCloseEligibilityStatus.blockedByOlderWorkday;
+                            final isEligibilityUnverified =
+                                !_loadingEligibility &&
+                                (eligibility == null ||
+                                    eligibility.status ==
+                                        DailyCloseEligibilityStatus
+                                            .verificationFailed);
+                            final canPressFinalSubmit =
+                                state.canSubmitFinal &&
+                                !state.isSubmitted &&
+                                !_submittingFinal &&
+                                !_loadingEligibility &&
+                                (eligibility?.isEligible ?? false);
+
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                if (state.businessDate != null)
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 6.h),
+                                    child: Text(
+                                      state.businessDate!,
+                                      style: AppStyles.s12W500.copyWith(
+                                        color: context.customColor.text3,
+                                      ),
+                                    ),
+                                  ),
+                                if (_loadingEligibility)
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 8.h),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  )
+                                else if (isBlockedByOlder ||
+                                    isEligibilityUnverified) ...[
+                                  Container(
+                                    margin: EdgeInsets.only(bottom: 8.h),
+                                    padding: EdgeInsets.all(10.w),
+                                    decoration: BoxDecoration(
+                                      color: isBlockedByOlder
+                                          ? Colors.orange.shade50
+                                          : Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                        color: isBlockedByOlder
+                                            ? Colors.orange.shade200
+                                            : Colors.red.shade200,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          isBlockedByOlder
+                                              ? context.tr.closeWorkdayDateFirst(
+                                                  eligibility!
+                                                      .localizedBlockingDate(
+                                                    lang,
+                                                  ),
+                                                )
+                                              : (eligibility
+                                                        ?.failure
+                                                        ?.error
+                                                        .message ??
+                                                    context
+                                                        .tr
+                                                        .couldNotVerifyPendingClosures),
+                                          style: AppStyles.s12W500.copyWith(
+                                            color: isBlockedByOlder
+                                                ? Colors.orange.shade900
+                                                : Colors.red.shade800,
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              _refreshWorkdayAndEligibility(
+                                                state,
+                                              ),
+                                          child: Text(
+                                            isBlockedByOlder
+                                                ? context
+                                                      .tr
+                                                      .refreshDailyCloseStatus
+                                                : context
+                                                      .tr
+                                                      .retryLoadPendingClosures,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                                 if (_lastSubmissionRejection != null) ...[
                                   Container(
                                     margin: EdgeInsets.only(bottom: 8.h),
@@ -622,10 +917,7 @@ class _UpdateManagerFinalDailyCloseScreenState
                                 ],
                                 AppButton(
                                   onClick: () => _submitFinal(state),
-                                  enabled:
-                                      state.canSubmitFinal &&
-                                      !state.isSubmitted &&
-                                      !_submittingFinal,
+                                  enabled: canPressFinalSubmit,
                                   text: _submittingFinal
                                       ? context.tr.submittingDailyClose
                                       : context.tr.submitDailyCloseFinal,
