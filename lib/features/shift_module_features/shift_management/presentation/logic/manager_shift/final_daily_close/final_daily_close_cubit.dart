@@ -106,6 +106,9 @@ class FinalDailyCloseCubit extends SafeCubit<FinalDailyCloseState> {
             variance: entity.variance,
             totalSales: entity.totalSales,
             aggregators: apps,
+            liabilityApprovalStatus: entity.liabilityApprovalStatus,
+            liabilityAllocationVersion: entity.liabilityAllocationVersion,
+            liabilityHasManagerSelfShare: entity.liabilityHasManagerSelfShare,
           );
         }).toList();
         totals = TotalsEntity.fromCashiers(cashiersBreakdown);

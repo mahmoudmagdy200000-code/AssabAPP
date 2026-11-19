@@ -4,6 +4,8 @@ import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/core/services/user_type_service.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/app_dialog.dart';
 import 'package:assab/core/utils/future_api_result.dart';
@@ -61,10 +63,140 @@ class _UpdateManagerFinalDailyCloseScreenState
   late TotalsEntity draftTotals;
   late List<AggregatorFinalDailyCloseEntity> draftAggregators;
   bool _submittingFinal = false;
+  bool _approvingLiability = false;
   String? _lastSubmissionRejection;
+  bool _lastRejectionIsLiability = false;
   DailyCloseWorkdayEligibility? _eligibility;
   bool _loadingEligibility = false;
   String? _verifiedEligibilityWorkdayId;
+
+  bool get _isAuthorizedBranchManager {
+    final userType =
+        UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType();
+    return userType == UserType.branchManager;
+  }
+
+  String _formatServerError(
+    DailyCloseServerError error, {
+    required String fallback,
+  }) {
+    debugPrint(
+      '[DailyClose] server rejection status=${error.statusCode} code=${error.code}',
+    );
+    return error.localizedMessage(
+      liabilityApprovalMessage: context.tr.dailyCloseLiabilityApprovalRequired,
+      fallback: fallback,
+    );
+  }
+
+  Future<void> _approvePendingLiabilities(
+    FinalDailyCloseLoadedOrUpdated snapshot,
+    DailyCloseSubmission action,
+    List<CashierBreakdownEntity> pendingItems,
+  ) async {
+    if (!_isAuthorizedBranchManager ||
+        !action.hasCurrentActor ||
+        _approvingLiability ||
+        _submittingFinal ||
+        pendingItems.isEmpty) {
+      return;
+    }
+    final hasSelfShare = pendingItems.any(
+      (item) => item.liabilityHasManagerSelfShare,
+    );
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.tr.approveLiabilityDialogTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(context.tr.approveLiabilityDialogBody),
+            if (hasSelfShare) ...[
+              8.verticalSpace,
+              Text(
+                context.tr.approveLiabilitySelfShareNote,
+                style: AppStyles.s12W500.copyWith(
+                  color: Colors.orange.shade900,
+                ),
+              ),
+            ],
+            8.verticalSpace,
+            for (final item in pendingItems)
+              Padding(
+                padding: EdgeInsets.only(top: 4.h),
+                child: Text(
+                  '• ${item.cashierName}: ${item.variance.abs().toStringAsFixed(2)} SAR',
+                  style: AppStyles.s12W600,
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.tr.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.tr.approveLiabilityAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _approvingLiability = true);
+    Object? approvalRawError;
+    try {
+      for (final item in pendingItems) {
+        await action.approvePendingLiability(
+          cashierShiftId: item.cashierShiftId!,
+          version: item.liabilityAllocationVersion!,
+          expectedRevision: item.expectedRevision!,
+          explicitSelfShare: item.liabilityHasManagerSelfShare,
+        );
+      }
+    } catch (e) {
+      approvalRawError = e;
+    }
+
+    if (!mounted) return;
+    final String? approvalError = approvalRawError != null
+        ? _formatServerError(
+            DailyCloseSubmission.extractServerError(approvalRawError),
+            fallback: context.tr.dailyCloseRejectedByServer,
+          )
+        : null;
+    final workdayId = snapshot.managerWorkdayId;
+    if (approvalError == null && workdayId != null && workdayId.isNotEmpty) {
+      await context.read<FinalDailyCloseCubit>().getDailyClose(
+        managerWorkdayId: workdayId,
+      );
+      if (!mounted) return;
+      final refreshed = context.read<FinalDailyCloseCubit>().state;
+      if (refreshed is FinalDailyCloseLoadedOrUpdated) {
+        await _verifyEligibilityFor(refreshed, force: true);
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _approvingLiability = false;
+      if (approvalError == null) {
+        _lastSubmissionRejection = null;
+        _lastRejectionIsLiability = false;
+      } else {
+        _lastSubmissionRejection = approvalError;
+        _lastRejectionIsLiability = false;
+      }
+    });
+    if (approvalError == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.tr.liabilityApprovedSuccess)),
+      );
+    }
+  }
 
   Future<DailyCloseWorkdayEligibility> _fetchEligibility(
     FinalDailyCloseLoadedOrUpdated snapshot,
@@ -204,6 +336,7 @@ class _UpdateManagerFinalDailyCloseScreenState
     setState(() {
       _submittingFinal = true;
       _lastSubmissionRejection = null;
+      _lastRejectionIsLiability = false;
     });
     // Always re-verify oldest-pending eligibility right before sending POST so
     // stale-open screens never submit a blocked newer workday.
@@ -276,22 +409,33 @@ class _UpdateManagerFinalDailyCloseScreenState
         !confirmed &&
         parsedError != null &&
         DailyCloseSubmission.isDefinitiveRollbackFailure(parsedError);
+    final isLiabilityBlocked =
+        isDefinitiveRejection && parsedError.isLiabilityApprovalRequired;
     final message = confirmed
         ? context.tr.dailyCloseSubmittedForReviewSuccess
         : isDefinitiveRejection
-        ? parsedError.formatted(fallback: context.tr.dailyCloseRejectedByServer)
+        ? _formatServerError(
+            parsedError,
+            fallback: context.tr.dailyCloseRejectedByServer,
+          )
         : parsedError != null && parsedError.statusCode != null
-        ? parsedError.formatted(fallback: context.tr.couldNotConfirmResultRefresh)
+        ? _formatServerError(
+            parsedError,
+            fallback: context.tr.couldNotConfirmResultRefresh,
+          )
         : error is DioException
         ? context.tr.couldNotConfirmResultRefresh
         : context.tr.submissionNotConfirmedByServer;
     setState(() {
       _submittingFinal = false;
       _lastSubmissionRejection = isDefinitiveRejection ? message : null;
+      _lastRejectionIsLiability = isLiabilityBlocked;
     });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    if (!isDefinitiveRejection) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   Future<void> _reconcileFinal(
@@ -304,6 +448,7 @@ class _UpdateManagerFinalDailyCloseScreenState
     setState(() {
       _submittingFinal = true;
       _lastSubmissionRejection = null;
+      _lastRejectionIsLiability = false;
     });
     final outcome = await action.reconcile(
       id,
@@ -342,25 +487,31 @@ class _UpdateManagerFinalDailyCloseScreenState
     );
     if (!mounted) return;
     final lang = Localizations.localeOf(context).languageCode;
-    final String snackMessage;
+    final String? snackMessage;
     String? rejectionBanner;
+    var isLiabilityRejection = false;
     switch (outcome.status) {
       case DailyCloseReconcileStatus.confirmed:
         snackMessage = context.tr.dailyCloseSubmissionVerified;
         break;
       case DailyCloseReconcileStatus.rejected:
-        rejectionBanner = DailyCloseServerError(
+        final serverError = DailyCloseServerError(
           statusCode: outcome.statusCode,
           code: outcome.errorCode,
           message: outcome.message,
-        ).formatted(fallback: context.tr.dailyCloseRejectedByServer);
-        snackMessage = rejectionBanner;
+        );
+        isLiabilityRejection = serverError.isLiabilityApprovalRequired;
+        rejectionBanner = _formatServerError(
+          serverError,
+          fallback: context.tr.dailyCloseRejectedByServer,
+        );
+        snackMessage = null;
         break;
       case DailyCloseReconcileStatus.blockedByOlderWorkday:
         rejectionBanner = context.tr.closeWorkdayDateFirst(
           outcome.eligibility?.localizedBlockingDate(lang) ?? '',
         );
-        snackMessage = rejectionBanner;
+        snackMessage = null;
         break;
       case DailyCloseReconcileStatus.verificationFailed:
         if (outcome.eligibility?.status ==
@@ -369,10 +520,14 @@ class _UpdateManagerFinalDailyCloseScreenState
           rejectionBanner = (detail != null && detail.isNotEmpty)
               ? '${context.tr.couldNotVerifyPendingClosures} ($detail)'
               : context.tr.couldNotVerifyPendingClosures;
-          snackMessage = rejectionBanner;
+          snackMessage = daily.state is FinalDailyCloseLoadedOrUpdated
+              ? null
+              : rejectionBanner;
         } else {
           rejectionBanner = context.tr.couldNotVerifyWorkdayStatus;
-          snackMessage = rejectionBanner;
+          snackMessage = daily.state is FinalDailyCloseLoadedOrUpdated
+              ? null
+              : rejectionBanner;
         }
         break;
       case DailyCloseReconcileStatus.unverifiedActor:
@@ -387,10 +542,13 @@ class _UpdateManagerFinalDailyCloseScreenState
     setState(() {
       _submittingFinal = false;
       _lastSubmissionRejection = rejectionBanner;
+      _lastRejectionIsLiability = isLiabilityRejection;
     });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(snackMessage)));
+    if (snackMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(snackMessage)));
+    }
   }
 
   @override
@@ -862,10 +1020,26 @@ class _UpdateManagerFinalDailyCloseScreenState
                                     eligibility.status ==
                                         DailyCloseEligibilityStatus
                                             .verificationFailed);
+                            final pendingLiabilities = state.cashiers
+                                .where((c) => c.canManagerApproveLiability)
+                                .toList();
+                            final hasPendingLiabilityNotice =
+                                _lastRejectionIsLiability ||
+                                state.cashiers.any(
+                                  (c) => c.isLiabilityApprovalPending,
+                                );
+                            final rejectionText =
+                                _lastSubmissionRejection ??
+                                (hasPendingLiabilityNotice
+                                    ? context
+                                          .tr
+                                          .dailyCloseLiabilityApprovalRequired
+                                    : null);
                             final canPressFinalSubmit =
                                 state.canSubmitFinal &&
                                 !state.isSubmitted &&
                                 !_submittingFinal &&
+                                !_approvingLiability &&
                                 !_loadingEligibility &&
                                 (eligibility?.isEligible ?? false);
 
@@ -949,7 +1123,7 @@ class _UpdateManagerFinalDailyCloseScreenState
                                     ),
                                   ),
                                 ],
-                                if (_lastSubmissionRejection != null) ...[
+                                if (rejectionText != null) ...[
                                   Container(
                                     margin: EdgeInsets.only(bottom: 8.h),
                                     padding: EdgeInsets.all(10.w),
@@ -960,11 +1134,79 @@ class _UpdateManagerFinalDailyCloseScreenState
                                         color: Colors.red.shade200,
                                       ),
                                     ),
-                                    child: Text(
-                                      _lastSubmissionRejection!,
-                                      style: AppStyles.s12W500.copyWith(
-                                        color: Colors.red.shade800,
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        if (hasPendingLiabilityNotice) ...[
+                                          Align(
+                                            alignment: AlignmentDirectional
+                                                .centerStart,
+                                            child: Container(
+                                              margin: EdgeInsets.only(
+                                                bottom: 6.h,
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 8.w,
+                                                vertical: 3.h,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.orange.shade100,
+                                                borderRadius:
+                                                    BorderRadius.circular(6.r),
+                                              ),
+                                              child: Text(
+                                                context
+                                                    .tr
+                                                    .pendingLiabilityApprovalBadge,
+                                                style: AppStyles.s11W600
+                                                    .copyWith(
+                                                      color: Colors
+                                                          .orange
+                                                          .shade900,
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                        Text(
+                                          rejectionText,
+                                          style: AppStyles.s12W500.copyWith(
+                                            color: Colors.red.shade800,
+                                          ),
+                                        ),
+                                        if (hasPendingLiabilityNotice &&
+                                            _isAuthorizedBranchManager &&
+                                            action.hasCurrentActor) ...[
+                                          6.verticalSpace,
+                                          TextButton(
+                                            onPressed:
+                                                (_approvingLiability ||
+                                                    _submittingFinal)
+                                                ? null
+                                                : pendingLiabilities.isNotEmpty
+                                                ? () =>
+                                                      _approvePendingLiabilities(
+                                                        state,
+                                                        action,
+                                                        pendingLiabilities,
+                                                      )
+                                                : () =>
+                                                      _refreshWorkdayAndEligibility(
+                                                        state,
+                                                      ),
+                                            child: Text(
+                                              pendingLiabilities.isNotEmpty
+                                                  ? context
+                                                        .tr
+                                                        .reviewAndApproveLiability
+                                                  : context
+                                                        .tr
+                                                        .refreshDailyCloseStatus,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
                                 ],

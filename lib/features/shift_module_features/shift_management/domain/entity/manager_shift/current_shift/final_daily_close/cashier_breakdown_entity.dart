@@ -20,6 +20,9 @@ class CashierBreakdownEntity {
   final double initialDeliveryAppPayments;
   final double initialTotalSales;
   final String? reason;
+  final String? liabilityApprovalStatus;
+  final int? liabilityAllocationVersion;
+  final bool liabilityHasManagerSelfShare;
 
   CashierBreakdownEntity({
     this.aggregators,
@@ -38,12 +41,23 @@ class CashierBreakdownEntity {
     double? initialDeliveryAppPayments,
     double? initialTotalSales,
     this.reason,
+    this.liabilityApprovalStatus,
+    this.liabilityAllocationVersion,
+    this.liabilityHasManagerSelfShare = false,
   }) : initialAggregators = initialAggregators ?? aggregators,
        initialCashCollected = initialCashCollected ?? cashCollected,
        initialCardPayments = initialCardPayments ?? cardPayments,
        initialDeliveryAppPayments =
            initialDeliveryAppPayments ?? deliveryAppPayments,
        initialTotalSales = initialTotalSales ?? totalSales;
+
+  bool get isLiabilityApprovalPending => liabilityApprovalStatus == 'pending';
+
+  bool get canManagerApproveLiability =>
+      isLiabilityApprovalPending &&
+      (cashierShiftId?.isNotEmpty ?? false) &&
+      (expectedRevision ?? 0) > 0 &&
+      (liabilityAllocationVersion ?? 0) > 0;
 
   /// True if manager explicitly altered any financial field from the server's authoritative state
   bool get isModified =>
@@ -69,6 +83,9 @@ class CashierBreakdownEntity {
     double? initialDeliveryAppPayments,
     double? initialTotalSales,
     String? reason,
+    String? liabilityApprovalStatus,
+    int? liabilityAllocationVersion,
+    bool? liabilityHasManagerSelfShare,
   }) {
     return CashierBreakdownEntity(
       aggregators: aggregators ?? this.aggregators,
@@ -88,6 +105,12 @@ class CashierBreakdownEntity {
           initialDeliveryAppPayments ?? this.initialDeliveryAppPayments,
       initialTotalSales: initialTotalSales ?? this.initialTotalSales,
       reason: reason ?? this.reason,
+      liabilityApprovalStatus:
+          liabilityApprovalStatus ?? this.liabilityApprovalStatus,
+      liabilityAllocationVersion:
+          liabilityAllocationVersion ?? this.liabilityAllocationVersion,
+      liabilityHasManagerSelfShare:
+          liabilityHasManagerSelfShare ?? this.liabilityHasManagerSelfShare,
     );
   }
 }

@@ -18,6 +18,11 @@ CashierBreakdownModel _$CashierBreakdownModelFromJson(
   deliveryAppPayments: (json['delivery_app_payments'] as num?)?.toDouble(),
   variance: (json['variance'] as num?)?.toDouble(),
   sales: (json['sales'] as num?)?.toDouble(),
+  liabilityApprovalStatus: json['liability_approval_status'] as String?,
+  liabilityAllocationVersion:
+      (json['liability_allocation_version'] as num?)?.toInt(),
+  liabilityHasManagerSelfShare:
+      json['liability_has_manager_self_share'] as bool?,
 );
 
 Map<String, dynamic> _$CashierBreakdownModelToJson(
