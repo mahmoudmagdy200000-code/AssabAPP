@@ -325,8 +325,23 @@ class _UpdateManagerFinalDailyCloseScreenState
           reportRevision: refreshedState.managerReportRevision,
         );
       },
+      verifyReplayEligibility: () async {
+        if (!mounted) {
+          return const DailyCloseWorkdayEligibility.unverified();
+        }
+        final refreshedState = daily.state;
+        if (refreshedState is! FinalDailyCloseLoadedOrUpdated) {
+          return const DailyCloseWorkdayEligibility.unverified();
+        }
+        final freshEligibility = await _fetchEligibility(refreshedState);
+        if (mounted) {
+          _eligibility = freshEligibility;
+        }
+        return freshEligibility;
+      },
     );
     if (!mounted) return;
+    final lang = Localizations.localeOf(context).languageCode;
     final String snackMessage;
     String? rejectionBanner;
     switch (outcome.status) {
@@ -341,7 +356,25 @@ class _UpdateManagerFinalDailyCloseScreenState
         ).formatted(fallback: context.tr.dailyCloseRejectedByServer);
         snackMessage = rejectionBanner;
         break;
+      case DailyCloseReconcileStatus.blockedByOlderWorkday:
+        rejectionBanner = context.tr.closeWorkdayDateFirst(
+          outcome.eligibility?.localizedBlockingDate(lang) ?? '',
+        );
+        snackMessage = rejectionBanner;
+        break;
       case DailyCloseReconcileStatus.verificationFailed:
+        if (outcome.eligibility?.status ==
+            DailyCloseEligibilityStatus.verificationFailed) {
+          final detail = outcome.eligibility?.failure?.error.message?.trim();
+          rejectionBanner = (detail != null && detail.isNotEmpty)
+              ? '${context.tr.couldNotVerifyPendingClosures} ($detail)'
+              : context.tr.couldNotVerifyPendingClosures;
+          snackMessage = rejectionBanner;
+        } else {
+          rejectionBanner = context.tr.couldNotVerifyWorkdayStatus;
+          snackMessage = rejectionBanner;
+        }
+        break;
       case DailyCloseReconcileStatus.unverifiedActor:
         snackMessage = context.tr.couldNotVerifyWorkdayStatus;
         break;
@@ -781,7 +814,27 @@ class _UpdateManagerFinalDailyCloseScreenState
                             }
                             if (unresolved) {
                               return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  if (_lastSubmissionRejection != null) ...[
+                                    Container(
+                                      margin: EdgeInsets.only(bottom: 8.h),
+                                      padding: EdgeInsets.all(10.w),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade50,
+                                        borderRadius: BorderRadius.circular(8.r),
+                                        border: Border.all(
+                                          color: Colors.orange.shade200,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        _lastSubmissionRejection!,
+                                        style: AppStyles.s12W500.copyWith(
+                                          color: Colors.orange.shade900,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                   Text(
                                     context.tr.previousSubmissionPendingContactAdmin,
                                   ),

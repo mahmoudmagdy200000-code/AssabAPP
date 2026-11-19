@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:assab/features/shift_module_features/shift_management/data/daily_close_submission.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/model/manager_shift_management_models/final_daily_close/final_daily_close_model.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/pending_daily_closure_item.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -205,6 +206,8 @@ void main() {
             reportRevision: 7,
           );
         },
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
 
       expect(result.status, DailyCloseReconcileStatus.confirmed);
@@ -245,6 +248,8 @@ void main() {
             reportRevision: 7,
           );
         },
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
 
       expect(result.status, DailyCloseReconcileStatus.confirmed);
@@ -285,6 +290,8 @@ void main() {
           serverSubmitted: false,
           reportRevision: 7,
         ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
 
       expect(result.status, DailyCloseReconcileStatus.pending);
@@ -311,6 +318,8 @@ void main() {
         serverSubmitted: true,
         reportRevision: 7,
       ),
+      verifyReplayEligibility: () async =>
+          const DailyCloseWorkdayEligibility.eligible(),
     );
 
     expect(result.status, DailyCloseReconcileStatus.unverifiedActor);
@@ -338,6 +347,8 @@ void main() {
           serverSubmitted: true,
           reportRevision: 5,
         ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
 
       expect(result.status, DailyCloseReconcileStatus.confirmed);
@@ -367,6 +378,8 @@ void main() {
           serverSubmitted: false,
           reportRevision: 5,
         ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
 
       expect(result.status, DailyCloseReconcileStatus.revisionChangedAmbiguous);
@@ -390,6 +403,8 @@ void main() {
         'workday',
         refreshWorkday: () async =>
             const DailyCloseFreshRead(readSucceeded: false),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
       expect(failedRead.status, DailyCloseReconcileStatus.verificationFailed);
       expect(adapter.requests.length, 1);
@@ -405,6 +420,8 @@ void main() {
           serverSubmitted: false,
           reportRevision: null,
         ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
       expect(incompleteRead.status, DailyCloseReconcileStatus.verificationFailed);
       expect(adapter.requests.length, 1);
@@ -433,6 +450,8 @@ void main() {
           serverSubmitted: true,
           reportRevision: 4,
         ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
       expect(wrongBranch.status, DailyCloseReconcileStatus.verificationFailed);
       expect(adapter.requests.length, 1);
@@ -448,6 +467,8 @@ void main() {
           serverSubmitted: false,
           reportRevision: 4,
         ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
       expect(wrongWorkday.status, DailyCloseReconcileStatus.verificationFailed);
       expect(adapter.requests.length, 1);
@@ -466,10 +487,66 @@ void main() {
             reportRevision: 4,
           );
         },
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.eligible(),
       );
       expect(switchedAccount.status, DailyCloseReconcileStatus.unverifiedActor);
       expect(adapter.requests.length, 1);
       expect(action.hasUnresolved('workday'), true);
+    },
+  );
+
+  test(
+    'Gap 3+4 Replay Guard: blocks replay when an older workday is pending or history verification fails (0 extra POSTs)',
+    () async {
+      adapter.fail = true;
+      await expectLater(
+        action.submit('day-19', 4),
+        throwsA(isA<DioException>()),
+      );
+      expect(adapter.requests.length, 1);
+
+      adapter.fail = false;
+      final blocked = await action.reconcile(
+        'day-19',
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'day-19',
+          managerId: 'manager-1',
+          branchId: 'branch-1',
+          serverSubmitted: false,
+          reportRevision: 4,
+        ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.blockedByOlder(
+              blockingWorkdayId: 'day-16',
+              blockingShiftDate: '2026-11-16',
+            ),
+      );
+      expect(blocked.status, DailyCloseReconcileStatus.blockedByOlderWorkday);
+      expect(blocked.eligibility?.blockingWorkdayId, 'day-16');
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('day-19'), true);
+
+      final unverifiedHistory = await action.reconcile(
+        'day-19',
+        refreshWorkday: () async => const DailyCloseFreshRead(
+          readSucceeded: true,
+          workdayId: 'day-19',
+          managerId: 'manager-1',
+          branchId: 'branch-1',
+          serverSubmitted: false,
+          reportRevision: 4,
+        ),
+        verifyReplayEligibility: () async =>
+            const DailyCloseWorkdayEligibility.unverified(),
+      );
+      expect(
+        unverifiedHistory.status,
+        DailyCloseReconcileStatus.verificationFailed,
+      );
+      expect(adapter.requests.length, 1);
+      expect(action.hasUnresolved('day-19'), true);
     },
   );
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:assab/core/network/idempotency_interceptor.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/pending_daily_closure_item.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +10,7 @@ enum DailyCloseReconcileStatus {
   confirmed,
   rejected,
   pending,
+  blockedByOlderWorkday,
   revisionChangedAmbiguous,
   verificationFailed,
   unverifiedActor,
@@ -78,12 +80,14 @@ class DailyCloseReconcileResult {
     this.statusCode,
     this.errorCode,
     this.message,
+    this.eligibility,
   });
 
   final DailyCloseReconcileStatus status;
   final int? statusCode;
   final String? errorCode;
   final String? message;
+  final DailyCloseWorkdayEligibility? eligibility;
 }
 
 class DailyCloseServerError {
@@ -285,6 +289,8 @@ class DailyCloseSubmission {
   Future<DailyCloseReconcileResult> reconcile(
     String workdayId, {
     required Future<DailyCloseFreshRead> Function() refreshWorkday,
+    required Future<DailyCloseWorkdayEligibility> Function()
+    verifyReplayEligibility,
   }) async {
     if (!hasCurrentActor) {
       return const DailyCloseReconcileResult(
@@ -380,6 +386,33 @@ class DailyCloseSubmission {
       }
       return const DailyCloseReconcileResult(
         status: DailyCloseReconcileStatus.revisionChangedAmbiguous,
+      );
+    }
+
+    // Re-run the exact same oldest-pending workday eligibility verification
+    // before issuing any replay POST so an unresolved newer day cannot bypass
+    // an older unclosed workday or partial/failed history check.
+    final DailyCloseWorkdayEligibility eligibility;
+    try {
+      eligibility = await verifyReplayEligibility();
+    } catch (_) {
+      return const DailyCloseReconcileResult(
+        status: DailyCloseReconcileStatus.verificationFailed,
+      );
+    }
+    if (!hasCurrentActor) {
+      return const DailyCloseReconcileResult(
+        status: DailyCloseReconcileStatus.unverifiedActor,
+      );
+    }
+    if (!eligibility.isEligible) {
+      return DailyCloseReconcileResult(
+        status:
+            eligibility.status ==
+                DailyCloseEligibilityStatus.blockedByOlderWorkday
+            ? DailyCloseReconcileStatus.blockedByOlderWorkday
+            : DailyCloseReconcileStatus.verificationFailed,
+        eligibility: eligibility,
       );
     }
 

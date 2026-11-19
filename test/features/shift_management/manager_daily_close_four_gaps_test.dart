@@ -134,6 +134,7 @@ class _TrackingAdapter implements HttpClientAdapter {
   bool failNextPost = false;
   Map<String, dynamic>? nextPostBody;
   int? nextPostStatus;
+  void Function(RequestOptions options)? onPost;
 
   List<RequestOptions> get submitPosts => requests
       .where((r) => r.uri.path.endsWith('/daily-close/submit'))
@@ -153,6 +154,7 @@ class _TrackingAdapter implements HttpClientAdapter {
         reason: 'network-timeout',
       );
     }
+    onPost?.call(options);
     final status = nextPostStatus ?? 200;
     final resBody = nextPostBody ?? {'success': true, 'message': 'Submitted'};
     nextPostStatus = null;
@@ -1117,9 +1119,180 @@ void main() {
         expect(submission.hasUnresolved('day-19'), true);
         expect(
           find.text('Could not verify the workday status from the server.'),
-          findsOneWidget,
+          findsWidgets,
         );
       },
     );
+
+    for (final lang in ['en', 'ar']) {
+      testWidgets(
+        'Decisive Replay Order Guard ($lang): timed-out Nov 19 cannot replay on Refresh while Nov 16 is pending or history fails (0 extra POSTs), then replays once after Nov 16 closes',
+        (tester) async {
+          SharedPreferences.setMockInitialValues({'u_id': 'mgr-1'});
+          final adapter = _TrackingAdapter();
+          final dio = Dio(BaseOptions(baseUrl: 'https://example.test/api/v1/'))
+            ..httpClientAdapter = adapter;
+
+          var closed16 = false;
+          var failHistory = false;
+          var day19Submitted = false;
+
+          final remote = _TestRemoteDataSource();
+          remote.onGetWorkdayHistory = ({int? perPage, int? page}) async {
+            if (failHistory) {
+              throw DioException.connectionError(
+                requestOptions: RequestOptions(
+                  path: 'branch-manager/workday/history',
+                ),
+                reason: 'history-down',
+              );
+            }
+            return {
+              'data': [
+                _historyRow(
+                  id: 'day-19',
+                  date: '2026-11-19',
+                  managerId: 'mgr-1',
+                  submitted: day19Submitted,
+                  revision: 4,
+                ),
+                _historyRow(
+                  id: 'day-16',
+                  date: '2026-11-16',
+                  managerId: 'mgr-1',
+                  submitted: closed16,
+                  revision: 1,
+                ),
+              ],
+              'meta': {'current_page': 1, 'last_page': 1},
+            };
+          };
+          remote.onGetDailyClose = ({String? managerWorkdayId, String? workday}) async {
+            return _dailyClosePayload(
+              workdayId: 'day-19',
+              businessDate: '2026-11-19',
+              managerId: 'mgr-1',
+              branchId: 'branch-1',
+              revision: 4,
+              submitted: day19Submitted,
+            );
+          };
+
+          final repo = ShiftManagementRepositoryImp(remote);
+          getIt.registerSingleton<Dio>(dio);
+          getIt.registerSingleton<ShiftManagementRepositoryImp>(repo);
+
+          final prefs = await SharedPreferences.getInstance();
+          final submission = DailyCloseSubmission(
+            dio,
+            prefs,
+            actorId: 'mgr-1',
+            branchId: 'branch-1',
+          );
+          await tester.runAsync(() async {
+            adapter.failNextPost = true;
+            await expectLater(
+              submission.submit('day-19', 4),
+              throwsA(isA<DioException>()),
+            );
+          });
+          expect(adapter.submitPosts.length, 1);
+          final originalKey =
+              adapter.submitPosts.single.headers['Idempotency-Key'];
+
+          final managerCubit = ManagerShiftCubit(repo)
+            ..managerShift = _makeTodayShift();
+          final dailyCubit = FinalDailyCloseCubit(repo);
+          final endManagerCubit = EndAndUpdateManagerShiftCubit(repo);
+          addTearDown(managerCubit.close);
+          addTearDown(dailyCubit.close);
+          addTearDown(endManagerCubit.close);
+
+          await dailyCubit.getDailyClose(managerWorkdayId: 'day-19');
+
+          await tester.pumpWidget(
+            MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: managerCubit),
+                BlocProvider.value(value: dailyCubit),
+                BlocProvider.value(value: endManagerCubit),
+              ],
+              child: _wrapTestApp(
+                appKey: ValueKey('replay-order-$lang'),
+                locale: Locale(lang),
+                scrollable: false,
+                child: const UpdateManagerFinalDailyCloseScreen(
+                  key: ValueKey('replay-order-screen'),
+                  branchName: 'Assab Main Branch',
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          final refreshLabel = lang == 'en'
+              ? 'Refresh Daily Close Status'
+              : 'تحديث حالة اليومية';
+
+          // 1) Nov 16 is still open -> Refresh checks fresh GET + history, sends 0 extra POSTs!
+          await tester.ensureVisible(find.text(refreshLabel));
+          await tester.tap(find.text(refreshLabel));
+          await tester.pumpAndSettle();
+
+          expect(adapter.submitPosts.length, 1);
+          expect(submission.hasUnresolved('day-19'), true);
+          expect(find.textContaining('2026-11-16'), findsWidgets);
+
+          ScaffoldMessenger.of(
+            tester.element(find.text(refreshLabel)),
+          ).clearSnackBars();
+          await tester.pumpAndSettle();
+
+          // 2) History fails -> Refresh refuses replay (0 extra POSTs) and keeps intent.
+          failHistory = true;
+          await tester.ensureVisible(find.text(refreshLabel));
+          await tester.tap(find.text(refreshLabel));
+          await tester.pumpAndSettle();
+
+          expect(adapter.submitPosts.length, 1);
+          expect(submission.hasUnresolved('day-19'), true);
+          expect(
+            find.textContaining(
+              lang == 'en'
+                  ? 'Could not verify pending daily closures.'
+                  : 'تعذر التحقق من الإقفالات اليومية المعلقة.',
+            ),
+            findsWidgets,
+          );
+
+          ScaffoldMessenger.of(
+            tester.element(find.text(refreshLabel)),
+          ).clearSnackBars();
+          await tester.pumpAndSettle();
+
+          // 3) Once Nov 16 is closed and history recovers -> Refresh replays ONCE with exact original key!
+          failHistory = false;
+          closed16 = true;
+          adapter.onPost = (_) {
+            day19Submitted = true;
+          };
+          await tester.ensureVisible(find.text(refreshLabel));
+          await tester.tap(find.text(refreshLabel));
+          await tester.pumpAndSettle();
+
+          expect(adapter.submitPosts.length, 2);
+          expect(
+            adapter.submitPosts.last.data['branch_manager_shift_id'],
+            'day-19',
+          );
+          expect(adapter.submitPosts.last.data['expected_revision'], 4);
+          expect(
+            adapter.submitPosts.last.headers['Idempotency-Key'],
+            originalKey,
+          );
+          expect(submission.hasUnresolved('day-19'), false);
+        },
+      );
+    }
   });
 }
