@@ -383,6 +383,8 @@ class _HandoverOnlyScreenState extends State<HandoverOnlyScreen> {
                                             widget
                                                 .isOpenedFromShiftDetailsScreen ??
                                             false,
+                                        'handoverOutcome':
+                                            state.handoverOutcome,
                                       },
                                       result: true,
                                     );

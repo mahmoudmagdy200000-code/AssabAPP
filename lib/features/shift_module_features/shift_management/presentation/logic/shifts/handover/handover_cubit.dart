@@ -1,6 +1,7 @@
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/handover_user_item.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_handover_outcome_status.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
@@ -146,7 +147,11 @@ class HandoverCubit extends SafeCubit<HandoverState> {
     handle(
       result,
       failure: (f) => emit(RecordingHandoverFailure(failure: f)),
-      success: (success) => emit(RecordingHandoverSuccess()),
+      success: (outcome) => emit(
+        RecordingHandoverSuccess(
+          handoverOutcome: outcome,
+        ),
+      ),
     );
   }
 }

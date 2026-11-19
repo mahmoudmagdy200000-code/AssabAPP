@@ -3673,5 +3673,27 @@
   "submittingDailyClose": "Submitting daily close...",
   "pendingIncomingCash": "Pending Incoming Cash",
   "pendingIncomingCashDesc": "Cash already counted in the drawer from incoming transfers awaiting confirmation.",
-  "vatNotSpecified": "VAT (Unspecified / N/A)"
+  "vatNotSpecified": "VAT (Unspecified / N/A)",
+  "pendingDailyClosuresTitle": "Pending Daily Closures",
+  "pendingDailyClosuresSubtitle": "Older completed workdays that still require final daily close submission.",
+  "closeOldestPendingWorkdayFirst": "Close the oldest pending workday first.",
+  "dailyCloseRejectedByServer": "Daily close submission was rejected by the server.",
+  "retryLoadPendingClosures": "Retry",
+  "handoverReceiptConfirmed": "Cash Custody Receipt Confirmed",
+  "handoverReceiptConfirmedDesc": "Cash custody receipt has been confirmed by {cashierName}.",
+  "@handoverReceiptConfirmedDesc": {
+    "placeholders": {
+      "cashierName": {}
+    }
+  },
+  "handoverSubmittedVerifyDetailsTitle": "Handover Submitted",
+  "handoverOutcomeUnconfirmedCheckDetails": "Handover status could not be confirmed from the server response. Check the details to verify.",
+  "closeWorkdayDateFirst": "Close {dateLabel} first.",
+  "@closeWorkdayDateFirst": {
+    "placeholders": {
+      "dateLabel": {}
+    }
+  },
+  "couldNotVerifyPendingClosures": "Could not verify pending daily closures. Retry before submitting.",
+  "couldNotVerifyWorkdayStatus": "Could not verify the workday status from the server."
 }

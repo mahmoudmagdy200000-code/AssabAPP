@@ -130,7 +130,7 @@ abstract class ShiftManagementRemoteDataSource {
   });
 
   @POST('${ApiEndpoint.branchManagerShifts}/{shift}/end-with-handover')
-  Future<void> endShiftWithHandOver({
+  Future<dynamic> endShiftWithHandOver({
     @Path('shift') required String shiftId,
     @Body() required FormData data,
   });
@@ -257,6 +257,7 @@ abstract class ShiftManagementRemoteDataSource {
     @Query('date_from') String? dateFrom,
     @Query('date_to') String? dateTo,
     @Query('per_page') int? perPage,
+    @Query('page') int? page,
   });
 
   @GET('${ApiEndpoint.branchWorkDayMgmt}/final-handover/{shiftId}')

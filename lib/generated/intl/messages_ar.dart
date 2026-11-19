@@ -65,301 +65,306 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m19(count) =>
       "اختر طريقة المخزون لمخزون اليوم (المنتجات المحددة ${count}):";
 
-  static String m20(date, time) => "اكتمل في: ${date} - ${time}";
+  static String m20(dateLabel) => "أقفل يوم ${dateLabel} أولًا.";
 
-  static String m21(count) => "الطلبات المكتملة (${count})";
+  static String m21(date, time) => "اكتمل في: ${date} - ${time}";
 
-  static String m22(count) => "المنتجات المكتملة (${count})";
+  static String m22(count) => "الطلبات المكتملة (${count})";
 
-  static String m23(name) =>
+  static String m23(count) => "المنتجات المكتملة (${count})";
+
+  static String m24(name) =>
       "أكملت ${name} المهمة الموكلة إليها وهي تسجيل النفايات والأضرار. يمكنك مراجعته أو تعديله أو الاتصال بـ ${name} لإجراء التعديلات.";
 
-  static String m24(CashierName) => "${CashierName} لم يكمل أي وردية بعد.";
+  static String m25(CashierName) => "${CashierName} لم يكمل أي وردية بعد.";
 
-  static String m25(count) => "(${count}) تم اختيار الموظفين.";
+  static String m26(count) => "(${count}) تم اختيار الموظفين.";
 
-  static String m26(count) => "تم استلام العناصر ${count}";
+  static String m27(count) => "تم استلام العناصر ${count}";
 
-  static String m27(count) => "مشروع ${count}";
+  static String m28(count) => "مشروع ${count}";
 
-  static String m28(count) => "حوادث ${count}";
+  static String m29(count) => "حوادث ${count}";
 
-  static String m29(count) => "${count} تباين الكمية";
+  static String m30(count) => "${count} تباين الكمية";
 
-  static String m30(count) => "قنوات مبيعات ${count} المسجلة:";
+  static String m31(count) => "قنوات مبيعات ${count} المسجلة:";
 
-  static String m31(count) => "${count} المنتجات المحددة";
+  static String m32(count) => "${count} المنتجات المحددة";
 
-  static String m32(count) => "المخزون اليومي (${count})";
+  static String m33(count) => "المخزون اليومي (${count})";
 
-  static String m33(date) => "تفاصيل الجرد اليومي ${date}";
+  static String m34(date) => "تفاصيل الجرد اليومي ${date}";
 
-  static String m34(itemName) => "أدخل الكمية الفعلية ${itemName}";
+  static String m35(itemName) => "أدخل الكمية الفعلية ${itemName}";
 
-  static String m35(date) => "تم التصعيد على: ${date}";
+  static String m36(date) => "تم التصعيد على: ${date}";
 
-  static String m36(count) => "التسليمات المتوقعة اليوم (${count})";
+  static String m37(count) => "التسليمات المتوقعة اليوم (${count})";
 
-  static String m37(date, time) =>
+  static String m38(date, time) =>
       "تم تأكيد طلب التخلص النهائي من ${date} و${time} المقترحين";
 
-  static String m38(count) => "${count} سنوات";
+  static String m39(count) => "${count} سنوات";
 
-  static String m39(name) =>
+  static String m40(name) =>
       "يتم حاليًا تأكيد الطلب الذي تم إنشاؤه من ${name}.";
-
-  static String m40(count) => "فحص البضائع (${count}):";
 
   static String m41(count) => "فحص البضائع (${count}):";
 
-  static String m42(selectedCashierName) =>
+  static String m42(count) => "فحص البضائع (${count}):";
+
+  static String m43(selectedCashierName) =>
       "التسليم النقدي في انتظار التأكيد من ${selectedCashierName}. سيتم إعلامك بمجرد الموافقة عليه.";
 
-  static String m43(cashierName, dateAndTime) =>
+  static String m44(cashierName, dateAndTime) =>
       "تم قبول التسليم من قبل ${cashierName} على: ${dateAndTime}";
 
-  static String m44(approveDate) =>
+  static String m45(approveDate) =>
       "تمت الموافقة على التسليم بواسطتك على: ${approveDate}";
 
-  static String m45(count) => "اكتمل التسليم مع وجود تناقضات مسجلة ${count}";
+  static String m46(count) => "اكتمل التسليم مع وجود تناقضات مسجلة ${count}";
 
-  static String m46(cashierName) => "في انتظار الموافقة من ${cashierName}.";
+  static String m47(cashierName) => "في انتظار الموافقة من ${cashierName}.";
 
-  static String m47(cashierName) =>
+  static String m48(cashierName) =>
+      "تم تأكيد استلام العهدة النقدية بواسطة ${cashierName}.";
+
+  static String m49(cashierName) =>
       "تم الرفض بواسطة ${cashierName}. لقد تم تصعيد هذه المشكلة وهي الآن في انتظار مراجعتك واتخاذ القرار النهائي.";
 
-  static String m48(name) =>
+  static String m50(name) =>
       "لقد تم إرسال طلب التسليم الخاص بك إلى ${name}. سيتم إعلامك عندما يقبلون ذلك.";
 
-  static String m49(hours) => "يبدأ في ${hours}h";
+  static String m51(hours) => "يبدأ في ${hours}h";
 
-  static String m50(date) => "كيف تريد تصدير المخزون العادي الشهري ${date}:";
+  static String m52(date) => "كيف تريد تصدير المخزون العادي الشهري ${date}:";
 
-  static String m51(productName) =>
+  static String m53(productName) =>
       "كيف تريد الرد على التناقض في ${productName}:";
 
-  static String m52(branchName) => "في ${branchName} كمدير فرع";
+  static String m54(branchName) => "في ${branchName} كمدير فرع";
 
-  static String m53(count) => "قيد التقدم (${count})";
+  static String m55(count) => "قيد التقدم (${count})";
 
-  static String m54(count) => "المنتجات المخزنة (${count}):";
+  static String m56(count) => "المنتجات المخزنة (${count}):";
 
-  static String m55(name) => "لقد تم إعادة تعيينه بواسطة ${name}";
+  static String m57(name) => "لقد تم إعادة تعيينه بواسطة ${name}";
 
-  static String m56(count) => "عدد العناصر ومدى توفرها (${count})";
+  static String m58(count) => "عدد العناصر ومدى توفرها (${count})";
 
-  static String m57(quantity, unit) =>
+  static String m59(quantity, unit) =>
       "السلعة التي تم تسليمها هي ${quantity} ${unit} أقل من الكمية المطلوبة والمؤكدة.";
 
-  static String m58(itemName) => "${itemName}:";
+  static String m60(itemName) => "${itemName}:";
 
-  static String m59(count) => "الأصناف والكميات (${count}):";
+  static String m61(count) => "الأصناف والكميات (${count}):";
 
-  static String m60(count) => "العناصر (${count}):";
+  static String m62(count) => "العناصر (${count}):";
 
-  static String m61(count) => "تم استلام العناصر ${count}";
+  static String m63(count) => "تم استلام العناصر ${count}";
 
-  static String m62(managerName) =>
+  static String m64(managerName) =>
       "أرسلت ${managerName} طلب إرجاع هذا العنصر للمراجعة والموافقة.";
 
-  static String m63(managerName) =>
+  static String m65(managerName) =>
       "قدمت ${managerName} هذا الطلب طلبًا للمراجعة والموافقة.";
 
-  static String m64(name) =>
+  static String m66(name) =>
       "أرسل ${name} (أنت) المدير هذا المخزون اليومي للمراجعة والموافقة.";
 
-  static String m65(managerName) => "تسليم ${managerName}";
+  static String m67(managerName) => "تسليم ${managerName}";
 
-  static String m66(mins) => "(منذ دقائق ${mins})";
+  static String m68(mins) => "(منذ دقائق ${mins})";
 
-  static String m67(minutes) => "يبدأ في ${minutes}m";
+  static String m69(minutes) => "يبدأ في ${minutes}m";
 
-  static String m68(count) => "المخزون الشهري (${count})";
+  static String m70(count) => "المخزون الشهري (${count})";
 
-  static String m69(location) => "تم النقل إلى ${location}";
+  static String m71(location) => "تم النقل إلى ${location}";
 
-  static String m70(count) => "قوائم أعمالي (${count})";
+  static String m72(count) => "قوائم أعمالي (${count})";
 
-  static String m71(date) =>
+  static String m73(date) =>
       "لقد تمت الموافقة على ملحق ${date} الجديد بواسطتك. تم تحديث تاريخ تسليم الطلب";
 
-  static String m72(date, branchName) =>
+  static String m74(date, branchName) =>
       "تمت الموافقة على ملحق ${date} الجديد بواسطة ${branchName}. تم تحديث تاريخ تسليم الطلب";
 
-  static String m73(date) => "لقد رفضت تمديد ${date} الجديد وتم إلغاء الطلب.";
+  static String m75(date) => "لقد رفضت تمديد ${date} الجديد وتم إلغاء الطلب.";
 
-  static String m74(date, time) =>
+  static String m76(date, time) =>
       "سيتم إنشاء طلبك التالي تلقائيًا على ${date} على ${time}.";
 
-  static String m75(when) => "الجدول التالي: ${when}";
+  static String m77(when) => "الجدول التالي: ${when}";
 
-  static String m76(count) => "التشغيل المجدول التالي (${count})";
+  static String m78(count) => "التشغيل المجدول التالي (${count})";
 
-  static String m77(CashierName) =>
+  static String m79(CashierName) =>
       "لم يبدأ ${CashierName} أي وردية بعد. اختر «المعلقة» لعرض الورديات القادمة.";
 
-  static String m78(CashierName) => "لا يوجد لدى ${CashierName} مناوبات معلقة.";
+  static String m80(CashierName) => "لا يوجد لدى ${CashierName} مناوبات معلقة.";
 
-  static String m79(total) => "من ${total}";
+  static String m81(total) => "من ${total}";
 
-  static String m80(sourceName) => "اطلب من ${sourceName}";
+  static String m82(sourceName) => "اطلب من ${sourceName}";
 
-  static String m81(sourceName) => "اطلب من ${sourceName}";
+  static String m83(sourceName) => "اطلب من ${sourceName}";
 
-  static String m82(July) => "${July} انهيار الأداء العام";
+  static String m84(July) => "${July} انهيار الأداء العام";
 
-  static String m83(count) => "الجداول المتوقفة مؤقتًا (${count})";
+  static String m85(count) => "الجداول المتوقفة مؤقتًا (${count})";
 
-  static String m84(count) => "مجمعات الدفع (${count}).";
+  static String m86(count) => "مجمعات الدفع (${count}).";
 
-  static String m85(supplierName) =>
+  static String m87(supplierName) =>
       "في انتظار الموافقة من ${supplierName}، سيتم إعلامك عند الرد.";
 
-  static String m86(count) => "المنتجات المعلقة (${count})";
+  static String m88(count) => "المنتجات المعلقة (${count})";
 
-  static String m87(count) => "منتجات ${count}";
+  static String m89(count) => "منتجات ${count}";
 
-  static String m88(count) => "المنتجات التي تتطلب التوضيح (${count}):";
+  static String m90(count) => "المنتجات التي تتطلب التوضيح (${count}):";
 
-  static String m89(count) => "${count} تباين الكمية";
+  static String m91(count) => "${count} تباين الكمية";
 
-  static String m90(branchName) => "مصروفات سريعة لفرع ${branchName}";
+  static String m92(branchName) => "مصروفات سريعة لفرع ${branchName}";
 
-  static String m91(cashierName) =>
+  static String m93(cashierName) =>
       "تم إعادة تعيين هذا الوردية إلى موظفين آخرين بواسطة ${cashierName}";
 
-  static String m92(CashierName) =>
+  static String m94(CashierName) =>
       "لم تقم بإعادة تعيين أية ورديات إلى ${CashierName}";
 
-  static String m93(supplierName) => "تلقي ${supplierName}";
+  static String m95(supplierName) => "تلقي ${supplierName}";
 
-  static String m94(name) =>
+  static String m96(name) =>
       "قام ${name} (المستلم) بمراجعة عملية التسليم والتوقيع عليها.\nتأكيدك مطلوب الآن لإكمال العملية.";
 
-  static String m95(count) => "${count} سجل";
+  static String m97(count) => "${count} سجل";
 
-  static String m96(area) => "الانتقال داخل ${area}";
+  static String m98(area) => "الانتقال داخل ${area}";
 
-  static String m97(name) =>
+  static String m99(name) =>
       "لقد تم إرسال تقريرك بنجاح بواسطة ${name} إلى الإدارة للمراجعة.";
 
-  static String m98(branchName) =>
+  static String m100(branchName) =>
       "قدمت ${branchName} تقريرًا عن النفايات والأضرار للمراجعة.";
 
-  static String m99(count) => "${count} طلب";
+  static String m101(count) => "${count} طلب";
 
-  static String m100(date) => "تم الحل في: ${date}";
+  static String m102(date) => "تم الحل في: ${date}";
 
-  static String m101(count) =>
+  static String m103(count) =>
       "راجع جميع مناطق ${count} وأكمل أي إجراءات مطلوبة قبل المتابعة.";
 
-  static String m102(name) => "${name} يتولى الأمر...";
+  static String m104(name) => "${name} يتولى الأمر...";
 
-  static String m103(count) => "السيناريوهات المحفوظة (${count})";
+  static String m105(count) => "السيناريوهات المحفوظة (${count})";
 
-  static String m104(count) => "الاختبارات المحفوظة (${count})";
+  static String m106(count) => "الاختبارات المحفوظة (${count})";
 
-  static String m105(managerName) =>
+  static String m107(managerName) =>
       "اطلع على تفاصيل توزيع تسليم ${managerName} أدناه:";
 
-  static String m106(count) => "المنتج المحدد (${count}):";
+  static String m108(count) => "المنتج المحدد (${count}):";
 
-  static String m107(count) =>
+  static String m109(count) =>
       "المنتجات المحددة لمخزون اليوم (منتجات ${count}):";
 
-  static String m108(count) => "الورديات اليوم (${count})";
+  static String m110(count) => "الورديات اليوم (${count})";
 
-  static String m109(cashierName) =>
+  static String m111(cashierName) =>
       "تسليمك النقدي الآن في انتظار موافقة ${cashierName}. سيتم إعلامك بمجرد تأكيد ذلك.";
 
-  static String m110(quantity, unit, value) =>
+  static String m112(quantity, unit, value) =>
       "قصير ${quantity} ${unit} (قيمة ${value} SAR)";
 
-  static String m111(count) => "عرض جميع صور ${count}";
+  static String m113(count) => "عرض جميع صور ${count}";
 
-  static String m112(hours) => "/ ${hours} ساعة";
+  static String m114(hours) => "/ ${hours} ساعة";
 
-  static String m113(branchName) => "مقدم من ${branchName}";
+  static String m115(branchName) => "مقدم من ${branchName}";
 
-  static String m114(count) => "ائتمان الموردين (${count})";
+  static String m116(count) => "ائتمان الموردين (${count})";
 
-  static String m115(date) =>
+  static String m117(date) =>
       "لقد طلب المورد تمديد التسليم ${date}. في انتظار موافقتك";
 
-  static String m116(date) =>
+  static String m118(date) =>
       "تم إلغاء طلب هذه الدورة يدويًا. يظل الجدول المتكرر نشطًا — سيتم إنشاء الطلب التالي على ${date}.";
 
-  static String m117(month) => "هذا الشهر حتى الآن (${month}):";
+  static String m119(month) => "هذا الشهر حتى الآن (${month}):";
 
-  static String m118(month) => "إنجازات هذا الشهر (${month}).";
+  static String m120(month) => "إنجازات هذا الشهر (${month}).";
 
-  static String m119(dates) =>
+  static String m121(dates) =>
       "سوف يتكرر هذا الطلب في كل: ${dates} من كل أسبوع.";
 
-  static String m120(dates) => "سوف يتكرر هذا الطلب في كل: ${dates} من كل شهر.";
+  static String m122(dates) => "سوف يتكرر هذا الطلب في كل: ${dates} من كل شهر.";
 
-  static String m121(cashierName, managerName) =>
+  static String m123(cashierName, managerName) =>
       "سيؤدي هذا إلى إرسال عملية التسليم مرة أخرى إلى ${cashierName} للحصول على التحديثات بناءً على تعليقات ${managerName}.";
 
-  static String m122(date) => "${date}، تقرير التناقض";
+  static String m124(date) => "${date}، تقرير التناقض";
 
-  static String m123(date) => "اليوم: ${date}";
+  static String m125(date) => "اليوم: ${date}";
 
-  static String m124(count) => "الأدوات والسجلات (${count})";
+  static String m126(count) => "الأدوات والسجلات (${count})";
 
-  static String m125(count) => "${count} =";
+  static String m127(count) => "${count} =";
 
-  static String m126(count) => "نقل جميع أصول ${count}";
-
-  static String m127(cashierName) =>
-      "لقد وافقت على التسليم وتجاوزت الرفض من ${cashierName}.";
-
-  static String m128(name) =>
-      "لا يمكنك متابعة هذا الوردية لأنه تم إعادة تعيينه إلى آخر بواسطة ${name}";
+  static String m128(count) => "نقل جميع أصول ${count}";
 
   static String m129(cashierName) =>
-      "ستتجاوز الرفض من ${cashierName}، وهذا الإجراء نهائي ولا يمكن التراجع عنه.";
+      "لقد وافقت على التسليم وتجاوزت الرفض من ${cashierName}.";
 
   static String m130(name) =>
+      "لا يمكنك متابعة هذا الوردية لأنه تم إعادة تعيينه إلى آخر بواسطة ${name}";
+
+  static String m131(cashierName) =>
+      "ستتجاوز الرفض من ${cashierName}، وهذا الإجراء نهائي ولا يمكن التراجع عنه.";
+
+  static String m132(name) =>
       "لقد أدرجتك شركة ${name} كأحد أسباب التباين في الرصيد الختامي للوردية. ZZLINEبريكZZ ZZLINEبريكزز برجاء مراجعة التفاصيل واختيار الموافقة أو الرفض للجزء الخاص بك فيها.";
 
-  static String m131(count) => "النفايات والأضرار (${count})";
+  static String m133(count) => "النفايات والأضرار (${count})";
 
-  static String m132(pers) =>
+  static String m134(pers) =>
       "عندما تنخفض الكمية المتاحة للعنصر المحدد إلى ${pers}% من المستويات المعتادة، سيتم إنشاء طلب جديد تلقائيًا.";
 
-  static String m133(fromTime, toTime) => "ساعات العمل ${fromTime} - ${toTime}";
+  static String m135(fromTime, toTime) => "ساعات العمل ${fromTime} - ${toTime}";
 
-  static String m134(date) => "أمس: ${date}";
+  static String m136(date) => "أمس: ${date}";
 
-  static String m135(dateAndTime) => "لقد قبلت هذا التسليم في: ${dateAndTime}";
+  static String m137(dateAndTime) => "لقد قبلت هذا التسليم في: ${dateAndTime}";
 
-  static String m136(dateAndTime) =>
+  static String m138(dateAndTime) =>
       "لقد قبلت دورك في التباين في: ${dateAndTime}";
 
-  static String m137(count) => "لديك حاليا ${count} مناطق مضافة";
+  static String m139(count) => "لديك حاليا ${count} مناطق مضافة";
 
-  static String m138(dateAndTime) => "لقد رفضت هذا التسليم في: ${dateAndTime}";
+  static String m140(dateAndTime) => "لقد رفضت هذا التسليم في: ${dateAndTime}";
 
-  static String m139(dateAndTime) =>
+  static String m141(dateAndTime) =>
       "لقد رفضت الجزء الخاص بك في التباين بشأن: ${dateAndTime}";
 
-  static String m140(cashierName) =>
+  static String m142(cashierName) =>
       "لقد طلبت من ${cashierName} إجراء تصحيحات على عملية التسليم هذه.";
 
-  static String m141(cashierName) =>
+  static String m143(cashierName) =>
       "لقد طلبت من ${cashierName} إجراء تصحيحات على التباين المقدم.";
 
-  static String m142(dateAndTime) =>
+  static String m144(dateAndTime) =>
       "لقد قمت بحفظ هذا الطلب للمسودة في: ${dateAndTime}";
 
-  static String m143(date, branchName) =>
+  static String m145(date, branchName) =>
       "لقد أرسلت تمديد التسليم ${date}. في انتظار الموافقة من ${branchName}";
 
-  static String m144(cashierName) =>
+  static String m146(cashierName) =>
       "لقد تم إرسال طلب التصحيح الخاص بك إلى ${cashierName}.";
 
-  static String m145(Amount) => "تم تحويل ${Amount} إلى عهدة الفرع بنجاح.";
+  static String m147(Amount) => "تم تحويل ${Amount} إلى عهدة الفرع بنجاح.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1243,6 +1248,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "انقر لتحميل الملف",
     ),
     "close": MessageLookupByLibrary.simpleMessage("إغلاق"),
+    "closeOldestPendingWorkdayFirst": MessageLookupByLibrary.simpleMessage(
+      "أقفل يوم العمل الأقدم المعلّق أولاً.",
+    ),
+    "closeWorkdayDateFirst": m20,
     "closed": MessageLookupByLibrary.simpleMessage("مغلق"),
     "closing_balance": MessageLookupByLibrary.simpleMessage("الرصيد الختامي:"),
     "codeSendSuccessfully": MessageLookupByLibrary.simpleMessage(
@@ -1300,14 +1309,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "completed": MessageLookupByLibrary.simpleMessage("مكتملة"),
     "completedForm": MessageLookupByLibrary.simpleMessage("استمارة مكتملة"),
-    "completedOnDateTime": m20,
-    "completedOrdersCount": m21,
+    "completedOnDateTime": m21,
+    "completedOrdersCount": m22,
     "completedProducts": MessageLookupByLibrary.simpleMessage(
       "المنتجات المكتملة",
     ),
-    "completedProductsCount": m22,
-    "completedTaskReview": m23,
-    "completed_cashiers_desc": m24,
+    "completedProductsCount": m23,
+    "completedTaskReview": m24,
+    "completed_cashiers_desc": m25,
     "completed_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "لا يوجد وردية مكتمل",
     ),
@@ -1413,20 +1422,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "couldNotVerifyManagerAccount": MessageLookupByLibrary.simpleMessage(
       "تعذر التحقق من حساب المدير.",
     ),
+    "couldNotVerifyPendingClosures": MessageLookupByLibrary.simpleMessage(
+      "تعذر التحقق من الإقفالات اليومية المعلقة. أعد المحاولة قبل الإرسال.",
+    ),
     "couldNotVerifyWorkdayIdentity": MessageLookupByLibrary.simpleMessage(
       "تعذر التحقق من هوية اليومية.",
+    ),
+    "couldNotVerifyWorkdayStatus": MessageLookupByLibrary.simpleMessage(
+      "تعذر التحقق من حالة يوم العمل من الخادم.",
     ),
     "count": MessageLookupByLibrary.simpleMessage("عد"),
     "countAssets": MessageLookupByLibrary.simpleMessage("عد الأصول"),
     "countCompleted": MessageLookupByLibrary.simpleMessage("اكتمل العد!"),
-    "countEmployeesSelected": m25,
-    "countItemsReceived": m26,
-    "countOfDraft": m27,
-    "countOfIncidents": m28,
+    "countEmployeesSelected": m26,
+    "countItemsReceived": m27,
+    "countOfDraft": m28,
+    "countOfIncidents": m29,
     "countProgress": MessageLookupByLibrary.simpleMessage("تقدم العد:"),
-    "countQuantityVariance": m29,
-    "countSalesChanelsRecorded": m30,
-    "countSpecifiedProducts": m31,
+    "countQuantityVariance": m30,
+    "countSalesChanelsRecorded": m31,
+    "countSpecifiedProducts": m32,
     "createAccountDesc": MessageLookupByLibrary.simpleMessage(
       "نحن متحمسون لانضمامك إلينا - تم تصميم عصب لمساعدة المطاعم والمقاهي المشابهة لمطعمك على العمل بشكل أكثر سلاسة وذكاءً وأكثر ربحية.",
     ),
@@ -1525,6 +1540,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
       "تم حفظ تعديلات اليومية.",
     ),
+    "dailyCloseRejectedByServer": MessageLookupByLibrary.simpleMessage(
+      "رفض السيرفر إرسال الإقفال اليومي.",
+    ),
     "dailyCloseSubmissionVerified": MessageLookupByLibrary.simpleMessage(
       "تم التحقق من إرسال اليومية للمراجعة.",
     ),
@@ -1532,7 +1550,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "تم إرسال اليومية النهائية للمراجعة.",
     ),
     "dailyFilter": MessageLookupByLibrary.simpleMessage("يومي"),
-    "dailyInventory": m32,
+    "dailyInventory": m33,
     "dailyInventoryAction": MessageLookupByLibrary.simpleMessage(
       "الجرد اليومي",
     ),
@@ -1568,7 +1586,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "date": MessageLookupByLibrary.simpleMessage("التاريخ"),
     "dateAdded": MessageLookupByLibrary.simpleMessage("تاريخ الإضافة"),
     "dateAndTime": MessageLookupByLibrary.simpleMessage("التاريخ والوقت"),
-    "dateDailyInventoryDetails": m33,
+    "dateDailyInventoryDetails": m34,
     "dateFilterCustomRange": MessageLookupByLibrary.simpleMessage("نطاق مخصص"),
     "dateFilterLast14Days": MessageLookupByLibrary.simpleMessage(
       "آخر 14 يومًا",
@@ -1913,7 +1931,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterFullVolumeThenDragToEstimateLeft": MessageLookupByLibrary.simpleMessage(
       "أدخل الحجم الكامل، ثم اسحب لتقدير ما تبقى. سنقوم بحساب الباقي تلقائيًا.",
     ),
-    "enterItemActualQuantity": m34,
+    "enterItemActualQuantity": m35,
     "enterName": MessageLookupByLibrary.simpleMessage("أدخل الاسم"),
     "enterQuantity": MessageLookupByLibrary.simpleMessage("أدخل الكمية"),
     "enterReason": MessageLookupByLibrary.simpleMessage("أدخل السبب (اختياري)"),
@@ -1929,7 +1947,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "error": MessageLookupByLibrary.simpleMessage("خطأ"),
     "escalateRejection": MessageLookupByLibrary.simpleMessage("تصعيد الرفض"),
     "escalated": MessageLookupByLibrary.simpleMessage("تصاعدت"),
-    "escalatedOnDate": m35,
+    "escalatedOnDate": m36,
     "escalation": MessageLookupByLibrary.simpleMessage("التصعيد"),
     "escalationRequests": MessageLookupByLibrary.simpleMessage("طلبات التصعيد"),
     "estimated": MessageLookupByLibrary.simpleMessage("يقدر"),
@@ -1959,7 +1977,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "expectedClassification": MessageLookupByLibrary.simpleMessage(
       "التصنيف المتوقع",
     ),
-    "expectedDeliveriesTodayCount": m36,
+    "expectedDeliveriesTodayCount": m37,
     "expectedDeliveryTime": MessageLookupByLibrary.simpleMessage(
       "وقت التسليم المتوقع",
     ),
@@ -2125,7 +2143,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "إيصال التسليم النهائي أو الفاتورة",
     ),
     "finalDisposal": MessageLookupByLibrary.simpleMessage("التخلص النهائي"),
-    "finalDisposalConfirmed": m37,
+    "finalDisposalConfirmed": m38,
     "finalDisposalDetails": MessageLookupByLibrary.simpleMessage(
       "تفاصيل طلب التخلص النهائي",
     ),
@@ -2706,7 +2724,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "تحذير كتابي",
     ),
     "followupYear": MessageLookupByLibrary.simpleMessage("السنة"),
-    "followupYears": m38,
+    "followupYears": m39,
     "foodPreparationLeftovers": MessageLookupByLibrary.simpleMessage(
       "بقايا تحضير الطعام",
     ),
@@ -2764,7 +2782,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "generateReport": MessageLookupByLibrary.simpleMessage("إنشاء تقرير"),
     "generated": MessageLookupByLibrary.simpleMessage("تم إنشاؤها"),
-    "generatedOrderConfirmation": m39,
+    "generatedOrderConfirmation": m40,
     "generatedOrderConfirmed": MessageLookupByLibrary.simpleMessage(
       "تم تأكيد الطلب الذي تم إنشاؤه وهو قيد المعالجة حاليًا.",
     ),
@@ -2789,8 +2807,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "انتقل إلى تقديم الطلب",
     ),
     "goodsInspection": MessageLookupByLibrary.simpleMessage("فحص البضائع:"),
-    "goodsInspectionCount": m40,
-    "goodsInspectionCountTitle": m41,
+    "goodsInspectionCount": m41,
+    "goodsInspectionCountTitle": m42,
     "goodsReturns": MessageLookupByLibrary.simpleMessage("إرجاع البضائع"),
     "grade": MessageLookupByLibrary.simpleMessage("الصف"),
     "grandTotalCost": MessageLookupByLibrary.simpleMessage(
@@ -2815,7 +2833,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "التسليم النقدي الآن",
     ),
     "handOverAmount": MessageLookupByLibrary.simpleMessage("مبلغ التسليم"),
-    "handOverDesc": m42,
+    "handOverDesc": m43,
     "handOverFrom": MessageLookupByLibrary.simpleMessage("تسليم من"),
     "handOverTo": MessageLookupByLibrary.simpleMessage("تسليم إلى"),
     "handoffNotApproved": MessageLookupByLibrary.simpleMessage(
@@ -2826,15 +2844,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "handoveDetails": MessageLookupByLibrary.simpleMessage("تفاصيل التسليم"),
     "handover": MessageLookupByLibrary.simpleMessage("التسليم"),
-    "handoverAcceptedDesc": m43,
+    "handoverAcceptedDesc": m44,
     "handoverAmount": MessageLookupByLibrary.simpleMessage("مبلغ التسليم"),
     "handoverAmountHintText": MessageLookupByLibrary.simpleMessage(
       "المبلغ الذي سيحصل عليه أمين الصندوق التالي",
     ),
     "handoverAmountTitle": MessageLookupByLibrary.simpleMessage("مبلغ التسليم"),
-    "handoverApprovedByYou": m44,
+    "handoverApprovedByYou": m45,
     "handoverBy": MessageLookupByLibrary.simpleMessage("التسليم بواسطة"),
-    "handoverCompleteWithRecordedDiscrepancies": m45,
+    "handoverCompleteWithRecordedDiscrepancies": m46,
     "handoverCompleted": MessageLookupByLibrary.simpleMessage("اكتمل التسليم"),
     "handoverCompletedDesc": MessageLookupByLibrary.simpleMessage(
       "وأكد الطرفان نقل الأصول.\nتم الآن تسليم وتسجيل جميع العناصر المخصصة رسميًا.",
@@ -2855,21 +2873,31 @@ class MessageLookup extends MessageLookupByLibrary {
       "لقد انضممت بنجاح إلى جلسة التسليم.",
     ),
     "handoverMethod": MessageLookupByLibrary.simpleMessage("طريقة التسليم"),
-    "handoverPendingDesc": m46,
+    "handoverOutcomeUnconfirmedCheckDetails": MessageLookupByLibrary.simpleMessage(
+      "تعذر تأكيد حالة استلام العهدة من استجابة الخادم. يرجى مراجعة التفاصيل للتحقق.",
+    ),
+    "handoverPendingDesc": m47,
+    "handoverReceiptConfirmed": MessageLookupByLibrary.simpleMessage(
+      "تم تأكيد استلام العهدة",
+    ),
+    "handoverReceiptConfirmedDesc": m48,
     "handoverRecipient": MessageLookupByLibrary.simpleMessage("مستلم التسليم"),
     "handoverRecipientApproval": MessageLookupByLibrary.simpleMessage(
       "في انتظار موافقة المستلم",
     ),
     "handoverRejected": MessageLookupByLibrary.simpleMessage("تم رفض التسليم"),
-    "handoverRejectedDesc": m47,
+    "handoverRejectedDesc": m49,
     "handoverRequest": MessageLookupByLibrary.simpleMessage("طلب التسليم"),
-    "handoverRequestSent": m48,
+    "handoverRequestSent": m50,
     "handoverSession": MessageLookupByLibrary.simpleMessage("جلسة التسليم"),
     "handoverSessionPreparation": MessageLookupByLibrary.simpleMessage(
       "التحضير لجلسة التسليم",
     ),
     "handoverSessionPreparationDesc": MessageLookupByLibrary.simpleMessage(
       "فقط بعض التفاصيل اللازمة لإكمال عملية التسليم.",
+    ),
+    "handoverSubmittedVerifyDetailsTitle": MessageLookupByLibrary.simpleMessage(
+      "تم إرسال التسليم",
     ),
     "handoverSummary": MessageLookupByLibrary.simpleMessage("ملخص التسليم"),
     "handoverTime": MessageLookupByLibrary.simpleMessage("وقت التسليم"),
@@ -2908,7 +2936,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "home": MessageLookupByLibrary.simpleMessage("الرئيسية"),
     "hour": MessageLookupByLibrary.simpleMessage("ساعة"),
     "hours": MessageLookupByLibrary.simpleMessage("ساعات"),
-    "hoursRemaining": m49,
+    "hoursRemaining": m51,
     "howMuchDidUSell": MessageLookupByLibrary.simpleMessage(
       "كم بعت في مناوبتك اليوم؟ (المبلغ الإجمالي، بما في ذلك ضريبة القيمة المضافة).",
     ),
@@ -2926,7 +2954,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "howWasThisExpensePaid": MessageLookupByLibrary.simpleMessage(
       "وكيف تم دفع هذه النفقات؟",
     ),
-    "howWouldYouLikeToExportDateMonthlyRegularInventory": m50,
+    "howWouldYouLikeToExportDateMonthlyRegularInventory": m52,
     "howWouldYouLikeToProceedWithThisItem":
         MessageLookupByLibrary.simpleMessage(
           "كيف تريد المتابعة مع هذا العنصر؟",
@@ -2935,7 +2963,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "كيف تريد تسجيل اقتراحات المخزون هذه؟",
         ),
-    "howWouldYouLikeToRespondToDiscrepancy": m51,
+    "howWouldYouLikeToRespondToDiscrepancy": m53,
     "howWouldYouLikeToRespondToDiscrepancyAtOnce":
         MessageLookupByLibrary.simpleMessage(
           "كيف تريد الرد على التناقض في العناصر التالية مرة واحدة:",
@@ -3014,11 +3042,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "inAppNotification": MessageLookupByLibrary.simpleMessage(
       "الإخطار داخل التطبيق",
     ),
-    "inBranchAsBranchManager": m52,
+    "inBranchAsBranchManager": m54,
     "inMaintenance": MessageLookupByLibrary.simpleMessage("في الصيانة"),
     "inMyCustody": MessageLookupByLibrary.simpleMessage("في عهدتي"),
     "inProgress": MessageLookupByLibrary.simpleMessage("قيد التنفيذ"),
-    "inProgressCount": m53,
+    "inProgressCount": m55,
     "inStock": MessageLookupByLibrary.simpleMessage("متوفر"),
     "in_progress_name": MessageLookupByLibrary.simpleMessage("قيد التقدم"),
     "inappNotification": MessageLookupByLibrary.simpleMessage(
@@ -3079,7 +3107,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidShiftTime": MessageLookupByLibrary.simpleMessage(
       "وقت الوردية غير صالح",
     ),
-    "inventoriedProducts": m54,
+    "inventoriedProducts": m56,
     "inventory": MessageLookupByLibrary.simpleMessage("المخزون"),
     "inventoryActions": MessageLookupByLibrary.simpleMessage("إجراءات المخزون"),
     "inventoryComplete": MessageLookupByLibrary.simpleMessage("اكتمل المخزون"),
@@ -3125,16 +3153,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "itCouldBeDueToManualEntryErrors": MessageLookupByLibrary.simpleMessage(
       "قد يكون ذلك بسبب أخطاء الإدخال اليدوي أو المبيعات المنسية أو المعاملات غير المسجلة.",
     ),
-    "itIsBeenReassignedByTheBranchManager": m55,
+    "itIsBeenReassignedByTheBranchManager": m57,
     "itWillBeSentForApprovalByTheBrandManagerOrStoreOwner":
         MessageLookupByLibrary.simpleMessage(
           "سيتم إرسالها للموافقة عليها من قبل مدير العلامة التجارية أو مالك المتجر",
         ),
     "item": MessageLookupByLibrary.simpleMessage("البند"),
     "itemCancelled": MessageLookupByLibrary.simpleMessage("تم إلغاء العنصر"),
-    "itemCountAndAvailability": m56,
+    "itemCountAndAvailability": m58,
     "itemData": MessageLookupByLibrary.simpleMessage("بيانات العنصر"),
-    "itemDeliveredIsQuantityUnitLowerThanRequestedAndConfirmedQty": m57,
+    "itemDeliveredIsQuantityUnitLowerThanRequestedAndConfirmedQty": m59,
     "itemDistributionByPerformance": MessageLookupByLibrary.simpleMessage(
       "توزيع العناصر حسب الأداء",
     ),
@@ -3143,7 +3171,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "اختر من العناصر المذكورة أدناه.",
     ),
     "itemName": MessageLookupByLibrary.simpleMessage("اسم العنصر"),
-    "itemNameVariance": m58,
+    "itemNameVariance": m60,
     "itemRejected": MessageLookupByLibrary.simpleMessage("تم رفض العنصر"),
     "itemRejectedDesc": MessageLookupByLibrary.simpleMessage(
       "لقد قمت برفض العنصر بنجاح. تمت مشاركة السبب الخاص بك مع الفرع الطالب.",
@@ -3164,9 +3192,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "itemsAmountMustBeEqualToTotalAmount": MessageLookupByLibrary.simpleMessage(
       "يجب أن يكون مبلغ العناصر مساوياً للمبلغ الإجمالي",
     ),
-    "itemsAndQuantities": m59,
-    "itemsCount": m60,
-    "itemsReceivedCount": m61,
+    "itemsAndQuantities": m61,
+    "itemsCount": m62,
+    "itemsReceivedCount": m63,
     "itemsRequired": MessageLookupByLibrary.simpleMessage("العناصر المطلوبة"),
     "johnDoe": MessageLookupByLibrary.simpleMessage("جون دو"),
     "joinHandoverSession": MessageLookupByLibrary.simpleMessage(
@@ -3294,13 +3322,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "managerDailyCashSales": MessageLookupByLibrary.simpleMessage(
       "المبيعات النقدية",
     ),
-    "managerNameSubmittedThisItemReturnRequestForReviewAndApproval": m62,
-    "managerNameSubmittedThisOrderRequestForReviewAndApproval": m63,
-    "managerSubmittedDailyInventory": m64,
+    "managerNameSubmittedThisItemReturnRequestForReviewAndApproval": m64,
+    "managerNameSubmittedThisOrderRequestForReviewAndApproval": m65,
+    "managerSubmittedDailyInventory": m66,
     "managersCommentCorrectionRequest": MessageLookupByLibrary.simpleMessage(
       "تعليق المديرين (طلب التصحيح)",
     ),
-    "managersHandover": m65,
+    "managersHandover": m67,
     "mandatoryAwareness": MessageLookupByLibrary.simpleMessage(
       "التوعية الإلزامية",
     ),
@@ -3354,10 +3382,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "method": MessageLookupByLibrary.simpleMessage("الطريقة"),
     "min": MessageLookupByLibrary.simpleMessage("دقيقة"),
     "mins": MessageLookupByLibrary.simpleMessage("دقيقة"),
-    "minsAgo": m66,
+    "minsAgo": m68,
     "minute": MessageLookupByLibrary.simpleMessage("دقيقة"),
     "minutes": MessageLookupByLibrary.simpleMessage("دقائق"),
-    "minutesRemaining": m67,
+    "minutesRemaining": m69,
     "missing": MessageLookupByLibrary.simpleMessage("مفقود"),
     "missingDocuments": MessageLookupByLibrary.simpleMessage(
       "المستندات المفقودة (المسودات معلومات مفقودة)",
@@ -3427,7 +3455,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "التكاليف الثابتة الشهرية",
     ),
     "monthlyInventory": MessageLookupByLibrary.simpleMessage("الجرد الشهري"),
-    "monthlyInventoryCount": m68,
+    "monthlyInventoryCount": m70,
     "monthlyRegularInventory": MessageLookupByLibrary.simpleMessage(
       "الجرد المنتظم الشهري",
     ),
@@ -3442,7 +3470,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "morningBetween1200AM1159AM": MessageLookupByLibrary.simpleMessage(
       "صباحًا (بين الساعة 12:00 صباحًا – 11:59 صباحًا)",
     ),
-    "movedTo": m69,
+    "movedTo": m71,
     "mozzarellaCheeseAlmarai": MessageLookupByLibrary.simpleMessage(
       "جبنة موزاريلا - المراعي",
     ),
@@ -3463,7 +3491,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "تفاصيل الوردية والتسليم (مدير الفرع)",
     ),
     "myShifts": MessageLookupByLibrary.simpleMessage("وردياتي"),
-    "myWorkLists": m70,
+    "myWorkLists": m72,
     "nakheelMainBranchNorth": MessageLookupByLibrary.simpleMessage(
       "فرع النخيل الرئيسي شمال",
     ),
@@ -3503,9 +3531,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "أمين الصندوق الجديد:",
     ),
     "newDate": MessageLookupByLibrary.simpleMessage("تاريخ جديد"),
-    "newDateTimeExtensionApproved": m71,
-    "newDateTimeExtensionApprovedByBranchName": m72,
-    "newDateTimeExtensionRejected": m73,
+    "newDateTimeExtensionApproved": m73,
+    "newDateTimeExtensionApprovedByBranchName": m74,
+    "newDateTimeExtensionRejected": m75,
     "newDeliveryDate": MessageLookupByLibrary.simpleMessage(
       "تاريخ التسليم الجديد",
     ),
@@ -3539,12 +3567,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextOrderWeeklyRepeat": MessageLookupByLibrary.simpleMessage(
       "الطلب التالي – تكرار أسبوعي",
     ),
-    "nextOrderWillBeGeneratedOn": m74,
+    "nextOrderWillBeGeneratedOn": m76,
     "nextReviewAssets": MessageLookupByLibrary.simpleMessage(
       "التالي: مراجعة الأصول",
     ),
-    "nextSchedule": m75,
-    "nextScheduledRun": m76,
+    "nextSchedule": m77,
+    "nextScheduledRun": m78,
     "nextSteps": MessageLookupByLibrary.simpleMessage("الخطوات التالية:"),
     "nextSupply": MessageLookupByLibrary.simpleMessage("العرض التالي"),
     "next_cashier": MessageLookupByLibrary.simpleMessage("الكاشير التالي:"),
@@ -3769,12 +3797,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "no_cashiers_desc": MessageLookupByLibrary.simpleMessage(
       "لإدارة مناوبات أمين الصندوق، ستحتاج إلى إضافة أمين صندوق واحد على الأقل إلى هذا الفرع.\n\nبمجرد الإضافة، يمكنك تعيين الورديات ومراقبة عمليات التسليم وتتبع نشاط المبيعات اليومي.",
     ),
-    "no_inProgress_cashiers_desc": m77,
+    "no_inProgress_cashiers_desc": m79,
     "no_inProgress_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "لا توجد ورديات قيد التنفيذ",
     ),
     "no_name": MessageLookupByLibrary.simpleMessage("لا يوجد اسم"),
-    "no_pending_cashiers_desc": m78,
+    "no_pending_cashiers_desc": m80,
     "no_pending_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "لا يوجد صرافون معلقون",
     ),
@@ -3839,7 +3867,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "الالتزامات لم تُسدد بعد",
     ),
     "ofEveryMonth": MessageLookupByLibrary.simpleMessage("من كل شهر"),
-    "ofTotal": m79,
+    "ofTotal": m81,
     "officeEquipments": MessageLookupByLibrary.simpleMessage(
       "المعدات المكتبية",
     ),
@@ -3953,8 +3981,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "تم الانتهاء من تفاصيل الطلب، ويتم التسليم حاليًا.",
         ),
-    "orderFromSourceName": m80,
-    "orderFromSourcename": m81,
+    "orderFromSourceName": m82,
+    "orderFromSourcename": m83,
     "orderModifiedDesc": MessageLookupByLibrary.simpleMessage(
       "تم تعديل الطلب. راجع التغييرات في \"التفاصيل\"",
     ),
@@ -4048,7 +4076,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "الإجراءات الشاملة/الشاملة",
     ),
     "overallPerformance": MessageLookupByLibrary.simpleMessage("الأداء العام:"),
-    "overallPerformanceBreakdown": m82,
+    "overallPerformanceBreakdown": m84,
     "overviewMatrix": MessageLookupByLibrary.simpleMessage(
       "نظرة عامة - مصفوفة",
     ),
@@ -4121,9 +4149,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "جدول الإيقاف المؤقت",
     ),
     "paused": MessageLookupByLibrary.simpleMessage("متوقف مؤقتًا"),
-    "pausedSchedules": m83,
+    "pausedSchedules": m85,
     "payment": MessageLookupByLibrary.simpleMessage("الدفع"),
-    "paymentAggregtors": m84,
+    "paymentAggregtors": m86,
     "paymentDetailsView": MessageLookupByLibrary.simpleMessage(
       "عرض تفاصيل الدفع",
     ),
@@ -4142,9 +4170,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "pendingApproval": MessageLookupByLibrary.simpleMessage(
       "في انتظار الموافقة",
     ),
-    "pendingApprovalFromSupplierYouWillBeNotifiedWhenTheyRespond": m85,
+    "pendingApprovalFromSupplierYouWillBeNotifiedWhenTheyRespond": m87,
     "pendingConfirmation": MessageLookupByLibrary.simpleMessage(
       "في انتظار التأكيد",
+    ),
+    "pendingDailyClosuresSubtitle": MessageLookupByLibrary.simpleMessage(
+      "أيام عمل مكتملة سابقة ما زالت تحتاج إرسال الإقفال اليومي النهائي.",
+    ),
+    "pendingDailyClosuresTitle": MessageLookupByLibrary.simpleMessage(
+      "إقفالات يومية معلقة",
     ),
     "pendingFinalReview": MessageLookupByLibrary.simpleMessage(
       "في انتظار المراجعة النهائية",
@@ -4164,7 +4198,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pendingOwnerApproval": MessageLookupByLibrary.simpleMessage(
       "في انتظار التأكيد من المالك",
     ),
-    "pendingProducts": m86,
+    "pendingProducts": m88,
     "pendingResolution": MessageLookupByLibrary.simpleMessage(
       "في انتظار القرار",
     ),
@@ -4361,7 +4395,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "الإنتاجية لكل موظف",
     ),
     "products": MessageLookupByLibrary.simpleMessage("المنتجات"),
-    "productsCount": m87,
+    "productsCount": m89,
     "productsCountValue": MessageLookupByLibrary.simpleMessage("1,247 منتج"),
     "productsDamagedDueToExternalFactors": MessageLookupByLibrary.simpleMessage(
       "المنتجات المتضررة بسبب عوامل خارجية:",
@@ -4381,7 +4415,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "productsRequiringClarification": MessageLookupByLibrary.simpleMessage(
       "المنتجات التي تتطلب التوضيح",
     ),
-    "productsRequiringClarificationCount": m88,
+    "productsRequiringClarificationCount": m90,
     "productsThatCannotBeUsedDueTo": MessageLookupByLibrary.simpleMessage(
       "المنتجات التي لا يمكن استخدامها للأسباب التالية:",
     ),
@@ -4460,7 +4494,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "الكميات دقيقة ومراجعتها",
     ),
     "quantity": MessageLookupByLibrary.simpleMessage("الكمية"),
-    "quantityVarianceCount": m89,
+    "quantityVarianceCount": m91,
     "quantityWasted": MessageLookupByLibrary.simpleMessage("الكمية المهدرة:"),
     "quarterlyReview": MessageLookupByLibrary.simpleMessage("مراجعة ربع سنوية"),
     "quickAccessToProfileInfo": MessageLookupByLibrary.simpleMessage(
@@ -4472,7 +4506,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickCashExpenseDesc": MessageLookupByLibrary.simpleMessage(
       "(نفقات صغيرة وسريعة ≥ 500 ريال سعودي، على سبيل المثال، سيارة أجرة ووجبة للموظفين)",
     ),
-    "quickExpenseForBranch": m90,
+    "quickExpenseForBranch": m92,
     "quickExpensesReportTitle": MessageLookupByLibrary.simpleMessage(
       "تقرير المصروفات السريعة",
     ),
@@ -4532,11 +4566,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "reassigned_by": MessageLookupByLibrary.simpleMessage(
       "تم إعادة التعيين بواسطة:",
     ),
-    "reassigned_by_another_cashier": m91,
+    "reassigned_by_another_cashier": m93,
     "reassigned_by_u": MessageLookupByLibrary.simpleMessage(
       "لقد قمت بإعادة تعيين هذا الوردية إلى موظف آخر.",
     ),
-    "reassigned_cashiers_desc": m92,
+    "reassigned_cashiers_desc": m94,
     "reassigned_cashiers_title": MessageLookupByLibrary.simpleMessage(
       "لا يوجد وردية معاد تعيينها",
     ),
@@ -4580,7 +4614,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "receiveOrderSummary": MessageLookupByLibrary.simpleMessage(
       "تلقي ملخص الطلب",
     ),
-    "receiveSuppliername": m93,
+    "receiveSuppliername": m95,
     "receiveThisOrder": MessageLookupByLibrary.simpleMessage("تلقي هذا الطلب"),
     "receiveWithoutPriorOrder": MessageLookupByLibrary.simpleMessage(
       "الاستلام بدون طلب مسبق",
@@ -4612,7 +4646,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "recipientIsHereInPerson": MessageLookupByLibrary.simpleMessage(
       "المتلقي هنا شخصيا",
     ),
-    "recipientSignedHandover": m94,
+    "recipientSignedHandover": m96,
     "record": MessageLookupByLibrary.simpleMessage("سجل"),
     "recordWasteDamage": MessageLookupByLibrary.simpleMessage(
       "سجل النفايات/الأضرار",
@@ -4634,7 +4668,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "❌تسجيل \"استهلاك الموظفين\" كهدر أو تلف",
         ),
     "recordingTime": MessageLookupByLibrary.simpleMessage("وقت التسجيل"),
-    "recordsCount": m95,
+    "recordsCount": m97,
     "recurringOrderScheduled": MessageLookupByLibrary.simpleMessage(
       "أمر متكرر مجدولة",
     ),
@@ -4737,7 +4771,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "rejectionEscalated": MessageLookupByLibrary.simpleMessage("تصاعد الرفض"),
     "relatedOrder": MessageLookupByLibrary.simpleMessage("الطلب ذو الصلة"),
-    "relocateWithin": m96,
+    "relocateWithin": m98,
     "remaining": MessageLookupByLibrary.simpleMessage("المتبقي"),
     "remainingAmount": MessageLookupByLibrary.simpleMessage("المتبقي"),
     "remainingBalanceAutoCalculated": MessageLookupByLibrary.simpleMessage(
@@ -4790,8 +4824,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "تم إرسال التقرير إلى البريد الإلكتروني بنجاح",
     ),
     "reportSubmitted": MessageLookupByLibrary.simpleMessage("تم تقديم التقرير"),
-    "reportSubmittedDesc": m97,
-    "reportSubmittedForReview": m98,
+    "reportSubmittedDesc": m99,
+    "reportSubmittedForReview": m100,
     "reportSummary": MessageLookupByLibrary.simpleMessage("ملخص التقرير"),
     "reportType": MessageLookupByLibrary.simpleMessage("نوع التقرير"),
     "reports": MessageLookupByLibrary.simpleMessage("التقارير"),
@@ -4852,7 +4886,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "requestedBy": MessageLookupByLibrary.simpleMessage("طلب بواسطة"),
     "requestedQty": MessageLookupByLibrary.simpleMessage("الكمية المطلوبة"),
     "requests": MessageLookupByLibrary.simpleMessage("الطلبات"),
-    "requestsCount": m99,
+    "requestsCount": m101,
     "requiredAction": MessageLookupByLibrary.simpleMessage("الإجراء المطلوب"),
     "requiredActions": MessageLookupByLibrary.simpleMessage(
       "الإجراءات المطلوبة",
@@ -4890,7 +4924,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "resolvedByBrandManager": MessageLookupByLibrary.simpleMessage(
       "تم الحل بواسطة مدير العلامة التجارية",
     ),
-    "resolvedOnDate": m100,
+    "resolvedOnDate": m102,
     "resolvedRefundReceived": MessageLookupByLibrary.simpleMessage(
       "تم الحل – تم استلام المبلغ المسترد",
     ),
@@ -4927,6 +4961,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "استئناف الجدول الزمني",
     ),
     "retry": MessageLookupByLibrary.simpleMessage("أعد المحاولة"),
+    "retryLoadPendingClosures": MessageLookupByLibrary.simpleMessage(
+      "إعادة المحاولة",
+    ),
     "returnApprovedDesc": MessageLookupByLibrary.simpleMessage(
       "تمت الموافقة على العودة. تم إخطار المورد لمعالجة عملية الإرجاع.",
     ),
@@ -5070,7 +5107,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reviewWillBeSentToManager": MessageLookupByLibrary.simpleMessage(
       "سيتم إرسالها للمدير للموافقة",
     ),
-    "reviewZonesDesc": m101,
+    "reviewZonesDesc": m103,
     "risk": MessageLookupByLibrary.simpleMessage("خطر"),
     "riskAnalysisAndFinancialSafety": MessageLookupByLibrary.simpleMessage(
       "تحليل المخاطر والسلامة المالية",
@@ -5107,7 +5144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "salesPersintage": MessageLookupByLibrary.simpleMessage("نسبة المبيعات"),
     "sar": MessageLookupByLibrary.simpleMessage("ريال سعودي"),
     "sara": MessageLookupByLibrary.simpleMessage("سارة"),
-    "saraIsHandlingIt": m102,
+    "saraIsHandlingIt": m104,
     "sat": MessageLookupByLibrary.simpleMessage("جلس"),
     "save": MessageLookupByLibrary.simpleMessage("حفظ"),
     "save600Sar3Sarkg": MessageLookupByLibrary.simpleMessage(
@@ -5130,11 +5167,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "savedScenarioResult": MessageLookupByLibrary.simpleMessage(
       "نتيجة السيناريو المحفوظة",
     ),
-    "savedScenariosCount": m103,
+    "savedScenariosCount": m105,
     "savedTestResult": MessageLookupByLibrary.simpleMessage(
       "نتيجة الاختبار المحفوظة",
     ),
-    "savedTestsCount": m104,
+    "savedTestsCount": m106,
     "savings": MessageLookupByLibrary.simpleMessage("الادخار"),
     "scanCode": MessageLookupByLibrary.simpleMessage("رمز المسح"),
     "scenarioAnalysisInteractiveChart": MessageLookupByLibrary.simpleMessage(
@@ -5228,7 +5265,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "انظر تفاصيل التسليم",
     ),
     "seeDetails": MessageLookupByLibrary.simpleMessage("انظر التفاصيل"),
-    "seeDetailsOfManagerHandover": m105,
+    "seeDetailsOfManagerHandover": m107,
     "seeDifferenceThisMonthVsLastMonthInventory":
         MessageLookupByLibrary.simpleMessage(
           "شاهد الفرق بين مخزون هذا الشهر ومخزون الشهر الماضي:",
@@ -5295,8 +5332,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectedAssetsAreAllReady": MessageLookupByLibrary.simpleMessage(
       "الأصول المختارة كلها جاهزة للتسليم",
     ),
-    "selectedProductCount": m106,
-    "selectedProductsForTodaysInventory": m107,
+    "selectedProductCount": m108,
+    "selectedProductsForTodaysInventory": m109,
     "selection": MessageLookupByLibrary.simpleMessage("التحديد"),
     "sell": MessageLookupByLibrary.simpleMessage("بيع"),
     "send": MessageLookupByLibrary.simpleMessage("إرسال"),
@@ -5360,11 +5397,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "shiftCompleted": MessageLookupByLibrary.simpleMessage("اكتمل الوردية"),
     "shiftCounts": MessageLookupByLibrary.simpleMessage("عدد الورديات"),
-    "shiftCountsDaily": m108,
+    "shiftCountsDaily": m110,
     "shiftDateTitle": MessageLookupByLibrary.simpleMessage("تاريخ الوردية:"),
     "shiftDetails": MessageLookupByLibrary.simpleMessage("تفاصيل الوردية"),
     "shiftEnded": MessageLookupByLibrary.simpleMessage("انتهى الوردية"),
-    "shiftEndedDesc": m109,
+    "shiftEndedDesc": m111,
     "shiftEndedPendingHandover": MessageLookupByLibrary.simpleMessage(
       "انتهى الوردية، في انتظار التسليم النقدي",
     ),
@@ -5384,7 +5421,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "shifts": MessageLookupByLibrary.simpleMessage("الورديات"),
     "shopOwner": MessageLookupByLibrary.simpleMessage("صاحب المحل"),
     "short": MessageLookupByLibrary.simpleMessage("قصير"),
-    "shortQuantityValue": m110,
+    "shortQuantityValue": m112,
     "shortTextMessageQuickAlert": MessageLookupByLibrary.simpleMessage(
       "تنبيه سريع برسالة نصية قصيرة",
     ),
@@ -5405,7 +5442,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "shortageToAllocate": MessageLookupByLibrary.simpleMessage(
       "العجز المطلوب توزيعه:",
     ),
-    "showAllPhotos": m111,
+    "showAllPhotos": m113,
     "showBranchesWithAtLeast80OfRequestedItems":
         MessageLookupByLibrary.simpleMessage(
           "إظهار الفروع التي تحتوي على 80% على الأقل من العناصر المطلوبة",
@@ -5466,7 +5503,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "تخطي التأكيد، تم الاتفاق عليه بالفعل مع المتلقي",
         ),
-    "slashWithTotalHrs": m112,
+    "slashWithTotalHrs": m114,
     "slideToPercentageOfPartialContainer": MessageLookupByLibrary.simpleMessage(
       "انتقل إلى النسبة المئوية للحاوية الجزئية",
     ),
@@ -5628,7 +5665,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "submitUpdate": MessageLookupByLibrary.simpleMessage("إرسال التحديث"),
     "submitted": MessageLookupByLibrary.simpleMessage("تم الإرسال"),
     "submittedByMe": MessageLookupByLibrary.simpleMessage("مقدم مني"),
-    "submittedFromBranchName": m113,
+    "submittedFromBranchName": m115,
     "submittingDailyClose": MessageLookupByLibrary.simpleMessage(
       "جارٍ إرسال اليومية...",
     ),
@@ -5657,12 +5694,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "supplierAvgResponseTime": MessageLookupByLibrary.simpleMessage(
       "متوسط وقت الاستجابة للمورد",
     ),
-    "supplierCredit": m114,
+    "supplierCredit": m116,
     "supplierCredit2": MessageLookupByLibrary.simpleMessage("ائتمان المورد/"),
     "supplierDeliveryIssue": MessageLookupByLibrary.simpleMessage(
       "مشكلة المورد/التسليم",
     ),
-    "supplierHasRequestedADeliveryDateTimeExtensionPendingYourApproval": m115,
+    "supplierHasRequestedADeliveryDateTimeExtensionPendingYourApproval": m117,
     "supplierInvoices": MessageLookupByLibrary.simpleMessage(
       "فواتير الموردين:",
     ),
@@ -5851,7 +5888,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "قد يكون هذا هو مالك المتجر التالي أو مدير العلامة التجارية أو رصيد عهدة الفرع.",
         ),
-    "thisCycleOrderCanceled": m116,
+    "thisCycleOrderCanceled": m118,
     "thisDecisionIsFinalAndCannotBeUndone":
         MessageLookupByLibrary.simpleMessage(
           "وهذا القرار نهائي ولا يمكن التراجع عنه.",
@@ -5870,18 +5907,18 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "thisMeansThe": MessageLookupByLibrary.simpleMessage("وهذا يعني"),
     "thisMonth": MessageLookupByLibrary.simpleMessage("هذا الشهر"),
-    "thisMonthSoFarMonth": m117,
-    "thisMonthsAchievements": m118,
-    "thisOrderWillRepeatOnEvery": m119,
-    "thisOrderWillRepeatOnEveryOfEveryMonth": m120,
+    "thisMonthSoFarMonth": m119,
+    "thisMonthsAchievements": m120,
+    "thisOrderWillRepeatOnEvery": m121,
+    "thisOrderWillRepeatOnEveryOfEveryMonth": m122,
     "thisRequestWillBeRejectedWhenYouClickConfirm":
         MessageLookupByLibrary.simpleMessage(
           "سيتم رفض هذا الطلب عند النقر فوق",
         ),
-    "thisWillSendTheHandoverBackToCashierBasedOnManagerFeedBack": m121,
+    "thisWillSendTheHandoverBackToCashierBasedOnManagerFeedBack": m123,
     "thu": MessageLookupByLibrary.simpleMessage("الخميس"),
     "time": MessageLookupByLibrary.simpleMessage("الوقت"),
-    "timeDiscrepancyReport": m122,
+    "timeDiscrepancyReport": m124,
     "timeLimit24Hours": MessageLookupByLibrary.simpleMessage(
       "الحد الزمني: 24 ساعة",
     ),
@@ -5909,14 +5946,14 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "toStart": MessageLookupByLibrary.simpleMessage("(للبدء)"),
     "today": MessageLookupByLibrary.simpleMessage("اليوم"),
-    "todayWithDate": m123,
+    "todayWithDate": m125,
     "todaysInventoryNotCompletedYet": MessageLookupByLibrary.simpleMessage(
       "مخزون اليوم لم يكتمل بعد",
     ),
     "todaysReceipt": MessageLookupByLibrary.simpleMessage("استلام اليوم"),
     "todaysSummary": MessageLookupByLibrary.simpleMessage("ملخص اليوم"),
     "tools": MessageLookupByLibrary.simpleMessage("أدوات"),
-    "toolsAndRecordsCount": m124,
+    "toolsAndRecordsCount": m126,
     "top10RecentExpenses": MessageLookupByLibrary.simpleMessage(
       "أعلى 10 نفقات حديثة",
     ),
@@ -5995,7 +6032,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalProfitability": MessageLookupByLibrary.simpleMessage(
       "الربحية الإجمالية",
     ),
-    "totalQuickExpenseCount": m125,
+    "totalQuickExpenseCount": m127,
     "totalQuickExpenseRequests": MessageLookupByLibrary.simpleMessage(
       "إجمالي طلبات المصروفات السريعة",
     ),
@@ -6043,7 +6080,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "transactions": MessageLookupByLibrary.simpleMessage("المعاملات"),
     "transfer": MessageLookupByLibrary.simpleMessage("نقل"),
     "transferAll": MessageLookupByLibrary.simpleMessage("نقل الكل"),
-    "transferAllAssets": m126,
+    "transferAllAssets": m128,
     "transferAmount": MessageLookupByLibrary.simpleMessage("مبلغ التحويل"),
     "transferAsset": MessageLookupByLibrary.simpleMessage("نقل الأصول"),
     "transferAssetDesc": MessageLookupByLibrary.simpleMessage(
@@ -6135,12 +6172,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "type": MessageLookupByLibrary.simpleMessage("اكتب"),
     "typeOfAsset": MessageLookupByLibrary.simpleMessage("نوع الأصل"),
-    "uApprovedTheHandoverFromCashier": m127,
+    "uApprovedTheHandoverFromCashier": m129,
     "uAreMakingCorrectionsToTheFinalShiftSubmission":
         MessageLookupByLibrary.simpleMessage(
           "أنت تقوم بإجراء تصحيحات على إرسال الوردية النهائية بناءً على طلب المحاسب.",
         ),
-    "uCantContinueThisShiftBecauseItHasBeenReassignedToAnother": m128,
+    "uCantContinueThisShiftBecauseItHasBeenReassignedToAnother": m130,
     "uCantTakeThisShift": MessageLookupByLibrary.simpleMessage(
       "لا يمكنك أن تأخذ هذا الوردية",
     ),
@@ -6154,7 +6191,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "uNeedToBeginTheShift": MessageLookupByLibrary.simpleMessage(
       "ستحتاج إلى بدء مناوبتك قبل أن تتمكن من إكمال التسليم النهائي.",
     ),
-    "uWillOverrideTheRejectionForm": m129,
+    "uWillOverrideTheRejectionForm": m131,
     "unauthorized": MessageLookupByLibrary.simpleMessage("غير مصرح به"),
     "unauthorizedDesc": MessageLookupByLibrary.simpleMessage(
       "انتهت صلاحية جلستك أو تم تسجيل خروجك. الرجاء تسجيل الدخول مرة أخرى للمتابعة.",
@@ -6242,7 +6279,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "varianceOrderIfAny": MessageLookupByLibrary.simpleMessage(
       "التباين (الطلب، إن وجد)",
     ),
-    "variancePendingApprovalDesc": m130,
+    "variancePendingApprovalDesc": m132,
     "varianceReasonWasAddedDuringHandover":
         MessageLookupByLibrary.simpleMessage(
           "تمت إضافة سبب التباين أثناء التسليم. انقر للعرض.",
@@ -6369,7 +6406,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "wasteAndDamageRegistration": MessageLookupByLibrary.simpleMessage(
       "تسجيل النفايات والأضرار",
     ),
-    "wasteAndDamages": m131,
+    "wasteAndDamages": m133,
     "wasteColon": MessageLookupByLibrary.simpleMessage("النفايات:"),
     "wasteDamageDetailsColon": MessageLookupByLibrary.simpleMessage(
       "تفاصيل النفايات/الأضرار:",
@@ -6436,7 +6473,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "متى من المتوقع أن يتم دفع الرصيد المتبقي؟",
         ),
     "whenSelectedItemAvailableQuantityDropsToPersOfUsualLevelsNewOrderCreatedAutomatically":
-        m132,
+        m134,
     "whenWasThisInvoiceIssued": MessageLookupByLibrary.simpleMessage(
       "متى صدرت هذه الفاتورة",
     ),
@@ -6463,7 +6500,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "إدارة يوم العمل",
     ),
     "workDays": MessageLookupByLibrary.simpleMessage("أيام العمل:"),
-    "workHoursFrom_t0": m133,
+    "workHoursFrom_t0": m135,
     "workdaysLabel": MessageLookupByLibrary.simpleMessage("أيام العمل:"),
     "workhorses": MessageLookupByLibrary.simpleMessage("🐎 خيول العمل"),
     "workingShift": MessageLookupByLibrary.simpleMessage("وردية العمل"),
@@ -6474,14 +6511,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "أنت توافق على هذا التسليم من أمين الصندوق. سيتم قفل جميع السجلات ووضع علامة عليها كمكتملة.",
     ),
     "yearlyFilter": MessageLookupByLibrary.simpleMessage("سنوي"),
-    "yesterdayWithDate": m134,
+    "yesterdayWithDate": m136,
     "yesterdaysReport": MessageLookupByLibrary.simpleMessage("تقرير الأمس"),
     "you": MessageLookupByLibrary.simpleMessage("(أنت)"),
     "youAcceptedTheReassignedShift": MessageLookupByLibrary.simpleMessage(
       "لقد قبلت الوردية المعاد تعيينها. تم الآن نقل جميع السجلات والمسؤوليات إليك، وسيتم تتبع نشاطك من الآن فصاعدًا.",
     ),
-    "youAcceptedThisHandover": m135,
-    "youAcceptedYourPartAt": m136,
+    "youAcceptedThisHandover": m137,
+    "youAcceptedYourPartAt": m138,
     "youAcceptedYourResponsibility": MessageLookupByLibrary.simpleMessage(
       "لقد قبلت المسؤولية",
     ),
@@ -6528,7 +6565,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "يمكنك الاطلاع على الطلب الأصلي والتعديل الجديد بالضغط على زر \"التعديلات والتتبع\".",
         ),
-    "youCurrentlyHaveNZonesAdded": m137,
+    "youCurrentlyHaveNZonesAdded": m139,
     "youHaveApprovedThisHandover": MessageLookupByLibrary.simpleMessage(
       "لقد وافقت على هذا التسليم",
     ),
@@ -6597,18 +6634,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "youRejectedResponsibility": MessageLookupByLibrary.simpleMessage(
       "لقد رفضت المسؤولية",
     ),
-    "youRejectedThisHandover": m138,
-    "youRejectedYourPartAt": m139,
-    "youRequestedCashierToMakeCorrections": m140,
-    "youRequestedEmployeeToCorrect": m141,
+    "youRejectedThisHandover": m140,
+    "youRejectedYourPartAt": m141,
+    "youRequestedCashierToMakeCorrections": m142,
+    "youRequestedEmployeeToCorrect": m143,
     "youReviewAndConfirm": MessageLookupByLibrary.simpleMessage(
       "2. تقوم بالمراجعة والتأكيد",
     ),
     "youSavedThisExpenseToDraftOn": MessageLookupByLibrary.simpleMessage(
       "لقد قمت بحفظ هذه النفقات للمسودة على:",
     ),
-    "youSavedThisRequestToDraftOn": m142,
-    "youSubmittedADeliveryDateTimeExtensionPendingApprovalFromBranchName": m143,
+    "youSavedThisRequestToDraftOn": m144,
+    "youSubmittedADeliveryDateTimeExtensionPendingApprovalFromBranchName": m145,
     "youSubmittedThisRequest": MessageLookupByLibrary.simpleMessage(
       "لقد قدمت هذا الطلب",
     ),
@@ -6626,7 +6663,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "تم إرسال تحديث حالة الأصل الخاص بك إلى الإدارة للموافقة عليه.",
     ),
     "yourComment": MessageLookupByLibrary.simpleMessage("تعليقك"),
-    "yourCorrectionRequestHasBeenSentToCashier": m144,
+    "yourCorrectionRequestHasBeenSentToCashier": m146,
     "yourCurrentCash": MessageLookupByLibrary.simpleMessage(
       "النقدية الحالية الخاصة بك",
     ),
@@ -6696,7 +6733,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "لقد نجحت في تصعيد رفض الإرجاع. سيقوم مدير العلامة التجارية أو الفريق المالي بمراجعة الأمر والرد عليك.",
         ),
-    "youveSuccessfullyTransferredAmountToBranchCustody": m145,
+    "youveSuccessfullyTransferredAmountToBranchCustody": m147,
     "zakattaxes": MessageLookupByLibrary.simpleMessage("الزكاة/الضرائب:"),
     "zone": MessageLookupByLibrary.simpleMessage("المنطقة"),
     "zoneApproved": MessageLookupByLibrary.simpleMessage(

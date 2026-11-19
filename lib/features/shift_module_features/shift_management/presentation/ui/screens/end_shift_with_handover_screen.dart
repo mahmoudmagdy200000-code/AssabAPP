@@ -426,6 +426,8 @@ class _EndShiftWithHandoverScreenState
                                                   shiftId: shiftId,
                                                   handoverReceiverName:
                                                       handoverReceiverName,
+                                                  handoverOutcome:
+                                                      state.handoverOutcome,
                                                   isNavigatedFromCashier: widget
                                                       .isNavigatedFromCashier,
                                                   isOpenedFromShiftDetailsScreen:

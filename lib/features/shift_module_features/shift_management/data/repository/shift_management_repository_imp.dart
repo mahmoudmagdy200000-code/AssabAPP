@@ -14,6 +14,7 @@ import 'package:assab/features/shift_module_features/shift_management/domain/ent
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/cashier_handover_details_entity/cashier_handover_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/current_shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/historical_final_handover_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/pending_daily_closure_item.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/end_shift_response_entites/manager_shift_update_data_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_status_details_entities/handover_status_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/variance_details/handover_variance_details_entity.dart';
@@ -25,6 +26,7 @@ import '../../../../../core/utils/future_api_result.dart';
 import '../../domain/entity/check_email_entity.dart';
 import '../../domain/entity/manager_shift/end_shift_response_entites/manager_shift_end_data_entity.dart';
 import '../../domain/entity/shift/shift_entity.dart';
+import '../../domain/entity/shift/shift_handover_outcome_status.dart';
 import '../../domain/enums/user_type.dart';
 import '../../presentation/mappers/manager_shift_mapper/end_shift_response_entites_mappers/manager_shift_end_data_mapper.dart';
 import '../data_source/shift_management_remote_data_source.dart';
@@ -322,12 +324,12 @@ class ShiftManagementRepositoryImp
     EndShiftRequestWithHandOver endShiftRequestWithVariance,
   ) async {
     return execute(() async {
-      await _remoteDataSource.endShiftWithHandOver(
+      final response = await _remoteDataSource.endShiftWithHandOver(
         shiftId: id,
         data: await endShiftRequestWithVariance.toFormData(),
       );
 
-      return true;
+      return ShiftHandoverOutcomeStatus.fromApiPayload(response);
     });
   }
 
@@ -511,7 +513,7 @@ class ShiftManagementRepositoryImp
     });
   }
 
-  FutureApiResult handOver({
+  FutureApiResult<ShiftHandoverOutcomeStatus> handOver({
     required String shiftId,
     required String cashierId,
     required bool isManager,
@@ -531,7 +533,7 @@ class ShiftManagementRepositoryImp
           handoverNotes: note,
         ),
       );
-      return response;
+      return ShiftHandoverOutcomeStatus.fromApiPayload(response);
     });
   }
 
@@ -715,6 +717,118 @@ class ShiftManagementRepositoryImp
           : <String, dynamic>{};
 
       return HistoricalFinalHandoverEntity.fromApiPayload(dataMap);
+    });
+  }
+
+  FutureApiResult<List<PendingDailyClosureItem>> getPendingDailyClosures({
+    required String actorId,
+    required String branchId,
+    String? excludeWorkdayId,
+    int perPage = 50,
+  }) async {
+    return execute(() async {
+      if (actorId.trim().isEmpty) {
+        throw StateError('Unverified manager actor.');
+      }
+      final allRows = <Map<String, dynamic>>[];
+      final seenPageSignatures = <String>{};
+      final seenNextLinks = <String>{};
+      var page = 1;
+      int? lastPage;
+      var hasMore = false;
+
+      do {
+        final historyRes = await _remoteDataSource.getWorkdayHistory(
+          perPage: perPage,
+          page: page,
+        );
+        if (historyRes is! Map || historyRes['data'] is! List) {
+          throw StateError('Invalid workday history response on page $page.');
+        }
+
+        final pageList = historyRes['data'] as List;
+        final pageIds = <String>[];
+        for (final row in pageList) {
+          if (row is Map) {
+            final normalized = row is Map<String, dynamic>
+                ? row
+                : Map<String, dynamic>.from(row);
+            allRows.add(normalized);
+            pageIds.add((normalized['id'] ?? '').toString());
+          }
+        }
+
+        final signature = pageIds.join('|');
+        if (pageIds.isNotEmpty && !seenPageSignatures.add(signature)) {
+          throw StateError(
+            'Repeated workday history page data encountered at page $page.',
+          );
+        }
+
+        final meta = historyRes['meta'];
+        if (meta is Map) {
+          final rawCurrent = meta['current_page'];
+          if (rawCurrent != null) {
+            final parsedCurrent = rawCurrent is int
+                ? rawCurrent
+                : int.tryParse(rawCurrent.toString());
+            if (parsedCurrent == null || parsedCurrent != page) {
+              throw StateError(
+                'Workday history page mismatch: expected $page, got $rawCurrent.',
+              );
+            }
+          }
+
+          final rawLast = meta['last_page'];
+          final parsedLast = rawLast is int
+              ? rawLast
+              : int.tryParse(rawLast?.toString() ?? '');
+          if (parsedLast == null || parsedLast < 1) {
+            throw StateError(
+              'Invalid workday history pagination metadata on page $page.',
+            );
+          }
+          if (pageList.isEmpty && page < parsedLast) {
+            throw StateError(
+              'Unexpected empty workday history page $page before last page $parsedLast.',
+            );
+          }
+          lastPage = parsedLast;
+          hasMore = page < lastPage;
+        } else {
+          final links = historyRes['links'];
+          final rawNext = links is Map ? links['next']?.toString() : null;
+          final nextLink = rawNext?.trim();
+          if (nextLink != null && nextLink.isNotEmpty) {
+            if (pageList.isEmpty) {
+              throw StateError(
+                'Non-advancing empty workday history page at page $page.',
+              );
+            }
+            if (!seenNextLinks.add(nextLink)) {
+              throw StateError(
+                'Repeated workday history pagination link at page $page.',
+              );
+            }
+            hasMore = true;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        page++;
+      } while (hasMore);
+
+      final items = allRows
+          .map(PendingDailyClosureItem.fromHistoryJson)
+          .toList();
+
+      return PendingDailyClosureItem.filterAndOrderPending(
+        items,
+        currentActorId: actorId,
+        currentBranchId: branchId,
+        excludeWorkdayId: excludeWorkdayId,
+      );
     });
   }
 }

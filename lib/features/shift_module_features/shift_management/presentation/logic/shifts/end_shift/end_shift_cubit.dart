@@ -5,6 +5,8 @@ import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/errors/l10n/error_locale_resolver.dart';
 import 'package:assab/core/errors/l10n/error_messages.dart';
+import 'package:assab/core/di/dependency_injection.dart';
+import 'package:assab/core/helpers/shared_preferences_helper.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
@@ -15,6 +17,7 @@ import 'package:assab/features/shift_module_features/shift_management/data/model
 import 'package:assab/features/shift_module_features/shift_management/data/repository/shift_management_repository_imp.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/end_shift_aggregator_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/shift_handover_outcome_status.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/end_shift_widgets/end_shift_with_hand_over_summary_strategy/variance_summary_strategy_factory.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -201,9 +204,33 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   int get previewRequestId => _previewRequestId;
   List<CashShortageAllocation> get shortageAllocations => _shortageAllocations;
   String? get allocationReason => _allocationReason;
+  String? _actorIdOverride;
+
+  void setActorIdForTesting(String? actorId) {
+    _actorIdOverride = actorId;
+  }
+
+  bool get isOwnManagerShift {
+    final userType =
+        UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType();
+    if (userType != UserType.branchManager) return false;
+    final actorId =
+        _actorIdOverride ??
+        (getIt.isRegistered<SharedPreferencesHelper>()
+            ? getIt<SharedPreferencesHelper>().getString('u_id')
+            : null);
+    final cashierId = shift?.cashier.id;
+    return actorId != null &&
+        actorId.isNotEmpty &&
+        cashierId != null &&
+        cashierId.isNotEmpty &&
+        actorId == cashierId;
+  }
+
   bool get requiresShortageAllocationReason =>
       (UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType()) ==
-      UserType.branchManager;
+          UserType.branchManager &&
+      !isOwnManagerShift;
   bool get _missingRequiredAllocationReason =>
       requiresShortageAllocationReason && (_allocationReason?.isEmpty ?? true);
   bool get isSubmitting => _isSubmitting;
@@ -912,7 +939,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     }
     handle(
       result,
-      success: (_) => emit(EndShiftSuccess()),
+      success: (outcome) => emit(
+        EndShiftSuccess(
+          handoverOutcome: outcome is ShiftHandoverOutcomeStatus
+              ? outcome
+              : ShiftHandoverOutcomeStatus.fromApiPayload(outcome),
+        ),
+      ),
       failure: (f) => emit(EndShiftFailure(f)),
     );
   }
@@ -1044,7 +1077,13 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
     }
     handle(
       result,
-      success: (_) => emit(EndShiftSuccess()),
+      success: (outcome) => emit(
+        EndShiftSuccess(
+          handoverOutcome: outcome is ShiftHandoverOutcomeStatus
+              ? outcome
+              : ShiftHandoverOutcomeStatus.fromApiPayload(outcome),
+        ),
+      ),
       failure: (f) => emit(EndShiftFailure(f)),
     );
   }

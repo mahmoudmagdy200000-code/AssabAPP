@@ -8,6 +8,7 @@ import '../../../../../../../core/services/navigation/navigation_service.dart';
 import '../../../../../../../core/styles/app_styles.dart';
 import '../../../../../../../core/widgets/app_button.dart';
 import '../../../../../../../core/widgets/app_scaffold.dart';
+import '../../../../domain/entity/shift/shift_handover_outcome_status.dart';
 import '../../arguments/shift_arguments.dart';
 
 class EndShiftRequestWidget extends StatefulWidget {
@@ -16,6 +17,7 @@ class EndShiftRequestWidget extends StatefulWidget {
     required this.withHandOver,
     required this.shiftId,
     this.handoverReceiverName = 'N/A',
+    this.handoverOutcome = ShiftHandoverOutcomeStatus.unknown,
     this.shiftArguments,
     required this.isNavigatedFromCashier,
     this.isOpenedFromShiftDetailsScreen = false,
@@ -24,6 +26,7 @@ class EndShiftRequestWidget extends StatefulWidget {
   final bool withHandOver;
   final String shiftId;
   final String handoverReceiverName;
+  final ShiftHandoverOutcomeStatus handoverOutcome;
   final ShiftArguments? shiftArguments;
   final bool isNavigatedFromCashier;
   final bool isOpenedFromShiftDetailsScreen;
@@ -60,7 +63,14 @@ class _EndShiftRequestWidgetState extends State<EndShiftRequestWidget> {
 
             Text(
               widget.withHandOver
-                  ? context.tr.shiftEndedDesc(widget.handoverReceiverName)
+                  ? switch (widget.handoverOutcome) {
+                      ShiftHandoverOutcomeStatus.accepted =>
+                        context.tr.handoverReceiptConfirmed,
+                      ShiftHandoverOutcomeStatus.pending =>
+                        context.tr.shiftEndedDesc(widget.handoverReceiverName),
+                      ShiftHandoverOutcomeStatus.unknown =>
+                        context.tr.handoverOutcomeUnconfirmedCheckDetails,
+                    }
                   : context.tr.shiftEndedPendingHandoverDesc,
               style: AppStyles.s14W400.copyWith(
                 color: context.customColor.text3,

@@ -21,7 +21,13 @@ final class HandoverCashiersFetchingFailure extends HandoverState {
 
 final class RecordingHandoverLoading extends HandoverState {}
 
-final class RecordingHandoverSuccess extends HandoverState {}
+final class RecordingHandoverSuccess extends HandoverState {
+  RecordingHandoverSuccess({
+    this.handoverOutcome = ShiftHandoverOutcomeStatus.unknown,
+  });
+
+  final ShiftHandoverOutcomeStatus handoverOutcome;
+}
 
 final class RecordingHandoverFailure extends HandoverState {
   final ApiFailure failure;
