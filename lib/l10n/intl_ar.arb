@@ -3678,5 +3678,10 @@
   "submittingDailyClose": "جارٍ إرسال اليومية...",
   "pendingIncomingCash": "النقد الوارد المعلق",
   "pendingIncomingCashDesc": "النقد المعدود في الدرج من تحويلات واردة بانتظار تأكيد الاستلام.",
-  "vatNotSpecified": "ضريبة القيمة المضافة (غير محددة)"
+  "vatNotSpecified": "ضريبة القيمة المضافة (غير محددة)",
+  "pendingDailyClosuresTitle": "إقفالات يومية معلقة",
+  "pendingDailyClosuresSubtitle": "أيام عمل مكتملة سابقة ما زالت تحتاج إرسال الإقفال اليومي النهائي.",
+  "closeOldestPendingWorkdayFirst": "أقفل يوم العمل الأقدم المعلّق أولاً.",
+  "dailyCloseRejectedByServer": "رفض السيرفر إرسال الإقفال اليومي.",
+  "retryLoadPendingClosures": "إعادة المحاولة"
 }

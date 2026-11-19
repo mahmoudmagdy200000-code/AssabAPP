@@ -27561,6 +27561,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Pending Daily Closures`
+  String get pendingDailyClosuresTitle {
+    return Intl.message(
+      'Pending Daily Closures',
+      name: 'pendingDailyClosuresTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Older completed workdays that still require final daily close submission.`
+  String get pendingDailyClosuresSubtitle {
+    return Intl.message(
+      'Older completed workdays that still require final daily close submission.',
+      name: 'pendingDailyClosuresSubtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close the oldest pending workday first.`
+  String get closeOldestPendingWorkdayFirst {
+    return Intl.message(
+      'Close the oldest pending workday first.',
+      name: 'closeOldestPendingWorkdayFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Daily close submission was rejected by the server.`
+  String get dailyCloseRejectedByServer {
+    return Intl.message(
+      'Daily close submission was rejected by the server.',
+      name: 'dailyCloseRejectedByServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get retryLoadPendingClosures {
+    return Intl.message(
+      'Retry',
+      name: 'retryLoadPendingClosures',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

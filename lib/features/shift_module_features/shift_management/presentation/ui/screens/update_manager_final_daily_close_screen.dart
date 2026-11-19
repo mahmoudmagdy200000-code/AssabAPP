@@ -46,6 +46,20 @@ class _UpdateManagerFinalDailyCloseScreenState
   late TotalsEntity draftTotals;
   late List<AggregatorFinalDailyCloseEntity> draftAggregators;
   bool _submittingFinal = false;
+  String? _lastSubmissionRejection;
+
+  bool _isVerifiedSubmitted(
+    FinalDailyCloseState state, {
+    required String workdayId,
+    required String managerId,
+    required String branchId,
+  }) {
+    return state is FinalDailyCloseLoadedOrUpdated &&
+        state.managerWorkdayId == workdayId &&
+        state.managerId == managerId &&
+        state.branchId == branchId &&
+        state.serverSubmitted == true;
+  }
 
   Future<void> _submitFinal(FinalDailyCloseLoadedOrUpdated snapshot) async {
     if (_submittingFinal || !snapshot.canSubmitFinal || snapshot.isSubmitted) {
@@ -71,7 +85,10 @@ class _UpdateManagerFinalDailyCloseScreenState
     if (agreed != true || !mounted || _submittingFinal) return;
     final daily = context.read<FinalDailyCloseCubit>();
     if (!identical(daily.state, snapshot)) return;
-    setState(() => _submittingFinal = true);
+    setState(() {
+      _submittingFinal = true;
+      _lastSubmissionRejection = null;
+    });
     final workdayId = snapshot.managerWorkdayId!;
     Object? error;
     DailyCloseSubmission? action;
@@ -100,22 +117,34 @@ class _UpdateManagerFinalDailyCloseScreenState
     final confirmed =
         action != null &&
         action.hasCurrentActor &&
-        refreshed is FinalDailyCloseLoadedOrUpdated &&
-        refreshed.managerWorkdayId == workdayId &&
-        refreshed.managerId == snapshot.managerId &&
-        refreshed.branchId == snapshot.branchId &&
-        refreshed.serverSubmitted == true;
+        _isVerifiedSubmitted(
+          refreshed,
+          workdayId: workdayId,
+          managerId: snapshot.managerId!,
+          branchId: snapshot.branchId!,
+        );
     if (confirmed) await action.resolveSubmitted(workdayId);
     if (!mounted) return;
-    setState(() => _submittingFinal = false);
+    final parsedError = error != null
+        ? DailyCloseSubmission.extractServerError(error)
+        : null;
+    final isDefinitiveRejection =
+        !confirmed &&
+        parsedError != null &&
+        DailyCloseSubmission.isDefinitiveRollbackFailure(parsedError);
     final message = confirmed
         ? context.tr.dailyCloseSubmittedForReviewSuccess
+        : isDefinitiveRejection
+        ? parsedError.formatted(fallback: context.tr.dailyCloseRejectedByServer)
+        : parsedError != null && parsedError.statusCode != null
+        ? parsedError.formatted(fallback: context.tr.couldNotConfirmResultRefresh)
         : error is DioException
-        ? (error.response?.data is Map
-              ? (error.response?.data['message']?.toString() ??
-                    context.tr.couldNotConfirmResultRefresh)
-              : context.tr.couldNotConfirmResultRefresh)
+        ? context.tr.couldNotConfirmResultRefresh
         : context.tr.submissionNotConfirmedByServer;
+    setState(() {
+      _submittingFinal = false;
+      _lastSubmissionRejection = isDefinitiveRejection ? message : null;
+    });
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
@@ -128,29 +157,52 @@ class _UpdateManagerFinalDailyCloseScreenState
     if (_submittingFinal || !action.hasCurrentActor) return;
     final daily = context.read<FinalDailyCloseCubit>();
     final id = snapshot.managerWorkdayId!;
-    setState(() => _submittingFinal = true);
-    await daily.getDailyClose(managerWorkdayId: id);
-    if (!mounted) return;
-    final updated = daily.state;
-    final confirmed =
-        action.hasCurrentActor &&
-        updated is FinalDailyCloseLoadedOrUpdated &&
-        updated.managerWorkdayId == id &&
-        updated.managerId == snapshot.managerId &&
-        updated.branchId == snapshot.branchId &&
-        updated.serverSubmitted == true;
-    if (confirmed) await action.resolveSubmitted(id);
-    if (!mounted) return;
-    setState(() => _submittingFinal = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          confirmed
-              ? context.tr.dailyCloseSubmissionVerified
-              : context.tr.resultUnconfirmedContactAccountant,
-        ),
-      ),
+    setState(() {
+      _submittingFinal = true;
+      _lastSubmissionRejection = null;
+    });
+    final outcome = await action.reconcile(
+      id,
+      currentRevision: snapshot.managerReportRevision,
+      refreshAndVerifySubmitted: () async {
+        await daily.getDailyClose(managerWorkdayId: id);
+        if (!mounted) return false;
+        return _isVerifiedSubmitted(
+          daily.state,
+          workdayId: id,
+          managerId: snapshot.managerId!,
+          branchId: snapshot.branchId!,
+        );
+      },
     );
+    if (!mounted) return;
+    final String snackMessage;
+    String? rejectionBanner;
+    switch (outcome.status) {
+      case DailyCloseReconcileStatus.confirmed:
+        snackMessage = context.tr.dailyCloseSubmissionVerified;
+        break;
+      case DailyCloseReconcileStatus.rejected:
+        rejectionBanner = DailyCloseServerError(
+          statusCode: outcome.statusCode,
+          code: outcome.errorCode,
+          message: outcome.message,
+        ).formatted(fallback: context.tr.dailyCloseRejectedByServer);
+        snackMessage = rejectionBanner;
+        break;
+      case DailyCloseReconcileStatus.none:
+      case DailyCloseReconcileStatus.pending:
+      case DailyCloseReconcileStatus.unverifiedActor:
+        snackMessage = context.tr.resultUnconfirmedContactAccountant;
+        break;
+    }
+    setState(() {
+      _submittingFinal = false;
+      _lastSubmissionRejection = rejectionBanner;
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(snackMessage)));
   }
 
   @override
@@ -546,15 +598,39 @@ class _UpdateManagerFinalDailyCloseScreenState
                                 context.tr.dailyCloseFinalSubmitted,
                               );
                             }
-                            return AppButton(
-                              onClick: () => _submitFinal(state),
-                              enabled:
-                                  state.canSubmitFinal &&
-                                  !state.isSubmitted &&
-                                  !_submittingFinal,
-                              text: _submittingFinal
-                                  ? context.tr.submittingDailyClose
-                                  : context.tr.submitDailyCloseFinal,
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (_lastSubmissionRejection != null) ...[
+                                  Container(
+                                    margin: EdgeInsets.only(bottom: 8.h),
+                                    padding: EdgeInsets.all(10.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                        color: Colors.red.shade200,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _lastSubmissionRejection!,
+                                      style: AppStyles.s12W500.copyWith(
+                                        color: Colors.red.shade800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                AppButton(
+                                  onClick: () => _submitFinal(state),
+                                  enabled:
+                                      state.canSubmitFinal &&
+                                      !state.isSubmitted &&
+                                      !_submittingFinal,
+                                  text: _submittingFinal
+                                      ? context.tr.submittingDailyClose
+                                      : context.tr.submitDailyCloseFinal,
+                                ),
+                              ],
                             );
                           },
                         );

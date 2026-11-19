@@ -15,6 +15,7 @@ import '../../../../../../../core/styles/app_colors.dart';
 import '../../../ui/widgets/manager_shift_management_widgets/final_handover_widgets/final_handover_widget.dart';
 import '../../../ui/widgets/manager_shift_management_widgets/final_handover_widgets/historical_final_handover_sheet_widget.dart';
 import '../../../ui/widgets/manager_shift_management_widgets/final_handover_widgets/no_final_handover_widget.dart';
+import '../../../ui/widgets/manager_shift_management_widgets/final_handover_widgets/pending_daily_closures_section_widget.dart';
 import 'manager_main_screen_tab_strategy.dart';
 
 class ManagerMainScreenFinalHandoverTabWidget
@@ -79,6 +80,10 @@ class ManagerMainScreenFinalHandoverTabWidget
       mainAxisSize: MainAxisSize.min,
       children: [
         todaySection,
+        12.verticalSpace,
+        PendingDailyClosuresSectionWidget(
+          currentManagerShift: currentManagerShift,
+        ),
         12.verticalSpace,
         AppButton(
           onClick: () {

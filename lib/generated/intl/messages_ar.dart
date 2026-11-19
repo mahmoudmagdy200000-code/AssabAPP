@@ -1243,6 +1243,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "انقر لتحميل الملف",
     ),
     "close": MessageLookupByLibrary.simpleMessage("إغلاق"),
+    "closeOldestPendingWorkdayFirst": MessageLookupByLibrary.simpleMessage(
+      "أقفل يوم العمل الأقدم المعلّق أولاً.",
+    ),
     "closed": MessageLookupByLibrary.simpleMessage("مغلق"),
     "closing_balance": MessageLookupByLibrary.simpleMessage("الرصيد الختامي:"),
     "codeSendSuccessfully": MessageLookupByLibrary.simpleMessage(
@@ -1524,6 +1527,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
       "تم حفظ تعديلات اليومية.",
+    ),
+    "dailyCloseRejectedByServer": MessageLookupByLibrary.simpleMessage(
+      "رفض السيرفر إرسال الإقفال اليومي.",
     ),
     "dailyCloseSubmissionVerified": MessageLookupByLibrary.simpleMessage(
       "تم التحقق من إرسال اليومية للمراجعة.",
@@ -4146,6 +4152,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "pendingConfirmation": MessageLookupByLibrary.simpleMessage(
       "في انتظار التأكيد",
     ),
+    "pendingDailyClosuresSubtitle": MessageLookupByLibrary.simpleMessage(
+      "أيام عمل مكتملة سابقة ما زالت تحتاج إرسال الإقفال اليومي النهائي.",
+    ),
+    "pendingDailyClosuresTitle": MessageLookupByLibrary.simpleMessage(
+      "إقفالات يومية معلقة",
+    ),
     "pendingFinalReview": MessageLookupByLibrary.simpleMessage(
       "في انتظار المراجعة النهائية",
     ),
@@ -4927,6 +4939,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "استئناف الجدول الزمني",
     ),
     "retry": MessageLookupByLibrary.simpleMessage("أعد المحاولة"),
+    "retryLoadPendingClosures": MessageLookupByLibrary.simpleMessage(
+      "إعادة المحاولة",
+    ),
     "returnApprovedDesc": MessageLookupByLibrary.simpleMessage(
       "تمت الموافقة على العودة. تم إخطار المورد لمعالجة عملية الإرجاع.",
     ),

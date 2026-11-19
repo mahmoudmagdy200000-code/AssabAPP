@@ -5,6 +5,8 @@ import 'package:assab/core/errors/api_error_model.dart';
 import 'package:assab/core/errors/api_failure.dart';
 import 'package:assab/core/errors/l10n/error_locale_resolver.dart';
 import 'package:assab/core/errors/l10n/error_messages.dart';
+import 'package:assab/core/di/dependency_injection.dart';
+import 'package:assab/core/helpers/shared_preferences_helper.dart';
 import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/core/services/user_type_service.dart';
 import 'package:assab/core/strategies/user_type_strategy.dart';
@@ -201,9 +203,33 @@ class EndShiftCubit extends SafeCubit<EndShiftState> with UserIntentOwner {
   int get previewRequestId => _previewRequestId;
   List<CashShortageAllocation> get shortageAllocations => _shortageAllocations;
   String? get allocationReason => _allocationReason;
+  String? _actorIdOverride;
+
+  void setActorIdForTesting(String? actorId) {
+    _actorIdOverride = actorId;
+  }
+
+  bool get isOwnManagerShift {
+    final userType =
+        UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType();
+    if (userType != UserType.branchManager) return false;
+    final actorId =
+        _actorIdOverride ??
+        (getIt.isRegistered<SharedPreferencesHelper>()
+            ? getIt<SharedPreferencesHelper>().getString('u_id')
+            : null);
+    final cashierId = shift?.cashier.id;
+    return actorId != null &&
+        actorId.isNotEmpty &&
+        cashierId != null &&
+        cashierId.isNotEmpty &&
+        actorId == cashierId;
+  }
+
   bool get requiresShortageAllocationReason =>
       (UserTypeService.selectedUserType ?? UserTypeService.getSavedUserType()) ==
-      UserType.branchManager;
+          UserType.branchManager &&
+      !isOwnManagerShift;
   bool get _missingRequiredAllocationReason =>
       requiresShortageAllocationReason && (_allocationReason?.isEmpty ?? true);
   bool get isSubmitting => _isSubmitting;

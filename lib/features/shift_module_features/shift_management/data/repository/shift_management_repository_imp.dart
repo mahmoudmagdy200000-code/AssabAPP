@@ -14,6 +14,7 @@ import 'package:assab/features/shift_module_features/shift_management/domain/ent
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/cashier_handover_details_entity/cashier_handover_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/current_shift/current_shift_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/historical_final_handover_entity.dart';
+import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/pending_daily_closure_item.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/manager_shift/end_shift_response_entites/manager_shift_update_data_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/handover_status_details_entities/handover_status_details_entity.dart';
 import 'package:assab/features/shift_module_features/shift_management/domain/entity/shift/variance_details/handover_variance_details_entity.dart';
@@ -715,6 +716,37 @@ class ShiftManagementRepositoryImp
           : <String, dynamic>{};
 
       return HistoricalFinalHandoverEntity.fromApiPayload(dataMap);
+    });
+  }
+
+  FutureApiResult<List<PendingDailyClosureItem>> getPendingDailyClosures({
+    required String actorId,
+    required String branchId,
+    String? excludeWorkdayId,
+  }) async {
+    return execute(() async {
+      final historyRes = await _remoteDataSource.getWorkdayHistory(perPage: 50);
+      final List<dynamic> historyList =
+          historyRes is Map && historyRes['data'] is List
+              ? historyRes['data'] as List
+              : const [];
+      final items = historyList
+          .whereType<Map>()
+          .map(
+            (row) => PendingDailyClosureItem.fromHistoryJson(
+              row is Map<String, dynamic>
+                  ? row
+                  : Map<String, dynamic>.from(row),
+            ),
+          )
+          .toList();
+
+      return PendingDailyClosureItem.filterAndOrderPending(
+        items,
+        currentActorId: actorId,
+        currentBranchId: branchId,
+        excludeWorkdayId: excludeWorkdayId,
+      );
     });
   }
 }

@@ -3673,5 +3673,10 @@
   "submittingDailyClose": "Submitting daily close...",
   "pendingIncomingCash": "Pending Incoming Cash",
   "pendingIncomingCashDesc": "Cash already counted in the drawer from incoming transfers awaiting confirmation.",
-  "vatNotSpecified": "VAT (Unspecified / N/A)"
+  "vatNotSpecified": "VAT (Unspecified / N/A)",
+  "pendingDailyClosuresTitle": "Pending Daily Closures",
+  "pendingDailyClosuresSubtitle": "Older completed workdays that still require final daily close submission.",
+  "closeOldestPendingWorkdayFirst": "Close the oldest pending workday first.",
+  "dailyCloseRejectedByServer": "Daily close submission was rejected by the server.",
+  "retryLoadPendingClosures": "Retry"
 }

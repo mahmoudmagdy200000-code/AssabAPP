@@ -1257,6 +1257,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Click to upload file",
     ),
     "close": MessageLookupByLibrary.simpleMessage("Close"),
+    "closeOldestPendingWorkdayFirst": MessageLookupByLibrary.simpleMessage(
+      "Close the oldest pending workday first.",
+    ),
     "closed": MessageLookupByLibrary.simpleMessage("Closed"),
     "closing_balance": MessageLookupByLibrary.simpleMessage("Closing balance:"),
     "codeSendSuccessfully": MessageLookupByLibrary.simpleMessage(
@@ -1562,6 +1565,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
       "Daily close modifications have been saved.",
+    ),
+    "dailyCloseRejectedByServer": MessageLookupByLibrary.simpleMessage(
+      "Daily close submission was rejected by the server.",
     ),
     "dailyCloseSubmissionVerified": MessageLookupByLibrary.simpleMessage(
       "Daily close submission for review has been verified.",
@@ -4207,6 +4213,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "pendingConfirmation": MessageLookupByLibrary.simpleMessage(
       "Pending Confirmation",
     ),
+    "pendingDailyClosuresSubtitle": MessageLookupByLibrary.simpleMessage(
+      "Older completed workdays that still require final daily close submission.",
+    ),
+    "pendingDailyClosuresTitle": MessageLookupByLibrary.simpleMessage(
+      "Pending Daily Closures",
+    ),
     "pendingFinalReview": MessageLookupByLibrary.simpleMessage(
       "Pending Final Review",
     ),
@@ -5034,6 +5046,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "resume": MessageLookupByLibrary.simpleMessage("Resume"),
     "resumeSchedule": MessageLookupByLibrary.simpleMessage("Resume Schedule"),
     "retry": MessageLookupByLibrary.simpleMessage("Retry"),
+    "retryLoadPendingClosures": MessageLookupByLibrary.simpleMessage("Retry"),
     "returnApprovedDesc": MessageLookupByLibrary.simpleMessage(
       "Return approved. The supplier has been notified to process the return.",
     ),
