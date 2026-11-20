@@ -52,6 +52,7 @@ class DatedTemplateSlot {
   final String? primaryCashierId;
   final String? primaryCashierName;
   final String? primaryEffectiveFrom;
+  final String? primaryEffectiveTo;
   final bool isRecurringPrimary;
 
   const DatedTemplateSlot({
@@ -68,6 +69,7 @@ class DatedTemplateSlot {
     this.primaryCashierId,
     this.primaryCashierName,
     this.primaryEffectiveFrom,
+    this.primaryEffectiveTo,
     this.isRecurringPrimary = false,
   });
 
@@ -90,6 +92,7 @@ class DatedTemplateSlot {
     String? primaryCashierId,
     String? primaryCashierName,
     String? primaryEffectiveFrom,
+    String? primaryEffectiveTo,
     bool? isRecurringPrimary,
   }) {
     return DatedTemplateSlot(
@@ -106,6 +109,7 @@ class DatedTemplateSlot {
       primaryCashierId: primaryCashierId ?? this.primaryCashierId,
       primaryCashierName: primaryCashierName ?? this.primaryCashierName,
       primaryEffectiveFrom: primaryEffectiveFrom ?? this.primaryEffectiveFrom,
+      primaryEffectiveTo: primaryEffectiveTo ?? this.primaryEffectiveTo,
       isRecurringPrimary: isRecurringPrimary ?? this.isRecurringPrimary,
     );
   }
@@ -174,10 +178,11 @@ class DatedShiftAssignmentScreen extends StatefulWidget {
 class _DatedShiftAssignmentScreenState
     extends State<DatedShiftAssignmentScreen> {
   late List<DatedTemplateSlot> _templates;
-  late String _dateRange;
   String _startDate = '2026-11-15';
   String _endDate = '2026-11-21';
-  String? _selectedDayFilter;
+  String _selectedDate = '2026-11-15';
+  String? _serverToday;
+  bool _hasUserSelectedDay = false;
   DatedTemplateSlot? _selectedSlotForSwap;
   String? _statusMessage;
   bool _isLoading = false;
@@ -199,6 +204,64 @@ class _DatedShiftAssignmentScreenState
   static String _formatYmd(DateTime d) =>
       "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
 
+  static DateTime? _parseYmdUtc(String ymd) {
+    final normalized = ymd.trim();
+    if (normalized.length < 10) return null;
+    final parts = normalized.substring(0, 10).split('-');
+    if (parts.length != 3) return null;
+    final y = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final d = int.tryParse(parts[2]);
+    if (y == null || m == null || d == null) return null;
+    return DateTime.utc(y, m, d);
+  }
+
+  static String _addDaysYmd(String ymd, int days) {
+    final parsed =
+        _parseYmdUtc(ymd) ??
+        () {
+          final r = DateTime.now().toUtc().add(const Duration(hours: 3));
+          return DateTime.utc(r.year, r.month, r.day);
+        }();
+    return _formatYmd(parsed.add(Duration(days: days)));
+  }
+
+  static String _arabicWeekdayName(String ymd) {
+    final dt = _parseYmdUtc(ymd);
+    if (dt == null) return '';
+    switch (dt.weekday) {
+      case DateTime.monday:
+        return 'الإثنين';
+      case DateTime.tuesday:
+        return 'الثلاثاء';
+      case DateTime.wednesday:
+        return 'الأربعاء';
+      case DateTime.thursday:
+        return 'الخميس';
+      case DateTime.friday:
+        return 'الجمعة';
+      case DateTime.saturday:
+        return 'السبت';
+      case DateTime.sunday:
+        return 'الأحد';
+      default:
+        return '';
+    }
+  }
+
+  static String _formatArabicDayHeader(String ymd) {
+    final dayName = _arabicWeekdayName(ymd);
+    return dayName.isNotEmpty ? '$dayName، $ymd' : ymd;
+  }
+
+  static String _formatShiftCountAr(int count) {
+    if (count <= 0) return 'لا توجد ورديات';
+    if (count == 1) return 'وردية واحدة';
+    if (count == 2) return 'ورديتان';
+    if (count <= 10) return '$count ورديات';
+    return '$count وردية';
+  }
+
   static DateTime _computeCurrentWeekSunday([DateTime? ref]) {
     final now = ref ?? DateTime.now();
     final daysToSubtract = now.weekday % 7; // Sunday is 7, 7 % 7 = 0
@@ -207,6 +270,52 @@ class _DatedShiftAssignmentScreenState
       now.month,
       now.day,
     ).subtract(Duration(days: daysToSubtract));
+  }
+
+  String get _todayYmd {
+    final server = _serverToday;
+    if (server != null && server.length >= 10) {
+      return server.substring(0, 10);
+    }
+    final branch = widget.branchBusinessDate?.trim();
+    if (branch != null && branch.length >= 10) {
+      return branch.substring(0, 10);
+    }
+    return _formatYmd(DateTime.now().toUtc().add(const Duration(hours: 3)));
+  }
+
+  String _resolveSelectedDate(
+    List<DatedTemplateSlot> slots, {
+    String? preferredDate,
+  }) {
+    final days = slots.map((s) => s.shiftDate).toSet().toList()..sort();
+    if (days.isEmpty) {
+      if (preferredDate != null) return preferredDate;
+      if (!_hasUserSelectedDay &&
+          !_isManuallySelected &&
+          widget.initialDateRange == null) {
+        final today = _todayYmd;
+        if (today.compareTo(_startDate) >= 0 &&
+            today.compareTo(_endDate) <= 0) {
+          return today;
+        }
+      }
+      return _selectedDate.isNotEmpty ? _selectedDate : _startDate;
+    }
+    if (preferredDate != null && days.contains(preferredDate)) {
+      return preferredDate;
+    }
+    if (!_hasUserSelectedDay &&
+        !_isManuallySelected &&
+        widget.initialDateRange == null) {
+      final today = _todayYmd;
+      if (days.contains(today)) return today;
+      if (days.contains(_selectedDate)) return _selectedDate;
+      return days.first;
+    }
+    if (days.contains(_selectedDate)) return _selectedDate;
+    if (days.contains(_startDate)) return _startDate;
+    return days.first;
   }
 
   @override
@@ -222,10 +331,8 @@ class _DatedShiftAssignmentScreenState
       if (match != null) {
         _startDate = match.group(1)!;
         _endDate = match.group(2)!;
-        _dateRange = rangeStr;
-      } else {
-        _dateRange = rangeStr;
       }
+      _selectedDate = _startDate;
     } else {
       _isManuallySelected = false;
       final ref = widget.branchBusinessDate != null
@@ -235,11 +342,12 @@ class _DatedShiftAssignmentScreenState
       final sat = sun.add(const Duration(days: 6));
       _startDate = _formatYmd(sun);
       _endDate = _formatYmd(sat);
-      _dateRange = '$_startDate — $_endDate';
+      _selectedDate = _todayYmd;
     }
 
     if (widget.initialTemplates != null) {
       _templates = List.from(widget.initialTemplates!);
+      _selectedDate = _resolveSelectedDate(_templates);
     } else {
       _templates = [];
       if (widget.onFetchRoster == null && _effectiveDio == null) {
@@ -252,7 +360,7 @@ class _DatedShiftAssignmentScreenState
     }
   }
 
-  Future<void> _loadRoster() async {
+  Future<void> _loadRoster({String? preferredDate}) async {
     setState(() {
       _isLoading = true;
       _selectedSlotForSwap = null;
@@ -265,16 +373,22 @@ class _DatedShiftAssignmentScreenState
             widget.initialDateRange == null &&
             widget.onFetchSchedulingRange != null) {
           final range = await widget.onFetchSchedulingRange!();
+          if (range['today'] != null && range['today']!.length >= 10) {
+            _serverToday = range['today']!.substring(0, 10);
+          }
           if (range['start_date'] != null && range['end_date'] != null) {
             _startDate = range['start_date']!;
             _endDate = range['end_date']!;
-            _dateRange = '$_startDate — $_endDate';
           }
         }
         final slots = await widget.onFetchRoster!(_startDate, _endDate);
         if (mounted) {
           setState(() {
             _templates = slots;
+            _selectedDate = _resolveSelectedDate(
+              slots,
+              preferredDate: preferredDate,
+            );
             _isLoading = false;
             _statusMessage = null;
             _hasLoadError = false;
@@ -343,6 +457,14 @@ class _DatedShiftAssignmentScreenState
           }
         }
 
+        if (data['scheduling_calendar'] is Map) {
+          final serverTodayRaw =
+              data['scheduling_calendar']['today']?.toString().trim();
+          if (serverTodayRaw != null && serverTodayRaw.length >= 10) {
+            _serverToday = serverTodayRaw.substring(0, 10);
+          }
+        }
+
         // If the manager has not manually navigated, adopt the server-driven scheduling calendar
         if (!_isManuallySelected && widget.initialDateRange == null) {
           final serverStart =
@@ -359,7 +481,6 @@ class _DatedShiftAssignmentScreenState
           if (serverStart != null && serverEnd != null) {
             _startDate = serverStart;
             _endDate = serverEnd;
-            _dateRange = '$_startDate — $_endDate';
           }
         }
 
@@ -452,8 +573,16 @@ class _DatedShiftAssignmentScreenState
               );
               final primaryCashierId = primary?['cashier_id']?.toString();
               final primaryCashierName = primary?['cashier_name']?.toString();
-              final primaryEffectiveFrom = primary?['effective_from']
-                  ?.toString();
+              final rawEffFrom = primary?['effective_from']?.toString().trim();
+              final primaryEffectiveFrom =
+                  rawEffFrom != null && rawEffFrom.length >= 10
+                      ? rawEffFrom.substring(0, 10)
+                      : rawEffFrom;
+              final rawEffTo = primary?['effective_to']?.toString().trim();
+              final primaryEffectiveTo =
+                  rawEffTo != null && rawEffTo.length >= 10
+                      ? rawEffTo.substring(0, 10)
+                      : (rawEffTo?.isEmpty == true ? null : rawEffTo);
               final effectiveCashierId = rEntry?['cashier_id']?.toString();
               final effectiveCashierName = rEntry?['cashier_name']?.toString();
               final isRecurringPrimary =
@@ -481,6 +610,7 @@ class _DatedShiftAssignmentScreenState
                   primaryCashierId: primaryCashierId,
                   primaryCashierName: primaryCashierName,
                   primaryEffectiveFrom: primaryEffectiveFrom,
+                  primaryEffectiveTo: primaryEffectiveTo,
                   isRecurringPrimary: isRecurringPrimary,
                 ),
               );
@@ -492,6 +622,10 @@ class _DatedShiftAssignmentScreenState
           setState(() {
             _templates = parsedSlots;
             _recurringRosterByShift = recurring;
+            _selectedDate = _resolveSelectedDate(
+              parsedSlots,
+              preferredDate: preferredDate,
+            );
             _isLoading = false;
             _statusMessage = null;
             _hasLoadError = false;
@@ -513,45 +647,110 @@ class _DatedShiftAssignmentScreenState
 
   Future<void> _pickRosterStartDate() async {
     if (_isLoading) return;
-    final current = DateTime.tryParse(_startDate);
-    if (current == null) return;
+    final parsed = _parseYmdUtc(_selectedDate) ?? _parseYmdUtc(_startDate);
+    if (parsed == null) return;
+    final current = DateTime(parsed.year, parsed.month, parsed.day);
     final selected = await showDatePicker(
       context: context,
       initialDate: current,
       firstDate: DateTime(current.year - 10),
       lastDate: DateTime(current.year + 10, 12, 31),
-      helpText: 'اختر بداية فترة التعيين (٧ أيام)',
+      helpText: 'اختر تاريخ الورديات',
     );
     if (!mounted || selected == null || _isLoading) return;
+    final pickedStr = _formatYmd(selected);
+    if (pickedStr.compareTo(_startDate) >= 0 &&
+        pickedStr.compareTo(_endDate) <= 0 &&
+        _distinctDays.contains(pickedStr)) {
+      setState(() {
+        _hasUserSelectedDay = true;
+        _selectedDate = pickedStr;
+        _selectedSlotForSwap = null;
+        _statusMessage = null;
+        _hasLoadError = false;
+      });
+      return;
+    }
+    final rangeStart = _parseYmdUtc(_startDate) ?? parsed;
     // Calendar arithmetic must not depend on DST-length local days.
     final days = DateTime.utc(selected.year, selected.month, selected.day)
-        .difference(DateTime.utc(current.year, current.month, current.day))
+        .difference(rangeStart)
         .inDays;
-    _shiftDateRange(days);
+    _shiftDateRange(days, targetDate: pickedStr);
   }
 
-  void _shiftDateRange(int days) {
+  void _shiftDateRange(int days, {String? targetDate}) {
     try {
-      final s = DateTime.parse(_startDate).add(Duration(days: days));
-      final e = DateTime.parse(_endDate).add(Duration(days: days));
-      final sStr =
-          "${s.year}-${s.month.toString().padLeft(2, '0')}-${s.day.toString().padLeft(2, '0')}";
-      final eStr =
-          "${e.year}-${e.month.toString().padLeft(2, '0')}-${e.day.toString().padLeft(2, '0')}";
+      final sStr = _addDaysYmd(_startDate, days);
+      final eStr = _addDaysYmd(_endDate, days);
+      final nextSelected = targetDate ?? sStr;
 
       setState(() {
         _isManuallySelected = true;
+        _hasUserSelectedDay = true;
         _startDate = sStr;
         _endDate = eStr;
-        _dateRange = '$sStr — $eStr';
-        _selectedDayFilter = null;
+        _selectedDate = nextSelected;
         _selectedSlotForSwap = null;
         _statusMessage = null;
         _hasLoadError = false;
       });
 
-      _loadRoster();
+      _loadRoster(preferredDate: nextSelected);
     } catch (_) {}
+  }
+
+  void _stepDay(int deltaDays) {
+    if (_isLoading) return;
+    final target = _addDaysYmd(_selectedDate, deltaDays);
+    if (!_hasLoadError &&
+        target.compareTo(_startDate) >= 0 &&
+        target.compareTo(_endDate) <= 0 &&
+        (_distinctDays.contains(target) || _templates.isEmpty)) {
+      setState(() {
+        _hasUserSelectedDay = true;
+        _selectedDate = target;
+        _selectedSlotForSwap = null;
+        _statusMessage = null;
+      });
+      return;
+    }
+    _shiftDateRange(deltaDays > 0 ? 7 : -7, targetDate: target);
+  }
+
+  void _jumpToToday() {
+    if (_isLoading) return;
+    final today = _todayYmd;
+    if (!_hasLoadError &&
+        today.compareTo(_startDate) >= 0 &&
+        today.compareTo(_endDate) <= 0 &&
+        (_distinctDays.contains(today) || _templates.isEmpty)) {
+      setState(() {
+        _hasUserSelectedDay = false;
+        _selectedDate = today;
+        _selectedSlotForSwap = null;
+        _statusMessage = null;
+      });
+      return;
+    }
+    final parsed = _parseYmdUtc(today);
+    if (parsed == null) return;
+    final sun = _computeCurrentWeekSunday(
+      DateTime(parsed.year, parsed.month, parsed.day),
+    );
+    final sat = sun.add(const Duration(days: 6));
+    setState(() {
+      _hasUserSelectedDay = false;
+      _isManuallySelected =
+          widget.initialDateRange != null || widget.onFetchRoster != null;
+      _startDate = _formatYmd(sun);
+      _endDate = _formatYmd(sat);
+      _selectedDate = today;
+      _selectedSlotForSwap = null;
+      _statusMessage = null;
+      _hasLoadError = false;
+    });
+    _loadRoster(preferredDate: today);
   }
 
   List<String> get _distinctDays {
@@ -564,11 +763,8 @@ class _DatedShiftAssignmentScreenState
   }
 
   List<DatedTemplateSlot> get _filteredTemplates {
-    if (_selectedDayFilter == null) {
-      return _templates;
-    }
     return _templates
-        .where((slot) => slot.shiftDate == _selectedDayFilter)
+        .where((slot) => slot.shiftDate == _selectedDate)
         .toList();
   }
 
@@ -767,9 +963,13 @@ class _DatedShiftAssignmentScreenState
     DatedTemplateSlot slot,
     String cashierId,
     String cashierName,
-    String effectiveFrom,
-  ) async {
+    String effectiveFrom, [
+    String? effectiveTo,
+  ]) async {
     setState(() => _isLoading = true);
+    final rangeLabel = (effectiveTo != null && effectiveTo.isNotEmpty)
+        ? 'من $effectiveFrom إلى $effectiveTo'
+        : 'من $effectiveFrom';
     if (widget.onSaveRosterAssignment != null) {
       try {
         await widget.onSaveRosterAssignment!(
@@ -780,7 +980,7 @@ class _DatedShiftAssignmentScreenState
         if (mounted) {
           setState(() {
             _statusMessage =
-                'تم حفظ الأساسي من $effectiveFrom. التعيينات الفعلية الموجودة لم تتغير؛ أنشئ تعيين اليوم للأيام الشاغرة.';
+                'تم حفظ الأساسي $rangeLabel. التعيينات الفعلية الموجودة لم تتغير؛ أنشئ تعيين اليوم للأيام الشاغرة.';
             _isLoading = false;
           });
           await _loadRoster();
@@ -813,6 +1013,8 @@ class _DatedShiftAssignmentScreenState
                 'shift_id': slot.templateId,
                 'cashier_id': cashierId,
                 'effective_from': effectiveFrom,
+                if (effectiveTo != null && effectiveTo.isNotEmpty)
+                  'effective_to': effectiveTo,
               },
             ],
           },
@@ -821,7 +1023,7 @@ class _DatedShiftAssignmentScreenState
           if (mounted) {
             setState(() {
               _statusMessage =
-                  'تم حفظ الأساسي من $effectiveFrom. التعيينات الفعلية الموجودة لم تتغير؛ أنشئ تعيين اليوم للأيام الشاغرة.';
+                  'تم حفظ الأساسي $rangeLabel. التعيينات الفعلية الموجودة لم تتغير؛ أنشئ تعيين اليوم للأيام الشاغرة.';
               _isLoading = false;
             });
             await _loadRoster();
@@ -945,9 +1147,15 @@ class _DatedShiftAssignmentScreenState
           slot: slot,
           effectiveDio: _effectiveDio,
           onFetchAvailableCashiers: widget.onFetchAvailableCashiers,
-          onCashierSelected: (cId, cName, isRecurring, effectiveFrom) {
+          onCashierSelected: (cId, cName, isRecurring, effectiveFrom, effectiveTo) {
             if (isRecurring) {
-              _executeRecurringAssign(slot, cId, cName, effectiveFrom);
+              _executeRecurringAssign(
+                slot,
+                cId,
+                cName,
+                effectiveFrom,
+                effectiveTo,
+              );
             } else {
               _executeAssign(slot, cId, cName);
             }
@@ -960,7 +1168,7 @@ class _DatedShiftAssignmentScreenState
   @override
   Widget build(BuildContext context) {
     final displayedTemplates = _filteredTemplates;
-    final distinctDays = _distinctDays;
+    final isToday = _selectedDate == _todayYmd;
 
     return AppScaffold(
       backgroundColor: AppColors.lightGray,
@@ -969,7 +1177,7 @@ class _DatedShiftAssignmentScreenState
           children: [
             // Header Bar
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
               child: Row(
                 children: [
                   AppBackButton(
@@ -1005,7 +1213,7 @@ class _DatedShiftAssignmentScreenState
             // Accountant Governance Banner
             Container(
               margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-              padding: EdgeInsets.all(12.r),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
                 color: Colors.blue.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8.r),
@@ -1019,7 +1227,7 @@ class _DatedShiftAssignmentScreenState
                   Icon(
                     Icons.admin_panel_settings_outlined,
                     color: Colors.blue.shade700,
-                    size: 20.w,
+                    size: 18.w,
                   ),
                   SizedBox(width: 8.w),
                   Expanded(
@@ -1029,7 +1237,7 @@ class _DatedShiftAssignmentScreenState
                           ? 'إعداد القوالب والمواعيد يظل ضمن صلاحيات المحاسب ($_scheduleSourceLabel)'
                           : 'إعداد القوالب والمواعيد يظل ضمن صلاحيات المحاسب',
                       key: const Key('txt_accountant_governance_notice'),
-                      style: AppStyles.s13W400.copyWith(
+                      style: AppStyles.s12W400.copyWith(
                         color: Colors.blue.shade900,
                       ),
                     ),
@@ -1038,110 +1246,144 @@ class _DatedShiftAssignmentScreenState
               ),
             ),
 
-            // Date Range Bar
+            // Single-Day Date & Calendar Navigator Card
             Container(
               margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.grey.shade200),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.calendar_month_outlined,
-                    color: context.theme.primaryColor,
-                    size: 18.w,
-                  ),
-                  SizedBox(width: 6.w),
-                  Expanded(
-                    child: InkWell(
-                      key: const Key('btn_pick_date_range'),
-                      onTap: _isLoading ? null : _pickRosterStartDate,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          _dateRange,
-                          key: const Key('txt_date_range'),
-                          style: AppStyles.s13W600.copyWith(
-                            color: context.theme.primaryColor,
-                            decoration: TextDecoration.underline,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ),
                   IconButton(
-                    key: const Key('btn_prev_week'),
-                    tooltip: 'الأسبوع السابق',
-                    onPressed: _isLoading ? null : () => _shiftDateRange(-7),
+                    key: const Key('btn_prev_day'),
+                    tooltip: 'اليوم السابق',
+                    onPressed: _isLoading ? null : () => _stepDay(-1),
                     icon: const Icon(Icons.chevron_right),
                     color: context.theme.primaryColor,
                   ),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        InkWell(
+                          key: const Key('btn_pick_date_range'),
+                          borderRadius: BorderRadius.circular(8.r),
+                          onTap: _isLoading ? null : _pickRosterStartDate,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 4.h,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.calendar_month_outlined,
+                                  color: context.theme.primaryColor,
+                                  size: 16.w,
+                                ),
+                                SizedBox(width: 6.w),
+                                Flexible(
+                                  child: Text(
+                                    _formatArabicDayHeader(_selectedDate),
+                                    key: const Key('txt_selected_date'),
+                                    style: AppStyles.s14W600.copyWith(
+                                      color: context.customColor.text1,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (isToday) ...[
+                                  SizedBox(width: 6.w),
+                                  Container(
+                                    key: const Key('badge_today'),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 6.w,
+                                      vertical: 2.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: context.theme.primaryColor
+                                          .withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                    child: Text(
+                                      'اليوم',
+                                      style: TextStyle(
+                                        color: context.theme.primaryColor,
+                                        fontSize: 10.w,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                SizedBox(width: 2.w),
+                                Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: context.theme.primaryColor,
+                                  size: 18.w,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8.w,
+                          runSpacing: 4.h,
+                          children: [
+                            Text(
+                              _formatShiftCountAr(displayedTemplates.length),
+                              key: const Key('txt_day_shift_count'),
+                              style: AppStyles.s12W500.copyWith(
+                                color: context.customColor.text3,
+                              ),
+                            ),
+                            if (!isToday)
+                              InkWell(
+                                key: const Key('btn_jump_today'),
+                                borderRadius: BorderRadius.circular(6.r),
+                                onTap: _isLoading ? null : _jumpToToday,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w,
+                                    vertical: 2.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: context.theme.primaryColor
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Text(
+                                    'العودة لليوم',
+                                    style: TextStyle(
+                                      color: context.theme.primaryColor,
+                                      fontSize: 11.w,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                   IconButton(
-                    key: const Key('btn_next_week'),
-                    tooltip: 'الأسبوع التالي',
-                    onPressed: _isLoading ? null : () => _shiftDateRange(7),
+                    key: const Key('btn_next_day'),
+                    tooltip: 'اليوم التالي',
+                    onPressed: _isLoading ? null : () => _stepDay(1),
                     icon: const Icon(Icons.chevron_left),
                     color: context.theme.primaryColor,
                   ),
                 ],
               ),
             ),
-
-            // Multi-Day Filter Chips (if more than 1 day returned)
-            if (distinctDays.length > 1)
-              Container(
-                height: 44.h,
-                margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4.w),
-                        child: ChoiceChip(
-                          key: const Key('chip_day_all'),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
-                          label: Text('الكل (${_templates.length})'),
-                          selected: _selectedDayFilter == null,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedDayFilter = null;
-                              _selectedSlotForSwap = null;
-                            });
-                          },
-                        ),
-                      ),
-                      ...distinctDays.map((d) {
-                        final count = _templates
-                            .where((t) => t.shiftDate == d)
-                            .length;
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4.w),
-                          child: ChoiceChip(
-                            key: Key('chip_day_$d'),
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
-                            label: Text('$d ($count)'),
-                            selected: _selectedDayFilter == d,
-                            onSelected: (selected) {
-                              setState(() {
-                                _selectedDayFilter = selected ? d : null;
-                                _selectedSlotForSwap = null;
-                              });
-                            },
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ),
 
             if (_isLoading)
               LinearProgressIndicator(
@@ -1378,14 +1620,19 @@ class _DatedShiftAssignmentScreenState
                                       color: context.theme.primaryColor,
                                     ),
                                   ),
-                                  Expanded(
-                                    child: Text(
-                                      slot.primaryCashierName != null
-                                          ? '${slot.primaryCashierName!} (سارٍ من ${slot.primaryEffectiveFrom ?? "—"})'
-                                          : 'غير محدد (لم يُعيّن كاشير أساسي)',
-                                      key: Key(
-                                        'txt_primary_cashier_${slot.templateId}',
-                                      ),
+                                    Expanded(
+                                      child: Text(
+                                        slot.primaryCashierName != null
+                                            ? (slot.primaryEffectiveTo != null &&
+                                                      slot
+                                                          .primaryEffectiveTo!
+                                                          .isNotEmpty
+                                                  ? '${slot.primaryCashierName!} (من ${slot.primaryEffectiveFrom ?? "—"} إلى ${slot.primaryEffectiveTo!})'
+                                                  : '${slot.primaryCashierName!} (سارٍ من ${slot.primaryEffectiveFrom ?? "—"})')
+                                            : 'غير محدد (لم يُعيّن كاشير أساسي)',
+                                        key: Key(
+                                          'txt_primary_cashier_${slot.templateId}',
+                                        ),
                                       style: AppStyles.s12W600.copyWith(
                                         color: slot.primaryCashierName != null
                                             ? context.customColor.text1
@@ -1652,6 +1899,7 @@ class _AssignCashierModalContent extends StatefulWidget {
     String cashierName,
     bool isRecurring,
     String effectiveFrom,
+    String? effectiveTo,
   )
   onCashierSelected;
 
@@ -1675,21 +1923,148 @@ class _AssignCashierModalContentState
   String? _selectedCashierId;
   String? _selectedCashierName;
   bool _isRecurring = false;
-  late TextEditingController _effectiveDateCtrl;
+  late DateTime _effectiveFromDate;
+  DateTime? _effectiveToDate;
 
   @override
   void initState() {
     super.initState();
     // A dated action creates/reassigns the selected day. Recurrence is explicit.
     _isRecurring = false;
-    _effectiveDateCtrl = TextEditingController(text: widget.slot.shiftDate);
+    final parsedSlot = _DatedShiftAssignmentScreenState._parseYmdUtc(
+      widget.slot.shiftDate,
+    );
+    _effectiveFromDate = parsedSlot != null
+        ? DateTime(parsedSlot.year, parsedSlot.month, parsedSlot.day)
+        : DateTime.now();
+    _effectiveToDate = null;
     _fetchCashiers();
   }
 
-  @override
-  void dispose() {
-    _effectiveDateCtrl.dispose();
-    super.dispose();
+  String _ymd(DateTime d) =>
+      _DatedShiftAssignmentScreenState._formatYmd(d);
+
+  int? get _durationDays {
+    if (_effectiveToDate == null) return null;
+    final fromUtc = DateTime.utc(
+      _effectiveFromDate.year,
+      _effectiveFromDate.month,
+      _effectiveFromDate.day,
+    );
+    final toUtc = DateTime.utc(
+      _effectiveToDate!.year,
+      _effectiveToDate!.month,
+      _effectiveToDate!.day,
+    );
+    final diff = toUtc.difference(fromUtc).inDays;
+    return diff < 0 ? 1 : diff + 1;
+  }
+
+  String _formatDaysAr(int days) {
+    if (days <= 1) return 'يوم واحد';
+    if (days == 2) return 'يومان';
+    if (days <= 10) return '$days أيام';
+    return '$days يوماً';
+  }
+
+  DateTime get _pickerFirstDate {
+    final nowY = DateTime.now().year;
+    final minY = _effectiveFromDate.year < nowY
+        ? _effectiveFromDate.year
+        : nowY;
+    return DateTime(minY - 2);
+  }
+
+  DateTime get _pickerLastDate {
+    final nowY = DateTime.now().year;
+    final maxY = _effectiveFromDate.year > nowY
+        ? _effectiveFromDate.year
+        : nowY;
+    return DateTime(maxY + 5, 12, 31);
+  }
+
+  DateTime _addLocalDays(DateTime base, int days) {
+    final u = DateTime.utc(base.year, base.month, base.day).add(
+      Duration(days: days),
+    );
+    return DateTime(u.year, u.month, u.day);
+  }
+
+  Future<void> _pickEffectiveFrom() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _effectiveFromDate,
+      firstDate: _pickerFirstDate,
+      lastDate: _pickerLastDate,
+      helpText: 'اختر تاريخ بداية التعيين المتكرر',
+    );
+    if (!mounted || picked == null) return;
+    setState(() {
+      _effectiveFromDate = DateTime(picked.year, picked.month, picked.day);
+      if (_effectiveToDate != null &&
+          _effectiveToDate!.isBefore(_effectiveFromDate)) {
+        _effectiveToDate = _effectiveFromDate;
+      }
+    });
+  }
+
+  Future<void> _pickEffectiveTo() async {
+    final fallbackEnd = _addLocalDays(_effectiveFromDate, 6);
+    final rawInitial = (_effectiveToDate != null &&
+            !_effectiveToDate!.isBefore(_effectiveFromDate))
+        ? _effectiveToDate!
+        : fallbackEnd;
+    final initialTo = rawInitial.isAfter(_pickerLastDate)
+        ? _pickerLastDate
+        : rawInitial;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialTo,
+      firstDate: _effectiveFromDate,
+      lastDate: _pickerLastDate,
+      helpText: 'اختر تاريخ نهاية التعيين المتكرر',
+    );
+    if (!mounted || picked == null) return;
+    setState(() {
+      _effectiveToDate = DateTime(picked.year, picked.month, picked.day);
+    });
+  }
+
+  Future<void> _pickRecurringRange() async {
+    final rawEnd = (_effectiveToDate != null &&
+            !_effectiveToDate!.isBefore(_effectiveFromDate))
+        ? _effectiveToDate!
+        : _addLocalDays(_effectiveFromDate, 6);
+    final safeEnd = rawEnd.isAfter(_pickerLastDate) ? _pickerLastDate : rawEnd;
+    final picked = await showDateRangePicker(
+      context: context,
+      initialDateRange: DateTimeRange(
+        start: _effectiveFromDate,
+        end: safeEnd,
+      ),
+      firstDate: _pickerFirstDate,
+      lastDate: _pickerLastDate,
+      helpText: 'اختر فترة التعيين المتكرر',
+    );
+    if (!mounted || picked == null) return;
+    setState(() {
+      _effectiveFromDate = DateTime(
+        picked.start.year,
+        picked.start.month,
+        picked.start.day,
+      );
+      _effectiveToDate = DateTime(
+        picked.end.year,
+        picked.end.month,
+        picked.end.day,
+      );
+    });
+  }
+
+  void _applyDurationPreset(int days) {
+    setState(() {
+      _effectiveToDate = _addLocalDays(_effectiveFromDate, days - 1);
+    });
   }
 
   String _formatManagerDisplayName(String rawName) {
@@ -1944,10 +2319,20 @@ class _AssignCashierModalContentState
 
   @override
   Widget build(BuildContext context) {
+    final fromStr = _ymd(_effectiveFromDate);
+    final toStr = _effectiveToDate != null ? _ymd(_effectiveToDate!) : null;
+    final fromWeekday = _DatedShiftAssignmentScreenState._arabicWeekdayName(
+      fromStr,
+    );
+    final toWeekday = toStr != null
+        ? _DatedShiftAssignmentScreenState._arabicWeekdayName(toStr)
+        : '';
+    final durationDays = _durationDays;
+
     return SafeArea(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.75,
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -1980,318 +2365,762 @@ class _AssignCashierModalContentState
                 ),
               ),
               SizedBox(height: 8.h),
-
-              // Mode selection: Recurring Primary vs Single-Day Exception (R5 / MTG-OPS-02/03)
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 4.h),
-                padding: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'نوع التعيين:',
-                      style: AppStyles.s12W600.copyWith(
-                        color: context.customColor.text1,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            key: const Key('radio_recurring_assignment'),
-                            onTap: () => setState(() => _isRecurring = true),
-                            child: Row(
-                              children: [
-                                Radio<bool>(
-                                  value: true,
-                                  groupValue: _isRecurring,
-                                  onChanged: (v) =>
-                                      setState(() => _isRecurring = v ?? true),
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    'أساسي متكرر',
-                                    style: AppStyles.s12W500.copyWith(
-                                      color: _isRecurring
-                                          ? context.theme.primaryColor
-                                          : context.customColor.text2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // High-contrast mode selection: Single-Day Exception vs Recurring Calendar
+                      Container(
+                        margin: EdgeInsets.symmetric(vertical: 4.h),
+                        padding: EdgeInsets.all(8.r),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
-                        Expanded(
-                          child: InkWell(
-                            key: const Key('radio_single_day_exception'),
-                            onTap: () => setState(() => _isRecurring = false),
-                            child: Row(
-                              children: [
-                                Radio<bool>(
-                                  value: false,
-                                  groupValue: _isRecurring,
-                                  onChanged: (v) =>
-                                      setState(() => _isRecurring = v ?? false),
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    'استثناء يوم واحد',
-                                    style: AppStyles.s12W500.copyWith(
-                                      color: !_isRecurring
-                                          ? context.theme.primaryColor
-                                          : context.customColor.text2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_isRecurring) ...[
-                      SizedBox(height: 6.h),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 14.w,
-                            color: context.theme.primaryColor,
-                          ),
-                          SizedBox(width: 6.w),
-                          Text(
-                            'تاريخ سريان الأساسي: ',
-                            style: AppStyles.s11W400.copyWith(
-                              color: context.customColor.text2,
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Expanded(
-                            child: SizedBox(
-                              height: 32.h,
-                              child: TextField(
-                                key: const Key('input_effective_from'),
-                                controller: _effectiveDateCtrl,
-                                style: AppStyles.s12W600,
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 8.w,
-                                    vertical: 4.h,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(4.r),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  isDense: true,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              SizedBox(height: 8.h),
-              if (_isLoading)
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 32.h),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      key: const Key('progress_available_cashiers'),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        context.theme.primaryColor,
-                      ),
-                    ),
-                  ),
-                )
-              else if (_errorMessage != null)
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24.h),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: Colors.red.shade700,
-                          size: 36.w,
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          _errorMessage!,
-                          key: const Key('txt_error_available_cashiers'),
-                          textAlign: TextAlign.center,
-                          style: AppStyles.s13W400.copyWith(
-                            color: Colors.red.shade900,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        ElevatedButton.icon(
-                          key: const Key('btn_retry_available_cashiers'),
-                          onPressed: _fetchCashiers,
-                          icon: const Icon(Icons.refresh, size: 16),
-                          label: const Text('إعادة المحاولة'),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else if (_cashiers.isEmpty)
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 32.h),
-                  child: Center(
-                    child: Text(
-                      'لا يوجد كاشيرات متاحين حالياً',
-                      key: const Key('txt_empty_available_cashiers'),
-                      style: AppStyles.s14W400.copyWith(
-                        color: context.customColor.text3,
-                      ),
-                    ),
-                  ),
-                )
-              else ...[
-                Flexible(
-                  child: ListView.separated(
-                    key: const Key('list_available_cashiers'),
-                    shrinkWrap: true,
-                    itemCount: _cashiers.length,
-                    separatorBuilder: (_, _) => Divider(height: 1.h),
-                    itemBuilder: (ctx, index) {
-                      final c = _cashiers[index];
-                      final cId = c['id'].toString();
-                      final cName = c['name'].toString();
-                      final isBranchManager = _isBranchManagerMap(c);
-                      final isAvailable =
-                          (c['is_available'] as bool? ?? true) &&
-                          !(c['disabled'] as bool? ?? false);
-                      final isSelected = _selectedCashierId == cId;
-
-                      return ListTile(
-                        key: Key('tile_cashier_$cId'),
-                        enabled: isAvailable,
-                        selected: isSelected,
-                        selectedTileColor: context.theme.primaryColor
-                            .withValues(alpha: 0.08),
-                        leading: CircleAvatar(
-                          backgroundColor: isAvailable
-                              ? (isSelected
-                                    ? context.theme.primaryColor
-                                    : context.theme.primaryColor.withValues(
-                                        alpha: 0.1,
-                                      ))
-                              : Colors.grey.shade200,
-                          child: Icon(
-                            isSelected
-                                ? Icons.check
-                                : (isBranchManager
-                                      ? Icons.manage_accounts_rounded
-                                      : Icons.person),
-                            color: isAvailable
-                                ? (isSelected
-                                      ? Colors.white
-                                      : context.theme.primaryColor)
-                                : Colors.grey,
-                            size: 20.w,
-                          ),
-                        ),
-                        title: Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 6.w,
-                          runSpacing: 4.h,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              cName,
-                              style: AppStyles.s14W500.copyWith(
-                                color: isAvailable
-                                    ? context.customColor.text1
-                                    : context.customColor.text3,
+                              'نوع التعيين:',
+                              style: AppStyles.s12W600.copyWith(
+                                color: context.customColor.text1,
                               ),
                             ),
-                            if (isBranchManager)
+                            SizedBox(height: 6.h),
+                            RadioGroup<bool>(
+                              groupValue: _isRecurring,
+                              onChanged: (v) {
+                                if (v != null) {
+                                  setState(() => _isRecurring = v);
+                                }
+                              },
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      key: const Key('radio_single_day_exception'),
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      onTap: () =>
+                                          setState(() => _isRecurring = false),
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 8.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: !_isRecurring
+                                              ? context.theme.primaryColor
+                                                    .withValues(alpha: 0.08)
+                                              : Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            10.r,
+                                          ),
+                                          border: Border.all(
+                                            color: !_isRecurring
+                                                ? context.theme.primaryColor
+                                                : Colors.grey.shade300,
+                                            width: !_isRecurring ? 1.5 : 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Radio<bool>(
+                                              value: false,
+                                              materialTapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                              visualDensity: VisualDensity(
+                                                horizontal: -4,
+                                                vertical: -4,
+                                              ),
+                                            ),
+                                            SizedBox(width: 4.w),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    'استثناء يوم واحد',
+                                                    style: AppStyles.s12W600
+                                                        .copyWith(
+                                                          color: !_isRecurring
+                                                              ? context
+                                                                    .theme
+                                                                    .primaryColor
+                                                              : context
+                                                                    .customColor
+                                                                    .text1,
+                                                        ),
+                                                  ),
+                                                  SizedBox(height: 2.h),
+                                                  Text(
+                                                    'ليوم ${widget.slot.shiftDate}',
+                                                    style: AppStyles.s11W400
+                                                        .copyWith(
+                                                          color: context
+                                                              .customColor
+                                                              .text3,
+                                                        ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Expanded(
+                                    child: InkWell(
+                                      key: const Key(
+                                        'radio_recurring_assignment',
+                                      ),
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      onTap: () =>
+                                          setState(() => _isRecurring = true),
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 8.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _isRecurring
+                                              ? context.theme.primaryColor
+                                                    .withValues(alpha: 0.08)
+                                              : Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            10.r,
+                                          ),
+                                          border: Border.all(
+                                            color: _isRecurring
+                                                ? context.theme.primaryColor
+                                                : Colors.grey.shade300,
+                                            width: _isRecurring ? 1.5 : 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Radio<bool>(
+                                              value: true,
+                                              materialTapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                              visualDensity: VisualDensity(
+                                                horizontal: -4,
+                                                vertical: -4,
+                                              ),
+                                            ),
+                                            SizedBox(width: 4.w),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    'تعيين متكرر',
+                                                    style: AppStyles.s12W600
+                                                        .copyWith(
+                                                          color: _isRecurring
+                                                              ? context
+                                                                    .theme
+                                                                    .primaryColor
+                                                              : context
+                                                                    .customColor
+                                                                    .text1,
+                                                        ),
+                                                  ),
+                                                  SizedBox(height: 2.h),
+                                                  Text(
+                                                    'يتكرر حسب التقويم',
+                                                    style: AppStyles.s11W400
+                                                        .copyWith(
+                                                          color: context
+                                                              .customColor
+                                                              .text3,
+                                                        ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_isRecurring) ...[
+                              SizedBox(height: 8.h),
                               Container(
-                                key: Key('tag_branch_manager_$cId'),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 6.w,
-                                  vertical: 2.h,
-                                ),
+                                padding: EdgeInsets.all(10.r),
                                 decoration: BoxDecoration(
-                                  color: context.theme.primaryColor.withValues(
-                                    alpha: 0.12,
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.r),
+                                  border: Border.all(
+                                    color: context.theme.primaryColor
+                                        .withValues(alpha: 0.25),
                                   ),
-                                  borderRadius: BorderRadius.circular(4.r),
                                 ),
-                                child: Text(
-                                  'مدير الفرع — حسابي',
-                                  style: TextStyle(
-                                    color: context.theme.primaryColor,
-                                    fontSize: 10.w,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'فترة التعيين المتكرر (التقويم)',
+                                      style: AppStyles.s12W600.copyWith(
+                                        color: context.customColor.text1,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: InkWell(
+                                            key: const Key(
+                                              'btn_pick_effective_from',
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            onTap: _pickEffectiveFrom,
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 8.w,
+                                                vertical: 8.h,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade50,
+                                                borderRadius:
+                                                    BorderRadius.circular(8.r),
+                                                border: Border.all(
+                                                  color: Colors.grey.shade300,
+                                                ),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.calendar_today,
+                                                        size: 13.w,
+                                                        color: context
+                                                            .theme
+                                                            .primaryColor,
+                                                      ),
+                                                      SizedBox(width: 4.w),
+                                                      Expanded(
+                                                        child: Text(
+                                                          'من تاريخ',
+                                                          style: AppStyles
+                                                              .s11W400
+                                                              .copyWith(
+                                                                color: context
+                                                                    .customColor
+                                                                    .text3,
+                                                              ),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 4.h),
+                                                  Text(
+                                                    fromStr,
+                                                    key: const Key(
+                                                      'txt_effective_from_value',
+                                                    ),
+                                                    style: AppStyles.s12W600
+                                                        .copyWith(
+                                                          color: context
+                                                              .customColor
+                                                              .text1,
+                                                        ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  if (fromWeekday.isNotEmpty)
+                                                    Text(
+                                                      fromWeekday,
+                                                      style: AppStyles.s11W400
+                                                          .copyWith(
+                                                            color: context
+                                                                .customColor
+                                                                .text3,
+                                                          ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: InkWell(
+                                            key: const Key(
+                                              'btn_pick_effective_to',
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            onTap: _pickEffectiveTo,
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 8.w,
+                                                vertical: 8.h,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade50,
+                                                borderRadius:
+                                                    BorderRadius.circular(8.r),
+                                                border: Border.all(
+                                                  color: Colors.grey.shade300,
+                                                ),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.event_available,
+                                                        size: 13.w,
+                                                        color: context
+                                                            .theme
+                                                            .primaryColor,
+                                                      ),
+                                                      SizedBox(width: 4.w),
+                                                      Expanded(
+                                                        child: Text(
+                                                          'إلى تاريخ (اختياري)',
+                                                          style: AppStyles
+                                                              .s11W400
+                                                              .copyWith(
+                                                                color: context
+                                                                    .customColor
+                                                                    .text3,
+                                                              ),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 4.h),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                          toStr ??
+                                                              'مفتوح (مستمر)',
+                                                          key: const Key(
+                                                            'txt_effective_to_value',
+                                                          ),
+                                                          style: AppStyles
+                                                              .s12W600
+                                                              .copyWith(
+                                                                color: toStr != null
+                                                                    ? context
+                                                                          .customColor
+                                                                          .text1
+                                                                    : context
+                                                                          .customColor
+                                                                          .text3,
+                                                              ),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                      if (_effectiveToDate !=
+                                                          null)
+                                                        InkWell(
+                                                          key: const Key(
+                                                            'btn_clear_effective_to',
+                                                          ),
+                                                          onTap: () => setState(
+                                                            () =>
+                                                                _effectiveToDate =
+                                                                    null,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10.r,
+                                                              ),
+                                                          child: Padding(
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                  2.r,
+                                                                ),
+                                                            child: Icon(
+                                                              Icons.close,
+                                                              size: 14.w,
+                                                              color: context
+                                                                  .customColor
+                                                                  .text3,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    toStr != null
+                                                        ? toWeekday
+                                                        : 'بدون تاريخ نهاية',
+                                                    style: AppStyles.s11W400
+                                                        .copyWith(
+                                                          color: context
+                                                              .customColor
+                                                              .text3,
+                                                        ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Wrap(
+                                      spacing: 6.w,
+                                      runSpacing: 6.h,
+                                      children: [
+                                        ChoiceChip(
+                                          key: const Key('chip_recurring_open'),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity.compact,
+                                          label: const Text('مفتوح'),
+                                          selected: _effectiveToDate == null,
+                                          onSelected: (_) => setState(
+                                            () => _effectiveToDate = null,
+                                          ),
+                                        ),
+                                        ChoiceChip(
+                                          key: const Key('chip_recurring_week'),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity.compact,
+                                          label: const Text('أسبوع'),
+                                          selected: durationDays == 7,
+                                          onSelected: (_) =>
+                                              _applyDurationPreset(7),
+                                        ),
+                                        ChoiceChip(
+                                          key: const Key(
+                                            'chip_recurring_two_weeks',
+                                          ),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity.compact,
+                                          label: const Text('أسبوعان'),
+                                          selected: durationDays == 14,
+                                          onSelected: (_) =>
+                                              _applyDurationPreset(14),
+                                        ),
+                                        ChoiceChip(
+                                          key: const Key(
+                                            'chip_recurring_month',
+                                          ),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity.compact,
+                                          label: const Text('شهر'),
+                                          selected: durationDays == 30,
+                                          onSelected: (_) =>
+                                              _applyDurationPreset(30),
+                                        ),
+                                        ActionChip(
+                                          key: const Key(
+                                            'btn_pick_recurring_range',
+                                          ),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity.compact,
+                                          avatar: Icon(
+                                            Icons.date_range,
+                                            size: 14.w,
+                                            color: context.theme.primaryColor,
+                                          ),
+                                          label: const Text(
+                                            'اختيار من التقويم',
+                                          ),
+                                          onPressed: _pickRecurringRange,
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8.w,
+                                        vertical: 6.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: context.theme.primaryColor
+                                            .withValues(alpha: 0.08),
+                                        borderRadius: BorderRadius.circular(
+                                          6.r,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.info_outline,
+                                            size: 14.w,
+                                            color: context.theme.primaryColor,
+                                          ),
+                                          SizedBox(width: 6.w),
+                                          Expanded(
+                                            child: Text(
+                                              toStr != null &&
+                                                      durationDays != null
+                                                  ? 'سارٍ تلقائياً من $fromStr حتى $toStr (${_formatDaysAr(durationDays)})'
+                                                  : 'سارٍ تلقائياً من $fromStr (مستمر بدون تاريخ نهاية)',
+                                              key: const Key(
+                                                'txt_recurring_summary',
+                                              ),
+                                              style: AppStyles.s11W500.copyWith(
+                                                color:
+                                                    context.customColor.text1,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+                            ],
                           ],
                         ),
-                        subtitle: isAvailable
-                            ? null
-                            : Text(
-                                c['reason_disabled']?.toString() ?? 'غير متاح',
-                                key: Key('tag_unavailable_$cId'),
-                                style: TextStyle(
-                                  color: Colors.red.shade700,
-                                  fontSize: 12.w,
-                                ),
+                      ),
+                      SizedBox(height: 8.h),
+                      if (_isLoading)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32.h),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              key: const Key('progress_available_cashiers'),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                context.theme.primaryColor,
                               ),
-                        trailing: isAvailable
-                            ? (isSelected
-                                  ? Icon(
-                                      Icons.check_circle,
-                                      color: context.theme.primaryColor,
-                                    )
-                                  : null)
-                            : Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w,
-                                  vertical: 2.h,
+                            ),
+                          ),
+                        )
+                      else if (_errorMessage != null)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24.h),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red.shade700,
+                                  size: 36.w,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: Text(
-                                  'غير متاح',
-                                  style: TextStyle(
-                                    color: Colors.red.shade700,
-                                    fontSize: 11.w,
+                                SizedBox(height: 8.h),
+                                Text(
+                                  _errorMessage!,
+                                  key: const Key('txt_error_available_cashiers'),
+                                  textAlign: TextAlign.center,
+                                  style: AppStyles.s13W400.copyWith(
+                                    color: Colors.red.shade900,
                                   ),
                                 ),
+                                SizedBox(height: 12.h),
+                                ElevatedButton.icon(
+                                  key: const Key(
+                                    'btn_retry_available_cashiers',
+                                  ),
+                                  onPressed: _fetchCashiers,
+                                  icon: const Icon(Icons.refresh, size: 16),
+                                  label: const Text('إعادة المحاولة'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else if (_cashiers.isEmpty)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32.h),
+                          child: Center(
+                            child: Text(
+                              'لا يوجد كاشيرات متاحين حالياً',
+                              key: const Key('txt_empty_available_cashiers'),
+                              style: AppStyles.s14W400.copyWith(
+                                color: context.customColor.text3,
                               ),
-                        onTap: isAvailable
-                            ? () {
-                                setState(() {
-                                  _selectedCashierId = cId;
-                                  _selectedCashierName = cName;
-                                });
-                              }
-                            : null,
-                      );
-                    },
+                            ),
+                          ),
+                        )
+                      else
+                        ListView.separated(
+                          key: const Key('list_available_cashiers'),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _cashiers.length,
+                          separatorBuilder: (_, _) => Divider(height: 1.h),
+                          itemBuilder: (ctx, index) {
+                            final c = _cashiers[index];
+                            final cId = c['id'].toString();
+                            final cName = c['name'].toString();
+                            final isBranchManager = _isBranchManagerMap(c);
+                            final isAvailable =
+                                (c['is_available'] as bool? ?? true) &&
+                                !(c['disabled'] as bool? ?? false);
+                            final isSelected = _selectedCashierId == cId;
+
+                            return ListTile(
+                              key: Key('tile_cashier_$cId'),
+                              enabled: isAvailable,
+                              selected: isSelected,
+                              selectedTileColor: context.theme.primaryColor
+                                  .withValues(alpha: 0.08),
+                              leading: CircleAvatar(
+                                backgroundColor: isAvailable
+                                    ? (isSelected
+                                          ? context.theme.primaryColor
+                                          : context.theme.primaryColor
+                                                .withValues(alpha: 0.1))
+                                    : Colors.grey.shade200,
+                                child: Icon(
+                                  isSelected
+                                      ? Icons.check
+                                      : (isBranchManager
+                                            ? Icons.manage_accounts_rounded
+                                            : Icons.person),
+                                  color: isAvailable
+                                      ? (isSelected
+                                            ? Colors.white
+                                            : context.theme.primaryColor)
+                                      : Colors.grey,
+                                  size: 20.w,
+                                ),
+                              ),
+                              title: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 6.w,
+                                runSpacing: 4.h,
+                                children: [
+                                  Text(
+                                    cName,
+                                    style: AppStyles.s14W500.copyWith(
+                                      color: isAvailable
+                                          ? context.customColor.text1
+                                          : context.customColor.text3,
+                                    ),
+                                  ),
+                                  if (isBranchManager)
+                                    Container(
+                                      key: Key('tag_branch_manager_$cId'),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6.w,
+                                        vertical: 2.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: context.theme.primaryColor
+                                            .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(
+                                          4.r,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'مدير الفرع — حسابي',
+                                        style: TextStyle(
+                                          color: context.theme.primaryColor,
+                                          fontSize: 10.w,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              subtitle: isAvailable
+                                  ? null
+                                  : Text(
+                                      c['reason_disabled']?.toString() ??
+                                          'غير متاح',
+                                      key: Key('tag_unavailable_$cId'),
+                                      style: TextStyle(
+                                        color: Colors.red.shade700,
+                                        fontSize: 12.w,
+                                      ),
+                                    ),
+                              trailing: isAvailable
+                                  ? (isSelected
+                                        ? Icon(
+                                            Icons.check_circle,
+                                            color: context.theme.primaryColor,
+                                          )
+                                        : null)
+                                  : Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8.w,
+                                        vertical: 2.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          4.r,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'غير متاح',
+                                        style: TextStyle(
+                                          color: Colors.red.shade700,
+                                          fontSize: 11.w,
+                                        ),
+                                      ),
+                                    ),
+                              onTap: isAvailable
+                                  ? () {
+                                      setState(() {
+                                        _selectedCashierId = cId;
+                                        _selectedCashierName = cName;
+                                      });
+                                    }
+                                  : null,
+                            );
+                          },
+                        ),
+                    ],
                   ),
                 ),
+              ),
+              if (!_isLoading &&
+                  _errorMessage == null &&
+                  _cashiers.isNotEmpty) ...[
                 SizedBox(height: 12.h),
                 SizedBox(
                   width: double.infinity,
@@ -2308,15 +3137,12 @@ class _AssignCashierModalContentState
                     onPressed: _selectedCashierId != null
                         ? () {
                             Navigator.pop(context);
-                            final effFrom =
-                                _effectiveDateCtrl.text.trim().isNotEmpty
-                                ? _effectiveDateCtrl.text.trim()
-                                : widget.slot.shiftDate;
                             widget.onCashierSelected(
                               _selectedCashierId!,
                               _selectedCashierName!,
                               _isRecurring,
-                              effFrom,
+                              fromStr,
+                              toStr,
                             );
                           }
                         : null,

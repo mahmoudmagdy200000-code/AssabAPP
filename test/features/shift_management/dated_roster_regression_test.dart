@@ -36,7 +36,7 @@ Widget _buildTestApp(Widget child, {Locale locale = const Locale('ar')}) {
 }
 
 void main() {
-  testWidgets('date range picker selects seven days and refresh preserves selection', (tester) async {
+  testWidgets('date picker selects day/week and step navigation preserves selection', (tester) async {
     tester.view.physicalSize = const Size(820, 1180);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -55,16 +55,27 @@ void main() {
     await tester.tap(find.text(label).last);
     await tester.pumpAndSettle();
     expect(calls.last, '2026-11-20/2026-11-26');
-    expect(find.text('2026-11-20 — 2026-11-26'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+      contains('2026-11-20'),
+    );
     await tester.tap(find.byKey(const Key('btn_refresh_roster')));
     await tester.pumpAndSettle();
     expect(calls.last, '2026-11-20/2026-11-26');
-    await tester.tap(find.byKey(const Key('btn_next_week')));
+    await tester.tap(find.byKey(const Key('btn_prev_day')));
     await tester.pumpAndSettle();
-    expect(calls.last, '2026-11-27/2026-12-03');
-    await tester.tap(find.byKey(const Key('btn_prev_week')));
+    expect(calls.last, '2026-11-13/2026-11-19');
+    expect(
+      tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+      contains('2026-11-19'),
+    );
+    await tester.tap(find.byKey(const Key('btn_next_day')));
     await tester.pumpAndSettle();
     expect(calls.last, '2026-11-20/2026-11-26');
+    expect(
+      tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+      contains('2026-11-20'),
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -79,16 +90,23 @@ void main() {
     await tester.pumpWidget(_buildTestApp(DatedShiftAssignmentScreen(
       initialDateRange: '2026-11-13 — 2026-11-19',
       initialTemplates: const [slot],
-      onFetchRoster: (_, __) async => [slot],
+      onFetchRoster: (_, _) async => [slot],
       onFetchAvailableCashiers: () async => [{'id': 'cashier', 'name': 'يوسف'}],
       onExecuteAssign: (cashier, template, date) async { assignedDate = date; },
-      onSaveRosterAssignment: (_, __, ___) async { recurringCalls++; },
+      onSaveRosterAssignment: (_, _, _) async { recurringCalls++; },
     )));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('btn_assign_night')));
     await tester.pumpAndSettle();
-    final single = tester.widget<Radio<bool>>(find.descendant(of: find.byKey(const Key('radio_single_day_exception')), matching: find.byType(Radio<bool>)));
-    expect(single.groupValue, false);
+    final group = tester.widget<RadioGroup<bool>>(find.byType(RadioGroup<bool>));
+    expect(group.groupValue, false);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('radio_single_day_exception')),
+        matching: find.byType(Radio<bool>),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('tile_cashier_cashier')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('btn_confirm_cashier_assignment')));
@@ -364,8 +382,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('btn_assign_tpl')), findsOneWidget);
       expect(
-        tester.widget<Text>(find.byKey(const Key('txt_date_range'))).data,
-        '2026-11-18 — 2026-11-18',
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-18'),
       );
       fail = true;
       await tester.tap(find.byKey(const Key('btn_refresh_roster')));
