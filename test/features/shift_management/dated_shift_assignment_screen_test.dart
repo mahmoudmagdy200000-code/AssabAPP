@@ -135,9 +135,15 @@ void main() {
         findsOneWidget,
       );
 
-      // 2. Verify date range
-      expect(find.byKey(const Key('txt_date_range')), findsOneWidget);
-      expect(find.text('2026-11-15 — 2026-11-21'), findsOneWidget);
+      // 2. Verify single-day calendar header (no legacy All/day chip strip)
+      expect(find.byKey(const Key('txt_selected_date')), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-15'),
+      );
+      expect(find.byKey(const Key('btn_prev_day')), findsOneWidget);
+      expect(find.byKey(const Key('btn_next_day')), findsOneWidget);
+      expect(find.byKey(const Key('chip_day_all')), findsNothing);
 
       // 3. Verify templates rendered with cashiers and hours
       expect(find.byKey(const Key('card_template_tpl-1')), findsOneWidget);
@@ -463,7 +469,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('date range navigation buttons update range and trigger reload',
+    testWidgets('day navigation buttons switch days and reload when crossing week boundary',
         (tester) async {
       tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
       tester.view.devicePixelRatio = 2.0;
@@ -486,12 +492,37 @@ void main() {
 
       expect(requestedStart, '2026-11-15');
 
-      // Click next week button
-      await tester.tap(find.byKey(const Key('btn_next_week')));
+      // Step backward from Sunday 2026-11-15 -> Saturday 2026-11-14 triggers previous week load
+      await tester.tap(find.byKey(const Key('btn_prev_day')));
       await tester.pumpAndSettle();
 
+      expect(requestedStart, '2026-11-08');
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-14'),
+      );
+
+      // Step forward back into 2026-11-15 triggers reload for next week
+      await tester.tap(find.byKey(const Key('btn_next_day')));
+      await tester.pumpAndSettle();
+
+      expect(requestedStart, '2026-11-15');
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-15'),
+      );
+
+      // Step through remaining 6 days of the week (16..21) + 1 more -> crosses to 2026-11-22
+      for (var i = 0; i < 7; i++) {
+        await tester.tap(find.byKey(const Key('btn_next_day')));
+        await tester.pumpAndSettle();
+      }
+
       expect(requestedStart, '2026-11-22');
-      expect(find.textContaining('2026-11-22'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-22'),
+      );
 
       expect(tester.takeException(), isNull);
     });
@@ -741,17 +772,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify day chips are rendered for both days
-      expect(find.byKey(const Key('chip_day_2026-11-15')), findsOneWidget);
-      expect(find.byKey(const Key('chip_day_2026-11-16')), findsOneWidget);
+      // Default view shows only Day 1 (2026-11-15), without legacy All/day chip strip
+      expect(find.byKey(const Key('chip_day_all')), findsNothing);
+      expect(find.byKey(const Key('chip_day_2026-11-15')), findsNothing);
+      expect(find.byKey(const Key('chip_day_2026-11-16')), findsNothing);
+      expect(find.text('كاشير يوم 15 قالب 1'), findsOneWidget);
+      expect(find.text('كاشير يوم 16 قالب 1'), findsNothing);
 
-      // Select Day 2 (2026-11-16)
-      await tester.ensureVisible(find.byKey(const Key('chip_day_2026-11-16')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('chip_day_2026-11-16')));
+      // Navigate to Day 2 (2026-11-16) via next-day button
+      await tester.tap(find.byKey(const Key('btn_next_day')));
       await tester.pumpAndSettle();
 
-      // Verify day 2 cashier names are visible
+      // Verify day 2 cashier names are visible and day 1 is hidden
+      expect(find.text('كاشير يوم 15 قالب 1'), findsNothing);
       expect(find.text('كاشير يوم 16 قالب 1'), findsOneWidget);
       expect(find.text('كاشير يوم 16 قالب 2'), findsOneWidget);
 
@@ -1126,15 +1159,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: 'after pump');
 
-      // 1. Both days (Nov 15 and Nov 16) are generated and chips exist
-      expect(find.byKey(const Key('chip_day_2026-11-15')), findsOneWidget);
-      expect(find.byKey(const Key('chip_day_2026-11-16')), findsOneWidget);
+      // 1. Default view shows only Day 1 (Nov 15) without All/day chips strip
+      expect(find.byKey(const Key('chip_day_all')), findsNothing);
+      expect(find.byKey(const Key('chip_day_2026-11-15')), findsNothing);
+      expect(find.byKey(const Key('chip_day_2026-11-16')), findsNothing);
 
-      // Filter to empty day (Nov 16)
-      await tester.ensureVisible(find.byKey(const Key('chip_day_2026-11-16')));
-      await tester.tap(find.byKey(const Key('chip_day_2026-11-16')));
+      // Navigate to empty day (Nov 16) via next-day arrow
+      await tester.tap(find.byKey(const Key('btn_next_day')));
       await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull, reason: 'after filter day');
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-16'),
+      );
+      expect(tester.takeException(), isNull, reason: 'after navigate to next day');
 
       // On Nov 16, both templates exist with 'غير معيّن' and 'تعيين كاشير'
       expect(find.byKey(const Key('btn_assign_tpl-1')), findsOneWidget);
@@ -1463,18 +1500,27 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final now = DateTime.now();
-      final expectedSunday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday % 7));
+      final riyadhNow = DateTime.now().toUtc().add(const Duration(hours: 3));
+      final expectedSunday = DateTime(
+        riyadhNow.year,
+        riyadhNow.month,
+        riyadhNow.day,
+      ).subtract(Duration(days: riyadhNow.weekday % 7));
       final expectedSaturday = expectedSunday.add(const Duration(days: 6));
       final expectedStartStr =
           "${expectedSunday.year}-${expectedSunday.month.toString().padLeft(2, '0')}-${expectedSunday.day.toString().padLeft(2, '0')}";
       final expectedEndStr =
           "${expectedSaturday.year}-${expectedSaturday.month.toString().padLeft(2, '0')}-${expectedSaturday.day.toString().padLeft(2, '0')}";
+      final expectedTodayStr =
+          "${riyadhNow.year}-${riyadhNow.month.toString().padLeft(2, '0')}-${riyadhNow.day.toString().padLeft(2, '0')}";
 
       expect(queriedStart, expectedStartStr);
       expect(queriedEnd, expectedEndStr);
-      expect(find.textContaining(expectedStartStr), findsOneWidget);
-      expect(find.textContaining(expectedEndStr), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains(expectedTodayStr),
+      );
+      expect(find.byKey(const Key('badge_today')), findsOneWidget);
 
       expect(tester.takeException(), isNull);
     });
@@ -1565,7 +1611,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(capturedQueryParams, isEmpty);
-      expect(find.textContaining('2026-11-15 — 2026-11-21'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-15'),
+      );
+      expect(find.byKey(const Key('badge_today')), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -1592,23 +1642,31 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(loadedRanges.first, '2026-12-27 — 2027-01-02');
-      expect(find.textContaining('2026-12-27 — 2027-01-02'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-12-27'),
+      );
 
-      // Navigate to next week: should cleanly transition to 2027-01-03 — 2027-01-09
-      await tester.tap(find.byKey(const Key('btn_next_week')));
+      // Step backwards across boundary into 2026-12-26 (loads 2026-12-20 — 2026-12-26)
+      await tester.tap(find.byKey(const Key('btn_prev_day')));
       await tester.pumpAndSettle();
+      expect(loadedRanges.last, '2026-12-20 — 2026-12-26');
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-12-26'),
+      );
+
+      // Step forward back to 2026-12-27, then 7 more days across year boundary into 2027-01-03
+      for (var i = 0; i < 8; i++) {
+        await tester.tap(find.byKey(const Key('btn_next_day')));
+        await tester.pumpAndSettle();
+      }
 
       expect(loadedRanges.last, '2027-01-03 — 2027-01-09');
-      expect(find.textContaining('2027-01-03 — 2027-01-09'), findsOneWidget);
-
-      // Navigate back across boundary
-      await tester.tap(find.byKey(const Key('btn_prev_week')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('btn_prev_week')));
-      await tester.pumpAndSettle();
-
-      expect(loadedRanges.last, '2026-12-20 — 2026-12-26');
-      expect(find.textContaining('2026-12-20 — 2026-12-26'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2027-01-03'),
+      );
 
       expect(tester.takeException(), isNull);
     });
@@ -1677,7 +1735,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('2026-11-15 — 2026-11-21'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-15'),
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -1713,6 +1774,13 @@ void main() {
                 'branch_id': 'branch-1',
                 'start_date': options.queryParameters['start_date'] ?? '2026-11-15',
                 'end_date': options.queryParameters['end_date'] ?? '2026-11-21',
+                'scheduling_calendar': {
+                  'today': '2026-11-21',
+                  'timezone': 'Asia/Riyadh',
+                  'week_start': 0,
+                  'default_start_date': '2026-11-15',
+                  'default_end_date': '2026-11-21',
+                },
                 'templates': [
                   {
                     'id': 'tpl-1',
@@ -1735,20 +1803,26 @@ void main() {
         );
       });
 
-      // 1. Initial load
+      // 1. Initial load opens cleanly on server Today (2026-11-21)
       await tester.pumpWidget(
         _buildTestApp(
           DatedShiftAssignmentScreen(dio: dio),
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('2026-11-15 — 2026-11-21'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-21'),
+      );
 
-      // 2. Manager manually navigates to next week (2026-11-22 — 2026-11-28)
-      await tester.tap(find.byKey(const Key('btn_next_week')));
+      // 2. Manager steps to next day (2026-11-22), crossing into next week (2026-11-22 — 2026-11-28)
+      await tester.tap(find.byKey(const Key('btn_next_day')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('2026-11-22 — 2026-11-28'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-22'),
+      );
       expect(requestedQueries.last['start_date'], '2026-11-22');
       expect(requestedQueries.last['end_date'], '2026-11-28');
 
@@ -1758,7 +1832,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Selection is preserved even on error
-      expect(find.textContaining('2026-11-22 — 2026-11-28'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-22'),
+      );
       expect(find.textContaining('تعذر تحميل التعيينات من الخادم'), findsOneWidget);
       // Crucial: Error state and Retry button are shown, NOT the empty templates state
       expect(find.byKey(const Key('error_roster_state')), findsOneWidget);
@@ -1771,7 +1848,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verified reload succeeded with the exact preserved dates
-      expect(find.textContaining('2026-11-22 — 2026-11-28'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+        contains('2026-11-22'),
+      );
       expect(requestedQueries.last['start_date'], '2026-11-22');
       expect(requestedQueries.last['end_date'], '2026-11-28');
       expect(find.textContaining('تعذر تحميل التعيينات من الخادم'), findsNothing);
@@ -2289,6 +2369,388 @@ void main() {
         expect(tester.takeException(), isNull);
       },
     );
+
+    for (final shiftCount in [2, 3]) {
+      testWidgets(
+        'UX Default Today Only ($shiftCount shifts): opens directly on today without All or day tabs, supports day stepping and jump to today',
+        (WidgetTester tester) async {
+          tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
+          tester.view.devicePixelRatio = 2.0;
+          addTearDown(tester.view.resetPhysicalSize);
+
+          final templates = List.generate(
+            shiftCount,
+            (i) => {
+              'id': 'tpl-${i + 1}',
+              'name': i == 0
+                  ? 'الصباحية'
+                  : (i == 1 ? 'المسائية' : 'الليلية'),
+              'start_time': i == 0
+                  ? '08:00:00'
+                  : (i == 1 ? '16:00:00' : '00:00:00'),
+              'end_time': i == 0
+                  ? '16:00:00'
+                  : (i == 1 ? '00:00:00' : '08:00:00'),
+            },
+          );
+
+          final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+          dio.httpClientAdapter = TestHttpAdapter(
+            onFetch: (options) async {
+              if (options.path.endsWith('roster-assignments')) {
+                return ResponseBody.fromString(
+                  jsonEncode({'success': true, 'data': []}),
+                  200,
+                  headers: {
+                    Headers.contentTypeHeader: [Headers.jsonContentType],
+                  },
+                );
+              }
+              if (options.path.contains('dated-roster')) {
+                return ResponseBody.fromString(
+                  jsonEncode({
+                    'success': true,
+                    'data': {
+                      'branch_id': 'branch-1',
+                      'start_date': '2026-11-15',
+                      'end_date': '2026-11-21',
+                      'scheduling_calendar': {
+                        'today': '2026-11-20',
+                        'timezone': 'Asia/Riyadh',
+                        'week_start': 0,
+                        'default_start_date': '2026-11-15',
+                        'default_end_date': '2026-11-21',
+                      },
+                      'templates': templates,
+                      'roster': {
+                        '2026-11-20_tpl-1': {
+                          'cashier_shift_id': 'cs-today-1',
+                          'cashier_id': 'c-today',
+                          'cashier_name': 'كاشير اليوم 20',
+                          'status': 'not_started',
+                          'can_swap': true,
+                        },
+                        '2026-11-21_tpl-1': {
+                          'cashier_shift_id': 'cs-tom-1',
+                          'cashier_id': 'c-tom',
+                          'cashier_name': 'كاشير الغد 21',
+                          'status': 'not_started',
+                          'can_swap': true,
+                        },
+                      },
+                    },
+                  }),
+                  200,
+                  headers: {
+                    Headers.contentTypeHeader: [Headers.jsonContentType],
+                  },
+                );
+              }
+              return ResponseBody.fromString(
+                jsonEncode({'success': true, 'data': []}),
+                200,
+                headers: {
+                  Headers.contentTypeHeader: [Headers.jsonContentType],
+                },
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            _buildTestApp(DatedShiftAssignmentScreen(dio: dio)),
+          );
+          await tester.pumpAndSettle();
+
+          // No legacy All chip or horizontal day filter tabs
+          expect(find.byKey(const Key('chip_day_all')), findsNothing);
+          expect(find.byKey(const Key('chip_day_2026-11-15')), findsNothing);
+          expect(find.byKey(const Key('chip_day_2026-11-20')), findsNothing);
+
+          // Opens directly on Today (2026-11-20, Friday) with Today badge
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+            'الجمعة، 2026-11-20',
+          );
+          expect(find.byKey(const Key('badge_today')), findsOneWidget);
+          expect(find.byKey(const Key('btn_jump_today')), findsNothing);
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_day_shift_count'))).data,
+            shiftCount == 2 ? 'ورديتان' : '3 ورديات',
+          );
+
+          // Shows ONLY Today's 2 or 3 shift cards (no Nov 21 cards mixed in)
+          expect(find.byKey(const Key('card_template_tpl-1')), findsOneWidget);
+          expect(find.byKey(const Key('card_template_tpl-2')), findsOneWidget);
+          if (shiftCount == 3) {
+            expect(find.byKey(const Key('card_template_tpl-3')), findsOneWidget);
+          }
+          expect(find.text('كاشير اليوم 20'), findsOneWidget);
+          expect(find.text('كاشير الغد 21'), findsNothing);
+
+          // Navigate to tomorrow (2026-11-21)
+          await tester.tap(find.byKey(const Key('btn_next_day')));
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+            'السبت، 2026-11-21',
+          );
+          expect(find.byKey(const Key('badge_today')), findsNothing);
+          expect(find.byKey(const Key('btn_jump_today')), findsOneWidget);
+          expect(find.text('كاشير اليوم 20'), findsNothing);
+          expect(find.text('كاشير الغد 21'), findsOneWidget);
+
+          // Jump straight back to Today
+          await tester.tap(find.byKey(const Key('btn_jump_today')));
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_selected_date'))).data,
+            'الجمعة، 2026-11-20',
+          );
+          expect(find.byKey(const Key('badge_today')), findsOneWidget);
+          expect(find.text('كاشير اليوم 20'), findsOneWidget);
+
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
+    for (final width in [360.0, 390.0, 820.0]) {
+      testWidgets(
+        'UX Modal Recurring Calendar (${width.toInt()}px): date pickers, presets, clear button, bounded vs open payload, and zero overflow',
+        (WidgetTester tester) async {
+          tester.view.physicalSize = Size(width * 2.0, (width == 820.0 ? 1180.0 : 800.0) * 2.0);
+          tester.view.devicePixelRatio = 2.0;
+          addTearDown(tester.view.resetPhysicalSize);
+
+          final List<Map<String, dynamic>> postedAssignments = [];
+          List<Map<String, dynamic>> persistedRecurring = [];
+
+          final dio = Dio(BaseOptions(baseUrl: 'https://erp.assab.sa/api/v1/'));
+          dio.httpClientAdapter = TestHttpAdapter(
+            onFetch: (options) async {
+              if (options.path.endsWith('roster-assignments') &&
+                  options.method == 'POST') {
+                final list = List<Map<String, dynamic>>.from(
+                  (options.data['assignments'] as List).map(
+                    (e) => Map<String, dynamic>.from(e as Map),
+                  ),
+                );
+                postedAssignments.addAll(list);
+                persistedRecurring = list
+                    .map(
+                      (a) => {
+                        'shift_id': a['shift_id'],
+                        'cashier_id': a['cashier_id'],
+                        'cashier_name': 'سعد العتيبي',
+                        'effective_from': a['effective_from'],
+                        if (a.containsKey('effective_to'))
+                          'effective_to': a['effective_to'],
+                      },
+                    )
+                    .toList();
+                return ResponseBody.fromString(
+                  jsonEncode({'success': true, 'data': persistedRecurring}),
+                  200,
+                  headers: {
+                    Headers.contentTypeHeader: [Headers.jsonContentType],
+                  },
+                );
+              }
+              if (options.path.endsWith('roster-assignments')) {
+                return ResponseBody.fromString(
+                  jsonEncode({'success': true, 'data': persistedRecurring}),
+                  200,
+                  headers: {
+                    Headers.contentTypeHeader: [Headers.jsonContentType],
+                  },
+                );
+              }
+              if (options.path.contains('dated-roster')) {
+                return ResponseBody.fromString(
+                  jsonEncode({
+                    'success': true,
+                    'data': {
+                      'branch_id': 'branch-1',
+                      'start_date': '2026-11-20',
+                      'end_date': '2026-11-26',
+                      'templates': [
+                        {
+                          'id': 'tpl-cal-1',
+                          'name': 'الوردية الأولى',
+                          'start_time': '08:00:00',
+                          'end_time': '16:00:00',
+                        },
+                      ],
+                      'roster': {},
+                    },
+                  }),
+                  200,
+                  headers: {
+                    Headers.contentTypeHeader: [Headers.jsonContentType],
+                  },
+                );
+              }
+              if (options.path.contains('available-cashiers')) {
+                return ResponseBody.fromString(
+                  jsonEncode({
+                    'success': true,
+                    'data': [
+                      {'id': 'c-cal-1', 'name': 'سعد العتيبي'},
+                    ],
+                  }),
+                  200,
+                  headers: {
+                    Headers.contentTypeHeader: [Headers.jsonContentType],
+                  },
+                );
+              }
+              return ResponseBody.fromString(
+                jsonEncode({'success': true, 'data': []}),
+                200,
+                headers: {
+                  Headers.contentTypeHeader: [Headers.jsonContentType],
+                },
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            _buildTestApp(
+              DatedShiftAssignmentScreen(
+                dio: dio,
+                initialDateRange: '2026-11-20 — 2026-11-26',
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          // 1. Open assignment modal
+          await tester.tap(find.byKey(const Key('btn_assign_tpl-cal-1')));
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('btn_pick_effective_from')), findsNothing);
+
+          // 2. Switch to recurring assignment -> calendar panel renders with zero overflow
+          await tester.tap(find.byKey(const Key('radio_recurring_assignment')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('btn_pick_effective_from')), findsOneWidget);
+          expect(find.byKey(const Key('btn_pick_effective_to')), findsOneWidget);
+          expect(find.byKey(const Key('chip_recurring_open')), findsOneWidget);
+          expect(find.byKey(const Key('chip_recurring_week')), findsOneWidget);
+          expect(find.byKey(const Key('chip_recurring_two_weeks')), findsOneWidget);
+          expect(find.byKey(const Key('chip_recurring_month')), findsOneWidget);
+          expect(find.byKey(const Key('btn_pick_recurring_range')), findsOneWidget);
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_effective_from_value'))).data,
+            '2026-11-20',
+          );
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_effective_to_value'))).data,
+            'مفتوح (مستمر)',
+          );
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_recurring_summary'))).data,
+            'سارٍ تلقائياً من 2026-11-20 (مستمر بدون تاريخ نهاية)',
+          );
+
+          // 3. Change start date via showDatePicker to 2026-11-22
+          await tester.tap(find.byKey(const Key('btn_pick_effective_from')));
+          await tester.pumpAndSettle();
+          expect(find.byType(DatePickerDialog), findsOneWidget);
+          await tester.tap(find.text('22').last);
+          final okLabel = MaterialLocalizations.of(
+            tester.element(find.byType(DatePickerDialog)),
+          ).okButtonLabel;
+          await tester.tap(find.text(okLabel).last);
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_effective_from_value'))).data,
+            '2026-11-22',
+          );
+
+          // 4. Tap "أسبوع" quick preset -> 2026-11-22 .. 2026-11-28 (7 أيام)
+          await tester.ensureVisible(find.byKey(const Key('chip_recurring_week')));
+          await tester.tap(find.byKey(const Key('chip_recurring_week')));
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_effective_to_value'))).data,
+            '2026-11-28',
+          );
+          expect(find.byKey(const Key('btn_clear_effective_to')), findsOneWidget);
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_recurring_summary'))).data,
+            'سارٍ تلقائياً من 2026-11-22 حتى 2026-11-28 (7 أيام)',
+          );
+
+          // 5. Clear button resets to open-ended, then pick custom end date via showDatePicker (25 -> 2026-11-25)
+          await tester.tap(find.byKey(const Key('btn_clear_effective_to')));
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_effective_to_value'))).data,
+            'مفتوح (مستمر)',
+          );
+          await tester.tap(find.byKey(const Key('btn_pick_effective_to')));
+          await tester.pumpAndSettle();
+          expect(find.byType(DatePickerDialog), findsOneWidget);
+          await tester.tap(find.text('25').last);
+          final okToLabel = MaterialLocalizations.of(
+            tester.element(find.byType(DatePickerDialog)),
+          ).okButtonLabel;
+          await tester.tap(find.text(okToLabel).last);
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_effective_to_value'))).data,
+            '2026-11-25',
+          );
+          expect(
+            tester.widget<Text>(find.byKey(const Key('txt_recurring_summary'))).data,
+            'سارٍ تلقائياً من 2026-11-22 حتى 2026-11-25 (4 أيام)',
+          );
+
+          // 6. Select cashier & confirm bounded recurring assignment
+          await tester.ensureVisible(find.byKey(const Key('tile_cashier_c-cal-1')));
+          await tester.tap(find.byKey(const Key('tile_cashier_c-cal-1')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('btn_confirm_cashier_assignment')));
+          await tester.pumpAndSettle();
+
+          expect(postedAssignments.last['effective_from'], '2026-11-22');
+          expect(postedAssignments.last['effective_to'], '2026-11-25');
+
+          // Navigate to 2026-11-22 to see primary range rendered on card
+          await tester.tap(find.byKey(const Key('btn_next_day')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('btn_next_day')));
+          await tester.pumpAndSettle();
+          expect(
+            tester
+                .widget<Text>(find.byKey(const Key('txt_primary_cashier_tpl-cal-1')))
+                .data,
+            'سعد العتيبي (من 2026-11-22 إلى 2026-11-25)',
+          );
+
+          // 7. Reopen modal, switch to recurring, select "مفتوح" preset -> omits effective_to
+          await tester.tap(find.byKey(const Key('btn_assign_tpl-cal-1')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('radio_recurring_assignment')));
+          await tester.pumpAndSettle();
+          await tester.ensureVisible(find.byKey(const Key('chip_recurring_week')));
+          await tester.tap(find.byKey(const Key('chip_recurring_week')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('chip_recurring_open')));
+          await tester.pumpAndSettle();
+          await tester.ensureVisible(find.byKey(const Key('tile_cashier_c-cal-1')));
+          await tester.tap(find.byKey(const Key('tile_cashier_c-cal-1')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('btn_confirm_cashier_assignment')));
+          await tester.pumpAndSettle();
+
+          expect(postedAssignments.last['effective_from'], '2026-11-22');
+          expect(postedAssignments.last.containsKey('effective_to'), isFalse);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
   });
 }
 
