@@ -4,6 +4,9 @@ import 'package:assab/core/widgets/app_padding_widget.dart';
 import 'package:assab/core/widgets/app_scaffold.dart';
 import 'package:assab/features/shift_module_features/shift_management/presentation/ui/widgets/manager_shift_management_widgets/manager_shift_management_bottom_section.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:assab/core/di/dependency_injection.dart';
+import 'workday_sales_reviews_screen.dart';
 
 import '../../../../../../core/styles/app_colors.dart';
 import '../widgets/cashier_shifts_management_widgets/cashier_shifts_app_bar.dart';
@@ -28,6 +31,19 @@ class ManagerShiftManagementScreen extends StatelessWidget {
               subTitle: context.tr.myShiftAndHandOffDetails,
               showInfoButton: false,
               showBackButton: false,
+            ),
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => WorkdaySalesReviewsScreen(dio: getIt<Dio>()),
+                ),
+              ),
+              icon: const Icon(Icons.rate_review_outlined),
+              label: Text(
+                Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'مراجعة تقارير المبيعات'
+                    : 'Sales report review',
+              ),
             ),
 
             Expanded(
