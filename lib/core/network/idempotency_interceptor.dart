@@ -181,7 +181,7 @@ class IdempotencyScopeManager {
 /// Reuses the same key across separate RequestOptions instances if retrying the same uncertain operation.
 class IdempotencyInterceptor extends Interceptor {
   static final RegExp _financialPathRegex = RegExp(
-    r'(shifts/[^/]+/(end|start-handover|end-with-handover|reassign-with-handover|handover(/approve|/accept|/reject)?)|shifts/end|replace-recipient|handover-receipts|custody/handover|shift-transfers|shift-transfer-attempts)',
+    r'(shifts/[^/]+/(end|start-handover|end-with-handover|reassign-with-handover|handover(/approve|/accept|/reject)?)|shifts/end|replace-recipient|handover-receipts|custody/handover|shift-transfers|shift-transfer-attempts|branch-manager/expenses/(quick-cash|single-invoice|grouped-invoice|pre-approval))',
     caseSensitive: false,
   );
 

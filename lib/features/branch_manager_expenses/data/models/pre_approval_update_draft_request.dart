@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'pre_approval_update_draft_request.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, createToJson: false)
 class PreApprovalUpdateDraftRequest {
   final String purpose;
 

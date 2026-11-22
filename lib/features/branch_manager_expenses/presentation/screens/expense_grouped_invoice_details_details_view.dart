@@ -64,7 +64,7 @@ class _ExpenseGroupedInvoiceDetailsDetailsViewState
                   children: [
                     if (groupedInvoiceEntity.status.toLowerCase() ==
                         ExpensesStatus.rejected.key.toLowerCase()) ...[
-                      RejectedWidget(reason: groupedInvoiceEntity.cancelReason),
+                      RejectedWidget(rejection: groupedInvoiceEntity.rejection),
                       14.verticalSpace,
                     ],
                     Container(

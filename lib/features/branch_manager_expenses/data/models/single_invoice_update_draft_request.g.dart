@@ -42,26 +42,6 @@ SingleInvoiceUpdateDraftRequest _$SingleInvoiceUpdateDraftRequestFromJson(
       .toList(),
 );
 
-Map<String, dynamic> _$SingleInvoiceUpdateDraftRequestToJson(
-  SingleInvoiceUpdateDraftRequest instance,
-) => <String, dynamic>{
-  'supplier_id': instance.supplierId,
-  'invoice_number': instance.invoiceNumber,
-  'issue_date': instance.issueDate,
-  'is_tax_invoice': instance.isTaxInvoice,
-  'tax_id': instance.taxId,
-  'tax_invoice_details': instance.taxInvoiceDetails.toJson(),
-  'items': instance.items.map((e) => e.toJson()).toList(),
-  'expenses': instance.expenses.map((e) => e.toJson()).toList(),
-  'payment_type': instance.paymentType,
-  'payment_method': instance.paymentMethod,
-  'payment_supplier_id': instance.paymentSupplierId,
-  'paid_amount': instance.paidAmount,
-  'due_date': instance.dueDate,
-  'is_draft': instance.isDraft,
-  'delete_attachments': instance.deleteAttachments,
-};
-
 SingleInvoiceUpdateDraftRequestTaxInvoiceDetails
 _$SingleInvoiceUpdateDraftRequestTaxInvoiceDetailsFromJson(
   Map<String, dynamic> json,

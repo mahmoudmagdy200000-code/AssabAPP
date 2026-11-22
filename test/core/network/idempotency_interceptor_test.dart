@@ -173,6 +173,24 @@ void main() {
       }
     });
 
+    test('Attaches idempotency keys to expense creation routes', () {
+      final routes = [
+        'branch-manager/expenses/quick-cash',
+        'branch-manager/expenses/single-invoice',
+        'branch-manager/expenses/grouped-invoice',
+        'branch-manager/expenses/pre-approval',
+      ];
+
+      for (final route in routes) {
+        final options = RequestOptions(method: 'POST', path: route);
+        final handler = _CaptureRequestHandler();
+        interceptor.onRequest(options, handler);
+        final key = handler.options!.headers['Idempotency-Key'];
+        expect(key, isNotNull, reason: 'Route $route must attach Idempotency-Key');
+        expect(key.toString().length, equals(36));
+      }
+    });
+
     test('Different payload data generates different scope and fresh key', () {
       final attempt1 = RequestOptions(
         method: 'POST',

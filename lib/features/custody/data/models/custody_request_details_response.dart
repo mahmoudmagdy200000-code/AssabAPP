@@ -1,8 +1,7 @@
 import 'package:assab/shared/models/time_line_response.dart';
 
 import '../../../../core/enums/custody_requests_status_enum.dart';
-import '../../../../shared/models/cancel_reason/cancel_reason_in_order_response.dart';
-import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/rejection_record.dart';
 
 class CustodyRequestDetailsResponse {
   final CustodyRequestDetailsData data;
@@ -21,9 +20,13 @@ class CustodyRequestDetailsData {
   final CustodyRequestsStatusEnum status;
   final CustodyRequestDetailsInfo details;
   final TimeLineResponse timeline;
-  final CancelReasonResponse? cancelReason;
+  final RejectionRecord? rejection;
   final CustodyRequestDetailsApproval? approval;
   final bool canConfirmReceipt;
+  final bool canResubmit;
+  final String? resubmissionBlockReason;
+  final bool cashHandoverAvailable;
+  final String? cashHandoverBlockReason;
 
   CustodyRequestDetailsData({
     required this.requestId,
@@ -31,8 +34,12 @@ class CustodyRequestDetailsData {
     required this.details,
     required this.timeline,
     required this.approval,
-    required this.cancelReason,
+    required this.rejection,
     required this.canConfirmReceipt,
+    this.canResubmit = false,
+    this.resubmissionBlockReason,
+    this.cashHandoverAvailable = false,
+    this.cashHandoverBlockReason,
   });
 
   factory CustodyRequestDetailsData.fromJson(Map<String, dynamic> json) {
@@ -45,11 +52,11 @@ class CustodyRequestDetailsData {
           ? null
           : CustodyRequestDetailsApproval.fromJson(json['approval']),
       canConfirmReceipt: json['canConfirmReceipt'] == true,
-      cancelReason: json['cancellation'] == null
-          ? null
-          : CancelReasonInOrderResponse.fromJson(
-              json['cancellation'] as Map<String, dynamic>,
-            ).toCancelReasonResponse(),
+      canResubmit: json['canResubmit'] == true,
+      resubmissionBlockReason: json['resubmissionBlockReason'] as String?,
+      cashHandoverAvailable: json['cashHandoverAvailable'] == true,
+      cashHandoverBlockReason: json['cashHandoverBlockReason'] as String?,
+      rejection: RejectionRecord.fromEnvelope(json),
     );
   }
 }

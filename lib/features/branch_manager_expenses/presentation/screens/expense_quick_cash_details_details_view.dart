@@ -6,6 +6,9 @@ import 'package:assab/core/widgets/custom_divider.dart';
 import 'package:assab/core/widgets/rejected_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:assab/core/services/navigation/navigation_service.dart';
+import 'package:assab/features/branch_manager_expenses/domain/strategies/expenses_strategy.dart';
+import 'package:assab/core/enums/expenses_steragies_keys.dart';
 
 import '../../../../core/widgets/app_failure_widget.dart';
 import '../../../../core/widgets/app_loading_widget.dart';
@@ -54,9 +57,33 @@ class _ExpenseQuickCashDetailsDetailsViewState
                     if (quickCashResponseDataModel.status.toLowerCase() ==
                         ExpensesStatus.rejected.key.toLowerCase()) ...[
                       RejectedWidget(
-                        reason: quickCashResponseDataModel.cancelReason,
+                        rejection: quickCashResponseDataModel.rejection,
                       ),
                       14.verticalSpace,
+                    ],
+                    if (quickCashResponseDataModel.status.toLowerCase() ==
+                        ExpensesStatus.rejected.key.toLowerCase()) ...[
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            final strategy =
+                                ExpensesStrategiesKeys.fromType(
+                                      'quick_cash',
+                                    ).strategy
+                                    as QuickCashExpensesStrategy;
+                            NavigationService.I.push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    strategy.expenseScreen(context, widget.id),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.edit_outlined),
+                          label: Text(context.tr.edit),
+                        ),
+                      ),
+                      8.verticalSpace,
                     ],
                     Container(
                       width: double.infinity,

@@ -37,6 +37,7 @@ class QuickCashCubit extends SafeCubit<QuickCashState> {
     required final String id,
     required UpdateDraftQuickCashRequestModel model,
     required final List<File> attachments,
+    bool resubmitRejected = false,
   }) async {
     emit(const QuickCashLoading());
 
@@ -59,11 +60,29 @@ class QuickCashCubit extends SafeCubit<QuickCashState> {
       success: (response) {
         handle(
           uploadResult,
-          success: (_) => emit(QuickCashSuccess(response)),
+          success: (_) {
+            if (!resubmitRejected) {
+              emit(QuickCashSuccess(response));
+              return;
+            }
+            _branchManagerExpensesRepository
+                .resubmitQuickCashExpense(id: id)
+                .then(
+                  (resubmitResult) => handle(
+                    resubmitResult,
+                    success: emitQuickCashSuccess,
+                    failure: (failure) => emit(QuickCashFailure(failure)),
+                  ),
+                );
+          },
           failure: (failure) => emit(QuickCashFailure(failure)),
         );
       },
       failure: (failure) => emit(QuickCashFailure(failure)),
     );
+  }
+
+  void emitQuickCashSuccess(QuickCashEntity response) {
+    emit(QuickCashSuccess(response));
   }
 }

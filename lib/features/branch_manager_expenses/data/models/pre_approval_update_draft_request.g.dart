@@ -35,21 +35,6 @@ PreApprovalUpdateDraftRequest _$PreApprovalUpdateDraftRequestFromJson(
   isDraft: json['is_draft'] as bool,
 );
 
-Map<String, dynamic> _$PreApprovalUpdateDraftRequestToJson(
-  PreApprovalUpdateDraftRequest instance,
-) => <String, dynamic>{
-  'purpose': instance.purpose,
-  'estimated_amount': instance.estimatedAmount,
-  'payment_method': instance.paymentMethod,
-  'payment_supplier_id': instance.paymentSupplierId,
-  'supplier_id': instance.supplierId,
-  'priority': instance.priority,
-  'items': instance.items.map((e) => e.toJson()).toList(),
-  'expenses': instance.expenses.map((e) => e.toJson()).toList(),
-  'delete_attachments': instance.deleteAttachments,
-  'is_draft': instance.isDraft,
-};
-
 PreApprovalUpdateDraftRequestItem _$PreApprovalUpdateDraftRequestItemFromJson(
   Map<String, dynamic> json,
 ) => PreApprovalUpdateDraftRequestItem(

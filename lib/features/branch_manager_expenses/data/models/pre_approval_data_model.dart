@@ -1,8 +1,7 @@
 import 'package:assab/features/branch_manager_expenses/data/models/supplier_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../../../shared/models/cancel_reason/cancel_reason_in_order_response.dart';
-import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/rejection_record.dart';
 import '../../../../shared/models/time_line_response.dart';
 import 'attachment_model.dart';
 import 'expense_status_model.dart';
@@ -11,9 +10,16 @@ import 'expenses_approval_model.dart';
 
 part 'pre_approval_data_model.g.dart';
 
-@JsonSerializable(explicitToJson: true, createToJson: false)
+@JsonSerializable(
+  explicitToJson: true,
+  createToJson: false,
+  createFactory: false,
+)
 class PreApprovalDataModel {
   final String? id;
+
+  @JsonKey(name: 'review_revision')
+  final int? reviewRevision;
 
   @JsonKey(name: 'expense_type')
   final ExpenseTypeModel? expenseType;
@@ -47,11 +53,12 @@ class PreApprovalDataModel {
   final PreApprovalInnerDataModel? data;
 
   final List<AttachmentModel>? attachments;
-  final CancelReasonResponse? cancelReason;
+  final RejectionRecord? rejection;
   final ExpensesApprovalModel? approval;
 
   PreApprovalDataModel({
     this.id,
+    this.reviewRevision,
     this.expenseType,
     this.status,
     this.totalAmount,
@@ -64,13 +71,14 @@ class PreApprovalDataModel {
     required this.timelines,
     this.data,
     this.attachments,
-    this.cancelReason,
+    this.rejection,
     this.approval,
   });
 
   factory PreApprovalDataModel.fromJson(Map<String, dynamic> json) =>
       PreApprovalDataModel(
         id: json['id'] as String?,
+        reviewRevision: (json['review_revision'] as num?)?.toInt() ?? 1,
         expenseType: json['expense_type'] == null
             ? null
             : ExpenseTypeModel.fromJson(
@@ -101,11 +109,7 @@ class PreApprovalDataModel {
         attachments: (json['attachments'] as List<dynamic>?)
             ?.map((e) => AttachmentModel.fromJson(e as Map<String, dynamic>))
             .toList(),
-        cancelReason: json['cancellation'] == null
-            ? null
-            : CancelReasonInOrderResponse.fromJson(
-                json['cancellation'] as Map<String, dynamic>,
-              ).toCancelReasonResponse(),
+        rejection: RejectionRecord.fromEnvelope(json),
         approval: json['approval'] == null
             ? null
             : ExpensesApprovalModel.fromJson(

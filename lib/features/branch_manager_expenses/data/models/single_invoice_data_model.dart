@@ -1,8 +1,7 @@
 import 'package:assab/features/branch_manager_expenses/data/models/supplier_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../../../shared/models/cancel_reason/cancel_reason_in_order_response.dart';
-import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/rejection_record.dart';
 import '../../../../shared/models/time_line_response.dart';
 import '../../domain/entities/single_invoice_entity.dart';
 import 'attachment_model.dart';
@@ -12,9 +11,16 @@ import 'expenses_approval_model.dart';
 
 part 'single_invoice_data_model.g.dart';
 
-@JsonSerializable(explicitToJson: true, createToJson: false)
+@JsonSerializable(
+  explicitToJson: true,
+  createToJson: false,
+  createFactory: false,
+)
 class SingleInvoiceDataModel {
   final String? id;
+
+  @JsonKey(name: 'review_revision')
+  final int? reviewRevision;
 
   @JsonKey(name: 'expense_type')
   final ExpenseTypeModel? expenseType;
@@ -51,11 +57,12 @@ class SingleInvoiceDataModel {
   final SingleInvoiceModel? singleInvoice;
 
   final List<AttachmentModel>? attachments;
-  final CancelReasonResponse? cancelReason;
+  final RejectionRecord? rejection;
   final ExpensesApprovalModel? approval;
 
   SingleInvoiceDataModel({
     this.id,
+    this.reviewRevision,
     this.expenseType,
     this.status,
     this.totalAmount,
@@ -69,13 +76,14 @@ class SingleInvoiceDataModel {
     required this.timelines,
     this.singleInvoice,
     this.attachments,
-    this.cancelReason,
+    this.rejection,
     this.approval,
   });
 
   factory SingleInvoiceDataModel.fromJson(Map<String, dynamic> json) =>
       SingleInvoiceDataModel(
         id: json['id'] as String?,
+        reviewRevision: (json['review_revision'] as num?)?.toInt() ?? 1,
         expenseType: json['expense_type'] == null
             ? null
             : ExpenseTypeModel.fromJson(
@@ -107,11 +115,7 @@ class SingleInvoiceDataModel {
         attachments: (json['attachments'] as List<dynamic>?)
             ?.map((e) => AttachmentModel.fromJson(e as Map<String, dynamic>))
             .toList(),
-        cancelReason: json['cancellation'] == null
-            ? null
-            : CancelReasonInOrderResponse.fromJson(
-                json['cancellation'] as Map<String, dynamic>,
-              ).toCancelReasonResponse(),
+        rejection: RejectionRecord.fromEnvelope(json),
         approval: json['approval'] == null
             ? null
             : ExpensesApprovalModel.fromJson(
@@ -122,6 +126,7 @@ class SingleInvoiceDataModel {
   SingleInvoiceEntity toEntity() {
     return SingleInvoiceEntity(
       id: id ?? '0',
+      reviewRevision: reviewRevision ?? 1,
       status: status?.label ?? 'N/A',
       createdAt: createdAt ?? 'N/A',
       expenseName: singleInvoice?.invoiceNumber ?? 'N/A',
@@ -147,7 +152,7 @@ class SingleInvoiceDataModel {
       paymentSupplier: paymentSupplier,
       taxSupplierName: singleInvoice?.taxInvoiceDetails?.supplierName ?? 'N/A',
       timelines: timelines,
-      cancelReason: cancelReason,
+      rejection: rejection,
       approval: approval,
     );
   }

@@ -8,6 +8,7 @@ import 'expense_details_state.dart';
 @injectable
 class ExpenseDetailsCubit extends SafeCubit<ExpenseDetailsState> {
   final BranchManagerExpensesRepository _branchManagerExpensesRepository;
+  int reviewRevision = 1;
 
   ExpenseDetailsCubit(this._branchManagerExpensesRepository)
     : super(ExpenseDetailsInitial());
@@ -37,7 +38,10 @@ class ExpenseDetailsCubit extends SafeCubit<ExpenseDetailsState> {
     handle(
       result,
       failure: (failure) => emit(ExpenseDetailsFailure(failure)),
-      success: (success) => emit(ExpenseQuickCashDetailsSuccess(success)),
+      success: (success) {
+        reviewRevision = success.reviewRevision;
+        emit(ExpenseQuickCashDetailsSuccess(success));
+      },
     );
   }
 
@@ -50,7 +54,10 @@ class ExpenseDetailsCubit extends SafeCubit<ExpenseDetailsState> {
     handle(
       result,
       failure: (failure) => emit(ExpenseDetailsFailure(failure)),
-      success: (success) => emit(ExpenseSingleInvoiceDetailsSuccess(success)),
+      success: (success) {
+        reviewRevision = success.reviewRevision;
+        emit(ExpenseSingleInvoiceDetailsSuccess(success));
+      },
     );
   }
 
@@ -63,7 +70,10 @@ class ExpenseDetailsCubit extends SafeCubit<ExpenseDetailsState> {
     handle(
       result,
       failure: (failure) => emit(ExpenseDetailsFailure(failure)),
-      success: (success) => emit(ExpensePreApprovalDetailsSuccess(success)),
+      success: (success) {
+        reviewRevision = success.reviewRevision;
+        emit(ExpensePreApprovalDetailsSuccess(success));
+      },
     );
   }
 
@@ -76,7 +86,10 @@ class ExpenseDetailsCubit extends SafeCubit<ExpenseDetailsState> {
     handle(
       result,
       failure: (failure) => emit(ExpenseDetailsFailure(failure)),
-      success: (success) => emit(ExpenseGroupedInvoiceDetailsSuccess(success)),
+      success: (success) {
+        reviewRevision = success.reviewRevision;
+        emit(ExpenseGroupedInvoiceDetailsSuccess(success));
+      },
     );
   }
 }

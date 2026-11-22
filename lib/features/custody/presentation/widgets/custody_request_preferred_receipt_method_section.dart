@@ -10,7 +10,13 @@ import '../../../../core/widgets/custom_text_button.dart';
 
 class CustodyRequestPreferredReceiptMethodSection extends StatefulWidget {
   final String? title;
-  const CustodyRequestPreferredReceiptMethodSection({super.key, this.title});
+  final List<CustodyPreferredReceiptMethod> methods;
+
+  const CustodyRequestPreferredReceiptMethodSection({
+    super.key,
+    this.title,
+    required this.methods,
+  });
 
   @override
   State<CustodyRequestPreferredReceiptMethodSection> createState() =>
@@ -42,25 +48,24 @@ class _CustodyRequestPreferredReceiptMethodSectionState
       borderRadius: BorderRadius.circular(1000.r),
       borderColor: Colors.transparent,
       child: Row(
-        children: List.generate(2, (index) {
-          final texts = [context.tr.bankTransfer, context.tr.cashHandover];
-
-          final options = [
-            CustodyPreferredReceiptMethod.bankTransfer,
-            CustodyPreferredReceiptMethod.cashHandover,
-          ];
+        children: List.generate(widget.methods.length, (index) {
+          final option = widget.methods[index];
+          final text = switch (option) {
+            CustodyPreferredReceiptMethod.bankTransfer => context.tr.bankTransfer,
+            CustodyPreferredReceiptMethod.cashHandover => context.tr.cashHandover,
+          };
 
           return Flexible(
             child: ValueListenableBuilder(
               valueListenable: _selectedIndexNotifier,
               builder: (context, value, child) {
                 return CustomTextButton(
-                  text: texts[index],
+                  text: text,
                   onTap: () {
                     _selectedIndexNotifier.value = index;
                     context.read<ValidationCubit>().validateFieldAndStoreValue(
                       fieldName: 'preferredReceiptMethod',
-                      value: options[index].value,
+                      value: option.value,
                       isValid: true,
                     );
                   },

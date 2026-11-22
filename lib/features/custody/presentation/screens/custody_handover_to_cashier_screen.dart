@@ -1,6 +1,7 @@
 import 'package:assab/core/cubits/choose_item/choose_item_cubit.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
+import 'package:assab/core/enums/custody_preferred_receipt_method.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
 import 'package:assab/core/utils/app_bottom_sheet.dart';
@@ -360,6 +361,7 @@ class _CustodyHandoverToCashierScreenState
                           16.verticalSpace,
                           CustodyRequestPreferredReceiptMethodSection(
                             title: context.tr.handoverMethod,
+                            methods: CustodyPreferredReceiptMethod.values,
                           ),
                           16.verticalSpace,
                           AppGestureDetectorButton(

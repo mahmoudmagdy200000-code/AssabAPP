@@ -18,7 +18,6 @@ import '../../../../core/constants/app_assets.dart';
 import '../../../../core/styles/app_colors.dart';
 import '../../../../core/styles/app_styles.dart';
 import '../../../../core/utils/app_bottom_sheet.dart';
-import '../../../../shared/models/meta_model/meta_model.dart';
 import '../../data/repositories/brand_owner_requests_repository.dart';
 import '../../data/models/brand_owner_requests_models.dart';
 import '../cubits/brand_owner_payment_log_cubit.dart';
@@ -42,9 +41,8 @@ class _BrandOwnerPaymentLogScreenState
   BrandOwnerPaymentLogFilterQuery _currentFilterQuery =
       const BrandOwnerPaymentLogFilterQuery();
 
-  // Kept for summary/meta while paginating
+  // Keep the latest summary available while loading the next page.
   BrandOwnerPaymentLogSummaryModel? _lastSummary;
-  MetaModel? _lastMeta;
 
   @override
   void initState() {
@@ -142,7 +140,6 @@ class _BrandOwnerPaymentLogScreenState
                 listener: (context, state) {
                   if (state is BrandOwnerPaymentLogSuccess) {
                     _lastSummary = state.summary;
-                    _lastMeta = state.meta;
                   }
                 },
                 builder: (context, state) {

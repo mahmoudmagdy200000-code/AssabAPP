@@ -2,12 +2,13 @@ import 'package:assab/features/branch_manager_expenses/data/models/attachment_mo
 import 'package:assab/features/branch_manager_expenses/data/models/expense_type_model.dart';
 import 'package:assab/features/branch_manager_expenses/data/models/supplier_model.dart';
 
-import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/rejection_record.dart';
 import '../../../../shared/models/time_line_response.dart';
 import '../../data/models/expenses_approval_model.dart';
 
 class GroupedInvoiceEntity {
   final String id;
+  final int reviewRevision;
   final SupplierModel defaultSupplier;
   final String totalGroupedInvoice;
   final String paymentMethod;
@@ -19,11 +20,12 @@ class GroupedInvoiceEntity {
   final String paidAmount;
   final List<GroupedInvoiceInvoiceEntity> invoices;
   final TimeLineResponse timelines;
-  final CancelReasonResponse? cancelReason;
+  final RejectionRecord? rejection;
   final ExpensesApprovalModel? approval;
 
   GroupedInvoiceEntity({
     required this.id,
+    this.reviewRevision = 1,
     required this.defaultSupplier,
     required this.totalGroupedInvoice,
     required this.paymentMethod,
@@ -35,7 +37,7 @@ class GroupedInvoiceEntity {
     required this.paidAmount,
     required this.invoices,
     required this.timelines,
-    required this.cancelReason,
+    required this.rejection,
     required this.approval,
   });
 }

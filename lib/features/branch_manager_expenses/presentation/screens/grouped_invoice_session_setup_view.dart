@@ -44,16 +44,23 @@ class _GroupedInvoiceSessionSetupViewState
       case 0:
         _validatePaymentTypeField(context, 'full');
         _addPaymentMethodField(context);
+        context.read<ValidationCubit>().removeDynamicFields({
+          'groupedPaidAmount',
+        });
         _removeDueDateField(context);
       case 1:
         _validatePaymentTypeField(context, 'partial');
         _addPaymentMethodField(context);
+        context.read<ValidationCubit>().addDynamicFields({'groupedPaidAmount'});
         _removeDueDateField(context);
         break;
       case 2:
         _validatePaymentTypeField(context, 'deferred');
         _addDueDateField(context);
         _removePaymentFields(context);
+        context.read<ValidationCubit>().removeDynamicFields({
+          'groupedPaidAmount',
+        });
         break;
       default:
     }
