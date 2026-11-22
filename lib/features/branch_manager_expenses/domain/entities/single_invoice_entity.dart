@@ -1,4 +1,4 @@
-import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/rejection_record.dart';
 import '../../../../shared/models/time_line_response.dart';
 import '../../data/models/attachment_model.dart';
 import '../../data/models/expense_type_model.dart';
@@ -8,6 +8,7 @@ import '../../data/models/supplier_model.dart';
 
 class SingleInvoiceEntity {
   final String id;
+  final int reviewRevision;
   final String status;
   final String createdAt;
   final String expenseName;
@@ -33,11 +34,12 @@ class SingleInvoiceEntity {
   final List<SingleInvoiceExpenseModel> expenses;
   final List<AttachmentModel> attachments;
   final TimeLineResponse timelines;
-  final CancelReasonResponse? cancelReason;
+  final RejectionRecord? rejection;
   final ExpensesApprovalModel? approval;
 
   SingleInvoiceEntity({
     required this.id,
+    this.reviewRevision = 1,
     required this.status,
     required this.createdAt,
     required this.expenseName,
@@ -63,7 +65,7 @@ class SingleInvoiceEntity {
     this.paymentSupplier,
     required this.taxSupplierName,
     required this.timelines,
-    this.cancelReason,
+    this.rejection,
     this.approval,
   });
 }

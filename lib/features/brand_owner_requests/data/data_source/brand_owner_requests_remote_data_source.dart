@@ -37,12 +37,15 @@ abstract class BrandOwnerRequestsRemoteDataSource {
   });
 
   @POST(ApiEndpoint.brandOwnerExpensesApprove)
-  Future<void> approveBrandOwnerExpense({@Path('id') required String id});
+  Future<void> approveBrandOwnerExpense({
+    @Path('id') required String id,
+    @Body() required Map<String, dynamic> body,
+  });
 
   @POST(ApiEndpoint.brandOwnerExpensesReject)
   Future<void> rejectBrandOwnerExpense({
     @Path('id') required String id,
-    @Body() required Map<String, dynamic> reason,
+    @Body() required Map<String, dynamic> body,
   });
 
   @POST(ApiEndpoint.brandOwnerCustodyRequestsApprove)

@@ -22,7 +22,6 @@ import '../cubit/expense_details/expense_details_cubit.dart';
 import '../cubit/expense_details/expense_details_state.dart';
 import '../widgets/expense_details_taps.dart';
 import '../widgets/expense_details_top_section.dart';
-import 'expense_approval_view.dart';
 
 class ExpenseDetailsScreen extends StatefulWidget {
   final String id;
@@ -206,6 +205,9 @@ class _ExpenseDetailsScreenState extends State<ExpenseDetailsScreen> {
                                         child:
                                             BrandOwnerRejectExpenseBottomSheetWidget(
                                               id: widget.id,
+                                            reviewRevision: context
+                                                .read<ExpenseDetailsCubit>()
+                                                .reviewRevision,
                                               onSuccess: () {
                                                 context
                                                     .read<ExpenseDetailsCubit>()
@@ -232,6 +234,9 @@ class _ExpenseDetailsScreenState extends State<ExpenseDetailsScreen> {
                                         .read<BranchOwnerApproveRejectCubit>()
                                         .approveExpense(
                                           expenseId: widget.id,
+                                          reviewRevision: context
+                                              .read<ExpenseDetailsCubit>()
+                                              .reviewRevision,
                                           onSuccess: () {
                                             final strategy =
                                                 ExpensesStrategiesKeys.fromType(

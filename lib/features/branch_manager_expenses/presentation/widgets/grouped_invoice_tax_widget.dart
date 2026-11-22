@@ -243,6 +243,8 @@ class _GroupedInvoiceTaxWidgetState extends State<GroupedInvoiceTaxWidget> {
       return;
     }
 
+    if (!mounted || !parentContext.mounted) return;
+
     final validationCubit = parentContext.read<ValidationCubit>();
 
     AppBottomSheet.customPageRoute(parentContext, (sheetContext) {
@@ -250,7 +252,7 @@ class _GroupedInvoiceTaxWidgetState extends State<GroupedInvoiceTaxWidget> {
         value: validationCubit,
         child: CustomQrScanner(
           onDetect: (data) {
-            if (data != null) {
+            if (data != null && mounted && parentContext.mounted) {
               _handleFillFieldsWhenQrGetDataSuccess(parentContext, data);
             }
           },

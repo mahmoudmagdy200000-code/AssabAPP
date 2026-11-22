@@ -40,6 +40,11 @@ abstract class BranchManagerExpensesRemoteDataSource {
     @Body() required UpdateDraftQuickCashRequestModel model,
   });
 
+  @POST('branch-manager/expenses/{id}/resubmit')
+  Future<QuickCashResponseModel> resubmitQuickCashExpense({
+    @Path('id') required String id,
+  });
+
   @POST(ApiEndpoint.branchManagerExpensesCreateSingleInvoice)
   Future<SingleInvoiceResponseModel> createSingleInvoiceExpense({
     @Body() required FormData formData,

@@ -61,7 +61,7 @@ class _ExpensePreApprovalDetailsDetailsViewState
                   children: [
                     if (preApprovalEntity.status.toLowerCase() ==
                         ExpensesStatus.rejected.key.toLowerCase()) ...[
-                      RejectedWidget(reason: preApprovalEntity.cancelReason),
+                      RejectedWidget(rejection: preApprovalEntity.rejection),
                       14.verticalSpace,
                     ],
                     Container(

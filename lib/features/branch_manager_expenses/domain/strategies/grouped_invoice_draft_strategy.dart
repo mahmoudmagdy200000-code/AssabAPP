@@ -121,6 +121,7 @@ class AddNewGroupedInvoiceDraftStrategy extends GroupedInvoiceDraftStrategy {
     final supplierId = _getField(validationCubit, 'supplierId');
     final paymentType = _getField(validationCubit, 'paymentType');
     final paymentMethod = _getField(validationCubit, 'paymentMethod');
+    final paidAmount = _getField(validationCubit, 'groupedPaidAmount');
     final paymentSupplierId = _getField(validationCubit, 'paymentSupplierId');
     final dueDate = _getField(validationCubit, 'dueDate');
 
@@ -192,6 +193,7 @@ class AddNewGroupedInvoiceDraftStrategy extends GroupedInvoiceDraftStrategy {
       supplierId: supplierId,
       paymentType: paymentType,
       paymentMethod: paymentMethod,
+      paidAmount: paidAmount,
       paymentSupplierId: paymentSupplierId,
       dueDate: dueDate,
       isDraft: isDraft,
@@ -259,16 +261,6 @@ class EditDraftGroupedInvoiceDraftStrategy extends GroupedInvoiceDraftStrategy {
 
   Set<String> deletedAttachments(String invoiceId) {
     return deletedAttachmentsNotifier.value['deleted_$invoiceId'] ?? <String>{};
-  }
-
-  Set<String> get _getAllDeletedAttachments {
-    final allDeleted = <String>{};
-
-    for (final deletedSet in deletedAttachmentsNotifier.value.values) {
-      allDeleted.addAll(deletedSet);
-    }
-
-    return allDeleted;
   }
 
   void _markAttachmentAsDeleted(String attachmentId, String invoiceId) {
@@ -775,6 +767,7 @@ class EditDraftGroupedInvoiceDraftStrategy extends GroupedInvoiceDraftStrategy {
     final supplierId = _getField(validationCubit, 'supplierId');
     final paymentType = _getField(validationCubit, 'paymentType');
     final paymentMethod = _getField(validationCubit, 'paymentMethod');
+    final paidAmount = _getField(validationCubit, 'groupedPaidAmount');
     final paymentSupplierId = _getField(validationCubit, 'paymentSupplierId');
     final dueDate = _getField(validationCubit, 'dueDate');
 
@@ -854,6 +847,7 @@ class EditDraftGroupedInvoiceDraftStrategy extends GroupedInvoiceDraftStrategy {
     return GroupedInvoiceUpdateDraftRequest(
       defaultSupplierId: supplierId,
       paymentType: paymentType,
+      paidAmount: double.tryParse(paidAmount) ?? 0,
       paymentMethod: paymentMethod,
       paymentSupplierId: paymentSupplierId,
       dueDate: dueDate,

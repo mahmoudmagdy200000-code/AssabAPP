@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/cubits/media/media_cubit.dart';
+import '../../../../core/enums/custody_preferred_receipt_method.dart';
 import '../../data/models/custody_get_past_requests_response.dart';
 import '../../data/models/custody_request_cash_in_request_model.dart';
 import '../cubit/custody_create_request/custody_create_request_cubit.dart';
@@ -213,7 +214,9 @@ class CustodyRequestScreen extends StatelessWidget {
                             ),
                           ),
                           14.verticalSpace,
-                          const CustodyRequestPreferredReceiptMethodSection(),
+                          const CustodyRequestPreferredReceiptMethodSection(
+                            methods: [CustodyPreferredReceiptMethod.bankTransfer],
+                          ),
                           14.verticalSpace,
                           const CustodyRequestAttachmentSection(),
                           14.verticalSpace,

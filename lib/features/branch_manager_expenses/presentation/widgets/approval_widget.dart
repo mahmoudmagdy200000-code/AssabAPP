@@ -3,7 +3,6 @@ import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_assets.dart';
-import '../../../../core/styles/app_colors.dart';
 import '../../../../core/styles/app_styles.dart';
 import '../../../../core/widgets/app_svg.dart';
 

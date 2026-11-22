@@ -7,6 +7,7 @@ class GroupedInvoiceRequestModel {
   final String supplierId;
   final String paymentType;
   final String paymentMethod;
+  final String paidAmount;
   final String paymentSupplierId;
   final String dueDate;
   final bool isDraft;
@@ -16,6 +17,7 @@ class GroupedInvoiceRequestModel {
     required this.supplierId,
     required this.paymentType,
     required this.paymentMethod,
+    required this.paidAmount,
     required this.paymentSupplierId,
     required this.dueDate,
     required this.isDraft,
@@ -28,6 +30,10 @@ class GroupedInvoiceRequestModel {
       'default_supplier_id': supplierId,
       'is_draft': isDraft ? '1' : '0',
     };
+
+    if (paymentType == 'partial' && paidAmount.isNotEmpty) {
+      formDataMap['paid_amount'] = paidAmount;
+    }
 
     if (paymentMethod.isNotEmpty) {
       formDataMap['payment_method'] = paymentMethod;

@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'single_invoice_update_draft_request.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, createToJson: false)
 class SingleInvoiceUpdateDraftRequest {
   @JsonKey(name: 'supplier_id')
   final String supplierId;

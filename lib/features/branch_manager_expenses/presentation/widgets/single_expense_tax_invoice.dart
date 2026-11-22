@@ -247,6 +247,8 @@ class _SingleExpenseTaxInvoiceState extends State<SingleExpenseTaxInvoice> {
       return;
     }
 
+    if (!mounted || !parentContext.mounted) return;
+
     final validationCubit = parentContext.read<ValidationCubit>();
 
     AppBottomSheet.customPageRoute(parentContext, (sheetContext) {
@@ -254,7 +256,7 @@ class _SingleExpenseTaxInvoiceState extends State<SingleExpenseTaxInvoice> {
         value: validationCubit,
         child: CustomQrScanner(
           onDetect: (data) {
-            if (data != null) {
+            if (data != null && mounted && parentContext.mounted) {
               _handleFillFieldsWhenQrGetDataSuccess(parentContext, data);
             }
           },

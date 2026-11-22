@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:assab/features/custody/data/custody_receipt_action.dart';
+import 'package:assab/features/custody/data/custody_request_resubmit_action.dart';
 import 'package:assab/features/custody/data/models/custody_request_details_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,6 +79,55 @@ void main() {
       CustodyRequestDetailsData.fromJson(data('true')).canConfirmReceipt,
       false,
     );
+  });
+  test('details prefer the distinct rejection record over the legacy alias', () {
+    final details = CustodyRequestDetailsData.fromJson({
+      'requestId': 'request-1',
+      'status': 'rejected',
+      'canConfirmReceipt': false,
+      'canResubmit': true,
+      'cashHandoverAvailable': true,
+      'timelines': [],
+      'details': {
+        'requestedAmount': 10,
+        'purpose': 'branch float',
+        'preferredReceiptMethod': 'bank_transfer',
+        'attachments': [],
+        'additionalNotes': null,
+      },
+      'rejection': {
+        'reason': 'missing receipt',
+        'rejected_at': '2026-11-22T10:00:00Z',
+        'rejected_by': {
+          'id': 'owner-1',
+          'name': 'Owner',
+          'type': 'brand_owner',
+        },
+      },
+      'cancellation': {
+        'cancellation_reason': 'legacy value must not override rejection',
+        'cancelled_at': '2026-11-22T09:00:00Z',
+        'cancelled_by': {'id': 'old', 'name': 'Old', 'type': 'branch_manager'},
+      },
+    });
+
+    expect(details.rejection?.reason, 'missing receipt');
+    expect(details.rejection?.rejectedBy.id, 'owner-1');
+    expect(details.canResubmit, true);
+    expect(details.cashHandoverAvailable, true);
+  });
+  test('resubmits the same request without a replacement id', () async {
+    final resubmit = CustodyRequestResubmitAction(
+      Dio(BaseOptions(baseUrl: 'https://example.test/api/v1/'))
+        ..httpClientAdapter = adapter,
+    );
+    await resubmit.resubmit('rejected-request');
+
+    expect(
+      adapter.requests.single.uri.path,
+      '/api/v1/custody/requests/rejected-request/resubmit',
+    );
+    expect(adapter.requests.single.data, isNull);
   });
   test('posts exact request without an amount and blocks duplicate', () async {
     await action.confirm('request-1');

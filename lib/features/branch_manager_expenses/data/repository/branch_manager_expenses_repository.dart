@@ -64,6 +64,16 @@ class BranchManagerExpensesRepository with RepositoryMixin {
     });
   }
 
+  FutureApiResult<QuickCashEntity> resubmitQuickCashExpense({
+    required String id,
+  }) async {
+    return execute(() async {
+      final response = await _branchManagerExpensesRemoteDataSource
+          .resubmitQuickCashExpense(id: id);
+      return response.toEntity();
+    });
+  }
+
   FutureApiResult<SingleInvoiceEntity> createSingleInvoiceExpense({
     required CreateSingleInvoiceRequestModel model,
   }) async {

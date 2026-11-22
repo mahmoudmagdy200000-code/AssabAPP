@@ -2,8 +2,7 @@ import 'package:assab/features/branch_manager_expenses/data/models/attachment_mo
 import 'package:assab/features/branch_manager_expenses/data/models/supplier_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../../../shared/models/cancel_reason/cancel_reason_in_order_response.dart';
-import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/rejection_record.dart';
 import '../../../../shared/models/time_line_response.dart';
 import '../../domain/entities/grouped_invoice_entity.dart';
 import 'expense_status_model.dart';
@@ -24,6 +23,7 @@ class GroupedInvoiceResponseModel {
   GroupedInvoiceEntity toEntity() {
     return GroupedInvoiceEntity(
       id: data?.id ?? '0',
+      reviewRevision: data?.reviewRevision ?? 1,
       defaultSupplier: SupplierModel(
         id: data?.data?.defaultSupplierId ?? '0',
         name: data?.data?.defaultSupplierName ?? 'N/A',
@@ -42,15 +42,17 @@ class GroupedInvoiceResponseModel {
           data?.data?.invoices?.map((invoice) => invoice.toEntity()).toList() ??
           [],
       timelines: data?.timelines ?? const TimeLineResponse(timelines: []),
-      cancelReason: data?.cancelReason,
+      rejection: data?.rejection,
       approval: data?.approval,
     );
   }
 }
 
-@JsonSerializable(createToJson: false, explicitToJson: true)
+@JsonSerializable(createToJson: false, createFactory: false, explicitToJson: true)
 class GroupedInvoiceDataModel {
   final String? id;
+  @JsonKey(name: 'review_revision')
+  final int? reviewRevision;
   @JsonKey(name: 'expense_type')
   final ExpenseTypeModel? expenseType;
   final ExpenseStatusModel? status;
@@ -71,11 +73,12 @@ class GroupedInvoiceDataModel {
   final String? submittedAt;
   final GroupedInvoiceInnerDataModel? data;
   final TimeLineResponse timelines;
-  final CancelReasonResponse? cancelReason;
+  final RejectionRecord? rejection;
   final ExpensesApprovalModel? approval;
 
   const GroupedInvoiceDataModel({
     this.id,
+    this.reviewRevision,
     this.expenseType,
     this.status,
     this.totalAmount,
@@ -87,7 +90,7 @@ class GroupedInvoiceDataModel {
     this.submittedAt,
     this.data,
     required this.timelines,
-    this.cancelReason,
+    this.rejection,
     this.approval,
   });
 
@@ -95,6 +98,7 @@ class GroupedInvoiceDataModel {
     Map<String, dynamic> json,
   ) => GroupedInvoiceDataModel(
     id: json['id'] as String?,
+    reviewRevision: (json['review_revision'] as num?)?.toInt() ?? 1,
     expenseType: json['expense_type'] == null
         ? null
         : ExpenseTypeModel.fromJson(
@@ -120,11 +124,7 @@ class GroupedInvoiceDataModel {
             json['data'] as Map<String, dynamic>,
           ),
     timelines: TimeLineResponse.fromJson(json as Map<String, dynamic>? ?? {}),
-    cancelReason: json['cancellation'] == null
-        ? null
-        : CancelReasonInOrderResponse.fromJson(
-            json['cancellation'] as Map<String, dynamic>,
-          ).toCancelReasonResponse(),
+    rejection: RejectionRecord.fromEnvelope(json),
     approval: json['approval'] == null
         ? null
         : ExpensesApprovalModel.fromJson(

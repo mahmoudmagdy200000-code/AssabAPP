@@ -174,11 +174,15 @@ class _BrandOwnerRequestsRemoteDataSource
   }
 
   @override
-  Future<void> approveBrandOwnerExpense({required String id}) async {
+  Future<void> approveBrandOwnerExpense({
+    required String id,
+    required Map<String, dynamic> body,
+  }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final _data = <String, dynamic>{};
+    _data.addAll(body);
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -195,13 +199,13 @@ class _BrandOwnerRequestsRemoteDataSource
   @override
   Future<void> rejectBrandOwnerExpense({
     required String id,
-    required Map<String, dynamic> reason,
+    required Map<String, dynamic> body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(reason);
+    _data.addAll(body);
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(

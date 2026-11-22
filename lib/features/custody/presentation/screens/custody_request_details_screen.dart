@@ -18,6 +18,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:assab/core/enums/custody_requests_status_enum.dart';
 import '../../data/custody_receipt_action.dart';
+import '../../data/custody_request_resubmit_action.dart';
 import '../cubit/get_branch_balance/get_branch_balance_cubit.dart';
 
 import '../cubit/get_custody_details/get_custody_details_state.dart';
@@ -185,7 +186,14 @@ class _CustodyRequestDetailsScreen extends StatelessWidget {
                         ),
                         if (userTypeStrategy is BranchManagerUserStrategy &&
                             getCustodyDetailsState.details.data.requestId ==
-                                requestId)
+                                requestId) ...[
+                          _ResubmitRequestButton(
+                            requestId: requestId,
+                            eligible: getCustodyDetailsState
+                                .details
+                                .data
+                                .canResubmit,
+                          ),
                           _ConfirmReceiptButton(
                             requestId: requestId,
                             eligible: getCustodyDetailsState
@@ -193,6 +201,7 @@ class _CustodyRequestDetailsScreen extends StatelessWidget {
                                 .data
                                 .canConfirmReceipt,
                           ),
+                        ],
                       ],
                     );
                   }
@@ -206,6 +215,70 @@ class _CustodyRequestDetailsScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ResubmitRequestButton extends StatefulWidget {
+  const _ResubmitRequestButton({required this.requestId, required this.eligible});
+
+  final String requestId;
+  final bool eligible;
+
+  @override
+  State<_ResubmitRequestButton> createState() => _ResubmitRequestButtonState();
+}
+
+class _ResubmitRequestButtonState extends State<_ResubmitRequestButton> {
+  bool _busy = false;
+
+  Future<void> _resubmit() async {
+    if (_busy || !widget.eligible) return;
+    setState(() => _busy = true);
+    final cubit = context.read<GetCustodyDetailsCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      try {
+        await CustodyRequestResubmitAction(getIt<Dio>()).resubmit(widget.requestId);
+      } catch (_) {
+        // A lost response may follow a successful state change; verify by GET.
+      }
+      await cubit.getRequestDetails(requestId: widget.requestId);
+      final state = cubit.state;
+      final resubmitted = state is GetCustodyRequestDetailsSuccess &&
+          state.details.data.requestId == widget.requestId &&
+          state.details.data.status != CustodyRequestsStatusEnum.rejected &&
+          !state.details.data.canResubmit;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            resubmitted
+                ? 'تمت إعادة إرسال الطلب نفسه للمراجعة.'
+                : 'لم تتأكد إعادة الإرسال. حدّث الحالة قبل المحاولة مرة أخرى.',
+          ),
+        ),
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('تعذر التحقق من حالة إعادة الإرسال.')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.eligible) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.r),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: _busy ? null : _resubmit,
+          child: Text(_busy ? 'جارٍ إعادة الإرسال...' : context.tr.submitRequest),
+        ),
       ),
     );
   }

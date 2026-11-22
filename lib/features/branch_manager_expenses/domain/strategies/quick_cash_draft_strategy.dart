@@ -169,6 +169,10 @@ class AddNewQuickCashStrategy extends QuickCashDraftStrategy {
 class EditDraftQuickCashStrategy extends QuickCashDraftStrategy {
   EditDraftQuickCashStrategy();
 
+  bool _resubmitRejectedExpense = false;
+
+  bool get isRejectedCorrection => _resubmitRejectedExpense;
+
   final ValueNotifier<Set<String>> deletedAttachmentsNotifier =
       ValueNotifier<Set<String>>(<String>{});
 
@@ -370,6 +374,8 @@ class EditDraftQuickCashStrategy extends QuickCashDraftStrategy {
   @override
   void validateAll(BuildContext context, QuickCashEntity quickCashEntity) {
     super.validateAll(context, quickCashEntity);
+    _resubmitRejectedExpense =
+        quickCashEntity.status.toLowerCase() == 'rejected';
 
     final validations = <String, bool>{
       'date': quickCashEntity.expenseDate != 'N/A',
@@ -532,11 +538,13 @@ class EditDraftQuickCashStrategy extends QuickCashDraftStrategy {
     UpdateDraftQuickCashRequestModel updateDraftQuickCashRequestModel, {
     required String id,
     required List<File> attachments,
+    bool resubmitRejected = false,
   }) {
     context.read<QuickCashCubit>().updateDraftQuickCashExpense(
       id: id,
       model: updateDraftQuickCashRequestModel,
       attachments: attachments,
+      resubmitRejected: resubmitRejected,
     );
   }
 
@@ -574,6 +582,7 @@ class EditDraftQuickCashStrategy extends QuickCashDraftStrategy {
       _updateDraftQuickCashRequestModel(quickCashExpenseData),
       id: id,
       attachments: quickCashExpenseData.files.map((e) => e.toFile).toList(),
+      resubmitRejected: _resubmitRejectedExpense,
     );
   }
 

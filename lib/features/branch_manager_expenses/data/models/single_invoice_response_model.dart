@@ -19,6 +19,7 @@ class SingleInvoiceResponseModel {
   SingleInvoiceEntity toEntity() {
     return SingleInvoiceEntity(
       id: data?.id ?? '0',
+      reviewRevision: data?.reviewRevision ?? 1,
       status: data?.status?.label ?? 'N/A',
       createdAt: data?.createdAt ?? 'N/A',
       expenseName: data?.singleInvoice?.invoiceNumber ?? 'N/A',
