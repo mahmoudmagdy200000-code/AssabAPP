@@ -65,7 +65,7 @@ class _ExpenseSingleInvoiceDetailsDetailsViewState
                     if (singleInvoiceResponseDataModel.status.toLowerCase() ==
                         ExpensesStatus.rejected.key.toLowerCase()) ...[
                       RejectedWidget(
-                        reason: singleInvoiceResponseDataModel.cancelReason,
+                        rejection: singleInvoiceResponseDataModel.rejection,
                       ),
                       14.verticalSpace,
                     ],

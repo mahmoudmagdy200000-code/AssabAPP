@@ -13,11 +13,13 @@ import '../cubits/branch_owner_approve_reject_cubit.dart';
 
 class BrandOwnerRejectExpenseBottomSheetWidget extends StatefulWidget {
   final String id;
+  final int reviewRevision;
   final void Function()? onSuccess;
 
   const BrandOwnerRejectExpenseBottomSheetWidget({
     super.key,
     required this.id,
+    required this.reviewRevision,
     this.onSuccess,
   });
 
@@ -105,6 +107,7 @@ class _BrandOwnerRejectExpenseBottomSheetWidgetState
                           .rejectExpense(
                             expenseId: widget.id,
                             reason: _reasonController.text,
+                            reviewRevision: widget.reviewRevision,
                             onSuccess: () {
                               widget.onSuccess?.call();
                             },

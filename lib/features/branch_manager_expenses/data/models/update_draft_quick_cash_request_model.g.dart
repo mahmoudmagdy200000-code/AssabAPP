@@ -22,16 +22,3 @@ UpdateDraftQuickCashRequestModel _$UpdateDraftQuickCashRequestModelFromJson(
   paymentSupplierId: json['payment_supplier_id'] as String?,
   isDraft: json['is_draft'] as bool,
 );
-
-Map<String, dynamic> _$UpdateDraftQuickCashRequestModelToJson(
-  UpdateDraftQuickCashRequestModel instance,
-) => <String, dynamic>{
-  'expense_date': instance.expenseDate,
-  'expense_name': instance.expenseName,
-  'total_amount': instance.totalAmount,
-  'items': instance.items.map((e) => e.toJson()).toList(),
-  'payment_method': instance.paymentMethod,
-  'delete_attachments': instance.deleteAttachments,
-  'payment_supplier_id': instance.paymentSupplierId,
-  'is_draft': instance.isDraft,
-};

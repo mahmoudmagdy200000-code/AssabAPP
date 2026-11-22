@@ -56,20 +56,27 @@ class BrandOwnerRequestsRepository with RepositoryMixin {
     });
   }
 
-  FutureApiResult<void> approveExpense({required String expenseId}) async {
+  FutureApiResult<void> approveExpense({
+    required String expenseId,
+    required int reviewRevision,
+  }) async {
     return execute(() async {
-      return _remote.approveBrandOwnerExpense(id: expenseId);
+      return _remote.approveBrandOwnerExpense(
+        id: expenseId,
+        body: {'review_revision': reviewRevision},
+      );
     });
   }
 
   FutureApiResult<void> rejectExpense({
     required String expenseId,
     required String reason,
+    required int reviewRevision,
   }) async {
     return execute(() async {
       return _remote.rejectBrandOwnerExpense(
         id: expenseId,
-        reason: {'reason': reason},
+        body: {'reason': reason, 'review_revision': reviewRevision},
       );
     });
   }

@@ -14,47 +14,6 @@ GroupedInvoiceResponseModel _$GroupedInvoiceResponseModelFromJson(
       : GroupedInvoiceDataModel.fromJson(json['data'] as Map<String, dynamic>),
 );
 
-GroupedInvoiceDataModel _$GroupedInvoiceDataModelFromJson(
-  Map<String, dynamic> json,
-) => GroupedInvoiceDataModel(
-  id: json['id'] as String?,
-  expenseType: json['expense_type'] == null
-      ? null
-      : ExpenseTypeModel.fromJson(json['expense_type'] as Map<String, dynamic>),
-  status: json['status'] == null
-      ? null
-      : ExpenseStatusModel.fromJson(json['status'] as Map<String, dynamic>),
-  totalAmount: json['total_amount'] as num?,
-  netAmount: json['net_amount'] as num?,
-  vatAmount: json['vat_amount'] as num?,
-  paymentMethod: json['payment_method'] as String?,
-  paymentSupplier: json['payment_supplier'] == null
-      ? null
-      : SupplierModel.fromJson(
-          json['payment_supplier'] as Map<String, dynamic>,
-        ),
-  createdAt: json['created_at'] as String?,
-  submittedAt: json['submitted_at'] as String?,
-  data: json['data'] == null
-      ? null
-      : GroupedInvoiceInnerDataModel.fromJson(
-          json['data'] as Map<String, dynamic>,
-        ),
-  timelines: TimeLineResponse.fromJson(
-    json['timelines'] as Map<String, dynamic>,
-  ),
-  cancelReason: json['cancelReason'] == null
-      ? null
-      : CancelReasonResponse.fromJson(
-          json['cancelReason'] as Map<String, dynamic>,
-        ),
-  approval: json['approval'] == null
-      ? null
-      : ExpensesApprovalModel.fromJson(
-          json['approval'] as Map<String, dynamic>,
-        ),
-);
-
 GroupedInvoiceInnerDataModel _$GroupedInvoiceInnerDataModelFromJson(
   Map<String, dynamic> json,
 ) => GroupedInvoiceInnerDataModel(

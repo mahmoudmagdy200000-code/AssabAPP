@@ -62,7 +62,7 @@ class CustodyRequestDetailsScreenDetailsView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (details.status == CustodyRequestsStatusEnum.rejected) ...[
-                  RejectedWidget(reason: details.cancelReason),
+                  RejectedWidget(rejection: details.rejection),
                   14.verticalSpace,
                 ],
                 Container(

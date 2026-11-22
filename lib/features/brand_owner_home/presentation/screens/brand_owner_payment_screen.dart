@@ -229,6 +229,7 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
                           16.verticalSpace,
                           CustodyRequestPreferredReceiptMethodSection(
                             title: context.tr.paymentMethod,
+                              methods: CustodyPreferredReceiptMethod.values,
                           ),
                           16.verticalSpace,
                           BlocSelector<

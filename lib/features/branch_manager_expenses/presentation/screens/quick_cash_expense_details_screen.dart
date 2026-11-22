@@ -36,6 +36,10 @@ class QuickCashExpenseDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRejectedCorrection =
+        strategy is EditDraftQuickCashStrategy &&
+        (strategy as EditDraftQuickCashStrategy).isRejectedCorrection;
+
     return Scaffold(
       backgroundColor: context.theme.primaryColor,
       body: Column(
@@ -110,6 +114,21 @@ class QuickCashExpenseDetailsScreen extends StatelessWidget {
                             builder: (context, state) {
                               if (state is QuickCashLoading) {
                                 return const AppButtonLoading();
+                              }
+
+                              if (isRejectedCorrection) {
+                                return SizedBox(
+                                  width: double.infinity,
+                                  child: AppButton(
+                                    onClick: () => strategy.submit(
+                                      context,
+                                      quickCashExpenseData,
+                                      id: expenseId,
+                                    ),
+                                    enabled: true,
+                                    text: context.tr.submitExpense,
+                                  ),
+                                );
                               }
 
                               return Row(

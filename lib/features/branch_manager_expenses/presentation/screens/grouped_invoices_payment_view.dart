@@ -18,7 +18,9 @@ import '../../../../core/widgets/app_padding_widget.dart';
 import '../../../../core/widgets/app_svg.dart';
 import '../../../../core/widgets/container_custom_text_field.dart';
 import '../../../../core/widgets/custom_calendar.dart';
+import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/label_text_field.dart';
+import '../../../../core/widgets/saudi_riyal_svg_widget.dart';
 import '../widgets/expenses_payment_field.dart';
 
 class GroupedInvoicesPaymentView extends StatelessWidget {
@@ -117,10 +119,43 @@ class GroupedInvoicesPaymentView extends StatelessWidget {
                       _validatePaymentMethod(context, value),
                   showConfirmButton: false,
                 ),
-                ExpensesPaymentField(
-                  onPaymentMethodSelected: (value) =>
-                      _validatePaymentMethod(context, value),
-                  showConfirmButton: false,
+                Column(
+                  children: [
+                    ExpensesPaymentField(
+                      onPaymentMethodSelected: (value) =>
+                          _validatePaymentMethod(context, value),
+                      showConfirmButton: false,
+                    ),
+                    12.verticalSpace,
+                    ContainerCustomTextField(
+                      label: context.tr.amountPaidNow,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextField(
+                              hintText: context.tr.amount,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              onChanged: (value) {
+                                context
+                                    .read<ValidationCubit>()
+                                    .validateFieldAndStoreValue(
+                                      fieldName: 'groupedPaidAmount',
+                                      value: value,
+                                      isValid:
+                                          (double.tryParse(value) ?? 0) > 0,
+                                    );
+                              },
+                            ),
+                          ),
+                          8.horizontalSpace,
+                          const SaudiRiyalSvgWidget(),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 Column(
                   children: [

@@ -19,7 +19,7 @@ class GetCategoriesUseCase {
     try {
       final result = await _branchManagerExpensesRepository.getCategories();
 
-      return result.when(
+      return await result.when(
         success: (response) {
           final filtered = response.data
               .where((e) => e.type.toLowerCase() == type.value.toLowerCase())

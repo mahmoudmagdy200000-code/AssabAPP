@@ -3,10 +3,13 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'grouped_invoice_update_draft_request.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, createToJson: false)
 class GroupedInvoiceUpdateDraftRequest {
   @JsonKey(name: 'payment_type')
   final String paymentType;
+
+  @JsonKey(name: 'paid_amount')
+  final double paidAmount;
 
   @JsonKey(name: 'payment_method')
   final String paymentMethod;
@@ -27,6 +30,7 @@ class GroupedInvoiceUpdateDraftRequest {
 
   GroupedInvoiceUpdateDraftRequest({
     required this.paymentType,
+    required this.paidAmount,
     required this.paymentMethod,
     required this.dueDate,
     required this.defaultSupplierId,
@@ -48,6 +52,10 @@ class GroupedInvoiceUpdateDraftRequest {
       'is_draft': isDraft ? '1' : '0',
     };
 
+    if (paymentType == 'partial') {
+      json['paid_amount'] = paidAmount;
+    }
+
     if (dueDate.isNotEmpty && paymentType == 'deferred') {
       json['due_date'] = dueDate;
     }
@@ -60,7 +68,7 @@ class GroupedInvoiceUpdateDraftRequest {
   }
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, createToJson: false)
 class GroupedInvoiceUpdateDraftRequestInvoice {
   final String id;
 
@@ -129,7 +137,7 @@ class GroupedInvoiceUpdateDraftRequestInvoice {
   }
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class GroupedInvoiceUpdateDraftRequestTaxInvoiceDetails {
   @JsonKey(name: 'supplier_name')
   final String supplierName;

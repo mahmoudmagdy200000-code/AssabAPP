@@ -10,6 +10,7 @@ GroupedInvoiceUpdateDraftRequest _$GroupedInvoiceUpdateDraftRequestFromJson(
   Map<String, dynamic> json,
 ) => GroupedInvoiceUpdateDraftRequest(
   paymentType: json['payment_type'] as String,
+  paidAmount: (json['paid_amount'] as num).toDouble(),
   paymentMethod: json['payment_method'] as String,
   dueDate: json['due_date'] as String,
   defaultSupplierId: json['default_supplier_id'] as String,
@@ -23,18 +24,6 @@ GroupedInvoiceUpdateDraftRequest _$GroupedInvoiceUpdateDraftRequestFromJson(
       .toList(),
   isDraft: json['is_draft'] as bool,
 );
-
-Map<String, dynamic> _$GroupedInvoiceUpdateDraftRequestToJson(
-  GroupedInvoiceUpdateDraftRequest instance,
-) => <String, dynamic>{
-  'payment_type': instance.paymentType,
-  'payment_method': instance.paymentMethod,
-  'due_date': instance.dueDate,
-  'default_supplier_id': instance.defaultSupplierId,
-  'payment_supplier_id': instance.paymentSupplierId,
-  'invoices': instance.invoices.map((e) => e.toJson()).toList(),
-  'is_draft': instance.isDraft,
-};
 
 GroupedInvoiceUpdateDraftRequestInvoice
 _$GroupedInvoiceUpdateDraftRequestInvoiceFromJson(Map<String, dynamic> json) =>
@@ -62,20 +51,6 @@ _$GroupedInvoiceUpdateDraftRequestInvoiceFromJson(Map<String, dynamic> json) =>
           .toList(),
     );
 
-Map<String, dynamic> _$GroupedInvoiceUpdateDraftRequestInvoiceToJson(
-  GroupedInvoiceUpdateDraftRequestInvoice instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'supplier_id': instance.supplierId,
-  'invoice_number': instance.invoiceNumber,
-  'issue_date': instance.issueDate,
-  'is_tax_invoice': instance.isTaxInvoice,
-  'tax_id': instance.taxId,
-  'tax_invoice_details': instance.taxInvoiceDetails?.toJson(),
-  'items': instance.items.map((e) => e.toJson()).toList(),
-  'delete_attachments': instance.deleteAttachments,
-};
-
 GroupedInvoiceUpdateDraftRequestTaxInvoiceDetails
 _$GroupedInvoiceUpdateDraftRequestTaxInvoiceDetailsFromJson(
   Map<String, dynamic> json,
@@ -85,15 +60,6 @@ _$GroupedInvoiceUpdateDraftRequestTaxInvoiceDetailsFromJson(
   vatAmount: json['vat_amount'] as String,
   totalAmount: json['total_amount'] as String,
 );
-
-Map<String, dynamic> _$GroupedInvoiceUpdateDraftRequestTaxInvoiceDetailsToJson(
-  GroupedInvoiceUpdateDraftRequestTaxInvoiceDetails instance,
-) => <String, dynamic>{
-  'supplier_name': instance.supplierName,
-  'net_amount': instance.netAmount,
-  'vat_amount': instance.vatAmount,
-  'total_amount': instance.totalAmount,
-};
 
 GroupedInvoiceUpdateDraftRequestItem
 _$GroupedInvoiceUpdateDraftRequestItemFromJson(Map<String, dynamic> json) =>

@@ -18,11 +18,15 @@ class BranchOwnerApproveRejectCubit
 
   Future<void> approveExpense({
     required String expenseId,
+    required int reviewRevision,
     void Function()? onSuccess,
   }) async {
     emit(const BranchOwnerApproveRejectLoading());
 
-    final result = await _repository.approveExpense(expenseId: expenseId);
+    final result = await _repository.approveExpense(
+      expenseId: expenseId,
+      reviewRevision: reviewRevision,
+    );
 
     handle(
       result,
@@ -37,6 +41,7 @@ class BranchOwnerApproveRejectCubit
   Future<void> rejectExpense({
     required String expenseId,
     required String reason,
+    required int reviewRevision,
     void Function()? onSuccess,
   }) async {
     emit(const BranchOwnerApproveRejectLoading());
@@ -44,6 +49,7 @@ class BranchOwnerApproveRejectCubit
     final result = await _repository.rejectExpense(
       expenseId: expenseId,
       reason: reason,
+      reviewRevision: reviewRevision,
     );
 
     handle(

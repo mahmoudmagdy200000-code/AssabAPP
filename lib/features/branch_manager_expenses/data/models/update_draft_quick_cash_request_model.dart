@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'update_draft_quick_cash_request_model.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, createToJson: false)
 class UpdateDraftQuickCashRequestModel {
   @JsonKey(name: 'expense_date')
   final String expenseDate;

@@ -4,8 +4,7 @@ import 'package:assab/features/branch_manager_expenses/data/models/expense_type_
 import 'package:assab/features/branch_manager_expenses/data/models/supplier_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../../../shared/models/cancel_reason/cancel_reason_in_order_response.dart';
-import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/rejection_record.dart';
 import '../../../../shared/models/time_line_response.dart';
 import '../../domain/entities/quick_cash_entity.dart';
 import 'expense_item_model.dart';
@@ -25,6 +24,7 @@ class QuickCashResponseModel {
   QuickCashEntity toEntity() {
     return QuickCashEntity(
       id: data?.id ?? '0',
+      reviewRevision: data?.reviewRevision ?? 1,
       status: data?.status?.label ?? 'N/A',
       createdAt: data?.createdAt ?? 'N/A',
       expenseName: data?.data?.expenseName ?? 'N/A',
@@ -39,15 +39,22 @@ class QuickCashResponseModel {
       expenseItems: data?.data?.items ?? [],
       attachments: data?.attachments ?? [],
       timelines: data?.timelines ?? const TimeLineResponse(timelines: []),
-      cancelReason: data?.cancelReason,
+      rejection: data?.rejection,
       approval: data?.approval,
     );
   }
 }
 
-@JsonSerializable(explicitToJson: true, createToJson: false)
+@JsonSerializable(
+  explicitToJson: true,
+  createToJson: false,
+  createFactory: false,
+)
 class QuickCashDataModel {
   final String? id;
+
+  @JsonKey(name: 'review_revision')
+  final int? reviewRevision;
 
   final ExpenseTypeModel? expenseType;
 
@@ -68,11 +75,12 @@ class QuickCashDataModel {
   final QuickCashDetailsModel? data;
 
   final List<AttachmentModel>? attachments;
-  final CancelReasonResponse? cancelReason;
+  final RejectionRecord? rejection;
   final ExpensesApprovalModel? approval;
 
   QuickCashDataModel({
     this.id,
+    this.reviewRevision,
     this.expenseType,
     this.status,
     this.totalAmount,
@@ -83,7 +91,7 @@ class QuickCashDataModel {
     required this.timelines,
     this.data,
     this.attachments,
-    this.cancelReason,
+    this.rejection,
     this.approval,
   });
 
@@ -91,6 +99,7 @@ class QuickCashDataModel {
     Map<String, dynamic> json,
   ) => QuickCashDataModel(
     id: json['id'] as String?,
+    reviewRevision: (json['review_revision'] as num?)?.toInt() ?? 1,
     expenseType: json['expense_type'] == null
         ? null
         : ExpenseTypeModel.fromJson(
@@ -115,11 +124,7 @@ class QuickCashDataModel {
     attachments: (json['attachments'] as List<dynamic>?)
         ?.map((e) => AttachmentModel.fromJson(e as Map<String, dynamic>))
         .toList(),
-    cancelReason: json['cancellation'] == null
-        ? null
-        : CancelReasonInOrderResponse.fromJson(
-            json['cancellation'] as Map<String, dynamic>,
-          ).toCancelReasonResponse(),
+    rejection: RejectionRecord.fromEnvelope(json),
     approval: json['approval'] == null
         ? null
         : ExpensesApprovalModel.fromJson(

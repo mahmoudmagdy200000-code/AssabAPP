@@ -20,6 +20,7 @@ class PreApprovalResponseModel {
   PreApprovalEntity toEntity() {
     return PreApprovalEntity(
       id: data?.id ?? '0',
+      reviewRevision: data?.reviewRevision ?? 1,
       status: data?.status?.label ?? 'N/A',
       estimatedAmount: data?.data?.estimatedAmount?.toString() ?? 'N/A',
       paymentMethod: data?.paymentMethod ?? 'N/A',
@@ -36,7 +37,7 @@ class PreApprovalResponseModel {
           data?.data?.priority ??
           PreApprovalPriorityModel(value: 'N/A', label: 'N/A'),
       timelines: data?.timelines ?? const TimeLineResponse(timelines: []),
-      cancelReason: data?.cancelReason,
+      rejection: data?.rejection,
       approval: data?.approval,
     );
   }
