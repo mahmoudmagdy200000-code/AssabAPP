@@ -15,12 +15,14 @@ class ExpenseSubmittedSuccess extends StatelessWidget {
   final ExpensesStrategy expensesStrategy;
   final String expenseId;
   final ExpenseTypeModel expenseTypeModel;
+  final bool isDraft;
 
   const ExpenseSubmittedSuccess({
     super.key,
     required this.expensesStrategy,
     required this.expenseId,
     required this.expenseTypeModel,
+    this.isDraft = false,
   });
 
   void get _navigateToDetailsScreen {
@@ -28,12 +30,17 @@ class ExpenseSubmittedSuccess extends StatelessWidget {
       expenseId,
       expenseTypeModel,
       BranchManagerUserStrategy(),
-      ExpenseStatusModel(value: 'pending', color: '', label: ''),
+      ExpenseStatusModel(
+        value: isDraft ? 'draft' : 'pending',
+        color: '',
+        label: '',
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
     return Scaffold(
       body: AppPaddingWidget(
         child: Column(
@@ -45,7 +52,9 @@ class ExpenseSubmittedSuccess extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      context.tr.expenseSubmittedSuccessfully,
+                      isDraft
+                          ? (isAr ? 'تم حفظ المسودة بنجاح' : 'Draft Saved Successfully')
+                          : context.tr.expenseSubmittedSuccessfully,
                       textAlign: TextAlign.center,
                       style: AppStyles.s24W500.copyWith(
                         color: context.customColor.text1,
@@ -53,19 +62,24 @@ class ExpenseSubmittedSuccess extends StatelessWidget {
                     ),
                     12.verticalSpace,
                     Text(
-                      context.tr.expenseSubmittedSuccessfullyDesc1,
+                      isDraft
+                          ? (isAr
+                              ? 'يمكنك تعديل المسودة أو إرسالها لاحقًا من تاريخ النفقات.'
+                              : 'You can edit or submit this draft later from expense history.')
+                          : context.tr.expenseSubmittedSuccessfullyDesc1,
                       textAlign: TextAlign.center,
                       style: AppStyles.s14W400.copyWith(
                         color: context.customColor.text3,
                       ),
                     ),
-                    Text(
-                      context.tr.expenseSubmittedSuccessfullyDesc2,
-                      textAlign: TextAlign.center,
-                      style: AppStyles.s14W400.copyWith(
-                        color: context.customColor.text3,
+                    if (!isDraft)
+                      Text(
+                        context.tr.expenseSubmittedSuccessfullyDesc2,
+                        textAlign: TextAlign.center,
+                        style: AppStyles.s14W400.copyWith(
+                          color: context.customColor.text3,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

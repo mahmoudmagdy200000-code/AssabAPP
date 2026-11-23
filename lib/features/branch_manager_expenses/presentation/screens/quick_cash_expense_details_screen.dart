@@ -101,6 +101,9 @@ class QuickCashExpenseDetailsScreen extends StatelessWidget {
                                           expenseTypeModel:
                                               state.response.expenseType,
                                           expenseId: state.response.id,
+                                          isDraft: state.response.status
+                                                  .toLowerCase() ==
+                                              'draft',
                                         ),
                                   ),
                                 );
