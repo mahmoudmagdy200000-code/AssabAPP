@@ -36,7 +36,7 @@ Future<void> showAttachment(WidgetTester tester, String url) async {
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  await tester.pump();
 }
 
 void main() {
@@ -50,14 +50,16 @@ void main() {
     expect(find.byType(InteractiveViewer), findsOneWidget);
     expect(find.byType(CloseButton), findsOneWidget);
     await tester.tap(find.byType(CloseButton));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(find.byType(InteractiveViewer), findsNothing);
   });
 
   testWidgets('an unsupported attachment link shows an error', (tester) async {
     await showAttachment(tester, 'file:///receipt.jpg');
     await tester.tap(find.byType(AppGestureDetectorButton));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
 
     expect(find.byType(InteractiveViewer), findsNothing);
     expect(find.byType(SnackBar), findsOneWidget);
