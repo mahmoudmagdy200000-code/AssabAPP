@@ -74,8 +74,8 @@ class CustodyMoreOptionsBottomSheetWidget extends StatelessWidget {
           _buildOptionItem(
             context: context,
             assetName: AppAssets.custody,
-            text: context.tr.handoverToCustodyowner,
-            desc: context.tr.transferFundsToOwnerOrBranchCustodyBalance,
+            text: context.tr.cashTransferToCustody,
+            desc: context.tr.transferFromYourPersonalCustodyToTheBranchCustodyTo,
             onTap: () {
               _onTapOption(
                 context,
@@ -102,8 +102,8 @@ class CustodyMoreOptionsBottomSheetWidget extends StatelessWidget {
           _buildOptionItem(
             context: context,
             assetName: AppAssets.returnsManagement,
-            text: context.tr.handoverToCashier,
-            desc: context.tr.transferFundsToACashierToBeRecordedAsAn,
+            text: context.tr.cashHandover,
+            desc: context.tr.confirmWhoWillReceiveTheCashAndAmount,
             onTap: () {
               _onTapOption(
                 context,

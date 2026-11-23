@@ -52,10 +52,12 @@ class BrandOwnerSalesTransferItemModel extends Equatable {
   factory BrandOwnerSalesTransferItemModel.fromJson(Map<String, dynamic> json) {
     return BrandOwnerSalesTransferItemModel(
       id: json['id'] as String,
-      submittedBy: json['submittedBy'] as String,
+      submittedBy: json['submittedBy'] as String? ?? '-',
       amount: (json['amount'] as num),
-      dateTime: json['dateTime'] as String,
-      status: CustodyRequestsStatusEnum.fromValue(json['status'] as String),
+      dateTime: json['dateTime'] as String? ?? '',
+      status: CustodyRequestsStatusEnum.fromValue(
+        (json['status'] as String?) ?? 'pending',
+      ),
     );
   }
 }
@@ -147,13 +149,13 @@ class BrandOwnerSalesTransferDetailsSummaryModel extends Equatable {
     Map<String, dynamic> json,
   ) {
     return BrandOwnerSalesTransferDetailsSummaryModel(
-      transferFrom: json['transferFrom'] as String,
-      recipientName: json['recipient'] as String,
+      transferFrom: json['transferFrom'] as String? ?? '-',
+      recipientName: json['recipient'] as String? ?? '-',
       handoverAmount: (json['handOverAmount'] as num),
-      handoverMethod: json['handoverMethod'] as String,
+      handoverMethod: json['handoverMethod'] as String? ?? '-',
       handoverDate:
           DateFormatter.formatDateMDY(
-            DateTime.tryParse(json['handoverDate'] as String),
+            DateTime.tryParse(json['handoverDate'] as String? ?? ''),
           ) ??
           '-',
     );
@@ -188,9 +190,9 @@ class BrandOwnerSalesTransferDetailsSenderModel extends Equatable {
     Map<String, dynamic> json,
   ) {
     return BrandOwnerSalesTransferDetailsSenderModel(
-      name: json['name'] as String,
+      name: json['name'] as String? ?? '-',
       image: json['image'] as String?,
-      branchName: json['branchName'] as String,
+      branchName: json['branchName'] as String? ?? '-',
     );
   }
 

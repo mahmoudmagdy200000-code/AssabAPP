@@ -14,24 +14,10 @@ import '../../../custody/presentation/cubit/custody_get_requets/custody_get_requ
 import '../../../custody/presentation/widgets/branch_custody_request_view_item_list_widget.dart';
 import '../../../custody/presentation/widgets/custody_empty_widget.dart';
 
-class BrandOwnerRequestsCustodyRequestsView extends StatefulWidget {
+class BrandOwnerRequestsCustodyRequestsView extends StatelessWidget {
   const BrandOwnerRequestsCustodyRequestsView({super.key});
 
-  @override
-  State<BrandOwnerRequestsCustodyRequestsView> createState() =>
-      _BrandOwnerRequestsCustodyRequestsViewState();
-}
-
-class _BrandOwnerRequestsCustodyRequestsViewState
-    extends State<BrandOwnerRequestsCustodyRequestsView> {
-  @override
-  void initState() {
-    super.initState();
-
-    _getCustodyRequests();
-  }
-
-  void _getCustodyRequests() {
+  void _getCustodyRequests(BuildContext context) {
     context.read<CustodyGetRequetsCubit>().getCustodyRequests();
   }
 
@@ -41,7 +27,21 @@ class _BrandOwnerRequestsCustodyRequestsViewState
       backgroundColor: context.customColor.text2,
       body: Container(
         padding: EdgeInsets.all(8.r),
-        child: BlocBuilder<CustodyGetRequetsCubit, CustodyGetRequetsState>(
+        child: BlocConsumer<CustodyGetRequetsCubit, CustodyGetRequetsState>(
+          listenWhen: (previous, current) =>
+              current is CustodyGetRequetsSuccess,
+          listener: (context, state) {
+            if (state is CustodyGetRequetsSuccess) {
+              context
+                  .read<ValidationCubit>()
+                  .validateFieldAndStoreTypedValue<String>(
+                    fieldName: 'custodyRequestsCount',
+                    value: state.requestsResponse.data.requests.length
+                        .toString(),
+                    isValid: true,
+                  );
+            }
+          },
           builder: (context, state) {
             final requests = <CustodyRequestItem>[];
 
@@ -50,23 +50,16 @@ class _BrandOwnerRequestsCustodyRequestsViewState
             } else if (state is CustodyGetRequetsFailure) {
               return AppFailureWidget(
                 failure: state.failure,
-                onRetry: _getCustodyRequests,
+                onRetry: () => _getCustodyRequests(context),
                 withBorder: false,
               );
             } else if (state is CustodyGetRequetsSuccess) {
               requests.addAll(state.requestsResponse.data.requests);
-              context
-                  .read<ValidationCubit>()
-                  .validateFieldAndStoreTypedValue<String>(
-                    fieldName: 'custodyRequestsCount',
-                    value: requests.length.toString(),
-                    isValid: true,
-                  );
             }
 
             if (requests.isEmpty) {
               return RefreshIndicator(
-                onRefresh: () async => _getCustodyRequests(),
+                onRefresh: () async => _getCustodyRequests(context),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return SingleChildScrollView(
@@ -90,7 +83,7 @@ class _BrandOwnerRequestsCustodyRequestsViewState
             }
 
             return RefreshIndicator(
-              onRefresh: () async => _getCustodyRequests(),
+              onRefresh: () async => _getCustodyRequests(context),
               child: ListView.builder(
                 itemCount: requests.length,
                 padding: EdgeInsets.zero,
