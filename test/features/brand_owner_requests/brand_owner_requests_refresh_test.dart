@@ -1,7 +1,11 @@
 import 'package:assab/core/cubits/paging_cubit/paging_cubit.dart';
 import 'package:assab/core/cubits/validation/validation_cubit.dart';
 import 'package:assab/core/di/dependency_injection.dart';
+import 'package:assab/core/enums/custody_preferred_receipt_method.dart';
 import 'package:assab/core/enums/custody_requests_status_enum.dart';
+import 'package:assab/core/routing/app_route_name.dart';
+import 'package:assab/core/routing/app_router.dart';
+import 'package:assab/core/services/navigation/navigation_service.dart';
 import 'package:assab/core/theme/app_theme.dart';
 import 'package:assab/core/utils/api_result.dart';
 import 'package:assab/core/utils/future_api_result.dart';
@@ -9,10 +13,12 @@ import 'package:assab/core/widgets/app_responsive_builder.dart';
 import 'package:assab/features/branch_manager_expenses/data/models/all_expense_response_model.dart';
 import 'package:assab/features/branch_manager_expenses/data/repository/branch_manager_expenses_repository.dart';
 import 'package:assab/features/branch_manager_expenses/presentation/cubit/branch_manager_expenses_history/branch_manager_expenses_history_cubit.dart';
+import 'package:assab/features/brand_owner_home/data/models/brand_owner_payment_request.dart';
 import 'package:assab/features/brand_owner_requests/data/models/brand_owner_requests_models.dart';
 import 'package:assab/features/brand_owner_requests/data/repositories/brand_owner_requests_repository.dart';
 import 'package:assab/features/brand_owner_requests/presentation/cubits/brand_owner_requests_custody_sales_transfers_cubit.dart';
 import 'package:assab/features/brand_owner_requests/presentation/screens/brand_owner_requests_screen.dart';
+import 'package:assab/features/brand_owner_tools/presentation/screens/brand_owner_tools_screen.dart';
 import 'package:assab/features/custody/data/models/custody_requests_response.dart';
 import 'package:assab/features/custody/data/repository/custody_repository.dart';
 import 'package:assab/features/custody/presentation/cubit/custody_get_requets/custody_get_requets_cubit.dart';
@@ -76,9 +82,13 @@ class _FakeBrandOwnerRequestsRepository extends Fake
   }
 }
 
-Widget _wrapWithApp(Widget child) {
+Widget _wrapWithApp(Widget child, {RouteFactory? onGenerateRoute}) {
   return AppResponsiveBuilder(
     builder: (_) => MaterialApp(
+      navigatorKey: onGenerateRoute == null
+          ? null
+          : NavigationService.I.navigatorKey,
+      onGenerateRoute: onGenerateRoute,
       theme: AppTheme.light,
       locale: const Locale('en'),
       localizationsDelegates: const [
@@ -122,6 +132,72 @@ void main() {
   });
 
   tearDown(() async => getIt.reset());
+
+  testWidgets(
+    'owner tools select the payment method and open custody requests',
+    (tester) async {
+      final paymentMethods = <Object?>[];
+      await tester.pumpWidget(
+        _wrapWithApp(
+          const Scaffold(body: BrandOwnerToolsScreen()),
+          onGenerateRoute: (settings) {
+            if (settings.name == AppRouteName.brandOwnerPaymentScreen) {
+              paymentMethods.add(settings.arguments);
+              return MaterialPageRoute<void>(builder: (_) => const Scaffold());
+            }
+            return AppRouter.generateRoute(settings);
+          },
+        ),
+      );
+      await _settleFrames(tester);
+      for (final label in ['Cash Handover', 'Transfer to Branch']) {
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        NavigationService.I.pop();
+        await tester.pumpAndSettle();
+      }
+      expect(paymentMethods, [
+        CustodyPreferredReceiptMethod.cashHandover,
+        CustodyPreferredReceiptMethod.bankTransfer,
+      ]);
+      final custody = find.text('Custody Management');
+      await tester.ensureVisible(custody);
+      await tester.tap(custody);
+      await _settleFrames(tester);
+      expect(custodyRepo.getRequestsCalls, 1);
+      expect(expensesRepo.getAllExpensesCalls, 0);
+      expect(ownerRequestsRepo.getSalesTransfersCalls, 0);
+      expect(find.byType(BackButton), findsOneWidget);
+    },
+  );
+
+  test('owner payment sends the date for the selected receipt method', () {
+    for (final method in CustodyPreferredReceiptMethod.values) {
+      const date = '2026-11-23';
+      final request = BrandOwnerPaymentRequest(
+        branchId: 'manager-1',
+        amount: 50,
+        paymentMethod: method.value,
+        transferDate: date,
+        purpose: null,
+        handoverDate: date,
+        receiptImage: null,
+        note: 'Branch funding',
+      );
+      final fields = Map<String, String>.fromEntries(
+        request.toFormData().fields,
+      );
+      expect(fields['preferredReceiptMethod'], method.value);
+      expect(fields['note'], 'Branch funding');
+      if (method == CustodyPreferredReceiptMethod.bankTransfer) {
+        expect(fields['transferDate'], date);
+        expect(fields['handoverDate'], isNull);
+      } else {
+        expect(fields['handoverDate'], date);
+        expect(fields['transferDate'], isNull);
+      }
+    }
+  });
 
   testWidgets(
     'refreshes active sub-tab only on tab activation and sub-tab switch, and updates AppBar counts including salesTransfersCount',

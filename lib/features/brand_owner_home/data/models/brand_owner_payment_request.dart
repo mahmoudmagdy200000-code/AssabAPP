@@ -52,7 +52,7 @@ class BrandOwnerPaymentRequest {
     if (receiptImage != null) {
       formData.files.add(
         MapEntry(
-          'receiptImage',
+          'attachments[]',
           MultipartFile.fromFileSync(
             receiptImage!.path,
             filename: receiptImage!.path.split('/').last,

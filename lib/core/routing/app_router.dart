@@ -114,6 +114,7 @@ import '../../features/brand_owner_home/presentation/screens/brand_owner_escalat
 import '../../features/brand_owner_home/presentation/screens/brand_owner_payment_screen.dart';
 import '../../features/brand_owner_main/presentation/screens/brand_owner_main_screen.dart';
 import '../../features/brand_owner_requests/presentation/screens/brand_owner_payment_log_screen.dart';
+import '../../features/brand_owner_requests/presentation/screens/brand_owner_requests_screen.dart';
 import '../../features/brand_owner_tools/presentation/cubit/brand_owner_daily_inventory_details/brand_owner_daily_inventory_details_cubit.dart';
 import '../../features/brand_owner_tools/presentation/cubit/brand_owner_wast_and_damage_details/brand_owner_wast_and_damage_details_cubit.dart';
 import '../../features/brand_owner_tools/presentation/cubit/brand_owner_wast_and_damage_requests/brand_owner_wast_and_damage_requests_cubit.dart';
@@ -249,6 +250,7 @@ import '../../features/supplier_returns/presentation/screens/supplier_item_retur
 import '../cubits/choose_item/choose_item_cubit.dart';
 import '../cubits/data_management/date_management/date_management_cubit.dart';
 import '../cubits/paging_cubit/paging_cubit.dart';
+import '../enums/custody_preferred_receipt_method.dart';
 import '../cubits/payment_method/payment_method_cubit.dart';
 import '../cubits/search/search_cubit.dart';
 import '../cubits/select_priority/select_priority_cubit.dart';
@@ -1864,6 +1866,10 @@ class AppRouter {
           settings: settings,
         );
       case AppRouteName.brandOwnerPaymentScreen:
+        final arguments = settings.arguments;
+        final method = arguments is CustodyPreferredReceiptMethod
+            ? arguments
+            : null;
         return MaterialPageRoute(
           builder: (context) => MultiBlocProvider(
             providers: [
@@ -1876,8 +1882,9 @@ class AppRouter {
                     'handoverAmount',
                     'handoverOrTransferDate',
                     'preferredReceiptMethod',
+                    'additionalNote',
                   },
-                  optionalFields: {'additionalNote', 'purposeOfTransfer'},
+                  optionalFields: {'purposeOfTransfer'},
                 ),
               ),
               BlocProvider(create: (context) => getIt<ChooseItemCubit>()),
@@ -1886,7 +1893,22 @@ class AppRouter {
                 create: (context) => getIt<BrandOwnerPaymentCubit>(),
               ),
             ],
-            child: const BrandOwnerPaymentScreen(),
+            child: BrandOwnerPaymentScreen(method: method),
+          ),
+          settings: settings,
+        );
+      case AppRouteName.brandOwnerCustodyRequestsScreen:
+        return MaterialPageRoute(
+          builder: (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => PagingCubit(totalSteps: 3, initialIndex: 1),
+              ),
+              BlocProvider(
+                create: (context) => ValidationCubit(requiredFields: {}),
+              ),
+            ],
+            child: const BrandOwnerRequestsScreen(showBackButton: true),
           ),
           settings: settings,
         );
