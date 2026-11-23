@@ -13,9 +13,11 @@ import 'package:assab/core/enums/expenses_steragies_keys.dart';
 import '../../../../core/widgets/app_failure_widget.dart';
 import '../../../../core/widgets/app_loading_widget.dart';
 import '../../../../core/widgets/network_file_preview_widget.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import '../cubit/expense_details/expense_details_cubit.dart';
 import '../cubit/expense_details/expense_details_state.dart';
 import '../widgets/expense_summary_quick_cash_view.dart';
+import 'expense_details_screen.dart';
 
 class ExpenseQuickCashDetailsDetailsView extends StatefulWidget {
   final String id;
@@ -47,6 +49,16 @@ class _ExpenseQuickCashDetailsDetailsViewState
           return AppFailureWidget(failure: state.failure);
         } else if (state is ExpenseQuickCashDetailsSuccess) {
           final quickCashResponseDataModel = state.quickCashResponseDataModel;
+          final role = context
+              .findAncestorWidgetOfExactType<ExpenseDetailsScreen>()
+              ?.userTypeStrategy;
+          final status = quickCashResponseDataModel.status.toLowerCase();
+          final isRejected =
+              status == ExpensesStatus.rejected.key.toLowerCase();
+          final canEdit =
+              (role is BranchManagerUserStrategy ||
+                  role is CashierUserStrategy) &&
+              (isRejected || status == ExpensesStatus.draft.key.toLowerCase());
 
           return CustomScrollView(
             slivers: [
@@ -54,15 +66,13 @@ class _ExpenseQuickCashDetailsDetailsViewState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (quickCashResponseDataModel.status.toLowerCase() ==
-                        ExpensesStatus.rejected.key.toLowerCase()) ...[
+                    if (isRejected) ...[
                       RejectedWidget(
                         rejection: quickCashResponseDataModel.rejection,
                       ),
                       14.verticalSpace,
                     ],
-                    if (quickCashResponseDataModel.status.toLowerCase() ==
-                        ExpensesStatus.rejected.key.toLowerCase()) ...[
+                    if (canEdit) ...[
                       Align(
                         alignment: AlignmentDirectional.centerEnd,
                         child: TextButton.icon(

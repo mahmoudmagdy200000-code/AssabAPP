@@ -1099,9 +1099,9 @@ class S {
     return Intl.message('Home', name: 'home', desc: '', args: []);
   }
 
-  /// `My Shift's`
+  /// `My Shifts`
   String get myShifts {
-    return Intl.message('My Shift\'s', name: 'myShifts', desc: '', args: []);
+    return Intl.message('My Shifts', name: 'myShifts', desc: '', args: []);
   }
 
   /// `Requests`
@@ -8455,10 +8455,10 @@ class S {
     );
   }
 
-  /// `You’ve requested [Amount] from the Store Owner. Waiting for approval.`
+  /// `Your custody request has been sent to the Store Owner. Waiting for approval.`
   String get youveRequestedAmountFromTheStoreOwnerWaitingForApproval {
     return Intl.message(
-      'You’ve requested [Amount] from the Store Owner. Waiting for approval.',
+      'Your custody request has been sent to the Store Owner. Waiting for approval.',
       name: 'youveRequestedAmountFromTheStoreOwnerWaitingForApproval',
       desc: '',
       args: [],

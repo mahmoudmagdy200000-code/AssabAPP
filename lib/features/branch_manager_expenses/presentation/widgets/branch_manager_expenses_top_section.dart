@@ -114,6 +114,9 @@ class _BranchManagerExpensesTopSectionState
                 child: const AppLoadingWidget(),
               );
             } else if (state is BranchManagerExpensesSummaryFailure) {
+              if (state.failure.statusCode == 403) {
+                return const SizedBox.shrink();
+              }
               return AppFailureWidget(
                 failure: state.failure,
                 onRetry: () => _getExpensesSummary(context),

@@ -87,6 +87,16 @@ class _BranchManagerExpensesBodyState extends State<BranchManagerExpensesBody> {
                         child: AppLoadingWidget(),
                       );
                     } else if (state is BranchManagerRecentExpensesFailure) {
+                      if (state.failure.statusCode == 403) {
+                        return SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: ExpensesEmptyWidget(
+                            icon: AppAssets.expensesEmptyPNG,
+                            title: context.tr.unauthorized,
+                            desc: state.failure.error.getErrorMessage,
+                          ),
+                        );
+                      }
                       return SliverFillRemaining(
                         hasScrollBody: false,
                         child: AppFailureWidget(
