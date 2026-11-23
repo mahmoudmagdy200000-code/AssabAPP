@@ -19,9 +19,11 @@ class BrandOwnerMainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = context.watch<PagingCubit>().state.currentIndex;
+
     return Scaffold(
       body: IndexedStack(
-        index: context.watch<PagingCubit>().state.currentIndex,
+        index: currentIndex,
         children: [
           MultiBlocProvider(
             providers: [
@@ -45,7 +47,7 @@ class BrandOwnerMainScreen extends StatelessWidget {
                 create: (context) => ValidationCubit(requiredFields: {}),
               ),
             ],
-            child: const BrandOwnerRequestsScreen(),
+            child: BrandOwnerRequestsScreen(isActiveTab: currentIndex == 2),
           ),
           BlocProvider(
             create: (context) =>

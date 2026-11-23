@@ -28,7 +28,6 @@ class _BrandOwnerRequestsExpensesViewState
   @override
   void initState() {
     _scrollController = ScrollController();
-    _getAllExpenses();
     _scrollController.addListener(_scrollControllerListener);
     super.initState();
   }
@@ -47,6 +46,7 @@ class _BrandOwnerRequestsExpensesViewState
 
   void _getAllExpenses({bool loadMore = false}) {
     context.read<BranchManagerExpensesHistoryCubit>().loadExpenses(
+      type: loadMore ? null : const AllExpense(),
       loadMore: loadMore,
     );
   }
@@ -61,10 +61,23 @@ class _BrandOwnerRequestsExpensesViewState
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<
+    return BlocConsumer<
       BranchManagerExpensesHistoryCubit,
       BranchManagerExpensesHistoryState
     >(
+      listenWhen: (previous, current) =>
+          current is BranchManagerExpensesHistorySuccess,
+      listener: (context, state) {
+        if (state is BranchManagerExpensesHistorySuccess) {
+          context
+              .read<ValidationCubit>()
+              .validateFieldAndStoreTypedValue<String>(
+                fieldName: 'expensesCount',
+                value: state.expenses.data.length.toString(),
+                isValid: true,
+              );
+        }
+      },
       buildWhen: (previous, current) =>
           (current is BranchManagerExpensesHistoryLoading) ||
           (current is BranchManagerExpensesHistoryFailure) ||
@@ -81,13 +94,6 @@ class _BrandOwnerRequestsExpensesViewState
           );
         } else if (state is BranchManagerExpensesHistorySuccess) {
           expenses.addAll(state.expenses.data);
-          context
-              .read<ValidationCubit>()
-              .validateFieldAndStoreTypedValue<String>(
-                fieldName: 'expensesCount',
-                value: expenses.length.toString(),
-                isValid: true,
-              );
         }
 
         if (expenses.isEmpty) {

@@ -44,6 +44,11 @@ class BrandOwnerRequestAppBar extends StatelessWidget {
                                   'custodyRequestsCount',
                                 ) ??
                                 '0';
+                          case 2:
+                            return state.getTypedValue<String>(
+                                  'salesTransfersCount',
+                                ) ??
+                                '0';
                           default:
                             return '0';
                         }

@@ -38,7 +38,12 @@ class BranchCustodyRequestViewItemListWidget extends StatelessWidget {
     return AppGestureDetectorButton(
       onTap: () {
         final custodyGetRequetsCubit = context.read<CustodyGetRequetsCubit>();
-        final branchBalanceCubit = context.read<GetBranchBalanceCubit?>();
+        GetBranchBalanceCubit? branchBalanceCubit;
+        try {
+          branchBalanceCubit = context.read<GetBranchBalanceCubit>();
+        } catch (_) {
+          branchBalanceCubit = null;
+        }
         NavigationService.I.push(
           MaterialPageRoute(
             builder: (context) => MultiBlocProvider(
