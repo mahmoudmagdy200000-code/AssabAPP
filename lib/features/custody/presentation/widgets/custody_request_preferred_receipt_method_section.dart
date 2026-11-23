@@ -31,7 +31,18 @@ class _CustodyRequestPreferredReceiptMethodSectionState
   void initState() {
     super.initState();
 
-    _selectedIndexNotifier = ValueNotifier<int>(-1);
+    final hasSingleMethod = widget.methods.length == 1;
+    _selectedIndexNotifier = ValueNotifier<int>(hasSingleMethod ? 0 : -1);
+    if (hasSingleMethod) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<ValidationCubit>().validateFieldAndStoreValue(
+          fieldName: 'preferredReceiptMethod',
+          value: widget.methods.first.value,
+          isValid: true,
+        );
+      });
+    }
   }
 
   @override

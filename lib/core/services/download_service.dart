@@ -393,29 +393,9 @@ class DownloadService {
 
     final sdk = await _getAndroidSdkVersion();
 
-    if (sdk >= 33) {
-      // Android 13+: granular media + MANAGE_EXTERNAL_STORAGE for the shared path
-      await PermissionService.requestPermission(permission: Permission.photos);
-      await PermissionService.requestPermission(permission: Permission.videos);
-      await PermissionService.requestPermission(permission: Permission.audio);
-      final manage = await Permission.manageExternalStorage.request();
-      if (!manage.isGranted) {
-        AppLogger.log(
-          'MANAGE_EXTERNAL_STORAGE denied – '
-          '/storage/emulated/0/Assab may not be writable. '
-          'Declare MANAGE_EXTERNAL_STORAGE in AndroidManifest.xml and direct '
-          'the user to Settings → Apps → Special access → All files access.',
-        );
-      }
-      return (granted: true, message: 'Granted');
-    }
-
     if (sdk >= 30) {
-      // Android 11-12: MANAGE_EXTERNAL_STORAGE required for /storage/emulated/0
-      final manage = await Permission.manageExternalStorage.request();
-      if (!manage.isGranted) {
-        AppLogger.log('MANAGE_EXTERNAL_STORAGE denied on Android 11-12');
-      }
+      // Android 11+: scoped storage and app-private/open_file previews do not
+      // require audio/video or MANAGE_EXTERNAL_STORAGE permissions.
       return (granted: true, message: 'Granted');
     }
 

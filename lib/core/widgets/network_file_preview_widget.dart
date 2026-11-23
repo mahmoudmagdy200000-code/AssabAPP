@@ -67,7 +67,13 @@ class NetworkFilePreviewWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      '${(attachmentModel?.fileSize ?? 0 / (1024 * 1024)).toStringAsFixed(2)} MB',
+                      () {
+                        final bytes = attachmentModel?.fileSize ?? 0;
+                        if (bytes < 1024 * 1024) {
+                          return '${(bytes / 1024).toStringAsFixed(1)} KB';
+                        }
+                        return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+                      }(),
                       style: AppStyles.s11W400.copyWith(
                         color: context.customColor.text3,
                       ),

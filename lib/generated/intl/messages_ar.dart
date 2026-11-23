@@ -627,7 +627,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "am": MessageLookupByLibrary.simpleMessage("صباحا"),
     "amount": MessageLookupByLibrary.simpleMessage("المبلغ"),
     "amount500Desc": MessageLookupByLibrary.simpleMessage(
-      "المبلغ يتجاوز الحد الأقصى للمصاريف السريعة (≥ 500 ريال سعودي). يرجى تقليل المبلغ أو تحديد نوع حساب مختلف.",
+      "المبلغ يتجاوز الحد الأقصى للمصاريف السريعة (≤ 500 ريال سعودي). يرجى تقليل المبلغ أو تحديد نوع حساب مختلف.",
     ),
     "amountBeforeTax": MessageLookupByLibrary.simpleMessage(
       "المبلغ قبل الضريبة",
@@ -688,6 +688,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "approveHandover": MessageLookupByLibrary.simpleMessage(
       "الموافقة على التسليم",
+    ),
+    "approveLiabilityAction": MessageLookupByLibrary.simpleMessage("اعتماد"),
+    "approveLiabilityDialogBody": MessageLookupByLibrary.simpleMessage(
+      "تأكيد اعتماد المدير لتوزيع مسؤولية عجز الوردية حتى يمكن إرسال الإغلاق اليومي.",
+    ),
+    "approveLiabilityDialogTitle": MessageLookupByLibrary.simpleMessage(
+      "اعتماد مسؤولية العجز",
+    ),
+    "approveLiabilitySelfShareNote": MessageLookupByLibrary.simpleMessage(
+      "يتضمن هذا التوزيع حصة مسؤولية مسندة إليك كمدير فرع. أكّد للاعتماد الصريح على حصتك.",
     ),
     "approvePendingQuantityBalances": MessageLookupByLibrary.simpleMessage(
       "الموافقة على أرصدة الكمية المعلقة",
@@ -1540,25 +1550,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "dailyCloseLiabilityApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "لا يمكن إرسال الإغلاق النهائي قبل اعتماد مسؤولية العجز. راجع توزيع العجز المعلّق واعتمده ثم أعد المحاولة.",
     ),
-    "pendingLiabilityApprovalBadge": MessageLookupByLibrary.simpleMessage(
-      "اعتماد مسؤولية العجز معلّق",
-    ),
-    "reviewAndApproveLiability": MessageLookupByLibrary.simpleMessage(
-      "مراجعة واعتماد مسؤولية العجز",
-    ),
-    "approveLiabilityDialogTitle": MessageLookupByLibrary.simpleMessage(
-      "اعتماد مسؤولية العجز",
-    ),
-    "approveLiabilityDialogBody": MessageLookupByLibrary.simpleMessage(
-      "تأكيد اعتماد المدير لتوزيع مسؤولية عجز الوردية حتى يمكن إرسال الإغلاق اليومي.",
-    ),
-    "approveLiabilitySelfShareNote": MessageLookupByLibrary.simpleMessage(
-      "يتضمن هذا التوزيع حصة مسؤولية مسندة إليك كمدير فرع. أكّد للاعتماد الصريح على حصتك.",
-    ),
-    "liabilityApprovedSuccess": MessageLookupByLibrary.simpleMessage(
-      "تم اعتماد مسؤولية العجز بنجاح. يمكنك الآن إرسال الإغلاق اليومي النهائي.",
-    ),
-    "approveLiabilityAction": MessageLookupByLibrary.simpleMessage("اعتماد"),
     "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
       "تم حفظ تعديلات اليومية.",
     ),
@@ -3268,6 +3259,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "ledger": MessageLookupByLibrary.simpleMessage("السجل"),
     "levelRatio": MessageLookupByLibrary.simpleMessage("نسبة المستوى"),
+    "liabilityApprovedSuccess": MessageLookupByLibrary.simpleMessage(
+      "تم اعتماد مسؤولية العجز بنجاح. يمكنك الآن إرسال الإغلاق اليومي النهائي.",
+    ),
     "lightMode": MessageLookupByLibrary.simpleMessage("فاتح"),
     "listBreakdown": MessageLookupByLibrary.simpleMessage("انهيار القائمة"),
     "liter": MessageLookupByLibrary.simpleMessage("لتر"),
@@ -4215,6 +4209,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "النقد المعدود في الدرج من تحويلات واردة بانتظار تأكيد الاستلام.",
     ),
     "pendingInvoice": MessageLookupByLibrary.simpleMessage("فاتورة معلقة"),
+    "pendingLiabilityApprovalBadge": MessageLookupByLibrary.simpleMessage(
+      "اعتماد مسؤولية العجز معلّق",
+    ),
     "pendingNotStarted": MessageLookupByLibrary.simpleMessage("معلق (لم يبدأ)"),
     "pendingOrders": MessageLookupByLibrary.simpleMessage("الأوامر المعلقة"),
     "pendingOwnerApproval": MessageLookupByLibrary.simpleMessage(
@@ -4526,7 +4523,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickActions": MessageLookupByLibrary.simpleMessage("إجراءات سريعة"),
     "quickCashExpense": MessageLookupByLibrary.simpleMessage("حساب نقدي سريع"),
     "quickCashExpenseDesc": MessageLookupByLibrary.simpleMessage(
-      "(نفقات صغيرة وسريعة ≥ 500 ريال سعودي، على سبيل المثال، سيارة أجرة ووجبة للموظفين)",
+      "(نفقات صغيرة وسريعة ≤ 500 ريال سعودي، على سبيل المثال، سيارة أجرة ووجبة للموظفين)",
     ),
     "quickExpenseForBranch": m92,
     "quickExpensesReportTitle": MessageLookupByLibrary.simpleMessage(
@@ -5040,6 +5037,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "reviewAllPurchases": MessageLookupByLibrary.simpleMessage(
       "مراجعة كافة المشتريات",
+    ),
+    "reviewAndApproveLiability": MessageLookupByLibrary.simpleMessage(
+      "مراجعة واعتماد مسؤولية العجز",
     ),
     "reviewAndCorrectFinal": MessageLookupByLibrary.simpleMessage(
       "مراجعة وتصحيح المجاميع النهائية",
@@ -6749,7 +6749,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "youveRequestedAmountFromTheStoreOwnerWaitingForApproval":
         MessageLookupByLibrary.simpleMessage(
-          "لقد طلبت [المبلغ] من مالك المتجر. في انتظار الموافقة.",
+          "تم إرسال طلب العهدة إلى مالك المتجر. في انتظار الموافقة.",
         ),
     "youveSuccessfullyEscalatedTheReturnRejection":
         MessageLookupByLibrary.simpleMessage(

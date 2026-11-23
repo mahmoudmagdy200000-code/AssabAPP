@@ -13,9 +13,11 @@ import 'package:assab/core/enums/expenses_steragies_keys.dart';
 import '../../../../core/widgets/app_failure_widget.dart';
 import '../../../../core/widgets/app_loading_widget.dart';
 import '../../../../core/widgets/network_file_preview_widget.dart';
+import 'package:assab/core/strategies/user_type_strategy.dart';
 import '../cubit/expense_details/expense_details_cubit.dart';
 import '../cubit/expense_details/expense_details_state.dart';
 import '../widgets/expense_summary_quick_cash_view.dart';
+import 'expense_details_screen.dart';
 
 class ExpenseQuickCashDetailsDetailsView extends StatefulWidget {
   final String id;
@@ -61,8 +63,16 @@ class _ExpenseQuickCashDetailsDetailsViewState
                       ),
                       14.verticalSpace,
                     ],
-                    if (quickCashResponseDataModel.status.toLowerCase() ==
-                        ExpensesStatus.rejected.key.toLowerCase()) ...[
+                    if (context
+                                .findAncestorWidgetOfExactType<
+                                  ExpenseDetailsScreen
+                                >()
+                                ?.userTypeStrategy
+                            is! BrandOwnerUserStrategy &&
+                        (quickCashResponseDataModel.status.toLowerCase() ==
+                                ExpensesStatus.rejected.key.toLowerCase() ||
+                            quickCashResponseDataModel.status.toLowerCase() ==
+                                ExpensesStatus.draft.key.toLowerCase())) ...[
                       Align(
                         alignment: AlignmentDirectional.centerEnd,
                         child: TextButton.icon(

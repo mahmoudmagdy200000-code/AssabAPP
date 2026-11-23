@@ -47,7 +47,7 @@ class _CustodyBalancePageViewSectionState
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 110.h,
+      height: 118.h,
       child: Column(
         children: [
           Expanded(

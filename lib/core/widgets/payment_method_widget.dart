@@ -143,6 +143,9 @@ class _PaymentMethodWidgetState extends State<PaymentMethodWidget> {
         if (state is ExpensesGetCustodyBalanceLoading) {
           return const AppLoadingWidget();
         } else if (state is ExpensesGetCustodyBalanceFailure) {
+          if (state.failure.statusCode == 403) {
+            return const SizedBox.shrink();
+          }
           return AppFailureWidget(
             failure: state.failure,
             withBorder: false,

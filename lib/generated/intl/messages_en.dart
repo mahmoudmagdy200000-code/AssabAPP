@@ -695,6 +695,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "approveAnyWay": MessageLookupByLibrary.simpleMessage("Approve Anyway"),
     "approveHandover": MessageLookupByLibrary.simpleMessage("Approve Handover"),
+    "approveLiabilityAction": MessageLookupByLibrary.simpleMessage("Approve"),
+    "approveLiabilityDialogBody": MessageLookupByLibrary.simpleMessage(
+      "Confirm manager approval of the shift shortage responsibility allocation so daily close can proceed.",
+    ),
+    "approveLiabilityDialogTitle": MessageLookupByLibrary.simpleMessage(
+      "Approve Shortage Liability",
+    ),
+    "approveLiabilitySelfShareNote": MessageLookupByLibrary.simpleMessage(
+      "This allocation includes a responsibility share assigned to you as Branch Manager. Confirm to approve your share explicitly.",
+    ),
     "approvePendingQuantityBalances": MessageLookupByLibrary.simpleMessage(
       "Approve Pending quantity Balances",
     ),
@@ -1578,25 +1588,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "dailyCloseLiabilityApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "Final daily close is blocked until the shift shortage responsibility is approved. Review the pending liability and try again.",
     ),
-    "pendingLiabilityApprovalBadge": MessageLookupByLibrary.simpleMessage(
-      "Pending Liability Approval",
-    ),
-    "reviewAndApproveLiability": MessageLookupByLibrary.simpleMessage(
-      "Review & Approve Pending Liability",
-    ),
-    "approveLiabilityDialogTitle": MessageLookupByLibrary.simpleMessage(
-      "Approve Shortage Liability",
-    ),
-    "approveLiabilityDialogBody": MessageLookupByLibrary.simpleMessage(
-      "Confirm manager approval of the shift shortage responsibility allocation so daily close can proceed.",
-    ),
-    "approveLiabilitySelfShareNote": MessageLookupByLibrary.simpleMessage(
-      "This allocation includes a responsibility share assigned to you as Branch Manager. Confirm to approve your share explicitly.",
-    ),
-    "liabilityApprovedSuccess": MessageLookupByLibrary.simpleMessage(
-      "Shortage liability approved. You can now submit the final daily close.",
-    ),
-    "approveLiabilityAction": MessageLookupByLibrary.simpleMessage("Approve"),
     "dailyCloseModificationsSaved": MessageLookupByLibrary.simpleMessage(
       "Daily close modifications have been saved.",
     ),
@@ -3343,6 +3334,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "ledger": MessageLookupByLibrary.simpleMessage("Ledger"),
     "levelRatio": MessageLookupByLibrary.simpleMessage("Level Ratio"),
+    "liabilityApprovedSuccess": MessageLookupByLibrary.simpleMessage(
+      "Shortage liability approved. You can now submit the final daily close.",
+    ),
     "lightMode": MessageLookupByLibrary.simpleMessage("Light"),
     "listBreakdown": MessageLookupByLibrary.simpleMessage("List Breakdown"),
     "liter": MessageLookupByLibrary.simpleMessage("Liter"),
@@ -3589,7 +3583,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "myShiftAndHandOffDetails": MessageLookupByLibrary.simpleMessage(
       "My shift & Handoff details (Branch Manager)",
     ),
-    "myShifts": MessageLookupByLibrary.simpleMessage("My Shift\'s"),
+    "myShifts": MessageLookupByLibrary.simpleMessage("My Shifts"),
     "myWorkLists": m72,
     "nakheelMainBranchNorth": MessageLookupByLibrary.simpleMessage(
       "Nakheel Main Branch North",
@@ -4274,6 +4268,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Cash already counted in the drawer from incoming transfers awaiting confirmation.",
     ),
     "pendingInvoice": MessageLookupByLibrary.simpleMessage("Pending Invoice"),
+    "pendingLiabilityApprovalBadge": MessageLookupByLibrary.simpleMessage(
+      "Pending Liability Approval",
+    ),
     "pendingNotStarted": MessageLookupByLibrary.simpleMessage(
       "Pending (not started)",
     ),
@@ -5145,6 +5142,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "reviewAllPurchases": MessageLookupByLibrary.simpleMessage(
       "Review All Purchases",
+    ),
+    "reviewAndApproveLiability": MessageLookupByLibrary.simpleMessage(
+      "Review & Approve Pending Liability",
     ),
     "reviewAndCorrectFinal": MessageLookupByLibrary.simpleMessage(
       "Review & Correct Final Totals",
@@ -6901,7 +6901,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "youveRequestedAmountFromTheStoreOwnerWaitingForApproval":
         MessageLookupByLibrary.simpleMessage(
-          "You’ve requested [Amount] from the Store Owner. Waiting for approval.",
+          "Your custody request has been sent to the Store Owner. Waiting for approval.",
         ),
     "youveSuccessfullyEscalatedTheReturnRejection":
         MessageLookupByLibrary.simpleMessage(

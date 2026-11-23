@@ -197,9 +197,11 @@ class _CustodyRequestDetailsScreen extends StatelessWidget {
                           _ConfirmReceiptButton(
                             requestId: requestId,
                             eligible: getCustodyDetailsState
-                                .details
-                                .data
-                                .canConfirmReceipt,
+                                    .details
+                                    .data
+                                    .canConfirmReceipt &&
+                                getCustodyDetailsState.details.data.status !=
+                                    CustodyRequestsStatusEnum.completed,
                           ),
                         ],
                       ],
