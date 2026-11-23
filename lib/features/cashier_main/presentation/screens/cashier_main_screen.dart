@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/cubits/data_management/date_management/date_management_cubit.dart';
 import '../../../../core/cubits/paging_cubit/paging_cubit.dart';
 import '../../../../core/cubits/validation/validation_cubit.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/strategies/user_type_strategy.dart';
+import '../../../../core/widgets/app_logout_button.dart';
+import '../../../branch_manager_expenses/presentation/cubit/branch_manager_expenses/branch_manager_expenses_cubit.dart';
+import '../../../branch_manager_expenses/presentation/screens/branch_manager_expenses_screen.dart';
 import '../../../branch_manager_requests/presentation/cubit/get_handovers/get_handovers_cubit.dart';
 import '../../../branch_manager_requests/presentation/cubit/get_variances/get_variances_cubit.dart';
 import '../../../branch_manager_settings/presentation/screens/branch_manager_settings.dart';
@@ -48,57 +52,19 @@ class CashierMainScreen extends StatelessWidget {
             ],
             child: const CashierRequests(),
           ),
-          const _CashierExpensesRestrictedView(),
+          MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => getIt<DateManagementCubit>()),
+              BlocProvider(
+                create: (context) => getIt<BranchManagerExpensesCubit>(),
+              ),
+            ],
+            child: const BranchManagerExpensesScreen(),
+          ),
           BranchManagerSettings(userType: CashierUserStrategy()),
         ],
       ),
       bottomNavigationBar: const CashierBottomNavBar(),
-    );
-  }
-}
-
-class _CashierExpensesRestrictedView extends StatelessWidget {
-  const _CashierExpensesRestrictedView();
-
-  @override
-  Widget build(BuildContext context) {
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.lock_outline_rounded,
-                size: 48,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                isAr
-                    ? 'المصروفات والعُهد مخصصة لمدير الفرع'
-                    : 'Expenses & Custody Managed by Branch Manager',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                isAr
-                    ? 'حساب الكاشير مخصص للورديات وطلبات التسليم والفروق فقط.'
-                    : 'Cashier accounts can manage shifts, handovers, and variances only.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
