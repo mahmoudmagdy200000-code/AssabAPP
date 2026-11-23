@@ -70,7 +70,11 @@ class BrandOwnerToolsScreen extends StatelessWidget {
                                     context,
                                     label: context.tr.cashHandover,
                                     asset: AppAssets.returnsManagement,
-                                    onTap: () {},
+                                    onTap: () {
+                                      NavigationService.I.pushNamed(
+                                        AppRouteName.brandOwnerPaymentScreen,
+                                      );
+                                    },
                                   ),
                                   _buildCustomButton(
                                     context,
@@ -89,7 +93,11 @@ class BrandOwnerToolsScreen extends StatelessWidget {
                                     context,
                                     label: context.tr.transferToBranch,
                                     asset: AppAssets.home,
-                                    onTap: () {},
+                                    onTap: () {
+                                      NavigationService.I.pushNamed(
+                                        AppRouteName.brandOwnerPaymentScreen,
+                                      );
+                                    },
                                   ),
                                   _buildCustomButton(
                                     context,
@@ -167,7 +175,11 @@ class BrandOwnerToolsScreen extends StatelessWidget {
                           iconAssetName: AppAssets.custody,
                           iconColor: context.theme.primaryColor,
                           // subtitle: '16',
-                          onTap: () {},
+                          onTap: () {
+                            NavigationService.I.pushNamed(
+                              AppRouteName.brandOwnerPaymentLogScreen,
+                            );
+                          },
                         ),
                         CashierGridViewItem(
                           colorHex: 0xfffef8f4,

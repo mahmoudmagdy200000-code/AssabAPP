@@ -241,7 +241,7 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                                 approved: data.approvedInvoices.toString(),
                                 totalAmount: data.totalInvoiceAmount
                                     .toStringAsFixed(0),
-                                increasePercentage: '+${data.pendingInvoices}%',
+                                increasePercentage: '0%',
                                 pending: data.pendingInvoices.toString(),
                               ),
                               10.horizontalSpace,
@@ -251,7 +251,7 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                                 approved: data.approvedExpenses.toString(),
                                 totalAmount: data.totalExpenseAmount
                                     .toStringAsFixed(0),
-                                increasePercentage: '+${data.pendingExpenses}%',
+                                increasePercentage: '0%',
                                 pending: data.pendingExpenses.toString(),
                               ),
                             ],
@@ -304,7 +304,12 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                               BranchManagerActionButton(
                                 assetName: AppAssets.viewReports,
                                 label: context.tr.reportsAndAnalytics,
-                                onTap: () {},
+                                onTap: () {
+                                  NavigationService.I.pushNamed(
+                                    AppRouteName
+                                        .brandOwnerFinancialReportingScreen,
+                                  );
+                                },
                               ),
                             ],
                           ),
