@@ -92,7 +92,7 @@ class _BranchManagerExpensesBodyState extends State<BranchManagerExpensesBody> {
                           hasScrollBody: false,
                           child: ExpensesEmptyWidget(
                             icon: AppAssets.expensesEmptyPNG,
-                            title: context.tr.noExpensesYet,
+                            title: context.tr.unauthorized,
                             desc: state.failure.error.getErrorMessage,
                           ),
                         );

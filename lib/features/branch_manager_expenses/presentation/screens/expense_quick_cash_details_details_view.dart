@@ -49,6 +49,16 @@ class _ExpenseQuickCashDetailsDetailsViewState
           return AppFailureWidget(failure: state.failure);
         } else if (state is ExpenseQuickCashDetailsSuccess) {
           final quickCashResponseDataModel = state.quickCashResponseDataModel;
+          final role = context
+              .findAncestorWidgetOfExactType<ExpenseDetailsScreen>()
+              ?.userTypeStrategy;
+          final status = quickCashResponseDataModel.status.toLowerCase();
+          final isRejected =
+              status == ExpensesStatus.rejected.key.toLowerCase();
+          final canEdit =
+              (role is BranchManagerUserStrategy ||
+                  role is CashierUserStrategy) &&
+              (isRejected || status == ExpensesStatus.draft.key.toLowerCase());
 
           return CustomScrollView(
             slivers: [
@@ -56,23 +66,13 @@ class _ExpenseQuickCashDetailsDetailsViewState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (quickCashResponseDataModel.status.toLowerCase() ==
-                        ExpensesStatus.rejected.key.toLowerCase()) ...[
+                    if (isRejected) ...[
                       RejectedWidget(
                         rejection: quickCashResponseDataModel.rejection,
                       ),
                       14.verticalSpace,
                     ],
-                    if (context
-                                .findAncestorWidgetOfExactType<
-                                  ExpenseDetailsScreen
-                                >()
-                                ?.userTypeStrategy
-                            is! BrandOwnerUserStrategy &&
-                        (quickCashResponseDataModel.status.toLowerCase() ==
-                                ExpensesStatus.rejected.key.toLowerCase() ||
-                            quickCashResponseDataModel.status.toLowerCase() ==
-                                ExpensesStatus.draft.key.toLowerCase())) ...[
+                    if (canEdit) ...[
                       Align(
                         alignment: AlignmentDirectional.centerEnd,
                         child: TextButton.icon(

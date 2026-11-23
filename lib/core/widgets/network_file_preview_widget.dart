@@ -1,9 +1,9 @@
-import 'package:assab/core/di/dependency_injection.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
-import 'package:assab/core/services/download_service.dart';
 import 'package:assab/features/branch_manager_expenses/data/models/attachment_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/app_assets.dart';
 import '../styles/app_styles.dart';
@@ -28,6 +28,73 @@ class NetworkFilePreviewWidget extends StatelessWidget {
     this.onRestore,
     this.withBorder = true,
   });
+
+  Future<void> _preview(BuildContext context) async {
+    final attachment = attachmentModel;
+    final uri = Uri.tryParse(attachment?.url ?? '');
+    final error = context.tr.somethingWentWrongPleaseTryAgain;
+    if (attachment != null &&
+        uri != null &&
+        uri.host.isNotEmpty &&
+        (uri.scheme == 'https' || (kDebugMode && uri.scheme == 'http'))) {
+      final type = attachment.fileType.trim().toLowerCase();
+      const imageTypes = {'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'};
+      final extension = attachment.fileName.split('.').last.toLowerCase();
+      if (type.startsWith('image/') ||
+          imageTypes.contains(type) ||
+          imageTypes.contains(extension)) {
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) => Dialog(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: Text(attachment.fileName),
+                  trailing: CloseButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                  ),
+                ),
+                Flexible(
+                  child: InteractiveViewer(
+                    child: Image.network(
+                      uri.toString(),
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, progress) =>
+                          progress == null
+                          ? child
+                          : const Padding(
+                              padding: EdgeInsets.all(24),
+                              child: CircularProgressIndicator(),
+                            ),
+                      errorBuilder: (context, exception, stackTrace) => Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(error),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        return;
+      }
+      try {
+        if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+      } catch (_, stackTrace) {
+        debugPrintStack(
+          label: 'Could not open attachment',
+          stackTrace: stackTrace,
+        );
+      }
+    }
+    if (context.mounted) {
+      ScaffoldMessenger.maybeOf(
+        context,
+      )?.showSnackBar(SnackBar(content: Text(error)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,10 +176,7 @@ class NetworkFilePreviewWidget extends StatelessWidget {
                 return;
               }
 
-              getIt<DownloadService>().downloadFile(
-                url: attachmentModel?.url ?? '',
-                fileName: attachmentModel?.fileName ?? '',
-              );
+              _preview(context);
             },
             child: Container(
               decoration: BoxDecoration(
