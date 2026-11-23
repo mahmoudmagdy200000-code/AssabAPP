@@ -204,21 +204,11 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
               ),
             ),
             10.verticalSpace,
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.zero,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _buildStrategicOverviewCard(context, data),
-                  20.horizontalSpace,
-                  _buildBranchPerformanceCard(context, data),
-                  20.horizontalSpace,
-                  _buildExecutiveSummaryCard(context, data),
-                ],
-              ),
-            ),
+            _buildStrategicOverviewCard(context, data),
+            12.verticalSpace,
+            _buildBranchPerformanceCard(context, data),
+            12.verticalSpace,
+            _buildExecutiveSummaryCard(context, data),
             10.verticalSpace,
             Text(
               S.current.quickLinks,
@@ -284,7 +274,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
   ) {
     final overview = data.strategicOverview;
     return Container(
-      width: 300.w,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: context.customColor.reversedTextColor,
         borderRadius: BorderRadius.circular(12.r),
@@ -382,7 +372,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
     BrandOwnerControlPanelModel data,
   ) {
     return Container(
-      width: 300.w,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: context.customColor.reversedTextColor,
         borderRadius: BorderRadius.circular(12.r),
@@ -420,7 +410,7 @@ class _BrandOwnerFixedAssetsControlPanalScreenState
   ) {
     final summary = data.executiveSummary;
     return Container(
-      width: 300.w,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: context.customColor.reversedTextColor,
         borderRadius: BorderRadius.circular(12.r),

@@ -1,3 +1,4 @@
+import 'package:assab/core/enums/custody_preferred_receipt_method.dart';
 import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/constants/app_assets.dart';
 import 'package:assab/core/cubits/paging_cubit/paging_cubit.dart';
@@ -241,7 +242,6 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                                 approved: data.approvedInvoices.toString(),
                                 totalAmount: data.totalInvoiceAmount
                                     .toStringAsFixed(0),
-                                increasePercentage: '+${data.pendingInvoices}%',
                                 pending: data.pendingInvoices.toString(),
                               ),
                               10.horizontalSpace,
@@ -251,7 +251,6 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                                 approved: data.approvedExpenses.toString(),
                                 totalAmount: data.totalExpenseAmount
                                     .toStringAsFixed(0),
-                                increasePercentage: '+${data.pendingExpenses}%',
                                 pending: data.pendingExpenses.toString(),
                               ),
                             ],
@@ -279,6 +278,8 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                                 onTap: () {
                                   NavigationService.I.pushNamed(
                                     AppRouteName.brandOwnerPaymentScreen,
+                                    arguments: CustodyPreferredReceiptMethod
+                                        .bankTransfer,
                                   );
                                 },
                               ),
@@ -288,6 +289,8 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                                 onTap: () {
                                   NavigationService.I.pushNamed(
                                     AppRouteName.brandOwnerPaymentScreen,
+                                    arguments: CustodyPreferredReceiptMethod
+                                        .cashHandover,
                                   );
                                 },
                               ),
@@ -304,7 +307,12 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                               BranchManagerActionButton(
                                 assetName: AppAssets.viewReports,
                                 label: context.tr.reportsAndAnalytics,
-                                onTap: () {},
+                                onTap: () {
+                                  NavigationService.I.pushNamed(
+                                    AppRouteName
+                                        .brandOwnerFinancialReportingScreen,
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -574,7 +582,6 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
     required String title,
     required String approved,
     required String totalAmount,
-    required String increasePercentage,
     required String pending,
   }) {
     return Container(
@@ -648,54 +655,6 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
             5.verticalSpace,
             const CustomDivider(),
             5.verticalSpace,
-            Row(
-              spacing: 10.w,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: context.customColor.text2,
-                    borderRadius: BorderRadius.circular(1000.r),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 4.r),
-                  child: Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: context.customColor.dark,
-                          shape: BoxShape.circle,
-                        ),
-                        padding: EdgeInsets.all(7.r),
-                        child: AppSvg(
-                          assetName: AppAssets.over,
-                          colorFilter: ColorFilter.mode(
-                            context.customColor.reversedTextColor,
-                            BlendMode.srcIn,
-                          ),
-                          width: 8.r,
-                        ),
-                      ),
-                      5.horizontalSpace,
-                      Text(
-                        increasePercentage,
-                        style: AppStyles.s13W400.copyWith(
-                          color: context.customColor.text1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: Text(
-                    context.tr.noIncreaseFromLastMonth.toUpperCase(),
-                    style: AppStyles.s12W500.copyWith(
-                      color: context.customColor.text3,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            10.verticalSpace,
             Container(
               decoration: BoxDecoration(
                 color: context.customColor.text2,

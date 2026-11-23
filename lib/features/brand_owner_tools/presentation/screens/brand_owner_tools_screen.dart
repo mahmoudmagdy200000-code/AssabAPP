@@ -1,3 +1,4 @@
+import 'package:assab/core/enums/custody_preferred_receipt_method.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/routing/app_route_name.dart';
@@ -70,7 +71,13 @@ class BrandOwnerToolsScreen extends StatelessWidget {
                                     context,
                                     label: context.tr.cashHandover,
                                     asset: AppAssets.returnsManagement,
-                                    onTap: () {},
+                                    onTap: () {
+                                      NavigationService.I.pushNamed(
+                                        AppRouteName.brandOwnerPaymentScreen,
+                                        arguments: CustodyPreferredReceiptMethod
+                                            .cashHandover,
+                                      );
+                                    },
                                   ),
                                   _buildCustomButton(
                                     context,
@@ -89,7 +96,13 @@ class BrandOwnerToolsScreen extends StatelessWidget {
                                     context,
                                     label: context.tr.transferToBranch,
                                     asset: AppAssets.home,
-                                    onTap: () {},
+                                    onTap: () {
+                                      NavigationService.I.pushNamed(
+                                        AppRouteName.brandOwnerPaymentScreen,
+                                        arguments: CustodyPreferredReceiptMethod
+                                            .bankTransfer,
+                                      );
+                                    },
                                   ),
                                   _buildCustomButton(
                                     context,
@@ -167,7 +180,11 @@ class BrandOwnerToolsScreen extends StatelessWidget {
                           iconAssetName: AppAssets.custody,
                           iconColor: context.theme.primaryColor,
                           // subtitle: '16',
-                          onTap: () {},
+                          onTap: () {
+                            NavigationService.I.pushNamed(
+                              AppRouteName.brandOwnerCustodyRequestsScreen,
+                            );
+                          },
                         ),
                         CashierGridViewItem(
                           colorHex: 0xfffef8f4,

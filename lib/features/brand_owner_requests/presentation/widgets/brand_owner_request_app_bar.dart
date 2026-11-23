@@ -13,7 +13,9 @@ import '../../../../core/styles/app_styles.dart';
 import '../../../../core/widgets/app_svg.dart';
 
 class BrandOwnerRequestAppBar extends StatelessWidget {
-  const BrandOwnerRequestAppBar({super.key});
+  final bool showBackButton;
+
+  const BrandOwnerRequestAppBar({super.key, this.showBackButton = false});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,7 @@ class BrandOwnerRequestAppBar extends StatelessWidget {
       top: 50.r,
       child: Row(
         children: [
+          if (showBackButton) const BackButton(),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

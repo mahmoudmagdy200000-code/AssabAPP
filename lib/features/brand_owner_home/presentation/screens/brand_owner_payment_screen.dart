@@ -1,4 +1,3 @@
-import 'package:assab/generated/l10n.dart';
 import 'package:assab/core/cubits/media/media_cubit.dart';
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
@@ -7,7 +6,6 @@ import 'package:assab/core/widgets/app_button_loading.dart';
 import 'package:assab/core/widgets/label_text_field.dart';
 import 'package:assab/core/widgets/list_view_files_preview.dart';
 import 'package:assab/core/widgets/upload_expense_invoice_receipt.dart';
-import 'package:assab/features/fixed_assets/presentation/screens/fixed_assets_success_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,7 +35,9 @@ import '../cubit/brand_owner_payment/brand_owner_payment_cubit.dart';
 import '../cubit/brand_owner_payment/brand_owner_payment_state.dart';
 
 class BrandOwnerPaymentScreen extends StatelessWidget {
-  const BrandOwnerPaymentScreen({super.key});
+  final CustodyPreferredReceiptMethod? method;
+
+  const BrandOwnerPaymentScreen({super.key, this.method});
 
   void _showCalendarBottomSheet(BuildContext context) {
     final validationCubit = context.read<ValidationCubit>();
@@ -71,7 +71,7 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
       amount: double.parse(validationState.getFieldValue('handoverAmount')),
       handoverDate: validationState.getFieldValue('handoverOrTransferDate'),
       paymentMethod: validationState.getFieldValue('preferredReceiptMethod'),
-      note: validationState.getFieldValue('additionalNote'),
+      note: validationState.getFieldValue('additionalNote').trim(),
       purpose: validationState.getFieldValue('purposeOfTransfer'),
       receiptImage: context.read<MediaCubit>().allFilesSelected.isEmpty
           ? null
@@ -90,7 +90,15 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
       backgroundColor: context.theme.primaryColor,
       body: Column(
         children: [
-          CustodyAppBar(title: context.tr.ownerPaymentForm),
+          CustodyAppBar(
+            title: switch (method) {
+              CustodyPreferredReceiptMethod.bankTransfer =>
+                context.tr.bankTransfer,
+              CustodyPreferredReceiptMethod.cashHandover =>
+                context.tr.cashHandover,
+              null => context.tr.ownerPaymentForm,
+            },
+          ),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -229,7 +237,9 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
                           16.verticalSpace,
                           CustodyRequestPreferredReceiptMethodSection(
                             title: context.tr.paymentMethod,
-                              methods: CustodyPreferredReceiptMethod.values,
+                            methods: method == null
+                                ? CustodyPreferredReceiptMethod.values
+                                : [method!],
                           ),
                           16.verticalSpace,
                           BlocSelector<
@@ -404,10 +414,10 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
                           16.verticalSpace,
                           ContainerCustomTextField(
                             label: context.tr.additionalNote,
-                            isLabelRequired: false,
-                            isLabelOptional: true,
+                            isLabelRequired: true,
+                            isLabelOptional: false,
                             child: CustomTextField(
-                              hintText: context.tr.optionalNotes,
+                              hintText: context.tr.additionalNote,
                               maxLines: 6,
                               keyboardType: TextInputType.multiline,
                               onChanged: (value) {
@@ -416,7 +426,7 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
                                     .validateFieldAndStoreValue(
                                       fieldName: 'additionalNote',
                                       value: value,
-                                      isValid: value.isNotEmpty,
+                                      isValid: value.trim().isNotEmpty,
                                     );
                               },
                             ),
@@ -429,18 +439,14 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
                   BlocListener<BrandOwnerPaymentCubit, BrandOwnerPaymentState>(
                     listener: (context, state) {
                       if (state is BrandOwnerPaymentSuccess) {
-                        NavigationService.I.pop();
-
-                        final validationState = context.read<ValidationCubit>();
-
-                        AppBottomSheet.customPageRoute(
-                          context,
-                          (context) => FixedAssetsSuccessScreen(
-                            title: S.current.cashHandoverRecorded,
-                            message:
-                                '${validationState.getFieldValue('handoverAmount')} SAR has been added to the branch manager’s custody balance and logged in your payment history.',
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              context.tr.followupRequestSubmittedSuccessfully,
+                            ),
                           ),
                         );
+                        NavigationService.I.pop();
                       } else if (state is BrandOwnerPaymentFailure) {
                         AppDialog.showErrorDialog(
                           context: context,
@@ -470,7 +476,7 @@ class BrandOwnerPaymentScreen extends StatelessWidget {
                                 return AppButton(
                                   onClick: () => _submitPayment(context),
                                   enabled: state,
-                                  text: context.tr.confirmHandover,
+                                  text: context.tr.confirm,
                                   padding: EdgeInsets.symmetric(vertical: 18.r),
                                 );
                               },

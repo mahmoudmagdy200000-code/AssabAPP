@@ -18,8 +18,13 @@ import 'brand_owner_requests_expenses_view.dart';
 
 class BrandOwnerRequestsScreen extends StatefulWidget {
   final bool isActiveTab;
+  final bool showBackButton;
 
-  const BrandOwnerRequestsScreen({super.key, this.isActiveTab = true});
+  const BrandOwnerRequestsScreen({
+    super.key,
+    this.isActiveTab = true,
+    this.showBackButton = false,
+  });
 
   @override
   State<BrandOwnerRequestsScreen> createState() =>
@@ -94,7 +99,7 @@ class _BrandOwnerRequestsScreenState extends State<BrandOwnerRequestsScreen> {
           backgroundColor: context.customColor.text2,
           body: Column(
             children: [
-              const BrandOwnerRequestAppBar(),
+              BrandOwnerRequestAppBar(showBackButton: widget.showBackButton),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(

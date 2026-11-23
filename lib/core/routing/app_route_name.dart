@@ -152,6 +152,8 @@ class AppRouteName {
   /// Brand Owner
   static const String brandOwnerMainScreen = '/brandOwnerMainScreen';
   static const String brandOwnerPaymentScreen = '/brandOwnerPaymentScreen';
+  static const String brandOwnerCustodyRequestsScreen =
+      '/brandOwnerCustodyRequestsScreen';
   static const String brandOwnerPaymentLogScreen =
       '/brandOwnerPaymentLogScreen';
   static const String brandOwnerInventoryManagementScreen =
