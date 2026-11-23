@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_assets.dart';
+import '../../../../core/enums/custody_requests_status_enum.dart';
 import '../../../../core/cubits/validation/validation_cubit.dart';
 import '../../../../core/strategies/user_type_strategy.dart';
 import '../../../../core/widgets/app_failure_widget.dart';
@@ -32,12 +33,14 @@ class BrandOwnerRequestsCustodyRequestsView extends StatelessWidget {
               current is CustodyGetRequetsSuccess,
           listener: (context, state) {
             if (state is CustodyGetRequetsSuccess) {
+              final pendingCount = state.requestsResponse.data.requests
+                  .where((r) => r.status == CustodyRequestsStatusEnum.pending)
+                  .length;
               context
                   .read<ValidationCubit>()
                   .validateFieldAndStoreTypedValue<String>(
                     fieldName: 'custodyRequestsCount',
-                    value: state.requestsResponse.data.requests.length
-                        .toString(),
+                    value: pendingCount.toString(),
                     isValid: true,
                   );
             }

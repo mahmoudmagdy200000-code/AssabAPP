@@ -430,25 +430,26 @@ class _ConfirmReceiptButtonState extends State<_ConfirmReceiptButton> {
       if (!unresolved && !widget.eligible) return const SizedBox.shrink();
       return Column(
         children: [
-          if (unresolved) ...[
+          if (!_busy && unresolved) ...[
             const Text(
               'الاستلام معلّق. حدّث الحالة، وإن بقيت غير مؤكدة تواصل مع المحاسب أو مسؤول النظام.',
             ),
             TextButton(
-              onPressed: _busy || !action.hasCurrentActor ? null : _reconcile,
+              onPressed: !action.hasCurrentActor ? null : _reconcile,
               child: const Text('تحديث حالة الاستلام'),
             ),
           ],
-          FilledButton(
-            onPressed:
-                _busy ||
-                    unresolved ||
-                    !widget.eligible ||
-                    !action.hasCurrentActor
-                ? null
-                : _confirm,
-            child: Text(_busy ? 'جارٍ التأكيد...' : 'تأكيد استلام التغذية'),
-          ),
+          if (widget.eligible || (!_busy && unresolved))
+            FilledButton(
+              onPressed:
+                  _busy ||
+                      unresolved ||
+                      !widget.eligible ||
+                      !action.hasCurrentActor
+                  ? null
+                  : _confirm,
+              child: Text(_busy ? 'جارٍ التأكيد...' : 'تأكيد استلام التغذية'),
+            ),
         ],
       );
     },

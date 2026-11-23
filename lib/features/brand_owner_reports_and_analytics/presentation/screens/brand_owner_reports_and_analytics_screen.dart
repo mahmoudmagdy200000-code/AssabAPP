@@ -48,7 +48,9 @@ class BrandOwnerReportsAndAnalyticsScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'View expense trends, supplier & branch insights',
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'عرض اتجاهات النفقات، الموردين ورؤى الفروع'
+                            : 'View expense trends, supplier & branch insights',
                         style: AppStyles.s12W400.copyWith(
                           color: context.customColor.text3,
                         ),

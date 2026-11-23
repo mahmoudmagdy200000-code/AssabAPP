@@ -69,11 +69,14 @@ class _BrandOwnerRequestsExpensesViewState
           current is BranchManagerExpensesHistorySuccess,
       listener: (context, state) {
         if (state is BranchManagerExpensesHistorySuccess) {
+          final pendingCount = state.expenses.data
+              .where((e) => e.status.value.toLowerCase() == 'pending')
+              .length;
           context
               .read<ValidationCubit>()
               .validateFieldAndStoreTypedValue<String>(
                 fieldName: 'expensesCount',
-                value: state.expenses.data.length.toString(),
+                value: pendingCount.toString(),
                 isValid: true,
               );
         }
