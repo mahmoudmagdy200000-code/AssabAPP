@@ -270,7 +270,11 @@ class _BrandOwnerHomeScreenState extends State<BrandOwnerHomeScreen> {
                               BranchManagerActionButton(
                                 assetName: AppAssets.box,
                                 label: context.tr.startInventory,
-                                onTap: () {},
+                                onTap: () {
+                NavigationService.I.pushNamed(
+                  AppRouteName.brandOwnerInventoryManagementScreen,
+                );
+              },
                               ),
                               BranchManagerActionButton(
                                 assetName: AppAssets.home,
