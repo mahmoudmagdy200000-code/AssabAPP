@@ -138,6 +138,14 @@ class PendingStatusStrategyImpl extends RequestsOrderStatusStrategy {
 
 class VarianceStatusStrategyImpl extends PendingStatusStrategyImpl {
   @override
+  Widget buildButtons(
+    BuildContext context,
+    RequestsOrderTypeStrategy orderType,
+  ) {
+    return orderType.onVariance(context);
+  }
+
+  @override
   Widget buildStatus(BuildContext context) {
     return BranchRequestsStatusWidget(
       status: context.tr.varianced,

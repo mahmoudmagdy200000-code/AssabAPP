@@ -153,6 +153,10 @@ abstract class RequestsOrderTypeStrategy {
     return const SizedBox.shrink();
   }
 
+  Widget onVariance(BuildContext context) {
+    return const SizedBox.shrink();
+  }
+
   Widget delayedDeliveryDetails(BuildContext context) {
     return const SizedBox.shrink();
   }
@@ -278,6 +282,136 @@ class BranchOrderTypeStrategy extends RequestsOrderTypeStrategy {
             },
           );
         },
+      ),
+    );
+  }
+
+  @override
+  Widget onVariance(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    return BlocProvider(
+      create: (context) => getIt<StartReceiveOrderCubit>(),
+      child: Builder(
+        builder: (c) {
+          return BlocConsumer<StartReceiveOrderCubit, StartReceiveOrderState>(
+            listener: (c, state) {
+              if (state is StartReceiveOrderSuccess) {
+                AppBottomSheet.customPageRoute(
+                  context,
+                  (context) => const ReceiveOrderSuccessScreen(),
+                );
+              } else if (state is StartReceiveOrderFailure) {
+                AppDialog.showErrorDialog(
+                  context: context,
+                  failure: state.failure,
+                );
+              }
+            },
+            builder: (c, state) {
+              if (state is StartReceiveOrderLoading) {
+                return const AppButtonLoading();
+              }
+              return Padding(
+                padding: EdgeInsets.only(top: 10.r),
+                child: AppButton(
+                  text: isAr ? 'إقفال فرق التحويل' : 'Close Transfer Variance',
+                  onClick: () => _showCloseVarianceDialog(c, isAr),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showCloseVarianceDialog(
+    BuildContext cubitContext,
+    bool isAr,
+  ) async {
+    String selectedResolution = 'standing_variance';
+    final reasonCtrl = TextEditingController();
+    final evidenceCtrl = TextEditingController();
+
+    await showDialog<void>(
+      context: cubitContext,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text(isAr ? 'إقفال فرق التحويل' : 'Close Transfer Variance'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: selectedResolution,
+                  items: [
+                    DropdownMenuItem(
+                      value: 'late_receipt',
+                      child: Text(
+                        isAr ? 'وصول / استلام متأخر' : 'Late Receipt',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'returned_to_sender',
+                      child: Text(
+                        isAr ? 'رجوع فعلي للمرسل' : 'Returned to Sender',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'standing_variance',
+                      child: Text(
+                        isAr
+                            ? 'فرق قائم عند الإقفال'
+                            : 'Standing Variance',
+                      ),
+                    ),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) setState(() => selectedResolution = v);
+                  },
+                ),
+                10.verticalSpace,
+                TextField(
+                  controller: reasonCtrl,
+                  decoration: InputDecoration(
+                    labelText: isAr ? 'السبب' : 'Reason',
+                  ),
+                ),
+                10.verticalSpace,
+                TextField(
+                  controller: evidenceCtrl,
+                  decoration: InputDecoration(
+                    labelText: isAr
+                        ? 'مرجع الدليل (اختياري)'
+                        : 'Evidence reference (optional)',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: Text(isAr ? 'إلغاء' : 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogCtx).pop();
+                cubitContext
+                    .read<StartReceiveOrderCubit>()
+                    .closeTransferVariance(
+                      orderId: orderId,
+                      resolution: selectedResolution,
+                      reason: reasonCtrl.text.trim(),
+                      evidencePath: evidenceCtrl.text.trim(),
+                      idempotencyKey:
+                          'flutter-close-$orderId-${DateTime.now().millisecondsSinceEpoch}',
+                    );
+              },
+              child: Text(isAr ? 'تأكيد الإقفال' : 'Confirm Closure'),
+            ),
+          ],
+        ),
       ),
     );
   }

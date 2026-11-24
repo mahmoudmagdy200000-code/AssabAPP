@@ -34,22 +34,24 @@ class BrandOwnerDailyInventoryDetailsResponse {
   factory BrandOwnerDailyInventoryDetailsResponse.fromJson(
     Map<String, dynamic> json,
   ) {
-    final dataJson = json['data'] as Map<String, dynamic>;
+    final dataJson = (json['data'] as Map<String, dynamic>?) ?? {};
     return BrandOwnerDailyInventoryDetailsResponse(
-      id: dataJson['id'] as String,
-      branchName: dataJson['branch_name'] as String,
-      branchOpenHours: dataJson['branch_open_hours'] as String,
-      inventoryDate: dataJson['inventory_date'] as String,
-      branchImageUrl: dataJson['branch_image_url'] as String,
-      reporterName: dataJson['reporter_name'] as String,
+      id: (dataJson['id'] ?? '').toString(),
+      branchName: (dataJson['branch_name'] as String?) ?? '',
+      branchOpenHours: (dataJson['branch_open_hours'] as String?) ?? '-',
+      inventoryDate: (dataJson['inventory_date'] as String?) ?? '',
+      branchImageUrl: (dataJson['branch_image_url'] as String?) ?? '',
+      reporterName: (dataJson['reporter_name'] as String?) ?? '',
       reporterImageUrl: dataJson['reporter_image_url'] as String?,
       status: DailyInventoryStatusStrategy.getStrategy(
-        InventoryStatusEnum.fromString(dataJson['status'] as String),
+        InventoryStatusEnum.fromString(
+          (dataJson['status'] as String?) ?? 'pending',
+        ),
       ),
       summary: DailyInventoryExecutiveSummary.fromJson(
-        dataJson['summary'] as Map<String, dynamic>,
+        (dataJson['summary'] as Map<String, dynamic>?) ?? {},
       ),
-      items: (dataJson['items'] as List)
+      items: ((dataJson['items'] as List?) ?? [])
           .map(
             (e) => BrandOwnerDailyInventoryItem.fromJson(
               e as Map<String, dynamic>,
@@ -78,11 +80,13 @@ class DailyInventoryExecutiveSummary {
 
   factory DailyInventoryExecutiveSummary.fromJson(Map<String, dynamic> json) {
     return DailyInventoryExecutiveSummary(
-      productsInventoried: json['products_inventoried'] as String,
-      productsWithDiscrepancies: json['products_with_discrepancies'] as String,
-      matchingProducts: json['matching_products'] as String,
-      totalDiscrepancyValue: json['total_discrepancy_value'] as String,
-      discrepancyType: json['discrepancy_type'] as String,
+      productsInventoried: (json['products_inventoried'] ?? '0').toString(),
+      productsWithDiscrepancies:
+          (json['products_with_discrepancies'] ?? '0').toString(),
+      matchingProducts: (json['matching_products'] ?? '0').toString(),
+      totalDiscrepancyValue:
+          (json['total_discrepancy_value'] ?? '0').toString(),
+      discrepancyType: (json['discrepancy_type'] as String?) ?? '-',
     );
   }
 }
