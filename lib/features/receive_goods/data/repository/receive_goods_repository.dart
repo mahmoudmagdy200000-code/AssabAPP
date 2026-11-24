@@ -50,10 +50,39 @@ class ReceiveGoodsRepository with RepositoryMixin {
     );
   });
 
-  FutureApiResult<void> startReceivingBranchOrder({required String orderId}) =>
-      execute(() async {
-        return _receiveGoodsRemoteDataSource.startReceivingBranchOrder(
-          orderId: orderId,
-        );
-      });
+  FutureApiResult<void> startReceivingBranchOrder({
+    required String orderId,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
+  }) => execute(() async {
+    final body = <String, dynamic>{
+      if (items != null) 'items': items,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+    };
+    return _receiveGoodsRemoteDataSource.startReceivingBranchOrder(
+      orderId: orderId,
+      body: body.isEmpty ? null : body,
+    );
+  });
+
+  FutureApiResult<void> closeTransferVariance({
+    required String orderId,
+    required String resolution,
+    String? reason,
+    String? evidencePath,
+    String? idempotencyKey,
+  }) => execute(() async {
+    final body = <String, dynamic>{
+      'resolution': resolution,
+      if (reason != null && reason.isNotEmpty) 'reason': reason,
+      if (evidencePath != null && evidencePath.isNotEmpty)
+        'evidence_path': evidencePath,
+      if (idempotencyKey != null && idempotencyKey.isNotEmpty)
+        'idempotency_key': idempotencyKey,
+    };
+    return _receiveGoodsRemoteDataSource.closeTransferVariance(
+      orderId: orderId,
+      body: body,
+    );
+  });
 }

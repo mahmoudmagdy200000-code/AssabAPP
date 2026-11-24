@@ -41,5 +41,12 @@ abstract class ReceiveGoodsRemoteDataSource {
   @POST(ApiEndpoint.purchaseReceivingBranchOrderStart)
   Future<void> startReceivingBranchOrder({
     @Path('orderId') required String orderId,
+    @Body() Map<String, dynamic>? body,
+  });
+
+  @POST(ApiEndpoint.purchaseReceivingCloseTransferVariance)
+  Future<void> closeTransferVariance({
+    @Path('orderId') required String orderId,
+    @Body() required Map<String, dynamic> body,
   });
 }

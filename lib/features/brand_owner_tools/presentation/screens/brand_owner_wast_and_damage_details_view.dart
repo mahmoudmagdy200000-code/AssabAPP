@@ -483,6 +483,8 @@ class BrandOwnerWastAndDamageDetailsView extends StatelessWidget {
                       final brandOwnerWastAndDamageDetailsCubit = context
                           .read<BrandOwnerWastAndDamageDetailsCubit>();
 
+                      final isAr =
+                          Localizations.localeOf(context).languageCode == 'ar';
                       AppBottomSheet.showModal(
                         context,
                         isScrollControlled: true,
@@ -490,10 +492,12 @@ class BrandOwnerWastAndDamageDetailsView extends StatelessWidget {
                           context,
                         ) => BrandOwnerInventoryGeneralActionsBottomSheet(
                           id: details.id,
-                          approveDesc:
-                              'You’re confirming all selected reports as valid waste or damage.\n\nEach item will be deducted from inventory and logged as a non-liability cost.',
-                          rejectDesc:
-                              'You’re rejecting this report.\nThe item will still be deducted from inventory, but its value will be recorded as a personal liability on the staff’s account.',
+                          approveDesc: isAr
+                              ? 'أنت تؤكد اعتماد جميع تقارير الهدر والتالف المحددة.\nسيتم اعتمادها محاسبياً ومراجعتها قبل الترحيل النهائي للمخزون.'
+                              : 'You’re confirming all selected reports as valid waste or damage.\nThey will be routed for accounting review before final posting.',
+                          rejectDesc: isAr
+                              ? 'أنت ترفض هذا التقرير.\nسيتم إعادة التقرير للمراجعة ولن يتم اعتماد تحميل الموظف أو الترحيل النهائي دون موافقة.'
+                              : 'You’re rejecting this report.\nIt will be returned for review and will not be posted as approved.',
                           itemNames: details.items
                               .map((item) => item.productName)
                               .toList(),

@@ -36,25 +36,27 @@ class BrandOwnerWastAndDamageDetailsResponse {
   factory BrandOwnerWastAndDamageDetailsResponse.fromJson(
     Map<String, dynamic> json,
   ) {
-    final dataJson = json['data'] as Map<String, dynamic>;
+    final dataJson = (json['data'] as Map<String, dynamic>?) ?? {};
     return BrandOwnerWastAndDamageDetailsResponse(
-      id: dataJson['id'] as String,
+      id: (dataJson['id'] ?? '').toString(),
       reportType: WastedProblemTypeEnum.fromString(
-        dataJson['report_type'] as String,
+        (dataJson['report_type'] as String?) ?? 'waste',
       ),
       status: DailyInventoryStatusStrategy.getStrategy(
-        InventoryStatusEnum.fromString(dataJson['status'] as String),
+        InventoryStatusEnum.fromString(
+          (dataJson['status'] as String?) ?? 'pending',
+        ),
       ),
-      branchName: dataJson['branch_name'] as String,
-      branchOpenHours: dataJson['branch_open_hours'] as String,
-      submissionDate: dataJson['submission_date'] as String,
-      branchImageUrl: dataJson['branch_image_url'] as String,
-      reporterName: dataJson['reporter_name'] as String,
+      branchName: (dataJson['branch_name'] as String?) ?? '',
+      branchOpenHours: (dataJson['branch_open_hours'] as String?) ?? '-',
+      submissionDate: (dataJson['submission_date'] as String?) ?? '',
+      branchImageUrl: (dataJson['branch_image_url'] as String?) ?? '',
+      reporterName: (dataJson['reporter_name'] as String?) ?? '',
       reporterImageUrl: dataJson['reporter_image_url'] as String?,
       summary: WastAndDamageExecutiveSummary.fromJson(
-        dataJson['summary'] as Map<String, dynamic>,
+        (dataJson['summary'] as Map<String, dynamic>?) ?? {},
       ),
-      items: (dataJson['items'] as List)
+      items: ((dataJson['items'] as List?) ?? [])
           .map(
             (e) =>
                 BrandOwnerWastAndDamageItem.fromJson(e as Map<String, dynamic>),
@@ -86,12 +88,12 @@ class WastAndDamageExecutiveSummary {
 
   factory WastAndDamageExecutiveSummary.fromJson(Map<String, dynamic> json) {
     return WastAndDamageExecutiveSummary(
-      recordedBy: json['recorded_by'] as String,
-      assignedBy: json['assigned_by'] as String,
-      recordingTime: json['recording_time'] as String,
-      numberOfItems: json['number_of_items'] as String,
-      matchingProducts: json['matching_products'] as String,
-      totalValue: json['total_value'] as String,
+      recordedBy: (json['recorded_by'] as String?) ?? '-',
+      assignedBy: (json['assigned_by'] as String?) ?? '-',
+      recordingTime: (json['recording_time'] as String?) ?? '-',
+      numberOfItems: (json['number_of_items'] ?? '0').toString(),
+      matchingProducts: (json['matching_products'] ?? '0').toString(),
+      totalValue: (json['total_value'] ?? '0').toString(),
       warning: json['warning'] as String? ?? '-',
     );
   }

@@ -29,11 +29,41 @@ class StartReceiveOrderCubit extends SafeCubit<StartReceiveOrderState> {
     );
   }
 
-  Future<void> startReceivingBranchOrder({required String orderId}) async {
+  Future<void> startReceivingBranchOrder({
+    required String orderId,
+    List<Map<String, dynamic>>? items,
+    String? idempotencyKey,
+  }) async {
     emit(const StartReceiveOrderLoading());
 
     final result = await _repository.startReceivingBranchOrder(
       orderId: orderId,
+      items: items,
+      idempotencyKey: idempotencyKey,
+    );
+
+    handle(
+      result,
+      success: (_) => emit(const StartReceiveOrderSuccess()),
+      failure: (failure) => emit(StartReceiveOrderFailure(failure)),
+    );
+  }
+
+  Future<void> closeTransferVariance({
+    required String orderId,
+    required String resolution,
+    String? reason,
+    String? evidencePath,
+    String? idempotencyKey,
+  }) async {
+    emit(const StartReceiveOrderLoading());
+
+    final result = await _repository.closeTransferVariance(
+      orderId: orderId,
+      resolution: resolution,
+      reason: reason,
+      evidencePath: evidencePath,
+      idempotencyKey: idempotencyKey,
     );
 
     handle(

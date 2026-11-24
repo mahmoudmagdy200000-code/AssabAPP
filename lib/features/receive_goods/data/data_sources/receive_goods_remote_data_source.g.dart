@@ -158,16 +158,41 @@ class _ReceiveGoodsRemoteDataSource implements ReceiveGoodsRemoteDataSource {
   }
 
   @override
-  Future<void> startReceivingBranchOrder({required String orderId}) async {
+  Future<void> startReceivingBranchOrder({
+    required String orderId,
+    Map<String, dynamic>? body,
+  }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
             'purchase/receiving/orders/${orderId}/receive-internal-transfer',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    await _dio.fetch<void>(_options);
+  }
+
+  @override
+  Future<void> closeTransferVariance({
+    required String orderId,
+    required Map<String, dynamic> body,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic> _data = body;
+    final _options = _setStreamType<void>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'purchase/receiving/orders/${orderId}/close-transfer-variance',
             queryParameters: queryParameters,
             data: _data,
           )

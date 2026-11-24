@@ -311,6 +311,8 @@ class ApiEndpoint {
       '${purchase}receiving/orders/{orderId}/start';
   static const String purchaseReceivingBranchOrderStart =
       '${purchase}receiving/orders/{orderId}/receive-internal-transfer';
+  static const String purchaseReceivingCloseTransferVariance =
+      '${purchase}receiving/orders/{orderId}/close-transfer-variance';
   static const String purchaseCreateReturns = '${purchase}returns';
   static const String purchaseAcceptReturnRejection =
       '${purchase}returns/{id}/accept-rejection';
