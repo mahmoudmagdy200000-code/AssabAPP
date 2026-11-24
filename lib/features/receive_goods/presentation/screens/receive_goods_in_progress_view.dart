@@ -147,14 +147,32 @@ class _ReceiveGoodsInProgressViewState
     );
   }
 
+  DateTime _parseOrderDate(String raw) {
+    const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+    var normalized = raw.trim();
+    for (var i = 0; i < 10; i++) {
+      normalized = normalized.replaceAll(arabicDigits[i], '$i');
+    }
+    final parsed = DateTime.tryParse(normalized);
+    if (parsed != null) return parsed;
+    final dmy = RegExp(r'^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$').firstMatch(normalized);
+    if (dmy != null) {
+      return DateTime(
+        int.parse(dmy.group(3)!),
+        int.parse(dmy.group(2)!),
+        int.parse(dmy.group(1)!),
+      );
+    }
+    return DateTime.now();
+  }
+
   // Helper method to group orders by date
   List<_DateGroup> _groupOrdersByDate(List<ReceiveGoodsOrder> orders) {
     final Map<DateTime, List<ReceiveGoodsOrder>> grouped = {};
 
     for (final order in orders) {
-      final dateOnly = DateFormat(
-        'yyyy-MM-dd',
-      ).format(DateTime.parse(order.date));
+      final parsed = _parseOrderDate(order.date);
+      final dateOnly = DateFormat('yyyy-MM-dd', 'en').format(parsed);
       final dateOnlyDateTime = DateTime.parse(dateOnly);
       if (!grouped.containsKey(dateOnlyDateTime)) {
         grouped[dateOnlyDateTime] = [];

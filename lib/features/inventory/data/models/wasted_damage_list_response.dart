@@ -168,9 +168,9 @@ class WastedDamageListBranch {
 
   factory WastedDamageListBranch.fromJson(Map<String, dynamic> json) {
     return WastedDamageListBranch(
-      id: json['id'],
-      name: json['name'],
-      location: json['location'],
+      id: (json['id'] as String?) ?? '',
+      name: (json['name'] as String?) ?? '',
+      location: (json['location'] as String?) ?? '',
     );
   }
 }
@@ -270,42 +270,44 @@ class WastedDamageListItem {
 
   factory WastedDamageListItem.fromJson(Map<String, dynamic> json) {
     return WastedDamageListItem(
-      id: json['id'],
-      wasteDamageReportId: json['waste_damage_report_id'],
-      branchId: json['branch_id'],
-      itemId: json['item_id'],
-      purchaseOrderItemId: json['purchase_order_item_id'],
-      productName: json['product_name'],
+      id: (json['id'] as String?) ?? '',
+      wasteDamageReportId: (json['waste_damage_report_id'] as String?) ?? '',
+      branchId: (json['branch_id'] as String?) ?? '',
+      itemId: (json['item_id'] as String?) ?? '',
+      purchaseOrderItemId: (json['purchase_order_item_id'] as String?) ?? '',
+      productName: (json['product_name'] as String?) ?? '',
       problemType: WastedProblemTypeEnum.fromString(
-        json['problem_type'] as String,
+        (json['problem_type'] as String?) ?? 'waste',
       ),
-      problemTypeLabel: json['problem_type_label'],
+      problemTypeLabel: (json['problem_type_label'] as String?) ?? '',
       causeOfDamage: json['cause_of_damage'] == null
           ? null
           : CauseOfDamageStrategy.getStrategy(
               json['cause_of_damage'] as String,
             ),
-      causeOfDamageLabel: json['cause_of_damage_label'],
-      responsibility: json['responsibility'],
-      quantity: (json['quantity'] as num).toDouble(),
-      quantityWasted: (json['quantity_wasted'] as num).toDouble(),
-      reason: json['reason'],
-      reasonLabel: json['reason_label'],
-      unit: json['unit'] as String,
-      totalValue: (json['total_value'] as num).toDouble(),
-      pricePerUnit: (json['price_per_unit'] as num).toDouble(),
-      justificationText: json['justification_text'],
-      justificationNote: json['justification_note'],
-      photoPath: json['photo_path'],
-      photoUrl: json['photo_url'],
-      explanatoryPhotoUrl: json['explanatory_photo_url'],
-      explanatoryPhotoWarning: json['explanatory_photo_warning'],
-      responsibleEmployees: (json['responsible_employees'] as List)
+      causeOfDamageLabel: json['cause_of_damage_label'] as String?,
+      responsibility: json['responsibility'] as String?,
+      quantity: ((json['quantity'] as num?) ?? 0).toDouble(),
+      quantityWasted: ((json['quantity_wasted'] as num?) ?? 0).toDouble(),
+      reason: (json['reason'] as String?) ?? '',
+      reasonLabel: (json['reason_label'] as String?) ?? '',
+      unit: (json['unit'] as String?) ?? '',
+      totalValue: ((json['total_value'] as num?) ?? 0).toDouble(),
+      pricePerUnit: ((json['price_per_unit'] as num?) ?? 0).toDouble(),
+      justificationText: json['justification_text'] as String?,
+      justificationNote: json['justification_note'] as String?,
+      photoPath: json['photo_path'] as String?,
+      photoUrl: json['photo_url'] as String?,
+      explanatoryPhotoUrl: json['explanatory_photo_url'] as String?,
+      explanatoryPhotoWarning: json['explanatory_photo_warning'] as String?,
+      responsibleEmployees: ((json['responsible_employees'] as List?) ?? const [])
           .map((e) => WastedDamageListResponsibleEmployee.fromJson(e))
           .toList(),
-      item: WastedDamageListItemDetails.fromJson(json['item']),
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      item: WastedDamageListItemDetails.fromJson(
+        (json['item'] as Map<String, dynamic>?) ?? const {},
+      ),
+      createdAt: (json['created_at'] as String?) ?? '',
+      updatedAt: (json['updated_at'] as String?) ?? '',
     );
   }
 }
@@ -345,9 +347,9 @@ class WastedDamageListItemDetails {
 
   factory WastedDamageListItemDetails.fromJson(Map<String, dynamic> json) {
     return WastedDamageListItemDetails(
-      id: json['id'],
-      name: json['name'],
-      unit: json['unit'] as String,
+      id: (json['id'] as String?) ?? '',
+      name: (json['name'] as String?) ?? '',
+      unit: (json['unit'] as String?) ?? '',
     );
   }
 }
@@ -373,12 +375,12 @@ class WastedDamageListAssignmentInformation {
     Map<String, dynamic> json,
   ) {
     return WastedDamageListAssignmentInformation(
-      assignedByName: json['assigned_by_name'],
-      assignedByRole: json['assigned_by_role'],
-      responsibility: json['responsibility'],
-      timing: json['timing'],
-      review: json['review'],
-      reminder: json['reminder'],
+      assignedByName: (json['assigned_by_name'] as String?) ?? '',
+      assignedByRole: (json['assigned_by_role'] as String?) ?? '',
+      responsibility: (json['responsibility'] as String?) ?? '',
+      timing: (json['timing'] as String?) ?? '',
+      review: (json['review'] as String?) ?? '',
+      reminder: (json['reminder'] as String?) ?? '',
     );
   }
 }
