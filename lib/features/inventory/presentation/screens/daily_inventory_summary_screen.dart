@@ -65,15 +65,16 @@ class DailyInventorySummaryScreen extends StatelessWidget {
             ),
           )
           .toList(),
-      inventoryDate: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      startTime: DateFormat('yyyy-MM-dd HH:mm:ss').format(
-        DateTime.parse(
-          context
-                  .read<ValidationCubit>()
-                  .state
-                  .fieldsValue['inventory_start_time'] ??
-              '',
-        ),
+      inventoryDate: DateFormat('yyyy-MM-dd', 'en').format(DateTime.now()),
+      startTime: DateFormat('yyyy-MM-dd HH:mm:ss', 'en').format(
+        DateTime.tryParse(
+              context
+                      .read<ValidationCubit>()
+                      .state
+                      .fieldsValue['inventory_start_time'] ??
+                  '',
+            ) ??
+            DateTime.now(),
       ),
     );
   }
