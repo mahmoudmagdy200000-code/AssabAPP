@@ -1,3 +1,4 @@
+import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/core/utils/app_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
@@ -28,6 +29,21 @@ class TokenStorageService {
     );
   }
 
+  /// Persist a successful login and establish its logical identity boundary.
+  /// [principalId] and [principalType] must come from the trusted login response
+  /// and selected authentication strategy, never from a decoded token claim.
+  Future<void> startAuthenticatedSession({
+    required String token,
+    required String principalType,
+    required String principalId,
+  }) async {
+    IdempotencyScopeManager.startSession(
+      principalType: principalType,
+      principalId: principalId,
+    );
+    await saveAccessToken(token);
+  }
+
   Future<void> saveRefreshToken(String token) async {
     await flutterSecureStorage.write(
       key: _refreshTokenKey,
@@ -54,6 +70,7 @@ class TokenStorageService {
   }
 
   Future<void> clearTokens() async {
+    IdempotencyScopeManager.resetAll();
     await Future.wait([
       flutterSecureStorage.delete(
         key: _accessTokenKey,
@@ -71,6 +88,7 @@ class TokenStorageService {
   }
 
   Future<void> deleteAll() async {
+    IdempotencyScopeManager.resetAll();
     await flutterSecureStorage.deleteAll(
       aOptions: _secureAndroidOptions,
       iOptions: _secureIOSOptions,
