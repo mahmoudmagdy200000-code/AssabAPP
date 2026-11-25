@@ -80,12 +80,15 @@ class _ActiveAccountFormState extends State<ActiveAccountForm> {
     LoginResponseModel firstLoginResponseModel,
   ) async {
     final loginData = firstLoginResponseModel.data;
-    await getIt<TokenStorageService>().saveAccessToken(loginData.token);
-
     if (UserTypeService.selectedUserTypeStrategy == null) {
       UserTypeService.restoreSavedUserType();
     }
     final strategy = UserTypeService.selectedUserTypeStrategy;
+    await getIt<TokenStorageService>().startAuthenticatedSession(
+      token: loginData.token,
+      principalType: strategy?.userType.value ?? 'unknown',
+      principalId: loginData.user.id,
+    );
 
     // When backend FirstLoginPolicy is OFF, first-login completes activation
     // immediately and returns `requires_password_reset: false` with a full

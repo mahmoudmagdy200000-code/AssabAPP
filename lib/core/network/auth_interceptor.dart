@@ -1,3 +1,4 @@
+import 'package:assab/core/network/idempotency_interceptor.dart';
 import 'package:assab/core/services/auth_service.dart';
 import 'package:assab/core/services/navigation/navigation_service.dart';
 import 'package:assab/core/services/token_storage_service.dart';
@@ -18,6 +19,7 @@ class AuthInterceptor extends Interceptor {
   ) async {
     try {
       final token = await getIt.get<TokenStorageService>().getAccessToken();
+      IdempotencyScopeManager.bindSession(token);
 
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';

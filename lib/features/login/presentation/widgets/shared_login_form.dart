@@ -104,10 +104,6 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
     strategy.login(context, identifier, formState.password);
   }
 
-  Future<void> _saveToken(LoginEntity entity) async {
-    await getIt<TokenStorageService>().saveAccessToken(entity.token);
-  }
-
   Future<void> _whenLoginSuccess(LoginEntity entity) async {
     final formState = context.read<LoginFormCubit>().state;
     if (UserTypeService.selectedUserTypeStrategy == null) {
@@ -117,7 +113,11 @@ class _SharedLoginFormState extends State<SharedLoginForm> {
     if (strategy == null) return;
 
     await Future.wait([
-      _saveToken(entity),
+      getIt<TokenStorageService>().startAuthenticatedSession(
+        token: entity.token,
+        principalType: strategy.userType.value,
+        principalId: entity.id,
+      ),
       if (formState.saveLoginDetails)
         getIt<SharedPreferencesHelper>().storeString(
           widget.identifierType == LoginIdentifierType.email
