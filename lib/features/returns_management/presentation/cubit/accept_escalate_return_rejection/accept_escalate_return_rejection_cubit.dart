@@ -43,4 +43,17 @@ class AcceptEscalateReturnRejectionCubit
       failure: (failure) => emit(AcceptEscalateReturnRejectionFailure(failure)),
     );
   }
+
+  Future<void> confirmHandover({required String id}) async {
+    if (state is AcceptEscalateReturnRejectionLoading) return;
+    emit(const AcceptEscalateReturnRejectionLoading());
+
+    final result = await _returnManagementRepository.confirmHandover(id: id);
+
+    handle(
+      result,
+      success: (_) => emit(const AcceptEscalateReturnRejectionSuccess()),
+      failure: (failure) => emit(AcceptEscalateReturnRejectionFailure(failure)),
+    );
+  }
 }

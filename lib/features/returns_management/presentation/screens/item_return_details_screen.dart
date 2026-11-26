@@ -24,6 +24,8 @@ import '../../../brand_owner_requests/presentation/cubits/branch_owner_approve_r
 import '../../../brand_owner_requests/presentation/cubits/branch_owner_approve_reject_state.dart';
 import '../../data/models/return_goods_details_response.dart';
 import '../../domain/strategies/item_return_status_strategy.dart';
+import '../cubit/accept_escalate_return_rejection/accept_escalate_return_rejection_cubit.dart';
+import '../cubit/accept_escalate_return_rejection/accept_escalate_return_rejection_state.dart';
 import '../cubit/get_return_details/get_return_details_cubit.dart';
 import '../cubit/get_return_details/get_return_details_state.dart';
 import '../widgets/item_return_details_details_view.dart';
@@ -165,6 +167,68 @@ class _ItemReturnDetailsScreenState extends State<ItemReturnDetailsScreen> {
                             },
                           ),
                         ),
+                        if (returnDetails.data.status
+                                is ApprovedItemReturnStatusStrategy &&
+                            returnDetails.data.handedOverAt == null &&
+                            widget.role is! BrandOwnerUserStrategy) ...[
+                          20.verticalSpace,
+                          BlocProvider(
+                            create: (context) =>
+                                getIt<AcceptEscalateReturnRejectionCubit>(),
+                            child:
+                                BlocConsumer<
+                                  AcceptEscalateReturnRejectionCubit,
+                                  AcceptEscalateReturnRejectionState
+                                >(
+                                  listener: (context, state) {
+                                    if (state
+                                        is AcceptEscalateReturnRejectionSuccess) {
+                                      _getDetails();
+                                    } else if (state
+                                        is AcceptEscalateReturnRejectionFailure) {
+                                      AppDialog.showErrorDialog(
+                                        context: context,
+                                        failure: state.failure,
+                                      );
+                                    }
+                                  },
+                                  builder: (context, state) {
+                                    if (state
+                                        is AcceptEscalateReturnRejectionLoading) {
+                                      return const AppButtonLoading();
+                                    }
+
+                                    return CustomTextButton(
+                                      text:
+                                          Localizations.localeOf(
+                                                context,
+                                              ).languageCode ==
+                                              'ar'
+                                          ? 'تأكيد التسليم الفعلي'
+                                          : 'Confirm Physical Handover',
+                                      onTap: () {
+                                        context
+                                            .read<
+                                              AcceptEscalateReturnRejectionCubit
+                                            >()
+                                            .confirmHandover(
+                                              id: widget.returnId,
+                                            );
+                                      },
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 16.r,
+                                      ),
+                                      textColor: context
+                                          .customColor
+                                          .reversedTextColor,
+                                      borderRadius: 20.r,
+                                      backgroundColor:
+                                          context.theme.primaryColor,
+                                    );
+                                  },
+                                ),
+                          ),
+                        ],
                         if (widget.role is BrandOwnerUserStrategy &&
                             returnDetails.data.status
                                 is PendingResolutionItemReturnStatusStrategy) ...[

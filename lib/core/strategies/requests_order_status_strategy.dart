@@ -57,7 +57,11 @@ abstract class RequestsOrderStatusStrategy {
     return const SizedBox.shrink();
   }
 
-  void addTrackView(BuildContext context, String orderId) {}
+  void addTrackView(
+    BuildContext context,
+    String orderId, {
+    bool isSupplier = false,
+  }) {}
 
   Widget buildStatusItem(
     BuildContext context, {
@@ -862,7 +866,11 @@ class PreparingStatusStrategyImpl extends RequestsOrderStatusStrategy {
   }
 
   @override
-  void addTrackView(BuildContext context, String orderId) {
+  void addTrackView(
+    BuildContext context,
+    String orderId, {
+    bool isSupplier = false,
+  }) {
     final dynamicStepsCubit = context.read<DynamicStepsCubit>();
     if (dynamicStepsCubit.state.titles.isNotEmpty &&
         dynamicStepsCubit.state.titles[0] == context.tr.track) {
@@ -873,7 +881,7 @@ class PreparingStatusStrategyImpl extends RequestsOrderStatusStrategy {
       0,
       () => BlocProvider(
         create: (context) => getIt<TrackOrderCubit>(),
-        child: OrderTrackView(orderId: orderId),
+        child: OrderTrackView(orderId: orderId, isSupplier: isSupplier),
       ),
       context.tr.track,
     );

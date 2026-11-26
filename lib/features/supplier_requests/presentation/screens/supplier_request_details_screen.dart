@@ -103,6 +103,7 @@ class _SupplierRequestDetailsScreenState
                         details.data.status.addTrackView(
                           context,
                           details.data.id,
+                          isSupplier: true,
                         );
 
                         final pagingCubit = context.read<PagingCubit>();

@@ -274,9 +274,10 @@ class AppRouter {
   static MaterialPageRoute _branchManagerMainScreenRoute(
     RouteSettings settings,
   ) {
+    final initialTab = settings.arguments is int ? settings.arguments as int : 0;
     return MaterialPageRoute(
       builder: (context) => BlocProvider(
-        create: (context) => PagingCubit(totalSteps: 5),
+        create: (context) => PagingCubit(totalSteps: 5)..goToStep(initialTab),
         child: const BranchManagerMainScreen(),
       ),
       settings: settings,

@@ -430,6 +430,8 @@ class ApiEndpoint {
   static const String supplierLogout = '${supplierAuth}logout';
   static const String supplierMe = '${supplierAuth}me';
   static const String supplierOrders = '${suppliers}orders';
+  static const String supplierOrderTracking =
+      '${suppliers}orders/{orderId}/tracking';
   static const String supplierPartialConfirmItem =
       '${suppliers}pending-orders/{id}/partial-approve';
   static const String supplierFullConfirmItem =

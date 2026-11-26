@@ -116,6 +116,11 @@ class CreateCompensatoryOrderVarianceRequiredActionsStrategy
       context.tr.order,
     );
   }
+
+  @override
+  Widget buildAmountDetailsWidget(BuildContext context, bool isSelected) {
+    return const SizedBox.shrink();
+  }
 }
 
 class DeductFromInvoiceValueVarianceRequiredActionsStrategy

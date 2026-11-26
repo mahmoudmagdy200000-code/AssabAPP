@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:assab/core/cubits/track_order/track_order_cubit.dart';
 import 'package:assab/core/network/api_endpoints.dart';
 import 'package:assab/features/branch_manager_requests/data/data_source/requests_remote_data_source.dart';
+import 'package:assab/features/branch_manager_requests/data/repository/requests_repository.dart';
+import 'package:assab/features/supplier_requests/data/data_source/supplier_remote_data_source.dart';
+import 'package:assab/features/supplier_requests/data/repository/supplier_requests_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -68,5 +72,29 @@ void main() {
       'POST purchase/pending/ord-2/delay/approve',
       'POST purchase/pending/ord-2/delay/reject',
     ]);
+  });
+
+  test('S5-DEF-011: TrackOrderCubit routes Supplier to supplier/orders/{id}/tracking and BM to purchase/receiving/orders/{id}/tracking', () async {
+    expect(ApiEndpoint.supplierOrderTracking, 'supplier/orders/{orderId}/tracking');
+
+    final adapter = _RecordingAdapter();
+    final dio = Dio(BaseOptions(baseUrl: 'https://example.test/api/v1/'))
+      ..httpClientAdapter = adapter;
+
+    final bmRepo = RequestsRepository(
+      remoteDataSource: RequestsRemoteDataSource(dio),
+    );
+    final supRepo = SupplierRequestsRepository(SupplierRemoteDataSource(dio));
+    final cubit = TrackOrderCubit(bmRepo, supRepo);
+
+    await cubit.getTrackOrder(orderId: 'ord-sup-1', isSupplier: true);
+    await cubit.getTrackOrder(orderId: 'ord-bm-1', isSupplier: false);
+
+    expect(adapter.requests, [
+      'GET supplier/orders/ord-sup-1/tracking',
+      'GET purchase/receiving/orders/ord-bm-1/tracking',
+    ]);
+
+    await cubit.close();
   });
 }

@@ -77,7 +77,9 @@ class SupplierOrder {
         PurchaseSourcesTypes.fromValue(json['order_type'] as String),
       ),
       status: RequestsOrderStatusEnum.getStatusStrategy(
-        RequestsOrderStatusEnum.fromString(json['status'] as String),
+        RequestsOrderStatusEnum.fromString(
+          (json['status'] as String?) ?? 'pending',
+        ),
       ),
       branch: BranchDetailsResponse.fromJson(
         json['branch'] as Map<String, dynamic>,
@@ -88,9 +90,9 @@ class SupplierOrder {
       items: (json['items'] as List<dynamic>)
           .map((e) => SupplierOrderItem.fromJson(e as Map<String, dynamic>))
           .toList(),
-      subtotal: json['subtotal'] as num,
-      taxAmount: json['tax_amount'] as num,
-      totalAmount: json['total_amount'] as num,
+      subtotal: (json['subtotal'] as num?) ?? 0,
+      taxAmount: (json['tax_amount'] as num?) ?? 0,
+      totalAmount: (json['total_amount'] as num?) ?? 0,
       priority: PriorityType.getPriorityStrategy(
         PriorityType.fromValue(json['priority'] as String),
       ),
@@ -145,16 +147,18 @@ class SupplierOrderItem {
       id: json['id'] as String,
       productId: json['item_id'] as String,
       productName: json['item_name'] as String,
-      orderedQuantity: json['quantity_ordered'] as num,
+      orderedQuantity: (json['quantity_ordered'] as num?) ?? 0,
       quantityConfirmed: (json['quantity_confirmed'] as num?) ?? 0,
-      productUnit: json['item_unit'] as String,
-      unitPrice: json['unit_price'] as num,
-      totalPrice: json['total_price'] as num,
+      productUnit: (json['item_unit'] ?? '').toString(),
+      unitPrice: (json['unit_price'] as num?) ?? 0,
+      totalPrice: (json['total_price'] as num?) ?? 0,
       qualityLevel: PurchasingOfficerQualityEnum.fromString(
         json['quality_level'] as String? ?? '-',
       ),
       status: RequestsOrderStatusEnum.getStatusStrategy(
-        RequestsOrderStatusEnum.fromString(json['status'] as String),
+        RequestsOrderStatusEnum.fromString(
+          (json['status'] as String?) ?? 'pending',
+        ),
       ),
     );
   }

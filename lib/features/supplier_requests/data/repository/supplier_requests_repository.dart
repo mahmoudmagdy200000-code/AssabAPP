@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../shared/models/cancel_reason/cancel_reason_response.dart';
+import '../../../../shared/models/order_track_response.dart';
 import '../../../branch_manager_requests/data/models/reject_all_order_request.dart';
 import '../data_source/supplier_remote_data_source.dart';
 import '../models/supplier_alternative_product_request.dart';
@@ -27,8 +28,16 @@ class SupplierRequestsRepository with RepositoryMixin {
 
   FutureApiResult<SupplierOrdersResponse> getSupplierOrders({
     required int page,
+    String? status,
+    String? dateFrom,
+    String? dateTo,
   }) => execute(() async {
-    return _supplierRemoteDataSource.getSupplierOrders(page: page);
+    return _supplierRemoteDataSource.getSupplierOrders(
+      page: page,
+      status: status,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+    );
   });
 
   FutureApiResult<SupplierOrderDetailsResponse> getSupplierOrderDetails({
@@ -180,6 +189,14 @@ class SupplierRequestsRepository with RepositoryMixin {
 
     return _supplierRemoteDataSource.supplierMarkOrderDelivered(
       body: formData,
+      orderId: orderId,
+    );
+  });
+
+  FutureApiResult<OrderTrackResponse> getSupplierOrderTracking({
+    required String orderId,
+  }) => execute(() async {
+    return _supplierRemoteDataSource.getSupplierOrderTracking(
       orderId: orderId,
     );
   });
