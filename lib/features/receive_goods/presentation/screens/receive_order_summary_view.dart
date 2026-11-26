@@ -26,6 +26,7 @@ import '../../../../core/widgets/app_svg.dart';
 import '../../data/models/receive_goods_local_item_model.dart';
 import '../../data/models/receive_order_inspection_response.dart';
 import '../../data/models/receive_order_supplier_request.dart';
+import '../../domain/utils/receive_goods_deduction_helper.dart';
 import '../cubit/start_receive_order/start_receive_order_cubit.dart';
 import '../cubit/start_receive_order/start_receive_order_state.dart';
 import 'receive_order_success_screen.dart';
@@ -68,22 +69,25 @@ class ReceiveOrderSummaryView extends StatelessWidget {
       final paymentTerms = validationCubit.getFieldValue('paymentTerms');
       final file = validationCubit.getTypedValue<MediaFile>('file');
       final note = validationCubit.getFieldValue('note');
-      final vatRate =
-          (validationCubit.state.fieldsValue['vatRate'] as num?)?.toDouble();
-      final amountBeforeTax =
-          (validationCubit.state.fieldsValue['amountBeforeTax'] as num?)
-              ?.toDouble();
-      final vatAmount =
-          (validationCubit.state.fieldsValue['vatAmount'] as num?)?.toDouble();
-      final totalAmount =
-          (validationCubit.state.fieldsValue['totalAmount'] as num?)
-              ?.toDouble();
+      final vatRate = readValidationDouble(validationCubit.state, 'vatRate');
+      final amountBeforeTax = readValidationDouble(
+        validationCubit.state,
+        'amountBeforeTax',
+      );
+      final vatAmount = readValidationDouble(
+        validationCubit.state,
+        'vatAmount',
+      );
+      final totalAmount = readValidationDouble(
+        validationCubit.state,
+        'totalAmount',
+      );
       invoiceData = InvoiceData(
         invoiceNumber: invoiceNumber,
         invoiceDate: invoiceDate,
         dueDate: dueDate,
         paymentTerms: paymentTerms,
-        file: file!.toFile,
+        file: file?.toFile,
         notes: note,
         taxRate: vatRate,
         amountBeforeTax: amountBeforeTax,
@@ -98,21 +102,47 @@ class ReceiveOrderSummaryView extends StatelessWidget {
 
     if (varianceItems.isNotEmpty) {
       final action = validationCubit.getFieldValue('varianceRequiredAction');
-      final note = validationCubit.getFieldValue('note');
-      final file = validationCubit.getTypedValue<MediaFile>('file');
-      final varianceItemModels = varianceItems
-          .map(
-            (item) => VarianceItem(
-              itemId: item.itemId,
-              quantity: item.qtyOrdered - item.qtyReceived,
-            ),
-          )
-          .toList();
+      final note = validationCubit.getFieldValue('varianceNote');
+      final file = validationCubit.getTypedValue<MediaFile>('varianceFile');
+      final varianceItemModels = action == 'compensatory_order'
+          ? varianceItems
+                .where((item) => item.qtyOrdered > item.qtyReceived)
+                .map(
+                  (item) => VarianceItem(
+                    itemId: item.itemId,
+                    quantity: (item.qtyOrdered - item.qtyReceived).toDouble(),
+                  ),
+                )
+                .toList()
+          : const <VarianceItem>[];
+      DeductData? deductData;
+      if (action == 'deduct_from_invoice') {
+        final summaryVatRate = readValidationDouble(
+          validationCubit.state,
+          'vatRate',
+        );
+        final explicitDamage = double.tryParse(
+          validationCubit.getFieldValue('deductAmount'),
+        );
+        final summary = computeReceiptDeductionSummary(
+          varianceItems: varianceItems,
+          invoiceVatRate: summaryVatRate,
+          explicitDamageAmount: explicitDamage,
+        );
+        if (summary != null) {
+          deductData = DeductData(
+            amount: summary.vatInclusiveAmount,
+            reason: summary.reason,
+            notes: note,
+          );
+        }
+      }
       variance = VarianceData(
         action: action,
         note: note,
         file: file?.toFile,
         items: varianceItemModels,
+        deductData: deductData,
       );
     }
 
@@ -193,15 +223,27 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
+                          final storedAmountBeforeTax = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'amountBeforeTax',
+                          );
                           final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
 
-                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble();
+                          final rawVatRate = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'vatRate',
+                          );
 
-                          final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
+                          final storedVatAmount = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'vatAmount',
+                          );
                           final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
 
-                          final storedTotalAmount = (context.read<ValidationCubit>().state.fieldsValue['totalAmount'] as num?)?.toDouble();
+                          final storedTotalAmount = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'totalAmount',
+                          );
                           final totalWithVat = storedTotalAmount ?? (vatAmount != null ? totalBeforeTax + vatAmount : totalBeforeTax);
 
                           String formatAmount(double value) =>
@@ -645,15 +687,27 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
+                          final storedAmountBeforeTax = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'amountBeforeTax',
+                          );
                           final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
 
-                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble();
+                          final rawVatRate = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'vatRate',
+                          );
 
-                          final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
+                          final storedVatAmount = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'vatAmount',
+                          );
                           final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
 
-                          final storedTotalAmount = (context.read<ValidationCubit>().state.fieldsValue['totalAmount'] as num?)?.toDouble();
+                          final storedTotalAmount = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'totalAmount',
+                          );
                           final totalWithVat = storedTotalAmount ?? (vatAmount != null ? totalBeforeTax + vatAmount : totalBeforeTax);
 
                           String formatAmount(double value) =>
@@ -788,8 +842,10 @@ class ReceiveOrderSummaryView extends StatelessWidget {
             final validationCubit = context.read<ValidationCubit>();
             final isInvoice = validationCubit.getFieldValue('documentType') ==
                 DocumentTypeEnum.invoice.value;
-            final rawVatRate =
-                (validationCubit.state.fieldsValue['vatRate'] as num?)?.toDouble();
+            final rawVatRate = readValidationDouble(
+              validationCubit.state,
+              'vatRate',
+            );
             final canFinalize = !isInvoice || rawVatRate != null;
 
             return AppButton(
@@ -1181,14 +1237,16 @@ class ReceiveOrderSummaryView extends StatelessWidget {
                               color: context.customColor.text3,
                             ),
                             5.horizontalSpace,
-                            Text(
-                              context.tr.shortQuantityValue(
-                                variance.toString(),
-                                unitText,
-                                (variance * item.unitPrice).toString(),
-                              ),
-                              style: AppStyles.s13W400.copyWith(
-                                color: context.customColor.text3,
+                            Expanded(
+                              child: Text(
+                                context.tr.shortQuantityValue(
+                                  variance.toString(),
+                                  unitText,
+                                  (variance * item.unitPrice).toString(),
+                                ),
+                                style: AppStyles.s13W400.copyWith(
+                                  color: context.customColor.text3,
+                                ),
                               ),
                             ),
                           ],
@@ -1207,7 +1265,7 @@ class ReceiveOrderSummaryView extends StatelessWidget {
 
   Widget _buildOptionalNoteWidget(BuildContext context) {
     return BlocSelector<ValidationCubit, ValidationState, String?>(
-      selector: (state) => state.fieldsValue['note'],
+      selector: (state) => state.fieldsValue['varianceNote'] ?? state.fieldsValue['note'],
       builder: (context, note) {
         // Only show if note is not empty
         if (note == null || note.isEmpty) {

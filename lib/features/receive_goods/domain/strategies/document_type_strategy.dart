@@ -136,7 +136,7 @@ class ReturnDocumentTypeStrategy extends DocumentTypeStrategy {
   Widget buildMiddleSectionInVarianceView(BuildContext context) {
     final validationCubit = context.read<ValidationCubit>();
 
-    validationCubit.addDynamicFields({'file'});
+    validationCubit.addDynamicFields({'varianceFile'});
 
     return Column(
       children: [
@@ -154,10 +154,13 @@ class ReturnDocumentTypeStrategy extends DocumentTypeStrategy {
                 orElse: () => null,
               );
 
-              context.read<ValidationCubit>().validateField(
-                'file',
-                file != null,
-              );
+              context
+                  .read<ValidationCubit>()
+                  .validateFieldAndStoreTypedValue<MediaFile?>(
+                    fieldName: 'varianceFile',
+                    value: file,
+                    isValid: file != null,
+                  );
 
               return file;
             }
@@ -170,6 +173,13 @@ class ReturnDocumentTypeStrategy extends DocumentTypeStrategy {
                 file: state,
                 onTapIcon: () {
                   context.read<MediaCubit>().unselectFile(state);
+                  context
+                      .read<ValidationCubit>()
+                      .validateFieldAndStoreTypedValue<MediaFile?>(
+                        fieldName: 'varianceFile',
+                        value: null,
+                        isValid: false,
+                      );
                 },
                 icon: AppAssets.trashSvg,
               );
