@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/receive_goods_local_item_model.dart';
+import '../../domain/utils/receive_goods_deduction_helper.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/cubits/media/media_cubit.dart';
 import '../../../../core/cubits/media/media_state.dart';
@@ -316,15 +317,27 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                             (sum, item) =>
                                 sum + (item.unitPrice * item.qtyReceived),
                           );
-                          final storedAmountBeforeTax = (context.read<ValidationCubit>().state.fieldsValue['amountBeforeTax'] as num?)?.toDouble();
+                          final storedAmountBeforeTax = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'amountBeforeTax',
+                          );
                           final totalBeforeTax = storedAmountBeforeTax ?? calculatedTotalBeforeTax;
 
-                          final rawVatRate = (context.read<ValidationCubit>().state.fieldsValue['vatRate'] as num?)?.toDouble();
+                          final rawVatRate = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'vatRate',
+                          );
 
-                          final storedVatAmount = (context.read<ValidationCubit>().state.fieldsValue['vatAmount'] as num?)?.toDouble();
+                          final storedVatAmount = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'vatAmount',
+                          );
                           final vatAmount = storedVatAmount ?? (rawVatRate != null ? totalBeforeTax * rawVatRate : null);
 
-                          final storedTotalAmount = (context.read<ValidationCubit>().state.fieldsValue['totalAmount'] as num?)?.toDouble();
+                          final storedTotalAmount = readValidationDouble(
+                            context.read<ValidationCubit>().state,
+                            'totalAmount',
+                          );
                           final totalWithVat = storedTotalAmount ?? (vatAmount != null ? totalBeforeTax + vatAmount : totalBeforeTax);
 
                           String formatAmount(double value) =>
@@ -559,7 +572,7 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
             final isVariance = state.fieldsValueTyped['isVariance'];
             final hasVariance = isVariance is bool ? isVariance : false;
 
-            final rawVatRate = (state.fieldsValue['vatRate'] as num?)?.toDouble();
+            final rawVatRate = readValidationDouble(state, 'vatRate');
             final vatValid = rawVatRate != null;
 
             final baseValidation =

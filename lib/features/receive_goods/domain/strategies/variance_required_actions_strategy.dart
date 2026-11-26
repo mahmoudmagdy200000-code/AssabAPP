@@ -10,6 +10,7 @@ import 'package:assab/features/receive_goods/data/models/receive_goods_local_ite
 
 import '../../../../core/enums/variance_required_actions_enum.dart';
 import '../../presentation/screens/receive_order_order_view.dart';
+import '../utils/receive_goods_deduction_helper.dart';
 
 abstract class VarianceRequiredActionsStrategy {
   String get value;
@@ -32,18 +33,22 @@ abstract class VarianceRequiredActionsStrategy {
     }
 
     final validationCubit = context.read<ValidationCubit>();
-    final List<ReceiveGoodsLocalItemModel>? items = validationCubit
-        .getListValue<ReceiveGoodsLocalItemModel>('receiveGoodsItems');
-
-    double beforeVarianceAmount = 0;
-    double afterVarianceAmount = 0;
-
-    for (final item in items ?? []) {
-      beforeVarianceAmount += item.qtyOrdered * item.unitPrice;
-      afterVarianceAmount += item.qtyReceived * item.unitPrice;
-    }
-
-    final double amountToDeduct = afterVarianceAmount - beforeVarianceAmount;
+    final List<ReceiveGoodsLocalItemModel> items =
+        validationCubit.getListValue<ReceiveGoodsLocalItemModel>(
+          'receiveGoodsItems',
+        ) ??
+        [];
+    final varianceItems = items.where((item) => item.isVariance).toList();
+    final vatRate = readValidationDouble(validationCubit.state, 'vatRate');
+    final explicitDamage = double.tryParse(
+      validationCubit.getFieldValue('deductAmount'),
+    );
+    final summary = computeReceiptDeductionSummary(
+      varianceItems: varianceItems,
+      invoiceVatRate: vatRate,
+      explicitDamageAmount: explicitDamage,
+    );
+    final double amountToDeduct = summary?.vatInclusiveAmount ?? 0.0;
 
     return Container(
       width: double.infinity,

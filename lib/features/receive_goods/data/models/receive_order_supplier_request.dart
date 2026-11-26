@@ -41,7 +41,7 @@ class InvoiceData {
   final String invoiceDate;
   final String dueDate;
   final String paymentTerms;
-  final File file;
+  final File? file;
   final String? notes;
   final double? taxRate;
   final double? amountBeforeTax;
@@ -53,7 +53,7 @@ class InvoiceData {
     required this.invoiceDate,
     required this.dueDate,
     required this.paymentTerms,
-    required this.file,
+    this.file,
     this.notes,
     this.taxRate,
     this.amountBeforeTax,
@@ -67,18 +67,32 @@ class VarianceData {
   final String? note;
   final File? file;
   final List<VarianceItem> items;
+  final DeductData? deductData;
 
   VarianceData({
     required this.action,
     this.note,
     this.file,
     required this.items,
+    this.deductData,
+  });
+}
+
+class DeductData {
+  final double amount;
+  final String reason;
+  final String? notes;
+
+  const DeductData({
+    required this.amount,
+    required this.reason,
+    this.notes,
   });
 }
 
 class VarianceItem {
   final String itemId;
-  final int quantity;
+  final double quantity;
 
   VarianceItem({required this.itemId, required this.quantity});
 }
@@ -177,15 +191,17 @@ extension ReceiveOrderSupplierRequestForm on ReceiveOrderSupplierRequest {
         );
       }
 
-      formData.files.add(
-        MapEntry(
-          'invoice_data[photo]',
-          MultipartFile.fromFileSync(
-            invoiceData!.file.path,
-            filename: invoiceData!.file.path.split('/').last,
+      if (invoiceData!.file != null) {
+        formData.files.add(
+          MapEntry(
+            'invoice_data[photo]',
+            MultipartFile.fromFileSync(
+              invoiceData!.file!.path,
+              filename: invoiceData!.file!.path.split('/').last,
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     if (variance != null) {
@@ -193,6 +209,27 @@ extension ReceiveOrderSupplierRequestForm on ReceiveOrderSupplierRequest {
 
       if (variance!.note != null) {
         formData.fields.add(MapEntry('variance[note]', variance!.note!));
+      }
+
+      if (variance!.deductData != null) {
+        formData.fields.addAll([
+          MapEntry(
+            'variance[deduct_data][amount]',
+            variance!.deductData!.amount.toStringAsFixed(2),
+          ),
+          MapEntry(
+            'variance[deduct_data][reason]',
+            variance!.deductData!.reason,
+          ),
+        ]);
+        if (variance!.deductData!.notes != null) {
+          formData.fields.add(
+            MapEntry(
+              'variance[deduct_data][notes]',
+              variance!.deductData!.notes!,
+            ),
+          );
+        }
       }
 
       if (variance!.file != null) {

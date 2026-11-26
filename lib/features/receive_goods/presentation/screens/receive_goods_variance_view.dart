@@ -32,7 +32,7 @@ class _ReceiveGoodsVarianceViewState extends State<ReceiveGoodsVarianceView> {
     super.initState();
     _validationCubit = context.read<ValidationCubit>();
 
-    _validationCubit.addDynamicFields({'note'});
+    _validationCubit.addDynamicFields({'varianceNote'});
   }
 
   @override
@@ -68,7 +68,7 @@ class _ReceiveGoodsVarianceViewState extends State<ReceiveGoodsVarianceView> {
                     maxLines: 5,
                     onChanged: (value) {
                       _validationCubit.validateFieldAndStoreValue(
-                        fieldName: 'note',
+                        fieldName: 'varianceNote',
                         value: value,
                         isValid: value.isNotEmpty,
                       );
