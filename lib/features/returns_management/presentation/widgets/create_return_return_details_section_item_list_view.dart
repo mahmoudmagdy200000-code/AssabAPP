@@ -181,7 +181,7 @@ class _CreateReturnReturnDetailsSectionItemListViewState
                                           value: value,
                                           isValid:
                                               value.isNotEmpty &&
-                                              (int.tryParse(value) ?? 0) > 0,
+                                              (double.tryParse(value) ?? 0.0) > 0.0,
                                         );
                                   },
                                 ),

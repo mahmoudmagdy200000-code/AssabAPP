@@ -15,6 +15,12 @@ abstract class ReturnManagementRemoteDataSource {
   @POST(ApiEndpoint.purchaseCreateReturns)
   Future<void> createReturnRequest({@Body() required FormData body});
 
+  @POST(ApiEndpoint.purchaseConfirmHandover)
+  Future<void> confirmHandover({
+    @Path('id') required String id,
+    @Body() Map<String, dynamic>? body,
+  });
+
   @POST(ApiEndpoint.purchaseAcceptReturnRejection)
   Future<void> acceptReturnRejection({@Path('id') required String id});
 

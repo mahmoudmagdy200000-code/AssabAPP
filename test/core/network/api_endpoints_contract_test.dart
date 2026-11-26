@@ -45,6 +45,10 @@ void main() {
       ApiEndpoint.purchaseRejectDelay,
       'purchase/pending/{id}/delay/reject',
     );
+    expect(
+      ApiEndpoint.purchaseConfirmHandover,
+      'purchase/returns/{id}/confirm-handover',
+    );
   });
 
   test('T2.4 PUR-F12: RequestsRemoteDataSource dispatches exact modification and delay paths', () async {
