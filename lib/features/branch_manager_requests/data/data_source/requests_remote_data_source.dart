@@ -94,8 +94,8 @@ abstract class RequestsRemoteDataSource {
 
   @POST(ApiEndpoint.purchaseApproveModification)
   Future<void> branchApproveModification({
-    @Path('order_id') required String orderId,
-    @Path('item_id') required String itemId,
+    @Path('id') required String orderId,
+    @Path('itemId') required String itemId,
   });
 
   @POST(ApiEndpoint.purchaseRejectModification)
