@@ -165,7 +165,7 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                               Expanded(
                                 child: CustomTextField(
                                   hintText: '[2024/11/22-485]',
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: TextInputType.text,
                                   onChanged: (value) {
                                     _validationCubit.validateFieldAndStoreValue(
                                       fieldName: 'invoiceNumber',
@@ -243,7 +243,7 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                                                     state ?? '',
                                                   ),
                                                 ) ??
-                                                'June 20, 2026',
+                                                context.tr.selectDate,
                                             style: AppStyles.s12W500.copyWith(
                                               color: state != null
                                                   ? context.customColor.text1
