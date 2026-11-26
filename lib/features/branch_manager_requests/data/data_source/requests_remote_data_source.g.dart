@@ -353,7 +353,7 @@ class _RequestsRemoteDataSource implements RequestsRemoteDataSource {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'purchase/pending/${orderId}/items/${itemId}/approve',
+            'purchase/pending/${orderId}/items/${itemId}/modification/approve',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -377,7 +377,7 @@ class _RequestsRemoteDataSource implements RequestsRemoteDataSource {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'purchase/pending/${orderId}/items/${itemId}/cancel',
+            'purchase/pending/${orderId}/items/${itemId}/modification/reject',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -446,7 +446,7 @@ class _RequestsRemoteDataSource implements RequestsRemoteDataSource {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'purchase/pending/direct-supplier/${id}/approve-delay',
+            'purchase/pending/${id}/delay/approve',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -469,7 +469,7 @@ class _RequestsRemoteDataSource implements RequestsRemoteDataSource {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'purchase/pending/direct-supplier/${id}/reject-delay',
+            'purchase/pending/${id}/delay/reject',
             queryParameters: queryParameters,
             data: _data,
           )

@@ -295,9 +295,9 @@ class ApiEndpoint {
   static const String purchaseCancellationReason =
       '${purchase}pending/{id}/items/{itemId}/cancellation-reason';
   static const String purchaseApproveModification =
-      '${purchase}pending/{order_id}/items/{item_id}/approve';
+      '${purchase}pending/{id}/items/{itemId}/modification/approve';
   static const String purchaseRejectModification =
-      '${purchase}pending/{id}/items/{itemId}/cancel';
+      '${purchase}pending/{id}/items/{itemId}/modification/reject';
   static const String purchaseCancelOrder = '${purchase}pending/{id}/cancel';
   static const String purchaseReceivingOrdersInProgress =
       '${purchase}receiving/orders';
@@ -325,9 +325,9 @@ class ApiEndpoint {
   static const String purchaseOrderTracking =
       '${purchase}receiving/orders/{orderId}/tracking';
   static const String purchaseApproveDelay =
-      '${purchase}pending/direct-supplier/{id}/approve-delay';
+      '${purchase}pending/{id}/delay/approve';
   static const String purchaseRejectDelay =
-      '${purchase}pending/direct-supplier/{id}/reject-delay';
+      '${purchase}pending/{id}/delay/reject';
   static const String purchaseSubmitOrderDraft =
       '${purchase}orders/{id}/submit';
   static const String purchaseDeleteOrderDraft = '${purchase}orders/{id}/draft';
