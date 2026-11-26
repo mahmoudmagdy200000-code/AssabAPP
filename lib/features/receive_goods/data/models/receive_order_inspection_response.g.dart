@@ -61,9 +61,9 @@ InspectionInvoiceData _$InspectionInvoiceDataFromJson(
 
 DeliveryDetails _$DeliveryDetailsFromJson(Map<String, dynamic> json) =>
     DeliveryDetails(
-      driverName: json['driver_name'] as String,
+      driverName: json['driver_name'] as String? ?? '',
       contactNumber: json['contact_number'] as String?,
-      vehicleNumber: json['vehicle_number'] as String,
-      arrivalTime: json['arrival_time'] as String,
+      vehicleNumber: json['vehicle_number'] as String? ?? '',
+      arrivalTime: json['arrival_time'] as String? ?? '',
       deliveryAddress: json['delivery_address'] as String? ?? '',
     );

@@ -65,6 +65,10 @@ class ReturnsManagmentQuickLinksBottomSheetWidget extends StatelessWidget {
             onTap: () {
               NavigationService.I.pop();
               NavigationService.I.pop();
+              NavigationService.I.pushNamed(
+                AppRouteName.branchManagerMainScreen,
+                arguments: 2,
+              );
             },
           ),
           12.verticalSpace,
@@ -72,7 +76,11 @@ class ReturnsManagmentQuickLinksBottomSheetWidget extends StatelessWidget {
             context: context,
             title: context.tr.receiveGoods,
             icon: AppAssets.box,
-            onTap: () {},
+            onTap: () {
+              NavigationService.I.pop();
+              NavigationService.I.pop();
+              NavigationService.I.pushNamed(AppRouteName.receiveGoodsScreen);
+            },
           ),
           12.verticalSpace,
           _buildTitle(context, context.tr.statisticsanalytics),
@@ -81,7 +89,13 @@ class ReturnsManagmentQuickLinksBottomSheetWidget extends StatelessWidget {
             context: context,
             title: context.tr.supplierAnalysisAndComparison,
             icon: AppAssets.ai,
-            onTap: () {},
+            onTap: () {
+              NavigationService.I.pop();
+              NavigationService.I.pop();
+              NavigationService.I.pushNamed(
+                AppRouteName.branchManagerViewReportsScreen,
+              );
+            },
           ),
         ],
       ),

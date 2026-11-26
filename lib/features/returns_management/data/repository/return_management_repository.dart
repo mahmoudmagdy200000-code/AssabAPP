@@ -48,4 +48,8 @@ class ReturnManagementRepository with RepositoryMixin {
   }) => execute(() async {
     return _returnManagementRemoteDataSource.getReturnDetials(id: id);
   });
+
+  FutureApiResult<void> confirmHandover({required String id}) => execute(
+    () async => _returnManagementRemoteDataSource.confirmHandover(id: id),
+  );
 }

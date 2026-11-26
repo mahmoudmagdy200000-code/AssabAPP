@@ -125,16 +125,16 @@ class InspectionInvoiceData {
 
 @JsonSerializable(createToJson: false)
 class DeliveryDetails {
-  @JsonKey(name: 'driver_name')
+  @JsonKey(name: 'driver_name', defaultValue: '')
   final String driverName;
 
   @JsonKey(name: 'contact_number')
   final String? contactNumber;
 
-  @JsonKey(name: 'vehicle_number')
+  @JsonKey(name: 'vehicle_number', defaultValue: '')
   final String vehicleNumber;
 
-  @JsonKey(name: 'arrival_time')
+  @JsonKey(name: 'arrival_time', defaultValue: '')
   final String arrivalTime;
 
   @JsonKey(name: 'delivery_address', defaultValue: '')
@@ -174,7 +174,7 @@ class GoodsInspectionItem {
       itemId: json['item_id'] as String,
       productName: json['product_name'] as String,
       itemLogo: json['item_logo'] as String?,
-      qtyOrdered: json['qty_ordered'] as int,
+      qtyOrdered: (json['qty_ordered'] as num).toInt(),
       unitPrice: (json['price'] as num).toDouble(),
       unit: json['unit'] as String,
     );

@@ -13,8 +13,13 @@ import '../cubits/track_order/track_order_state.dart';
 
 class OrderTrackView extends StatefulWidget {
   final String orderId;
+  final bool isSupplier;
 
-  const OrderTrackView({super.key, required this.orderId});
+  const OrderTrackView({
+    super.key,
+    required this.orderId,
+    this.isSupplier = false,
+  });
 
   @override
   State<OrderTrackView> createState() => _OrderTrackViewState();
@@ -29,7 +34,10 @@ class _OrderTrackViewState extends State<OrderTrackView> {
   }
 
   void _getTrack() {
-    context.read<TrackOrderCubit>().getTrackOrder(orderId: widget.orderId);
+    context.read<TrackOrderCubit>().getTrackOrder(
+      orderId: widget.orderId,
+      isSupplier: widget.isSupplier,
+    );
   }
 
   @override

@@ -20,11 +20,27 @@ final class SupplierGetRequestsLoading extends SupplierGetRequestsState {
 
 final class SupplierGetRequestsSuccess extends SupplierGetRequestsState {
   final List<SupplierOrder> requests;
+  final int total;
+  final String? statusFilter;
+  final String? dateFrom;
+  final String? dateTo;
 
-  const SupplierGetRequestsSuccess(this.requests);
+  const SupplierGetRequestsSuccess(
+    this.requests, {
+    this.total = 0,
+    this.statusFilter,
+    this.dateFrom,
+    this.dateTo,
+  });
 
   @override
-  List<Object> get props => [requests];
+  List<Object> get props => [
+    requests,
+    total,
+    statusFilter ?? '',
+    dateFrom ?? '',
+    dateTo ?? '',
+  ];
 }
 
 final class SupplierGetRequestsFailure extends SupplierGetRequestsState {

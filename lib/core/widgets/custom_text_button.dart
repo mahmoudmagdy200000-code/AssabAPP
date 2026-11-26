@@ -39,13 +39,18 @@ class CustomTextButton extends StatelessWidget {
         padding:
             padding ?? EdgeInsets.symmetric(horizontal: 10.r, vertical: 11.r),
         child: Center(
-          child: Text(
-            text,
-            style:
-                textStyle ??
-                AppStyles.s12W500.copyWith(
-                  color: textColor ?? context.theme.primaryColor,
-                ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text,
+              maxLines: 1,
+              softWrap: false,
+              style:
+                  textStyle ??
+                  AppStyles.s12W500.copyWith(
+                    color: textColor ?? context.theme.primaryColor,
+                  ),
+            ),
           ),
         ),
       ),

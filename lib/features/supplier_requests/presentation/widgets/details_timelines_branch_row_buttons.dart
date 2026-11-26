@@ -29,6 +29,10 @@ class DetailsTimelinesBranchRowButtons extends StatelessWidget {
               return Expanded(
                 child: CustomTextButton(
                   text: titles[index],
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 6.r,
+                    vertical: 11.r,
+                  ),
                   onTap: () {
                     context.read<PagingCubit>().goToStep(index);
                   },

@@ -10,6 +10,7 @@ import 'package:assab/core/widgets/button_text_icon.dart';
 import 'package:assab/core/widgets/profile_image_widget.dart';
 import 'package:assab/shared/models/branch_manager_details_response.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../shared/models/branch_details_response.dart';
 
@@ -140,7 +141,20 @@ class SupplierRequestBranchView extends StatelessWidget {
               ),
               16.verticalSpace,
               ButtonTextIcon(
-                onTap: () {},
+                onTap: () async {
+                  final hasCoords = branch.lat != 0 || branch.lng != 0;
+                  final query = hasCoords
+                      ? '${branch.lat},${branch.lng}'
+                      : Uri.encodeComponent(
+                          branch.location.isNotEmpty
+                              ? '${branch.name}, ${branch.location}'
+                              : branch.name,
+                        );
+                  final uri = Uri.parse(
+                    'https://www.google.com/maps/search/?api=1&query=$query',
+                  );
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                },
                 label: context.tr.mapToStore,
                 icon: Icon(
                   Icons.location_on_outlined,

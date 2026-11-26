@@ -21,14 +21,18 @@ class BranchDetailsResponse {
 
   factory BranchDetailsResponse.fromJson(Map<String, dynamic> json) {
     return BranchDetailsResponse(
-      id: json['id'],
-      name: json['name'],
-      image: json['image'],
-      location: json['location'].toString(),
-      lat: (json['lat'] as num).toDouble(),
-      lng: (json['lng'] as num).toDouble(),
-      openingHours: DateTime.tryParse(json['opening_hours']),
-      closingHours: DateTime.tryParse(json['closing_hours']),
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      image: json['image']?.toString(),
+      location: (json['location'] ?? '').toString(),
+      lat: ((json['lat'] as num?) ?? 0).toDouble(),
+      lng: ((json['lng'] as num?) ?? 0).toDouble(),
+      openingHours: json['opening_hours'] != null
+          ? DateTime.tryParse(json['opening_hours'].toString())
+          : null,
+      closingHours: json['closing_hours'] != null
+          ? DateTime.tryParse(json['closing_hours'].toString())
+          : null,
     );
   }
 }

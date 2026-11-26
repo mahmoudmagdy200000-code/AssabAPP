@@ -347,14 +347,15 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                             if (rate == null) {
                               return context.tr.vatNotSpecified;
                             }
-                            if (rate == 0) {
+                            final normalized = rate > 1 ? rate / 100 : rate;
+                            if (normalized == 0) {
                               return context.tr.vat0Percent;
                             }
-                            if (rate == 0.15) {
+                            if (normalized == 0.15) {
                               return context.tr.vat15Percent;
                             }
                             final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-                            final percentage = (rate * 100).toStringAsFixed(0);
+                            final percentage = (normalized * 100).toStringAsFixed(0);
                             return isArabic
                                 ? 'ضريبة القيمة المضافة ($percentage%)'
                                 : 'VAT ($percentage%)';
@@ -382,6 +383,40 @@ class _ReceiveGoodsInvoiceDocumentTypeViewState
                                     ? '-'
                                     : formatAmount(totalWithVat),
                               ),
+                              if (storedVatAmount == null) ...[
+                                12.verticalSpace,
+                                Row(
+                                  children: [
+                                    for (final option in [
+                                      (rate: 0.0, label: context.tr.vat0Percent),
+                                      (rate: 0.15, label: context.tr.vat15Percent),
+                                    ]) ...[
+                                      Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 4.r),
+                                          child: ChoiceChip(
+                                            label: Center(
+                                              child: Text(
+                                                option.label,
+                                                style: TextStyle(fontSize: 11.r),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            selected: rawVatRate == option.rate,
+                                            onSelected: (_) {
+                                              _validationCubit.validateFieldAndStoreValue(
+                                                fieldName: 'vatRate',
+                                                value: option.rate.toString(),
+                                                isValid: true,
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
                             ],
                           );
                         },

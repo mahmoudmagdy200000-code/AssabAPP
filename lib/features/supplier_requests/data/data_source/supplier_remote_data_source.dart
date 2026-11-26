@@ -1,5 +1,6 @@
 import 'package:assab/core/network/api_endpoints.dart';
 import 'package:assab/shared/models/cancel_reason/cancel_reason_response.dart';
+import 'package:assab/shared/models/order_track_response.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -20,7 +21,12 @@ abstract class SupplierRemoteDataSource {
       _SupplierRemoteDataSource;
 
   @GET(ApiEndpoint.supplierOrders)
-  Future<SupplierOrdersResponse> getSupplierOrders({@Query('page') int? page});
+  Future<SupplierOrdersResponse> getSupplierOrders({
+    @Query('page') int? page,
+    @Query('status') String? status,
+    @Query('date_from') String? dateFrom,
+    @Query('date_to') String? dateTo,
+  });
 
   @GET('${ApiEndpoint.supplierOrders}/{id}')
   Future<SupplierOrderDetailsResponse> getSupplierOrderDetails({
@@ -105,5 +111,10 @@ abstract class SupplierRemoteDataSource {
   Future<void> supplierMarkOrderDelivered({
     @Path('order_id') required String orderId,
     @Body() required FormData body,
+  });
+
+  @GET(ApiEndpoint.supplierOrderTracking)
+  Future<OrderTrackResponse> getSupplierOrderTracking({
+    @Path('orderId') required String orderId,
   });
 }

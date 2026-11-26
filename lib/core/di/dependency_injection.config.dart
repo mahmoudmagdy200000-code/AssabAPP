@@ -1584,7 +1584,10 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.factory<_i117.TrackOrderCubit>(
-      () => _i117.TrackOrderCubit(gh<_i38.RequestsRepository>()),
+      () => _i117.TrackOrderCubit(
+        gh<_i38.RequestsRepository>(),
+        gh<_i507.SupplierRequestsRepository>(),
+      ),
     );
     gh.factory<_i963.ApproveOrRejectOrderCubit>(
       () => _i963.ApproveOrRejectOrderCubit(gh<_i38.RequestsRepository>()),

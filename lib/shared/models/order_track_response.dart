@@ -87,11 +87,11 @@ class OrderTrackResponsePreparingStage {
 
   factory OrderTrackResponsePreparingStage.fromJson(Map<String, dynamic> json) {
     return OrderTrackResponsePreparingStage(
-      status: json['status'],
-      items: (json['items'] as List)
+      status: (json['status'] ?? '').toString(),
+      items: (json['items'] as List? ?? const [])
           .map((e) => OrderTrackResponsePreparingItem.fromJson(e))
           .toList(),
-      startedAt: json['started_at'],
+      startedAt: (json['started_at'] ?? '').toString(),
     );
   }
 }
@@ -115,9 +115,9 @@ class OrderTrackResponsePreparingItem {
 
   factory OrderTrackResponsePreparingItem.fromJson(Map<String, dynamic> json) {
     return OrderTrackResponsePreparingItem(
-      itemName: json['item_name'],
-      itemLogo: json['item_logo'],
-      requestedQuantity: json['requested_quantity'],
+      itemName: (json['item_name'] ?? '').toString(),
+      itemLogo: json['item_logo']?.toString(),
+      requestedQuantity: (json['requested_quantity'] as num?)?.toInt() ?? 0,
       unit: json['item_unit'] as String,
       status: RequestsOrderStatusEnum.getStatusStrategy(
         RequestsOrderStatusEnum.fromString(json['status'] as String),
@@ -153,13 +153,13 @@ class OrderTrackResponseOutForDeliveryStage {
       status: RequestsOrderStatusEnum.getStatusStrategy(
         RequestsOrderStatusEnum.fromString(json['status'] as String),
       ),
-      arrivalTime: json['arrival_time'],
+      arrivalTime: json['arrival_time'] as String? ?? '',
       driverDetails: OrderTrackResponseDriverDetails.fromJson(
         json['driver_details'],
       ),
-      deliveryAddress: json['delivery_address'],
-      deliveryNotes: json['delivery_notes'],
-      startedAt: json['started_at'],
+      deliveryAddress: json['delivery_address'] as String? ?? '',
+      deliveryNotes: json['delivery_notes'] as String?,
+      startedAt: json['started_at'] as String? ?? '',
     );
   }
 }
@@ -177,11 +177,11 @@ class OrderTrackResponseDriverDetails {
 
   factory OrderTrackResponseDriverDetails.fromJson(Map<String, dynamic> json) {
     return OrderTrackResponseDriverDetails(
-      name: json['name'],
+      name: json['name'] as String? ?? '',
       photo: json['photo'] != null
           ? AttachmentModel.fromJson(json['photo'])
           : null,
-      vehicleNumber: json['vehicle_number'],
+      vehicleNumber: json['vehicle_number'] as String? ?? '',
     );
   }
 }
@@ -202,7 +202,7 @@ class OrderTrackResponseDeliveredStage {
       status: RequestsOrderStatusEnum.getStatusStrategy(
         RequestsOrderStatusEnum.fromString(json['status'] as String),
       ),
-      startedAt: json['started_at'],
+      startedAt: (json['started_at'] ?? '').toString(),
       deliveryPhotos: (json['delivery_photos'] as List? ?? [])
           .map((e) => AttachmentModel.fromJson(e))
           .toList(),
@@ -292,13 +292,13 @@ class OrderTrackResponseInspectionSummary {
     Map<String, dynamic> json,
   ) {
     return OrderTrackResponseInspectionSummary(
-      numberOfItems: json['number_of_items'],
-      quantityVariance: json['quantity_variance'],
-      totalAmount: json['total_amount'],
-      driverName: json['driver_name'],
-      contactNumber: json['contact_number'],
-      vehicleNumber: json['vehicle_number'],
-      arrivalTime: json['arrival_time'],
+      numberOfItems: (json['number_of_items'] as num?)?.toInt() ?? 0,
+      quantityVariance: (json['quantity_variance'] as num?)?.toInt() ?? 0,
+      totalAmount: (json['total_amount'] as num?) ?? 0,
+      driverName: json['driver_name'] as String? ?? '',
+      contactNumber: json['contact_number'] as String?,
+      vehicleNumber: json['vehicle_number'] as String? ?? '',
+      arrivalTime: json['arrival_time'] as String? ?? '',
     );
   }
 }
@@ -336,18 +336,18 @@ class OrderTrackResponseGoodsInspection {
     Map<String, dynamic> json,
   ) {
     return OrderTrackResponseGoodsInspection(
-      itemName: json['item_name'],
-      itemLogo: json['item_logo'],
-      quantityOrdered: json['quantity_ordered'],
-      quantityReceived: json['quantity_received'],
-      unit: json['item_unit'] as String,
+      itemName: (json['item_name'] ?? '').toString(),
+      itemLogo: json['item_logo']?.toString(),
+      quantityOrdered: (json['quantity_ordered'] as num?)?.toInt() ?? 0,
+      quantityReceived: (json['quantity_received'] as num?)?.toInt() ?? 0,
+      unit: (json['item_unit'] ?? '').toString(),
       quality: PurchasingOfficerQualityEnum.fromString(
-        json['quality'] as String,
+        (json['quality'] as String?) ?? '-',
       ),
-      varianceType: json['variance_type'],
-      amountVariance: json['amount_variance'],
-      temperature: json['temperature'],
-      expirationDate: json['expiration_date'],
+      varianceType: (json['variance_type'] ?? '').toString(),
+      amountVariance: (json['amount_variance'] as num?) ?? 0,
+      temperature: (json['temperature'] ?? '').toString(),
+      expirationDate: (json['expiration_date'] ?? '').toString(),
       itemImage: json['item_image'] != null
           ? AttachmentModel.fromJson(json['item_image'])
           : null,
@@ -377,12 +377,12 @@ class OrderTrackResponseFinancialSummary {
     Map<String, dynamic> json,
   ) {
     return OrderTrackResponseFinancialSummary(
-      invoiceNumber: json['invoice_number'],
-      invoiceDate: json['invoice_date'],
-      supplierName: json['supplier_name'],
-      amountBeforeTax: json['amount_before_tax'],
-      vat: json['vat'],
-      totalAmount: json['total_amount'],
+      invoiceNumber: (json['invoice_number'] ?? '').toString(),
+      invoiceDate: (json['invoice_date'] ?? '').toString(),
+      supplierName: (json['supplier_name'] ?? '').toString(),
+      amountBeforeTax: (json['amount_before_tax'] as num?) ?? 0,
+      vat: (json['vat'] as num?) ?? 0,
+      totalAmount: (json['total_amount'] as num?) ?? 0,
     );
   }
 }
@@ -401,9 +401,11 @@ class OrderTrackResponseVarianceLoggedStage {
   ) {
     return OrderTrackResponseVarianceLoggedStage(
       status: RequestsOrderStatusEnum.getStatusStrategy(
-        RequestsOrderStatusEnum.fromString(json['status'] as String),
+        RequestsOrderStatusEnum.fromString(
+          (json['status'] as String?) ?? 'variance',
+        ),
       ),
-      variances: (json['variances'] as List)
+      variances: (json['variances'] as List? ?? const [])
           .map((e) => OrderTrackResponseVarianceItem.fromJson(e))
           .toList(),
     );
@@ -451,27 +453,28 @@ final int quantityOrdered;
 
   factory OrderTrackResponseVarianceItem.fromJson(Map<String, dynamic> json) {
     return OrderTrackResponseVarianceItem(
-      itemName: json['item_name'],
-      itemLogo: json['item_logo'],
-      temperature: json['temperature'],
-      quantityOrdered: json['quantity_ordered'],
-      quantityReceived: json['quantity_received'],
-      unit: json['item_unit'] as String,
+      itemName: (json['item_name'] ?? '').toString(),
+      itemLogo: json['item_logo']?.toString(),
+      temperature: (json['temperature'] ?? '').toString(),
+      quantityOrdered: (json['quantity_ordered'] as num?)?.toInt() ?? 0,
+      quantityReceived: (json['quantity_received'] as num?)?.toInt() ?? 0,
+      unit: (json['item_unit'] ?? '').toString(),
       quality: PurchasingOfficerQualityEnum.fromString(
-        json['quality'] as String,
+        (json['quality'] as String?) ?? '-',
       ),
-      varianceType: json['variance_type'],
-      amountVariance: json['amount_variance'],
-      supplierResponse: json['supplier_response'],
-      supplierDecisionStatus: json['supplier_decision_status'],
-      reportedOn: json['reported_on'],
-      respondedOn: json['responded_on'],
-      supplierName: json['supplier_name'],
+      varianceType: (json['variance_type'] ?? '').toString(),
+      amountVariance: (json['amount_variance'] as num?) ?? 0,
+      supplierResponse: json['supplier_response']?.toString(),
+      supplierDecisionStatus:
+          (json['supplier_decision_status'] ?? '').toString(),
+      reportedOn: (json['reported_on'] ?? '').toString(),
+      respondedOn: json['responded_on']?.toString(),
+      supplierName: (json['supplier_name'] ?? '').toString(),
       supplierImage: json['supplier_image'] != null
           ? AttachmentModel.fromJson(json['supplier_image'])
           : null,
-      rejectionReason: json['rejection_reason'],
-      rejectionDateTime: json['rejection_date_time'],
+      rejectionReason: json['rejection_reason']?.toString(),
+      rejectionDateTime: json['rejection_date_time']?.toString(),
     );
   }
 }

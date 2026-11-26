@@ -207,7 +207,7 @@ class ValidationCubit extends SafeCubit<ValidationState> {
           enableButton:
               allRequiredPresent &&
               allRequiredValid &&
-              state.fieldsValidity.values.any((v) => v == true),
+              updatedValidity.values.any((v) => v == true),
         ),
       );
     } finally {
@@ -257,7 +257,7 @@ class ValidationCubit extends SafeCubit<ValidationState> {
           enableButton:
               allRequiredPresent &&
               allRequiredValid &&
-              state.fieldsValidity.values.any((v) => v == true),
+              updatedValidity.values.any((v) => v == true),
         ),
       );
     } finally {

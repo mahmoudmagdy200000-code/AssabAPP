@@ -23,17 +23,34 @@ class SupplierRequestAppBar extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BlocSelector<
+                BlocBuilder<
                   SupplierGetRequestsCubit,
-                  SupplierGetRequestsState,
-                  int
+                  SupplierGetRequestsState
                 >(
-                  selector: (state) => state is SupplierGetRequestsSuccess
-                      ? state.requests.length
-                      : 0,
                   builder: (context, state) {
+                    final isAr =
+                        Localizations.localeOf(context).languageCode == 'ar';
+                    final count = state is SupplierGetRequestsSuccess
+                        ? state.total
+                        : 0;
+                    final status = state is SupplierGetRequestsSuccess
+                        ? state.statusFilter
+                        : context
+                              .read<SupplierGetRequestsCubit>()
+                              .statusFilter;
+                    final label = switch (status) {
+                      'pending' => context.tr.pending,
+                      'confirmed' => isAr ? 'مؤكد' : 'Confirmed',
+                      'preparing' => isAr ? 'قيد التجهيز' : 'Preparing',
+                      'on_the_way' => isAr ? 'في الطريق' : 'Out for Delivery',
+                      'delivered' => isAr ? 'تم التوصيل' : 'Delivered',
+                      'cancelled_by_supplier' =>
+                        isAr ? 'ملغي من المورد' : 'Canceled by Supplier',
+                      'closed' => isAr ? 'مغلق' : 'Closed',
+                      _ => isAr ? 'الطلبات' : 'All Orders',
+                    };
                     return Text(
-                      '${context.tr.pending} ($state)',
+                      '$label ($count)',
                       style: AppStyles.s20W600.copyWith(
                         color: context.customColor.text1,
                       ),

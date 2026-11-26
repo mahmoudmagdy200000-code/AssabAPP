@@ -20,9 +20,19 @@ class _SupplierRemoteDataSource implements SupplierRemoteDataSource {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<SupplierOrdersResponse> getSupplierOrders({int? page}) async {
+  Future<SupplierOrdersResponse> getSupplierOrders({
+    int? page,
+    String? status,
+    String? dateFrom,
+    String? dateTo,
+  }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'page': page};
+    final queryParameters = <String, dynamic>{
+      r'page': page,
+      r'status': status,
+      r'date_from': dateFrom,
+      r'date_to': dateTo,
+    };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
@@ -405,6 +415,35 @@ class _SupplierRemoteDataSource implements SupplierRemoteDataSource {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     await _dio.fetch<void>(_options);
+  }
+
+  @override
+  Future<OrderTrackResponse> getSupplierOrderTracking({
+    required String orderId,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<OrderTrackResponse>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'supplier/orders/${orderId}/tracking',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late OrderTrackResponse _value;
+    try {
+      _value = OrderTrackResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

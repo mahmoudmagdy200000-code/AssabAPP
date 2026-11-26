@@ -48,6 +48,7 @@ class ReturnGoodsDetailsData {
   final DateTime? resolvedAt;
   final DateTime submittedAt;
   final DateTime? approvedAt;
+  final DateTime? handedOverAt;
   final DateTime? closedAt;
   final DateTime createdAt;
   final bool isDraft;
@@ -85,6 +86,7 @@ class ReturnGoodsDetailsData {
     this.resolvedAt,
     required this.submittedAt,
     this.approvedAt,
+    this.handedOverAt,
     this.closedAt,
     required this.createdAt,
     required this.isDraft,
@@ -138,6 +140,9 @@ class ReturnGoodsDetailsData {
       approvedAt: json['approved_at'] == null
           ? null
           : DateTime.parse(json['approved_at']),
+      handedOverAt: json['handed_over_at'] == null
+          ? null
+          : DateTime.tryParse(json['handed_over_at'].toString()),
       closedAt: json['closed_at'] == null
           ? null
           : DateTime.parse(json['closed_at']),
