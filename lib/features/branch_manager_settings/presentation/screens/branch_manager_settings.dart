@@ -1,6 +1,7 @@
 import 'package:assab/core/extensions/build_context_extensions.dart';
 import 'package:assab/core/extensions/number_extensions.dart';
 import 'package:assab/core/utils/app_bottom_sheet.dart';
+import 'package:assab/core/widgets/app_version_card.dart';
 import 'package:assab/features/branch_manager_settings/presentation/screens/branch_manager_my_account_details_screen.dart';
 import 'package:assab/features/branch_manager_settings/presentation/widgets/brand_owner_retention_settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -118,6 +119,7 @@ class BranchManagerSettings extends StatelessWidget {
                 userType: userType,
               ),
               const BranchManagerSettingsSystemSettingsSection(),
+              const AppVersionCard(),
             ],
           ),
         ),
