@@ -155,7 +155,7 @@ class SupplierMarkAllAsDeliveredScreen extends StatelessWidget {
                               ),
                               12.verticalSpace,
                               Text(
-                                '${context.tr.maxSize}: 5GB',
+                                '${context.tr.maxSize}: 5MB',
                                 style: AppStyles.s12W400.copyWith(
                                   color: context.customColor.text3,
                                 ),

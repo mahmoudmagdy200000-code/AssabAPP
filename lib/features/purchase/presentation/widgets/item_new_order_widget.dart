@@ -89,7 +89,7 @@ class ItemNewOrderWidget extends StatelessWidget {
               ),
               10.horizontalSpace,
               Text(
-                '$quantity ${context.tr.kg}',
+                '$quantity ${item.itemUnit}',
                 style: AppStyles.s12W500.copyWith(
                   color: context.theme.primaryColor,
                 ),

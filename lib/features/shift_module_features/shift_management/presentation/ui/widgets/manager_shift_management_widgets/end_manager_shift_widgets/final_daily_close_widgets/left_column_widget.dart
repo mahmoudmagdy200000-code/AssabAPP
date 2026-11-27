@@ -58,7 +58,7 @@ class LeftColumnWidget extends StatelessWidget {
               children: [
                 FinalDailyCloseTableCellWidget(
                   topStartBorderRadius: 10.r,
-                  cellColor: AppColors.lightGray,
+                  cellColor: context.customColor.text2,
                   bottomBorderSide: BorderSide(
                     color: context.customColor.border,
                     width: 1.w,
@@ -222,7 +222,7 @@ class LeftColumnWidget extends StatelessWidget {
 
                 FinalDailyCloseTableCellWidget(
                   bottomStartBorderRadius: 10.r,
-                  cellColor: AppColors.lightGray,
+                  cellColor: context.customColor.text2,
                   bottomBorderSide: BorderSide(
                     color: context.customColor.border,
                     width: 1.w,

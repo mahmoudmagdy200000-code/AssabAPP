@@ -70,11 +70,18 @@ class _ChooseDirectSupplierScreenState
       body: Column(
         children: [
           10.verticalSpace,
-          PurchaseAppBar(
-            iconColor: context.customColor.text1,
-            title: '${context.tr.allSuppliers} (8)',
-            titleColor: context.customColor.text1,
-            subtitle: context.tr.chooseSupplierForThisOrderRequest,
+          BlocBuilder<GetPurchaseSuppliersCubit, GetPurchaseSuppliersState>(
+            builder: (context, state) {
+              final title = state is GetPurchaseSuppliersSuccess
+                  ? '${context.tr.allSuppliers} (${state.response.data.length})'
+                  : context.tr.allSuppliers;
+              return PurchaseAppBar(
+                iconColor: context.customColor.text1,
+                title: title,
+                titleColor: context.customColor.text1,
+                subtitle: context.tr.chooseSupplierForThisOrderRequest,
+              );
+            },
           ),
           AppPaddingWidget(
             top: 8.r,

@@ -65,7 +65,7 @@ class ManagerEditHandoverButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 15.h),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isEnabled ? AppColors.lightBackground : AppColors.lightGray,
+          color: isEnabled ? AppColors.lightBackground : context.customColor.text2,
           borderRadius: BorderRadius.circular(25.r),
           border: Border.all(color: context.customColor.border, width: 1.w),
         ),

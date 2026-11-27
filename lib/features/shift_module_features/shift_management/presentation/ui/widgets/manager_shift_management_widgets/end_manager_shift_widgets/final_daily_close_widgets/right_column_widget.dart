@@ -59,7 +59,7 @@ class RightColumnWidget extends StatelessWidget {
               children: [
                 FinalDailyCloseTableCellWidget(
                   topEndBorderRadius: 10.r,
-                  cellColor: AppColors.lightGray,
+                  cellColor: context.customColor.text2,
                   bottomBorderSide: BorderSide(
                     color: context.customColor.border,
                     width: 1.w,

@@ -177,7 +177,7 @@ class _ApprovedHandoverFromModalSheetWidgetState
                   enabled: hasAmount,
                   background: hasAmount
                       ? AppColors.primaryLight
-                      : AppColors.lightGray,
+                      : context.customColor.text2,
                 );
               },
             ),

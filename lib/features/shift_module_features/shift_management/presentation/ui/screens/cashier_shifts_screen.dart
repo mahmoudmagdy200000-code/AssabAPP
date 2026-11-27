@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/cubits/paging_cubit/paging_cubit.dart';
 import '../../../../../../core/enums/shift_status/shift_status.dart';
-import '../../../../../../core/styles/app_colors.dart';
 import '../../../domain/entity/cashier_entity.dart';
 import '../../logic/shifts/cashier_shifts_management_cubit.dart';
 import '../filters/cashier_shifts_status_impl.dart';
@@ -46,7 +45,7 @@ class CashierShiftsScreen extends StatelessWidget {
       },
       builder: (context, state) {
         return AppScaffold(
-          backgroundColor: AppColors.lightGray,
+          backgroundColor: context.customColor.text2,
           child: AppPaddingWidget(
             top: 10.h,
             bottom: 0,

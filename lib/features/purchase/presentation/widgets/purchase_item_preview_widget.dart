@@ -45,27 +45,32 @@ class PurchaseItemPreviewWidget extends StatelessWidget {
                     color: context.customColor.text1,
                   ),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      '${context.tr.totalAmount} =',
-                      style: AppStyles.s11W400.copyWith(
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${context.tr.totalAmount} =',
+                        style: AppStyles.s11W400.copyWith(
+                          color: context.customColor.text3,
+                        ),
+                      ),
+                      2.horizontalSpace,
+                      SaudiRiyalSvgWidget(
+                        size: 15.r,
                         color: context.customColor.text3,
                       ),
-                    ),
-                    2.horizontalSpace,
-                    SaudiRiyalSvgWidget(
-                      size: 15.r,
-                      color: context.customColor.text3,
-                    ),
-                    2.horizontalSpace,
-                    Text(
-                      ((itemPrice ?? 0) * (itemQuantity ?? 0)).toString(),
-                      style: AppStyles.s11W500.copyWith(
-                        color: context.customColor.text1,
+                      2.horizontalSpace,
+                      Text(
+                        ((itemPrice ?? 0) * (itemQuantity ?? 0)).toString(),
+                        style: AppStyles.s11W500.copyWith(
+                          color: context.customColor.text1,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

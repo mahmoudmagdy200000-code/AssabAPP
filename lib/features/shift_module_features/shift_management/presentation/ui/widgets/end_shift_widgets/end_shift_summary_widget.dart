@@ -49,7 +49,7 @@ class EndShiftSummaryWidget extends StatelessWidget {
                       padding: EdgeInsets.all(12.r),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: AppColors.lightGray,
+                        color: context.customColor.text2,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Column(

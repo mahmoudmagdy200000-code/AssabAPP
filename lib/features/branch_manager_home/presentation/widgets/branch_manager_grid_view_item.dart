@@ -24,12 +24,21 @@ class BranchManagerGridViewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? Color.alphaBlend(
+            Color(colorHex).withValues(alpha: 0.08),
+            context.theme.scaffoldBackgroundColor,
+          )
+        : Color(colorHex);
+
     return AppGestureDetectorButton(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Color(colorHex),
+          color: cardColor,
           borderRadius: BorderRadius.circular(20.r),
+          border: isDark ? Border.all(color: context.customColor.border) : null,
         ),
         padding: EdgeInsets.all(20.r),
         child: Column(
