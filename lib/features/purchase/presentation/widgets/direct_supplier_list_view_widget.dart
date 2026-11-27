@@ -93,8 +93,7 @@ class DirectSupplierListViewWidget extends StatelessWidget {
             children: [
               _buildSupplierDetailRow(
                 context: context,
-                label:
-                    'price Per ${supplier.itemUnit} i.e Kg',
+                label: '${context.tr.unitPrice} (${supplier.itemUnit})',
                 value: supplier.itemPrice.toDouble().toStringAsFixed(2),
               ),
               8.verticalSpace,

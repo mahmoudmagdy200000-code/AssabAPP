@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:assab/core/di/dependency_injection.dart';
 import 'workday_sales_reviews_screen.dart';
 
-import '../../../../../../core/styles/app_colors.dart';
 import '../widgets/cashier_shifts_management_widgets/cashier_shifts_app_bar.dart';
 import '../widgets/manager_shift_management_widgets/manager_shift_management_top_section.dart';
 
@@ -18,7 +17,7 @@ class ManagerShiftManagementScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      backgroundColor: AppColors.lightGray,
+      backgroundColor: context.customColor.text2,
       child: AppPaddingWidget(
         top: 10.h,
         bottom: 0,

@@ -192,8 +192,7 @@ class _PurchasingOfficerScreenState extends State<PurchasingOfficerScreen> {
                           itemImage: widget.item.itemLogo,
                           itemName: widget.item.itemName,
                           itemPrice: widget.item.itemPrice,
-                          itemQuantity:
-                              (widget.item.itemPrice * widget.quantity).toInt(),
+                          itemQuantity: widget.quantity,
                           itemUnit: widget.item.itemUnit,
                         ),
                       ],
@@ -321,6 +320,7 @@ class _PurchasingOfficerScreenState extends State<PurchasingOfficerScreen> {
                       PurchaseSourcesTypes.officer.toString(),
                     );
 
+                    NavigationService.I.pop();
                     NavigationService.I.pop();
                   },
                   enabled: state,

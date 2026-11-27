@@ -543,7 +543,7 @@ Widget _CashierProfileView({
                       color: AppColors.lightBackground,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.lightGray,
+                          color: context.customColor.text2,
                           blurRadius: 15.r,
                           spreadRadius: 2.h,
                         ),

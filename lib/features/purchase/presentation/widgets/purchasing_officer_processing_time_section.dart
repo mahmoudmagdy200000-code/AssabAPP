@@ -87,7 +87,7 @@ class PurchasingOfficerProcessingTimeSection extends StatelessWidget {
     return AppGestureDetectorButton(
       onTap: onTap,
       child: Container(
-        height: 91.r,
+        constraints: BoxConstraints(minHeight: 91.r),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.r),
           border: Border.all(

@@ -69,7 +69,7 @@ class _FinalHandoverSummaryWidgetState
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.lightGray,
+                      color: context.customColor.text2,
                       blurRadius: 10.r,
                       spreadRadius: 1.h,
                     ),

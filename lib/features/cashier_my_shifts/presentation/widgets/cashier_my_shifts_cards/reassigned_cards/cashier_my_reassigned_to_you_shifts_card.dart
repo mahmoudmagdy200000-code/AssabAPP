@@ -32,7 +32,7 @@ class CashierMyReassignedToYouShiftsCard extends StatelessWidget {
         padding: EdgeInsetsGeometry.all(15.w),
         width: 340.w,
         decoration: BoxDecoration(
-          color: AppColors.lightGray,
+          color: context.customColor.text2,
           borderRadius: BorderRadius.circular(10.r),
         ),
         child: Column(

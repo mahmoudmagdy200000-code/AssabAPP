@@ -129,8 +129,19 @@ class _ChooseSupplierOptionsBottomSheetState
 
     widget.onConfirmed?.call();
 
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final confirmMsg = context.tr.confirmDetails;
+
     NavigationService.I.pop();
     NavigationService.I.pop();
+    NavigationService.I.pop();
+
+    messenger?.showSnackBar(
+      SnackBar(
+        content: Text(confirmMsg),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override

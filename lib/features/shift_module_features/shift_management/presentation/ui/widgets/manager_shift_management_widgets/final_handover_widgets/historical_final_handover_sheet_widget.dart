@@ -134,7 +134,7 @@ class _HistoricalFinalHandoverSheetWidgetState
                       vertical: 4.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.lightGray,
+                      color: context.customColor.text2,
                       borderRadius: BorderRadius.circular(100.r),
                     ),
                     child: Text(
@@ -175,7 +175,7 @@ class _HistoricalFinalHandoverSheetWidgetState
                 Container(
                   padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
-                    color: AppColors.lightGray,
+                    color: context.customColor.text2,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(

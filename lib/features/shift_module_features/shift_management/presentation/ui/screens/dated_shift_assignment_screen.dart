@@ -1171,7 +1171,7 @@ class _DatedShiftAssignmentScreenState
     final isToday = _selectedDate == _todayYmd;
 
     return AppScaffold(
-      backgroundColor: AppColors.lightGray,
+      backgroundColor: context.customColor.text2,
       child: SafeArea(
         child: Column(
           children: [

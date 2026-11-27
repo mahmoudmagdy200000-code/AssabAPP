@@ -224,7 +224,7 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  '${context.tr.rate} = ${widget.item.rate} /kg',
+                                  '${context.tr.rate} = ${widget.item.rate} /${widget.item.itemUnit}',
                                   style: AppStyles.s13W400.copyWith(
                                     color: context.customColor.text3,
                                   ),
@@ -244,7 +244,7 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
                               ),
                               5.horizontalSpace,
                               Text(
-                                widget.item.itemPrice.toString(),
+                                (state * widget.item.itemPrice).toStringAsFixed(1),
                                 style: AppStyles.s13W500.copyWith(
                                   color: context.customColor.text1,
                                 ),

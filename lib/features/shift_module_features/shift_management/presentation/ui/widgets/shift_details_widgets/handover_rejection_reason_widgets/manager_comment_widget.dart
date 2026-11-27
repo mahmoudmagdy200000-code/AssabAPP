@@ -68,7 +68,7 @@ class ManagerCommentWidget extends StatelessWidget {
                         vertical: 10.h,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.lightGray,
+                        color: context.customColor.text2,
                         borderRadius: BorderRadius.circular(25.r),
                       ),
                       child: Text(messageContent, style: AppStyles.s13W400),
@@ -91,7 +91,7 @@ class ManagerCommentWidget extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: AppColors.lightGray,
+              color: context.customColor.text2,
               borderRadius: BorderRadius.circular(25.r),
             ),
             child: Text(messageContent, style: AppStyles.s13W400),

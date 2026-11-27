@@ -50,7 +50,7 @@ extension ShiftStatusUiMapper on ShiftStatusType {
   Color cardColor(BuildContext context) {
     switch (this) {
       case ShiftStatusType.pending:
-        return AppColors.lightGray;
+        return context.customColor.text2;
       default:
         return AppColors.lightBackground;
     }
