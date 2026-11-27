@@ -1,4 +1,5 @@
 import 'package:assab/core/extensions/build_context_extensions.dart';
+import 'package:assab/core/widgets/app_version_card.dart';
 import 'package:assab/features/supplier_settings/presentation/widgets/supplier_settings_account_and_password_section.dart'
     show SupplierSettingsAccountAndPasswordSection;
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class SupplierSettings extends StatelessWidget {
               SupplierSettingsTopSection(),
               SupplierSettingsAccountAndPasswordSection(),
               SupplierSettingsSystemSettingsSection(),
+              AppVersionCard(),
             ],
           ),
         ),
